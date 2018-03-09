@@ -8,9 +8,9 @@
 	</appender>
 
 	<appender name="rollingFileINFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${LOG_DIR}/servicename-info.log</file>
+		<file>${LOG_DIR}/payment-info.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${LOG_DIR}/servicename-info.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<fileNamePattern>${LOG_DIR}/payment-info.%d{yyyy-MM-dd}.log</fileNamePattern>
 			<maxHistory>30</maxHistory>		
 		</rollingPolicy>
 		<encoder>
@@ -23,9 +23,9 @@
 	
 	
 	<appender name="rollingFileERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${LOG_DIR}/servicename-error.log</file>
+		<file>${LOG_DIR}/payment-error.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${LOG_DIR}/servicename-error.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<fileNamePattern>${LOG_DIR}/payment-error.%d{yyyy-MM-dd}.log</fileNamePattern>
 			<maxHistory>30</maxHistory>		
 		</rollingPolicy>
 		<encoder>
@@ -36,7 +36,7 @@
 		</filter> 
 	</appender>
 
-	<logger name="com.dl.shop.servicename" level="INFO" />
+	<logger name="com.dl.shop.payment" level="INFO" />
 	<logger name="org.springframework" level="INFO"/>
 	<logger name="com.dl.base.mapper" level="debug" />
 	<logger name="com.alibaba.druid" level="WARN" />
