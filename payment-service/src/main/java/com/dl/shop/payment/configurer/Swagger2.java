@@ -1,9 +1,10 @@
-﻿package com.dl.shop.payment.configurer;
+package com.dl.shop.payment.configurer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import com.dl.base.constant.CommonConstants;
 
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.ParameterBuilder;
@@ -16,13 +17,11 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Configuration
 @EnableSwagger2
 public class Swagger2 {
-    @Bean
+
+	@Bean
     public Docket createRestApi() {
         List<Parameter> pars = new ArrayList<>();
         ParameterBuilder tokenPar = new ParameterBuilder();
@@ -33,13 +32,6 @@ public class Swagger2 {
                 .required(false);
         pars.add(tokenPar.build());
 
-        /*tokenPar = new ParameterBuilder();
-        tokenPar.name(CommonConstants.HTTP_HEADER_ADDRESS)
-                .description("地址")
-                .modelRef(new ModelRef("string"))
-                .parameterType("header")
-                .required(false);
-        pars.add(tokenPar.build());*/
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
                 .select()

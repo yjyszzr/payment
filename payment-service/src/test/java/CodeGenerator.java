@@ -1,5 +1,21 @@
-﻿import com.google.common.base.CaseFormat;
-import freemarker.template.TemplateExceptionHandler;
+import static com.dl.shop.payment.core.ProjectConstant.BASE_PACKAGE;
+import static com.dl.shop.payment.core.ProjectConstant.CONTROLLER_PACKAGE;
+import static com.dl.shop.payment.core.ProjectConstant.MAPPER_BASE;
+import static com.dl.shop.payment.core.ProjectConstant.MAPPER_PACKAGE;
+import static com.dl.shop.payment.core.ProjectConstant.MODEL_PACKAGE;
+import static com.dl.shop.payment.core.ProjectConstant.SERVICE_IMPL_PACKAGE;
+import static com.dl.shop.payment.core.ProjectConstant.SERVICE_PACKAGE;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.mybatis.generator.api.MyBatisGenerator;
 import org.mybatis.generator.config.Configuration;
@@ -15,31 +31,17 @@ import org.mybatis.generator.config.SqlMapGeneratorConfiguration;
 import org.mybatis.generator.config.TableConfiguration;
 import org.mybatis.generator.internal.DefaultShellCallback;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.common.base.CaseFormat;
 
-import static com.dl.shop.payment.core.ProjectConstant.BASE_PACKAGE;
-import static com.dl.shop.payment.core.ProjectConstant.CONTROLLER_PACKAGE;
-import static com.dl.shop.payment.core.ProjectConstant.MAPPER_BASE;
-import static com.dl.shop.payment.core.ProjectConstant.MAPPER_PACKAGE;
-import static com.dl.shop.payment.core.ProjectConstant.MODEL_PACKAGE;
-import static com.dl.shop.payment.core.ProjectConstant.SERVICE_IMPL_PACKAGE;
-import static com.dl.shop.payment.core.ProjectConstant.SERVICE_PACKAGE;
-
+import freemarker.template.TemplateExceptionHandler;
 
 /**
  * 代码生成器，根据数据表名称生成对应的Model、Mapper、Service、Controller简化开发。
  * https://mapperhelper.github.io
  */
 public class CodeGenerator {
-    //JDBC配置，请修改为你项目的实际配置
+
+	 //JDBC配置，请修改为你项目的实际配置
     private static final String JDBC_URL = "jdbc:mysql://localhost:3306/lovnx_db";
     private static final String JDBC_USERNAME = "root";
     private static final String JDBC_PASSWORD = "adminroot";
@@ -244,5 +246,4 @@ public class CodeGenerator {
     private static String packageConvertPath(String packageName) {
         return String.format("/%s/", packageName.contains(".") ? packageName.replaceAll("\\.", "/") : packageName);
     }
-
 }
