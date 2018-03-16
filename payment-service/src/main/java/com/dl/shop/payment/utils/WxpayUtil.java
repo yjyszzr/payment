@@ -30,6 +30,7 @@ import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.shop.payment.configurer.WxpayConfig;
 import com.dl.shop.payment.dto.WxpayAppDTO;
+import com.dl.shop.payment.model.OrderQueryResponse;
 import com.dl.shop.payment.model.UnifiedOrderParam;
 import com.dl.shop.payment.model.WxpayAppModel;
 import com.dl.shop.payment.model.WxpayOrderQuery;
@@ -127,7 +128,7 @@ public class WxpayUtil {
 	 * @param param
 	 * @return
 	 */
-	public BaseResult<WxpayOrderQuery.Response> orderQuery(String orderNo){
+	public BaseResult<OrderQueryResponse> orderQuery(String orderNo){
 		WxpayOrderQuery queryOrder = new WxpayOrderQuery();
 		queryOrder.setOut_trade_no(orderNo);
 		queryOrder.setAppid(wxpayConfig.getWxAppAppId());
@@ -156,7 +157,16 @@ public class WxpayUtil {
 			String resultCode = response.getResult_code();
 			String returnCode = response.getReturn_code();
 			if("SUCCESS".equals(resultCode) && "SUCCESS".equals(returnCode)) {
-				return ResultGenerator.genSuccessResult("success", response);
+				OrderQueryResponse queryResponse = new OrderQueryResponse();
+				if("SUCCESS".equals(response.getTrade_state())) {
+					queryResponse.setTradeState(1);
+					queryResponse.setTradeNo(response.getTransaction_id());
+					queryResponse.setTradeStateDesc("支付成功！");
+				}else {
+					queryResponse.setTradeState(0);
+					queryResponse.setTradeStateDesc(response.getTrade_state()+"_" + response.getTrade_state_desc());
+				}
+				return ResultGenerator.genSuccessResult("success", queryResponse);
 			}else {
 				String msg = "err_code:" + response.getErr_code() + ",err_desc:"+response.getErr_code_des();
 				return ResultGenerator.genFailResult(msg, null);
@@ -165,7 +175,7 @@ public class WxpayUtil {
 			logger.error("微信app订单查询失败", e);
 			e.printStackTrace();
 		}
-		return ResultGenerator.genFailResult("微信app支付调起失败", null);
+		return ResultGenerator.genFailResult("微信app支付查询失败", null);
 	}
 	private WxpayAppDTO wXpayAppModel2DTO(WxpayAppModel appModel) {
 		if(null == appModel) {

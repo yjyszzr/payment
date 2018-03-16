@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dl.shop.payment.dao.PayMentMapper">
+  <resultMap id="BaseResultMap" type="com.dl.shop.payment.model.PayMent">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="pay_id" jdbcType="INTEGER" property="payId" />
+    <result column="pay_code" jdbcType="VARCHAR" property="payCode" />
+    <result column="pay_name" jdbcType="VARCHAR" property="payName" />
+    <result column="pay_type" jdbcType="INTEGER" property="payType" />
+    <result column="pay_fee" jdbcType="VARCHAR" property="payFee" />
+    <result column="pay_sort" jdbcType="INTEGER" property="paySort" />
+    <result column="is_enable" jdbcType="BIT" property="isEnable" />
+    <result column="pay_title" jdbcType="VARCHAR" property="payTitle" />
+    <result column="pay_img" jdbcType="VARCHAR" property="payImg" />
+    <result column="pay_config" jdbcType="LONGVARCHAR" property="payConfig" />
+    <result column="pay_desc" jdbcType="LONGVARCHAR" property="payDesc" />
+  </resultMap>
+</mapper>

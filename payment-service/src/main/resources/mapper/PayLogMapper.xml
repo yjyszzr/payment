@@ -31,7 +31,7 @@
 
 	<select id="existPayLog" resultMap="BaseResultMap">
 	select 
-	<include refid="queryFields"/>
+	<include refid="queryFields" />
 	from dl_pay_log 
 	where order_sn=#{orderSn} 
 	and pay_type=#{payType} and pay_code=#{payCode} 

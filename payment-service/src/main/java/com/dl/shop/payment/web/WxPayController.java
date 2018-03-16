@@ -1,8 +1,6 @@
 package com.dl.shop.payment.web;
 
 import java.math.BigDecimal;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -19,8 +17,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
-import com.dl.base.util.DateUtil;
 import com.dl.base.util.SessionUtil;
+import com.dl.member.api.IUserAccountService;
 import com.dl.shop.payment.dto.WxpayAppDTO;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.UnifiedOrderParam;
@@ -33,7 +31,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Controller
 @RequestMapping("/payment/wxpay")
-public class WxPayController {
+public class WxPayController extends AbstractBaseController{
 
 	private final static Logger logger = LoggerFactory.getLogger(WxPayController.class);
 	
@@ -42,22 +40,17 @@ public class WxPayController {
 	@Resource
 	private WxpayUtil wxpayUtil;
 	
+	
 	@ApiOperation(value="微信app支付调用", notes="微信app支付,orderSn,parentSn最少一个有值，orderAmount必须为非0的值，payType取值为0或1，payCode=app_weixin")
 	@PostMapping("/app")
 	@ResponseBody
 	public BaseResult<WxpayAppDTO> unifiedOrderForApp(@RequestBody GoPayParam param, HttpServletRequest request) {
 		String loggerId = "wxpay_app_" + System.currentTimeMillis();
-		logger.info(loggerId + " int /payment/wxpay/app, userId="+SessionUtil.getUserId()+" ,payCode="+param.getPayCode()+" , paytype="+param.getPayType()+" , orderSn="+param.getOrderSn()+ " , orderAmount="+param.getOrderAmount());
+		logger.info(loggerId + " int /payment/wxpay/app, userId="+SessionUtil.getUserId()+" ,payCode="+param.getPayCode());
 		if(!"app_weixin".equals(param.getPayCode())) {
 			return ResultGenerator.genFailResult("对不起，操作错误！", null);
 		}
-		if(StringUtils.isBlank(param.getOrderSn()) ) {
-			return ResultGenerator.genFailResult("请提供有效的订单号！", null);
-		}
-		if(param.getOrderAmount() == 0) {
-			return ResultGenerator.genFailResult("请提供有效的支付金额！", null);
-		}
-		int payType = param.getPayType();
+		int payType = 0;//param.getPayType();
 		if(payType !=0 && payType != 1) {
 			return ResultGenerator.genFailResult("请选择有效的支付类型！", null);
 		}
@@ -69,7 +62,8 @@ public class WxPayController {
 		}
 		String ip = this.getIpAddr(request);
 		unifiedOrderParam.setIp(ip);
-		PayLog payLog = this.newPayLog(unifiedOrderParam, param, "微信app支付");
+		String orderSn = null;
+		PayLog payLog = null;//this.newPayLog(unifiedOrderParam, param, "微信app支付", orderSn);
 		int status = payLogService.findPayStatus(payLog);
 		if(status > 0) {
 			logger.info(loggerId + " 该订单已完成操作！payLog_status="+status); 
@@ -141,55 +135,5 @@ public class WxPayController {
 		}
 	}
 	
-	protected PayLog newPayLog(UnifiedOrderParam param, GoPayParam goPayParam, String payName) {
-		Integer userId = SessionUtil.getUserId();
-		PayLog payLog = new PayLog();
-		payLog.setUserId(userId);
-		payLog.setPayType(goPayParam.getPayType());
-		payLog.setPayName(payName);
-		payLog.setPayCode(goPayParam.getPayCode());
-		payLog.setParentSn("");
-		payLog.setOrderSn(goPayParam.getOrderSn());
-		payLog.setOrderAmount(BigDecimal.valueOf(param.getTotalAmount()));
-		Integer current = DateUtil.getCurrentTimeLong();
-		payLog.setLastTime(current);
-		payLog.setAddTime(current);
-		payLog.setIsPaid(0);
-		payLog.setPayIp(param.getIp());
-		return payLog;
-	}
-	/**
-	 * 获取客户端ip
-	 * @param request
-	 * @return
-	 */
-	protected String getIpAddr(HttpServletRequest request) {   
-		String ip = request.getHeader("x-forwarded-for");   
-		if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {   
-			ip = request.getHeader("Proxy-Client-IP");   
-		}   
-		if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {   
-			ip = request.getHeader("WL-Proxy-Client-IP");   
-		}   
-		if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {   
-			ip = request.getRemoteAddr(); 
-			if(ip.equals("127.0.0.1")){     
-				//根据网卡取本机配置的IP     
-				InetAddress inet=null;     
-				try {     
-					inet = InetAddress.getLocalHost();     
-				} catch (UnknownHostException e) {     
-					e.printStackTrace();     
-				}     
-				ip= inet.getHostAddress();     
-			}  
-		}   
-		// 对于通过多个代理的情况，第一个IP为客户端真实IP,多个IP按照','分割  
-		if(ip != null && ip.length() > 15){    
-			if(ip.indexOf(",")>0){     
-				ip = ip.substring(0,ip.indexOf(","));     
-			}     
-		}     
-		return ip;   
-	}
+	
 }
