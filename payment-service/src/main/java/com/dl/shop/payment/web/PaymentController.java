@@ -25,7 +25,10 @@ import com.dl.base.util.SessionUtil;
 import com.dl.dto.OrderDTO;
 import com.dl.member.api.IUserAccountService;
 import com.dl.member.dto.SurplusPaymentCallbackDTO;
+import com.dl.member.dto.UserRechargeDTO;
+import com.dl.member.param.AmountParam;
 import com.dl.member.param.SurplusPayParam;
+import com.dl.member.param.UpdateUserRechargeParam;
 import com.dl.param.OrderSnParam;
 import com.dl.param.SubmitOrderParam;
 import com.dl.param.SubmitOrderParam.TicketDetail;
@@ -35,6 +38,7 @@ import com.dl.shop.payment.model.OrderQueryResponse;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.UnifiedOrderParam;
 import com.dl.shop.payment.param.GoPayParam;
+import com.dl.shop.payment.param.RechargeParam;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
 import com.dl.shop.payment.utils.WxpayUtil;
@@ -168,6 +172,71 @@ public class PaymentController extends AbstractBaseController{
 		return payBaseResult;
 	}
 	
+	@ApiOperation(value="app充值调用", notes="")
+	@PostMapping("/recharge")
+	@ResponseBody
+	public BaseResult<Object> rechargeForApp(@RequestBody RechargeParam param, HttpServletRequest request){
+		String loggerId = "rechargeForApp_" + System.currentTimeMillis();
+		logger.info(loggerId + " int /payment/app, userId="+SessionUtil.getUserId()+" ,payCode="+param.getPayCode());
+		double totalAmount = param.getTotalAmount();
+		if(totalAmount <= 0) {
+			return ResultGenerator.genFailResult("对不起，请提供有效的充值金额！", null);
+		}
+		//支付方式
+		String payCode = param.getPayCode();
+		if(StringUtils.isBlank(payCode)) {
+			logger.info(loggerId + "订单第三支付没有提供paycode！");
+			return ResultGenerator.genFailResult("对不起，您还没有选择第三方支付！", null);
+		}
+		BaseResult<PaymentDTO> paymentResult = paymentService.queryByCode(payCode);
+		if(paymentResult.getCode() == 1) {
+			logger.info(loggerId + "订单第三方支付提供paycode有误！");
+			return ResultGenerator.genFailResult("请选择有效的支付方式！", null);
+		}
+		//生成充值单
+		AmountParam amountParam = new AmountParam();
+		amountParam.setAmount(BigDecimal.valueOf(totalAmount));
+		BaseResult<UserRechargeDTO> createReCharege = userAccountService.createReCharege(amountParam);
+		if(createReCharege.getCode() != 0) {
+			return ResultGenerator.genFailResult("充值失败！", null);
+		}
+		String orderSn = createReCharege.getData().getRechargeSn();
+		//生成充值记录payLog
+		String payName = paymentResult.getData().getPayName();
+		String payIp = this.getIpAddr(request);
+		PayLog payLog = super.newPayLog(orderSn, BigDecimal.valueOf(totalAmount), 1, payCode, payName, payIp);
+		PayLog savePayLog = payLogService.savePayLog(payLog);
+		if(null == savePayLog) {
+			logger.info(loggerId + " payLog对象保存失败！"); 
+			return ResultGenerator.genFailResult("请求失败！", null);
+		}
+		//更新订单号为paylogId
+		UnifiedOrderParam unifiedOrderParam = new UnifiedOrderParam();
+		unifiedOrderParam.setBody("余额充值");
+		unifiedOrderParam.setSubject("余额充值");
+		unifiedOrderParam.setTotalAmount(totalAmount);
+		unifiedOrderParam.setIp(payIp);
+		unifiedOrderParam.setOrderNo(savePayLog.getLogId());
+		BaseResult payBaseResult = null;
+		if("app_weixin".equals(payCode)) {
+			payBaseResult = wxpayUtil.unifiedOrderForApp(unifiedOrderParam);
+		}
+		//处理支付失败的情况
+		if(null == payBaseResult || payBaseResult.getCode() != 0) {
+			try {
+				PayLog updatePayLog = new PayLog();
+				updatePayLog.setLogId(savePayLog.getLogId());
+				updatePayLog.setIsPaid(0);
+				updatePayLog.setPayMsg(payBaseResult.getMsg());
+				payLogService.updatePayMsg(updatePayLog);
+			} catch (Exception e) {
+				logger.error(loggerId + "paylogid="+savePayLog.getLogId()+" , paymsg="+payBaseResult.getMsg()+"保存失败记录时出错", e);
+			}
+		}
+		logger.info(loggerId + " result: code="+payBaseResult.getCode()+" , msg="+payBaseResult.getMsg());
+		return payBaseResult;
+	}
+	
 	@ApiOperation(value="支付订单结果 查询 ", notes="")
 	@PostMapping("/query")
 	@ResponseBody
@@ -187,12 +256,84 @@ public class PaymentController extends AbstractBaseController{
 			logger.info(loggerId+" 订单已支付成功");
 			return ResultGenerator.genSuccessResult("订单已支付成功！", null);
 		}
-		BaseResult<OrderQueryResponse> baseResult = wxpayUtil.orderQuery(payLogId);
+		String payCode = payLog.getPayCode();
+		BaseResult<OrderQueryResponse> baseResult = null;
+		if("app_weixin".equals(payCode)) {
+			baseResult = wxpayUtil.orderQuery(payLogId);
+		}
 		if(baseResult.getCode() != 0) {
 			logger.info(loggerId+" 订单查询请求异常"+baseResult.getMsg());
 			return ResultGenerator.genFailResult("请求异常！", null);
 		}
 		OrderQueryResponse response = baseResult.getData();
+		Integer payType = payLog.getPayType();
+		if(0 == payType) {
+			return orderOptions(loggerId, payLog, response);
+		}else if(1 == payType){
+			return rechargeOptions(loggerId, payLog, response);
+		}
+		return ResultGenerator.genFailResult("请求失败！", null);
+	}
+
+	/**
+	 * 对支付结果的一个回写处理
+	 * @param loggerId
+	 * @param payLog
+	 * @param response
+	 * @return
+	 */
+	private BaseResult<Object> rechargeOptions(String loggerId, PayLog payLog, OrderQueryResponse response) {
+		Integer tradeState = response.getTradeState();
+		if(1 == tradeState) {
+			int currentTime = DateUtil.getCurrentTimeLong();
+			//更新order
+			UpdateUserRechargeParam updateUserRechargeParam = new UpdateUserRechargeParam();
+			updateUserRechargeParam.setPaymentCode(payLog.getPayCode());
+			updateUserRechargeParam.setPaymentId(payLog.getLogId()+"");
+			updateUserRechargeParam.setPaymentName(payLog.getPayName());
+			updateUserRechargeParam.setPayTime(currentTime);
+			updateUserRechargeParam.setStatus("1");
+			updateUserRechargeParam.setRechargeSn(payLog.getOrderSn());
+			BaseResult<UserRechargeDTO> updateReCharege = userAccountService.updateReCharege(updateUserRechargeParam);
+			if(updateReCharege.getCode() != 0) {
+				logger.error(loggerId+" paylogid="+"ordersn=" + payLog.getOrderSn()+"更新充值单成功状态失败");
+			}
+			//更新paylog
+			try {
+				PayLog updatePayLog = new PayLog();
+				updatePayLog.setPayTime(currentTime);
+				payLog.setLastTime(currentTime);
+				updatePayLog.setTradeNo(response.getTradeNo());
+				updatePayLog.setLogId(payLog.getLogId());
+				updatePayLog.setIsPaid(1);
+				updatePayLog.setPayMsg("支付成功");
+				payLogService.update(updatePayLog);
+			} catch (Exception e) {
+				logger.error(loggerId+" paylogid="+payLog.getLogId()+" , paymsg=支付成功，保存成功记录时出错", e);
+			}
+			return ResultGenerator.genSuccessResult("订单已支付成功！", null);
+		}else {
+			//更新paylog
+			try {
+				PayLog updatePayLog = new PayLog();
+				updatePayLog.setLogId(payLog.getLogId());
+				updatePayLog.setIsPaid(0);
+				updatePayLog.setPayMsg(response.getTradeStateDesc());
+				payLogService.updatePayMsg(updatePayLog);
+			} catch (Exception e) {
+				logger.error(loggerId + " paylogid="+payLog.getLogId()+" , paymsg="+response.getTradeStateDesc()+"，保存失败记录时出错", e);
+			}
+			return ResultGenerator.genFailResult("请求失败！", null);
+		}
+	}
+	/**
+	 * 对支付结果的一个回写处理
+	 * @param loggerId
+	 * @param payLog
+	 * @param response
+	 * @return
+	 */
+	private BaseResult<Object> orderOptions(String loggerId, PayLog payLog, OrderQueryResponse response) {
 		Integer tradeState = response.getTradeState();
 		if(1 == tradeState) {
 			int currentTime = DateUtil.getCurrentTimeLong();
@@ -206,7 +347,7 @@ public class PaymentController extends AbstractBaseController{
 			param.setOrderSn(payLog.getOrderSn());
 			BaseResult<String> updateOrderInfo = orderService.updateOrderInfo(param);
 			if(updateOrderInfo.getCode() != 0) {
-				logger.error("ordersn=" + payLog.getOrderSn()+"更新订单成功状态失败");
+				logger.error(loggerId+" paylogid="+"ordersn=" + payLog.getOrderSn()+"更新订单成功状态失败");
 			}
 			//更新paylog
 			try {

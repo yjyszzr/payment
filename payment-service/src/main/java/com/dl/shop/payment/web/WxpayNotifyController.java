@@ -10,12 +10,18 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.dl.api.IOrderService;
 import com.dl.base.result.BaseResult;
 import com.dl.base.util.DateUtil;
+import com.dl.member.api.IUserAccountService;
+import com.dl.member.dto.UserRechargeDTO;
+import com.dl.member.param.UpdateUserRechargeParam;
+import com.dl.param.UpdateOrderInfoParam;
 import com.dl.shop.payment.configurer.WxpayConfig;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.WxpayNotifyModel;
@@ -33,7 +39,10 @@ public class WxpayNotifyController {
 	private WxpayConfig wxpayConfig;
 	@Resource
 	private PayLogService payLogService;
-
+	@Autowired
+	private IUserAccountService userAccountService;
+	@Autowired
+	private IOrderService orderService;
 
 	@ApiOperation(value="微信支付回调")
 	@PostMapping("notify")
@@ -119,27 +128,29 @@ public class WxpayNotifyController {
 					boolean result = false;
 					if(0 == payType) {
 						//order
-						/*PaymentCallbackParam paymentCallbackParam = new PaymentCallbackParam();
-						paymentCallbackParam.setAmount(payLog.getOrderAmount().doubleValue()+"");
-						paymentCallbackParam.setOrderSn(payLog.getOrderSn());
-						paymentCallbackParam.setParentSn(payLog.getParentSn());
-						paymentCallbackParam.setPayCode(payLog.getPayCode());
-						paymentCallbackParam.setPayId("4");
-						paymentCallbackParam.setPayName(payLog.getPayName());
-						paymentCallbackParam.setPaySn(payLog.getLogId()+"");
-						paymentCallbackParam.setPayTime(currentTime);
-						paymentCallbackParam.setIp(payLog.getPayIp());*/
-						BaseResult<String> baseResult = null;//orderService.payCallback(paymentCallbackParam);
+						UpdateOrderInfoParam param = new UpdateOrderInfoParam();
+						param.setPayStatus(1);
+						param.setPayTime(currentTime);
+						param.setPaySn(payLog.getLogId()+"");
+						param.setPayName(payLog.getPayName());
+						param.setPayCode(payLog.getPayCode());
+						param.setOrderSn(payLog.getOrderSn());
+						BaseResult<String> baseResult = orderService.updateOrderInfo(param);
 						logger.info(loggerId + " 订单回调返回结果：status=" + baseResult.getCode()+" , message="+baseResult.getMsg());
 						if(0 == baseResult.getCode()) {
 							result = true;
 						}
 					}else {
 						String rechargeSn = payLog.getOrderSn();
-						/*UserCapitalSnParam userCapitalSnParam = new UserCapitalSnParam();
-						userCapitalSnParam.setRechargeSn(rechargeSn);
-						userCapitalSnParam.setTradeNo(payLog.getLogId()+"");*/
-						BaseResult baseResult = null;//userCapitalService.completeRecharge(userCapitalSnParam);
+						//更新order
+						UpdateUserRechargeParam updateUserRechargeParam = new UpdateUserRechargeParam();
+						updateUserRechargeParam.setPaymentCode(payLog.getPayCode());
+						updateUserRechargeParam.setPaymentId(payLog.getLogId()+"");
+						updateUserRechargeParam.setPaymentName(payLog.getPayName());
+						updateUserRechargeParam.setPayTime(currentTime);
+						updateUserRechargeParam.setStatus("1");
+						updateUserRechargeParam.setRechargeSn(payLog.getOrderSn());
+						BaseResult<UserRechargeDTO> baseResult = userAccountService.updateReCharege(updateUserRechargeParam);
 						logger.info(loggerId + " 充值回调返回结果：status=" + baseResult.getCode()+" , message="+baseResult.getMsg());
 						if(0 == baseResult.getCode()) {
 							result = true;
