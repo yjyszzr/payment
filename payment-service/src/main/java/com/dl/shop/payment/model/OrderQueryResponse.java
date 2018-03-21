@@ -8,4 +8,5 @@ public class OrderQueryResponse {
 	private Integer tradeState;
 	private String tradeStateDesc;
 	private String tradeNo;
+	private Integer tradeEndTime;
 }

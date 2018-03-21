@@ -29,6 +29,8 @@ import com.dl.member.dto.UserRechargeDTO;
 import com.dl.member.param.AmountParam;
 import com.dl.member.param.SurplusPayParam;
 import com.dl.member.param.UpdateUserRechargeParam;
+import com.dl.member.param.UpdateUserWithdrawParam;
+import com.dl.member.param.UserWithdrawParam;
 import com.dl.param.OrderSnParam;
 import com.dl.param.SubmitOrderParam;
 import com.dl.param.SubmitOrderParam.TicketDetail;
@@ -39,6 +41,7 @@ import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.UnifiedOrderParam;
 import com.dl.shop.payment.param.GoPayParam;
 import com.dl.shop.payment.param.RechargeParam;
+import com.dl.shop.payment.param.WithdrawParam;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
 import com.dl.shop.payment.utils.WxpayUtil;
@@ -177,7 +180,7 @@ public class PaymentController extends AbstractBaseController{
 	@ResponseBody
 	public BaseResult<Object> rechargeForApp(@RequestBody RechargeParam param, HttpServletRequest request){
 		String loggerId = "rechargeForApp_" + System.currentTimeMillis();
-		logger.info(loggerId + " int /payment/app, userId="+SessionUtil.getUserId()+" ,payCode="+param.getPayCode());
+		logger.info(loggerId + " int /payment/recharge, userId="+SessionUtil.getUserId()+" ,payCode="+param.getPayCode());
 		double totalAmount = param.getTotalAmount();
 		if(totalAmount <= 0) {
 			return ResultGenerator.genFailResult("对不起，请提供有效的充值金额！", null);
@@ -232,6 +235,72 @@ public class PaymentController extends AbstractBaseController{
 			} catch (Exception e) {
 				logger.error(loggerId + "paylogid="+savePayLog.getLogId()+" , paymsg="+payBaseResult.getMsg()+"保存失败记录时出错", e);
 			}
+		}
+		logger.info(loggerId + " result: code="+payBaseResult.getCode()+" , msg="+payBaseResult.getMsg());
+		return payBaseResult;
+	}
+	
+	@ApiOperation(value="app提现调用", notes="")
+	@PostMapping("/withdraw")
+	@ResponseBody
+	public BaseResult<Object> withdrawForApp(@RequestBody WithdrawParam param, HttpServletRequest request){
+		String loggerId = "withdrawForApp_" + System.currentTimeMillis();
+		logger.info(loggerId + " int /payment/withdraw, userId="+SessionUtil.getUserId());
+		double totalAmount = param.getTotalAmount();
+		if(totalAmount <= 0) {
+			return ResultGenerator.genFailResult("对不起，请提供有效的提现金额！", null);
+		}
+		//支付方式
+		int userBankId = param.getUserBankId();
+		if(userBankId < 1) {
+			logger.info(loggerId + "用户很行卡信息id提供有误！");
+			return ResultGenerator.genFailResult("对不起，请选择有效的很行卡！", null);
+		}
+		String realName = null;
+		String cardNo = null;
+		//生成充值单
+		UserWithdrawParam userWithdrawParam = new UserWithdrawParam();
+		userWithdrawParam.setAmount(BigDecimal.valueOf(totalAmount));
+		userWithdrawParam.setCardNo(cardNo);
+		userWithdrawParam.setRealName(realName);
+		BaseResult<UserRechargeDTO> createUserWithdraw = userAccountService.createUserWithdraw(userWithdrawParam);
+		if(createUserWithdraw.getCode() != 0) {
+			return ResultGenerator.genFailResult("提现失败！", null);
+		}
+		String orderSn = createUserWithdraw.getData().getRechargeSn();
+		//生成充值记录payLog
+		String payName = null;
+		String payIp = this.getIpAddr(request);
+		String payCode = null;
+		PayLog payLog = super.newPayLog(orderSn, BigDecimal.valueOf(totalAmount), 1, payCode, payName, payIp);
+		PayLog savePayLog = payLogService.savePayLog(payLog);
+		if(null == savePayLog) {
+			logger.info(loggerId + " payLog对象保存失败！"); 
+			return ResultGenerator.genFailResult("请求失败！", null);
+		}
+		//调用第三方提现
+		BaseResult payBaseResult = null;
+		
+		//处理支付失败的情况
+		if(null == payBaseResult || payBaseResult.getCode() != 0) {
+			try {
+				PayLog updatePayLog = new PayLog();
+				updatePayLog.setLogId(savePayLog.getLogId());
+				updatePayLog.setIsPaid(0);
+				updatePayLog.setPayMsg(payBaseResult.getMsg());
+				payLogService.updatePayMsg(updatePayLog);
+			} catch (Exception e) {
+				logger.error(loggerId + "paylogid="+savePayLog.getLogId()+" , paymsg="+payBaseResult.getMsg()+"保存失败记录时出错", e);
+			}
+		} else {
+			int currentTime = DateUtil.getCurrentTimeLong();
+			UpdateUserWithdrawParam updateUserWithdrawParam = new UpdateUserWithdrawParam();
+			updateUserWithdrawParam.setPaymentId(savePayLog.getLogId()+"");
+			updateUserWithdrawParam.setPayTime(currentTime);
+			updateUserWithdrawParam.setStatus("1");
+			updateUserWithdrawParam.setWithdrawalSn(orderSn);
+			BaseResult<UserRechargeDTO> updateUserWithdraw = userAccountService.updateUserWithdraw(updateUserWithdrawParam);
+			logger.info(loggerId + " paylogid="+savePayLog.getLogId()+" 提现成功回调用户提现记录更新结果 ， code="+updateUserWithdraw.getCode()+" , msg="+updateUserWithdraw.getMsg());
 		}
 		logger.info(loggerId + " result: code="+payBaseResult.getCode()+" , msg="+payBaseResult.getMsg());
 		return payBaseResult;

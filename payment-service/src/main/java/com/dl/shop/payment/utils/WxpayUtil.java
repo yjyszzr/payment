@@ -6,6 +6,9 @@ import java.lang.reflect.Field;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -28,6 +31,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
+import com.dl.base.util.DateUtil;
 import com.dl.shop.payment.configurer.WxpayConfig;
 import com.dl.shop.payment.dto.WxpayAppDTO;
 import com.dl.shop.payment.model.OrderQueryResponse;
@@ -159,7 +163,12 @@ public class WxpayUtil {
 			if("SUCCESS".equals(resultCode) && "SUCCESS".equals(returnCode)) {
 				OrderQueryResponse queryResponse = new OrderQueryResponse();
 				if("SUCCESS".equals(response.getTrade_state())) {
+					String time_end = response.getTime_end();
+					LocalDateTime timeEnd = LocalDateTime.parse(time_end, DateUtil.yyyymmddhhmmss);
+					Instant instant = timeEnd.atZone(ZoneId.systemDefault()).toInstant();
+					int tradeEndTime = Math.toIntExact(instant.getEpochSecond());
 					queryResponse.setTradeState(1);
+					queryResponse.setTradeEndTime(tradeEndTime);
 					queryResponse.setTradeNo(response.getTransaction_id());
 					queryResponse.setTradeStateDesc("支付成功！");
 				}else {

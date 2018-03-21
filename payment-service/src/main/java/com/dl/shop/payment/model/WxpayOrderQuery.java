@@ -33,5 +33,6 @@ public class WxpayOrderQuery {
         private String trade_state_desc;
         private String transaction_id;//微信支付订单号
         private String trade_type;// 交易类型 trade_type 是 APP
+        private String time_end;//交易完成时间
     }
 }
