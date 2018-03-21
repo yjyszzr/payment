@@ -29,6 +29,6 @@ public class WxpayConfig {
 	private String wxUnifiedOrderUrl;
 	@Value("${wxpay.refund_url}")
 	private String wxRefundUrl;
-	/*@Value("${wxpay.notify_url}")
-	private String wxNotifyUrl;*/
+	@Value("${wxpay.notify_url}")
+	private String wxNotifyUrl;
 }
