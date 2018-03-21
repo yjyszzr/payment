@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.base.util.SessionUtil;
-import com.dl.member.api.IUserAccountService;
 import com.dl.shop.payment.dto.WxpayAppDTO;
+import com.dl.shop.payment.model.OrderQueryResponse;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.UnifiedOrderParam;
 import com.dl.shop.payment.model.WxpayOrderQuery;
@@ -41,7 +41,7 @@ public class WxPayController extends AbstractBaseController{
 	private WxpayUtil wxpayUtil;
 	
 	
-	@ApiOperation(value="微信app支付调用", notes="微信app支付,orderSn,parentSn最少一个有值，orderAmount必须为非0的值，payType取值为0或1，payCode=app_weixin")
+	/*@ApiOperation(value="微信app支付调用", notes="微信app支付,orderSn,parentSn最少一个有值，orderAmount必须为非0的值，payType取值为0或1，payCode=app_weixin")
 	@PostMapping("/app")
 	@ResponseBody
 	public BaseResult<WxpayAppDTO> unifiedOrderForApp(@RequestBody GoPayParam param, HttpServletRequest request) {
@@ -91,9 +91,9 @@ public class WxPayController extends AbstractBaseController{
 			
 		}
 		return rst;
-	}
+	}*/
 	
-	@ApiOperation(value="微信app支付订单结果 查询 ", notes="")
+	/*@ApiOperation(value="微信app支付订单结果 查询 ", notes="")
 	@PostMapping("/query")
 	@ResponseBody
 	public BaseResult<Object> orderquery(String payLogId) {
@@ -108,7 +108,7 @@ public class WxPayController extends AbstractBaseController{
 		if(1== isPaid) {
 			return ResultGenerator.genSuccessResult("订单已支付成功！", null);
 		}
-		BaseResult<WxpayOrderQuery.Response> baseResult = wxpayUtil.orderQuery(payLogId);
+		BaseResult<OrderQueryResponse> baseResult = wxpayUtil.orderQuery(payLogId);
 		if(1 == baseResult.getCode()) {
 			logger.error(baseResult.getMsg());
 			return ResultGenerator.genFailResult("请求异常！", null);
@@ -133,7 +133,7 @@ public class WxPayController extends AbstractBaseController{
 			payLogService.updatePayMsg(updatePayLog);
 			return ResultGenerator.genFailResult("请求失败！", null);
 		}
-	}
+	}*/
 	
 	
 }
