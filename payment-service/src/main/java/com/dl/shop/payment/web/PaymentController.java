@@ -7,7 +7,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.bouncycastle.pqc.math.linearalgebra.BigEndianConversions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +23,13 @@ import com.dl.base.util.DateUtil;
 import com.dl.base.util.SessionUtil;
 import com.dl.dto.OrderDTO;
 import com.dl.member.api.IUserAccountService;
+import com.dl.member.api.IUserBankService;
 import com.dl.member.dto.SurplusPaymentCallbackDTO;
+import com.dl.member.dto.UserBankDTO;
+import com.dl.member.dto.UserBonusDTO;
 import com.dl.member.dto.UserRechargeDTO;
 import com.dl.member.param.AmountParam;
+import com.dl.member.param.IDParam;
 import com.dl.member.param.SurplusPayParam;
 import com.dl.member.param.UpdateUserRechargeParam;
 import com.dl.member.param.UpdateUserWithdrawParam;
@@ -63,14 +66,20 @@ public class PaymentController extends AbstractBaseController{
 	private IUserAccountService userAccountService;
 	@Autowired
 	private IOrderService orderService;
+	@Autowired
+	private IUserBankService userBankService;
 	
-	@ApiOperation(value="app支付调用", notes="")
+	@ApiOperation(value="app支付调用", notes="payToken:商品中心购买信息保存后的返回值 ，payCode：支付编码，app端微信支付为app_weixin")
 	@PostMapping("/app")
 	@ResponseBody
 	public BaseResult<Object> unifiedOrderForApp(@RequestBody GoPayParam param, HttpServletRequest request) {
 		String loggerId = "payment_app_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/app, userId="+SessionUtil.getUserId()+" ,payCode="+param.getPayCode());
 		String payToken = param.getPayToken();
+		if(StringUtils.isBlank(payToken)) {
+			logger.info(loggerId + "payToken值为空！");
+			return ResultGenerator.genFailResult("商品信息有误，支付失败！");
+		}
 		//校验payToken的有效性
 		Integer userBonusId = null;//form paytoken
 		BigDecimal ticketAmount = null;//from paytoken
@@ -80,6 +89,17 @@ public class PaymentController extends AbstractBaseController{
 		List<TicketDetail> ticketDetails = null;//from paytoken
 		BigDecimal surplus = null;//from paytoken
 		BigDecimal thirdPartyPaid = new BigDecimal(moneyPaid.doubleValue()-surplus.doubleValue());
+		//支付方式校验
+		String payCode = param.getPayCode();
+		if(StringUtils.isBlank(payCode)) {
+			logger.info(loggerId + "订单第三支付没有提供paycode！");
+			return ResultGenerator.genFailResult("对不起，您还没有选择第三方支付！", null);
+		}
+		BaseResult<PaymentDTO> paymentResult = paymentService.queryByCode(payCode);
+		if(paymentResult.getCode() == 1) {
+			logger.info(loggerId + "订单第三方支付提供paycode有误！payCode="+payCode);
+			return ResultGenerator.genFailResult("请选择有效的支付方式！", null);
+		}
 		//order生成
 		SubmitOrderParam submitOrderParam = new SubmitOrderParam();
 		submitOrderParam.setBonusAmount(bonusAmount);
@@ -91,7 +111,7 @@ public class PaymentController extends AbstractBaseController{
 		submitOrderParam.setSurplus(surplus);
 		submitOrderParam.setThirdPartyPaid(thirdPartyPaid);
 		BaseResult<OrderDTO> createOrder = orderService.createOrder(submitOrderParam);
-		if(createOrder == null || createOrder.getCode() != 0) {
+		if(createOrder.getCode() != 0) {
 			logger.info(loggerId + "订单创建失败！");
 			return ResultGenerator.genFailResult("支付失败！");
 		}
@@ -122,17 +142,7 @@ public class PaymentController extends AbstractBaseController{
 			logger.info(loggerId + "订单没有需要第三方支付金额，完全余额支付成功！");
 			return ResultGenerator.genSuccessResult("支付成功！");
 		}
-		//支付方式
-		String payCode = param.getPayCode();
-		if(StringUtils.isBlank(payCode)) {
-			logger.info(loggerId + "订单第三支付没有提供paycode！");
-			return ResultGenerator.genFailResult("对不起，您还没有选择第三方支付！", null);
-		}
-		BaseResult<PaymentDTO> paymentResult = paymentService.queryByCode(payCode);
-		if(paymentResult.getCode() == 1) {
-			logger.info(loggerId + "订单第三方支付提供paycode有误！");
-			return ResultGenerator.genFailResult("请选择有效的支付方式！", null);
-		}
+		
 		String payName = paymentResult.getData().getPayName();
 		String payIp = this.getIpAddr(request);
 		PayLog payLog = super.newPayLog(orderSn, thirdPartyPaid, 0, payCode, payName, payIp);
@@ -154,11 +164,12 @@ public class PaymentController extends AbstractBaseController{
 		}
 		//处理支付失败的情况
 		if(null == payBaseResult || payBaseResult.getCode() != 0) {
+			//余额回滚
 			SurplusPayParam surplusPayParam = new SurplusPayParam();
 			surplusPayParam.setOrderSn(orderSn);
 			surplusPayParam.setSurplus(surplus);
 			BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
-			if(rollbackUserAccountChangeByPay.getCode() == 1) {
+			if(rollbackUserAccountChangeByPay.getCode() != 0) {
 				logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在回滚用户余额时出错！");
 			}
 			try {
@@ -180,9 +191,10 @@ public class PaymentController extends AbstractBaseController{
 	@ResponseBody
 	public BaseResult<Object> rechargeForApp(@RequestBody RechargeParam param, HttpServletRequest request){
 		String loggerId = "rechargeForApp_" + System.currentTimeMillis();
-		logger.info(loggerId + " int /payment/recharge, userId="+SessionUtil.getUserId()+" ,payCode="+param.getPayCode());
+		logger.info(loggerId + " int /payment/recharge, userId="+SessionUtil.getUserId()+" ,payCode="+param.getPayCode()+" , totalAmount="+param.getTotalAmount());
 		double totalAmount = param.getTotalAmount();
 		if(totalAmount <= 0) {
+			logger.info(loggerId + "充值金额有误！totalAmount="+totalAmount);
 			return ResultGenerator.genFailResult("对不起，请提供有效的充值金额！", null);
 		}
 		//支付方式
@@ -192,7 +204,7 @@ public class PaymentController extends AbstractBaseController{
 			return ResultGenerator.genFailResult("对不起，您还没有选择第三方支付！", null);
 		}
 		BaseResult<PaymentDTO> paymentResult = paymentService.queryByCode(payCode);
-		if(paymentResult.getCode() == 1) {
+		if(paymentResult.getCode() != 0) {
 			logger.info(loggerId + "订单第三方支付提供paycode有误！");
 			return ResultGenerator.genFailResult("请选择有效的支付方式！", null);
 		}
@@ -201,6 +213,7 @@ public class PaymentController extends AbstractBaseController{
 		amountParam.setAmount(BigDecimal.valueOf(totalAmount));
 		BaseResult<UserRechargeDTO> createReCharege = userAccountService.createReCharege(amountParam);
 		if(createReCharege.getCode() != 0) {
+			logger.info(loggerId + "生成充值单：code="+createReCharege.getCode()+" , msg="+createReCharege.getMsg());
 			return ResultGenerator.genFailResult("充值失败！", null);
 		}
 		String orderSn = createReCharege.getData().getRechargeSn();
@@ -213,7 +226,7 @@ public class PaymentController extends AbstractBaseController{
 			logger.info(loggerId + " payLog对象保存失败！"); 
 			return ResultGenerator.genFailResult("请求失败！", null);
 		}
-		//更新订单号为paylogId
+		//第三方支付调用
 		UnifiedOrderParam unifiedOrderParam = new UnifiedOrderParam();
 		unifiedOrderParam.setBody("余额充值");
 		unifiedOrderParam.setSubject("余额充值");
@@ -245,9 +258,10 @@ public class PaymentController extends AbstractBaseController{
 	@ResponseBody
 	public BaseResult<Object> withdrawForApp(@RequestBody WithdrawParam param, HttpServletRequest request){
 		String loggerId = "withdrawForApp_" + System.currentTimeMillis();
-		logger.info(loggerId + " int /payment/withdraw, userId="+SessionUtil.getUserId());
+		logger.info(loggerId + " int /payment/withdraw, userId="+SessionUtil.getUserId()+", totalAmount="+param.getTotalAmount()+",userBankId="+param.getUserBankId());
 		double totalAmount = param.getTotalAmount();
 		if(totalAmount <= 0) {
+			logger.info(loggerId+"提现金额提供有误！");
 			return ResultGenerator.genFailResult("对不起，请提供有效的提现金额！", null);
 		}
 		//支付方式
@@ -256,19 +270,28 @@ public class PaymentController extends AbstractBaseController{
 			logger.info(loggerId + "用户很行卡信息id提供有误！");
 			return ResultGenerator.genFailResult("对不起，请选择有效的很行卡！", null);
 		}
-		String realName = null;
-		String cardNo = null;
-		//生成充值单
+		IDParam idParam = new IDParam();
+		idParam.setId(userBankId);
+		BaseResult<UserBankDTO> queryUserBank = userBankService.queryUserBank(idParam);
+		if(queryUserBank.getCode() != 0) {
+			logger.info(loggerId+"用户银行卡信息获取有误！");
+			return ResultGenerator.genFailResult("对不起，请提供有效的银行卡！", null);
+		}
+		UserBankDTO userBankDTO = queryUserBank.getData();
+		String realName = userBankDTO.getRealName();
+		String cardNo = userBankDTO.getCardNo();
+		//生成提现单
 		UserWithdrawParam userWithdrawParam = new UserWithdrawParam();
 		userWithdrawParam.setAmount(BigDecimal.valueOf(totalAmount));
 		userWithdrawParam.setCardNo(cardNo);
 		userWithdrawParam.setRealName(realName);
 		BaseResult<UserRechargeDTO> createUserWithdraw = userAccountService.createUserWithdraw(userWithdrawParam);
 		if(createUserWithdraw.getCode() != 0) {
+			logger.info(loggerId+" 生成提现单，code="+createUserWithdraw.getCode()+" , msg="+createUserWithdraw.getMsg());
 			return ResultGenerator.genFailResult("提现失败！", null);
 		}
 		String orderSn = createUserWithdraw.getData().getRechargeSn();
-		//生成充值记录payLog
+		//生成提现记录payLog
 		String payName = null;
 		String payIp = this.getIpAddr(request);
 		String payCode = null;

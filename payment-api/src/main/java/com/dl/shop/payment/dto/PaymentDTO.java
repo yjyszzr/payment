@@ -1,8 +1,5 @@
 package com.dl.shop.payment.dto;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
-
 import io.swagger.annotations.Api;
 import lombok.Data;
 
