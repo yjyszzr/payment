@@ -150,7 +150,7 @@ public class WxpayNotifyController {
 						updateUserRechargeParam.setPayTime(currentTime);
 						updateUserRechargeParam.setStatus("1");
 						updateUserRechargeParam.setRechargeSn(payLog.getOrderSn());
-						BaseResult<UserRechargeDTO> baseResult = userAccountService.updateReCharege(updateUserRechargeParam);
+						BaseResult<String> baseResult = userAccountService.updateReCharege(updateUserRechargeParam);
 						logger.info(loggerId + " 充值回调返回结果：status=" + baseResult.getCode()+" , message="+baseResult.getMsg());
 						if(0 == baseResult.getCode()) {
 							result = true;

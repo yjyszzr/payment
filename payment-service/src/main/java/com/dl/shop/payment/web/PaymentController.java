@@ -186,7 +186,7 @@ public class PaymentController extends AbstractBaseController{
 		return payBaseResult;
 	}
 	
-	@ApiOperation(value="app充值调用", notes="")
+	@ApiOperation(value="app充值调用", notes="payCode：支付编码，app端微信支付为app_weixin")
 	@PostMapping("/recharge")
 	@ResponseBody
 	public BaseResult<Object> rechargeForApp(@RequestBody RechargeParam param, HttpServletRequest request){
@@ -217,6 +217,7 @@ public class PaymentController extends AbstractBaseController{
 			return ResultGenerator.genFailResult("充值失败！", null);
 		}
 		String orderSn = createReCharege.getData().getRechargeSn();
+//		String orderSn = "test01";
 		//生成充值记录payLog
 		String payName = paymentResult.getData().getPayName();
 		String payIp = this.getIpAddr(request);
@@ -322,7 +323,7 @@ public class PaymentController extends AbstractBaseController{
 			updateUserWithdrawParam.setPayTime(currentTime);
 			updateUserWithdrawParam.setStatus("1");
 			updateUserWithdrawParam.setWithdrawalSn(orderSn);
-			BaseResult<UserRechargeDTO> updateUserWithdraw = userAccountService.updateUserWithdraw(updateUserWithdrawParam);
+			BaseResult<String> updateUserWithdraw = userAccountService.updateUserWithdraw(updateUserWithdrawParam);
 			logger.info(loggerId + " paylogid="+savePayLog.getLogId()+" 提现成功回调用户提现记录更新结果 ， code="+updateUserWithdraw.getCode()+" , msg="+updateUserWithdraw.getMsg());
 		}
 		logger.info(loggerId + " result: code="+payBaseResult.getCode()+" , msg="+payBaseResult.getMsg());
@@ -386,7 +387,7 @@ public class PaymentController extends AbstractBaseController{
 			updateUserRechargeParam.setPayTime(currentTime);
 			updateUserRechargeParam.setStatus("1");
 			updateUserRechargeParam.setRechargeSn(payLog.getOrderSn());
-			BaseResult<UserRechargeDTO> updateReCharege = userAccountService.updateReCharege(updateUserRechargeParam);
+			BaseResult<String> updateReCharege = userAccountService.updateReCharege(updateUserRechargeParam);
 			if(updateReCharege.getCode() != 0) {
 				logger.error(loggerId+" paylogid="+"ordersn=" + payLog.getOrderSn()+"更新充值单成功状态失败");
 			}
