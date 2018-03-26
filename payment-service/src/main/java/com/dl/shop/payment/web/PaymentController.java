@@ -26,8 +26,8 @@ import com.dl.member.api.IUserAccountService;
 import com.dl.member.api.IUserBankService;
 import com.dl.member.dto.SurplusPaymentCallbackDTO;
 import com.dl.member.dto.UserBankDTO;
-import com.dl.member.dto.UserBonusDTO;
 import com.dl.member.dto.UserRechargeDTO;
+import com.dl.member.dto.UserWithdrawDTO;
 import com.dl.member.param.AmountParam;
 import com.dl.member.param.IDParam;
 import com.dl.member.param.SurplusPayParam;
@@ -286,12 +286,12 @@ public class PaymentController extends AbstractBaseController{
 		userWithdrawParam.setAmount(BigDecimal.valueOf(totalAmount));
 		userWithdrawParam.setCardNo(cardNo);
 		userWithdrawParam.setRealName(realName);
-		BaseResult<UserRechargeDTO> createUserWithdraw = userAccountService.createUserWithdraw(userWithdrawParam);
+		BaseResult<UserWithdrawDTO> createUserWithdraw = userAccountService.createUserWithdraw(userWithdrawParam);
 		if(createUserWithdraw.getCode() != 0) {
 			logger.info(loggerId+" 生成提现单，code="+createUserWithdraw.getCode()+" , msg="+createUserWithdraw.getMsg());
 			return ResultGenerator.genFailResult("提现失败！", null);
 		}
-		String orderSn = createUserWithdraw.getData().getRechargeSn();
+		String orderSn = createUserWithdraw.getData().getWithdrawalSn();
 		//生成提现记录payLog
 		String payName = null;
 		String payIp = this.getIpAddr(request);
