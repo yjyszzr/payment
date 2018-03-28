@@ -121,6 +121,11 @@ public class PaymentController extends AbstractBaseController{
 			SurplusPayParam surplusPayParam = new SurplusPayParam();
 			surplusPayParam.setOrderSn(orderSn);
 			surplusPayParam.setSurplus(surplus);
+			surplusPayParam.setBonusMoney(bonusAmount);
+			int payType1 = 0;
+			surplusPayParam.setPayType(payType1);
+			surplusPayParam.setThirdPartName(paymentResult.getData().getPayName());
+			surplusPayParam.setThirdPartPaid(thirdPartyPaid);
 			BaseResult<SurplusPaymentCallbackDTO> changeUserAccountByPay = userAccountService.changeUserAccountByPay(surplusPayParam);
 			if(changeUserAccountByPay.getCode() != 0) {
 				logger.info(loggerId + "用户余额扣减失败！");
@@ -164,13 +169,20 @@ public class PaymentController extends AbstractBaseController{
 		}
 		//处理支付失败的情况
 		if(null == payBaseResult || payBaseResult.getCode() != 0) {
-			//余额回滚
-			SurplusPayParam surplusPayParam = new SurplusPayParam();
-			surplusPayParam.setOrderSn(orderSn);
-			surplusPayParam.setSurplus(surplus);
-			BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
-			if(rollbackUserAccountChangeByPay.getCode() != 0) {
-				logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在回滚用户余额时出错！");
+			if(surplus != null && surplus.doubleValue() > 0){
+				//余额回滚
+				SurplusPayParam surplusPayParam = new SurplusPayParam();
+				surplusPayParam.setOrderSn(orderSn);
+				surplusPayParam.setSurplus(surplus);
+				surplusPayParam.setBonusMoney(bonusAmount);
+				int payType1 = 0;
+				surplusPayParam.setPayType(payType1);
+				surplusPayParam.setThirdPartName(paymentResult.getData().getPayName());
+				surplusPayParam.setThirdPartPaid(thirdPartyPaid);
+				BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
+				if(rollbackUserAccountChangeByPay.getCode() != 0) {
+					logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在回滚用户余额时出错！");
+				}
 			}
 			try {
 				PayLog updatePayLog = new PayLog();
@@ -466,13 +478,21 @@ public class PaymentController extends AbstractBaseController{
 				logger.info(loggerId+" 订单获取失败");
 				return ResultGenerator.genFailResult("请求失败！", null);
 			}
-			BigDecimal userAccount = orderInfoByOrderSn.getData().getSurplus();
-			SurplusPayParam surplusPayParam = new SurplusPayParam();
-			surplusPayParam.setOrderSn(orderSn);
-			surplusPayParam.setSurplus(userAccount);
-			BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
-			if(rollbackUserAccountChangeByPay.getCode() != 0) {
-				logger.error(loggerId + " orderSn="+orderSn+" , Surplus="+userAccount.doubleValue()+" 在回滚用户余额时出错！");
+			BigDecimal surplus = orderInfoByOrderSn.getData().getSurplus();
+			BigDecimal bonusAmount = orderInfoByOrderSn.getData().getBonus();
+			if(surplus != null && surplus.doubleValue() > 0){
+				SurplusPayParam surplusPayParam = new SurplusPayParam();
+				surplusPayParam.setOrderSn(orderSn);
+				surplusPayParam.setSurplus(surplus);
+				surplusPayParam.setBonusMoney(bonusAmount);
+				int payType1 = 0;
+				surplusPayParam.setPayType(payType1);
+				surplusPayParam.setThirdPartName(payLog.getPayName());
+				surplusPayParam.setThirdPartPaid(payLog.getOrderAmount());
+				BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
+				if(rollbackUserAccountChangeByPay.getCode() != 0) {
+					logger.error(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在回滚用户余额时出错！");
+				}
 			}
 			//更新paylog
 			try {

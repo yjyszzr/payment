@@ -1,0 +1,21 @@
+package com.dl.shop.payment.dto;
+
+import java.io.Serializable;
+
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
+@Data
+public class UserWithdrawLogDTO implements Serializable{
+
+	private static final long serialVersionUID = 1L;
+	
+	@ApiModelProperty("提现单号")
+    private String withdrawSn;
+	@ApiModelProperty("提现单号")
+    private String logTime;
+	@ApiModelProperty("提现单号")
+    private Integer logCode;
+	@ApiModelProperty("提现单号")
+    private String logName;
+}
