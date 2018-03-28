@@ -7,17 +7,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
+import com.dl.shop.payment.dto.UserWithdrawDetailDTO;
 import com.dl.shop.payment.dto.UserWithdrawLogDTO;
 import com.dl.shop.payment.model.UserWithdrawLog;
 import com.dl.shop.payment.param.WithdrawDetailParam;
 import com.dl.shop.payment.service.UserWithdrawLogService;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 
 import io.swagger.annotations.ApiOperation;
 
@@ -32,13 +30,19 @@ public class UserWithdrawLogController {
 
     @ApiOperation(value="提现进度详情")
     @PostMapping("/list")
-    public BaseResult<List<UserWithdrawLogDTO>> detail(@RequestBody WithdrawDetailParam param) {
+    public BaseResult<UserWithdrawDetailDTO> detail(@RequestBody WithdrawDetailParam param) {
     	String withdawSn = param.getWithdawSn();
     	if(StringUtils.isBlank(withdawSn)) {
     		return ResultGenerator.genFailResult("提现单号不能为空!", null);
     	}
-        List<UserWithdrawLogDTO> userWithdrawLog = userWithdrawLogService.findByWithdrawSn(withdawSn);
-        return ResultGenerator.genSuccessResult(null, userWithdrawLog);
+        List<UserWithdrawLogDTO> userWithdrawLogs = userWithdrawLogService.findByWithdrawSn(withdawSn);
+        UserWithdrawDetailDTO dto = new UserWithdrawDetailDTO();
+        dto.setAmount("1.00");
+        dto.setCard("招商银行(尾号9832)");
+        dto.setStatus("申请中");
+        dto.setWithdrawSn(withdawSn);
+        dto.setUserWithdrawLogs(userWithdrawLogs);
+        return ResultGenerator.genSuccessResult(null, dto);
     }
     @ApiOperation(value="添加提现进度")
     @PostMapping("/add")
