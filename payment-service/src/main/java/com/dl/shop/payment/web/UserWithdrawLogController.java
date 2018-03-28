@@ -19,6 +19,8 @@ import com.dl.shop.payment.service.UserWithdrawLogService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 
+import io.swagger.annotations.ApiOperation;
+
 /**
 * Created by CodeGenerator on 2018/03/28.
 */
@@ -28,6 +30,7 @@ public class UserWithdrawLogController {
     @Resource
     private UserWithdrawLogService userWithdrawLogService;
 
+    @ApiOperation(value="提现进度详情")
     @PostMapping("/list")
     public BaseResult<List<UserWithdrawLogDTO>> detail(@RequestBody WithdrawDetailParam param) {
     	String withdawSn = param.getWithdawSn();
@@ -37,7 +40,7 @@ public class UserWithdrawLogController {
         List<UserWithdrawLogDTO> userWithdrawLog = userWithdrawLogService.findByWithdrawSn(withdawSn);
         return ResultGenerator.genSuccessResult(null, userWithdrawLog);
     }
-    
+    @ApiOperation(value="添加提现进度")
     @PostMapping("/add")
     public BaseResult add(UserWithdrawLog userWithdrawLog) {
         userWithdrawLogService.save(userWithdrawLog);
