@@ -1,7 +1,11 @@
 package com.dl.shop.payment.web;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -10,18 +14,20 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.dl.api.IOrderService;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.base.util.DateUtil;
+import com.dl.base.util.JSONHelper;
 import com.dl.base.util.SessionUtil;
-import com.dl.dto.OrderDTO;
+import com.dl.lottery.dto.DIZQUserBetCellInfoDTO;
+import com.dl.lottery.dto.DIZQUserBetInfoDTO;
 import com.dl.member.api.IUserAccountService;
 import com.dl.member.api.IUserBankService;
 import com.dl.member.dto.SurplusPaymentCallbackDTO;
@@ -34,10 +40,12 @@ import com.dl.member.param.SurplusPayParam;
 import com.dl.member.param.UpdateUserRechargeParam;
 import com.dl.member.param.UpdateUserWithdrawParam;
 import com.dl.member.param.UserWithdrawParam;
-import com.dl.param.OrderSnParam;
-import com.dl.param.SubmitOrderParam;
-import com.dl.param.SubmitOrderParam.TicketDetail;
-import com.dl.param.UpdateOrderInfoParam;
+import com.dl.order.api.IOrderService;
+import com.dl.order.dto.OrderDTO;
+import com.dl.order.param.OrderSnParam;
+import com.dl.order.param.SubmitOrderParam;
+import com.dl.order.param.SubmitOrderParam.TicketDetail;
+import com.dl.order.param.UpdateOrderInfoParam;
 import com.dl.shop.payment.dto.PaymentDTO;
 import com.dl.shop.payment.model.OrderQueryResponse;
 import com.dl.shop.payment.model.PayLog;
@@ -68,6 +76,8 @@ public class PaymentController extends AbstractBaseController{
 	private IOrderService orderService;
 	@Autowired
 	private IUserBankService userBankService;
+	 @Resource
+	 private StringRedisTemplate stringRedisTemplate;
 	
 	@ApiOperation(value="app支付调用", notes="payToken:商品中心购买信息保存后的返回值 ，payCode：支付编码，app端微信支付为app_weixin")
 	@PostMapping("/app")
@@ -81,14 +91,38 @@ public class PaymentController extends AbstractBaseController{
 			return ResultGenerator.genFailResult("商品信息有误，支付失败！");
 		}
 		//校验payToken的有效性
-		Integer userBonusId = null;//form paytoken
-		BigDecimal ticketAmount = null;//from paytoken
-		Integer orderFrom = null;//from paytoken
-		BigDecimal moneyPaid = null;//from paytoken
-		BigDecimal bonusAmount = null;//from paytoken
-		List<TicketDetail> ticketDetails = null;//from paytoken
-		BigDecimal surplus = null;//from paytoken
-		BigDecimal thirdPartyPaid = new BigDecimal(moneyPaid.doubleValue()-surplus.doubleValue());
+		String jsonData = stringRedisTemplate.opsForValue().get(payToken);
+		if(StringUtils.isBlank(jsonData)) {
+			logger.info(loggerId + "支付信息获取为空！");
+			return ResultGenerator.genFailResult("支付信息不存在或失效，支付失败！");
+		}
+		DIZQUserBetInfoDTO dto = null;
+		try {
+			dto = JSONHelper.getSingleBean(jsonData, DIZQUserBetInfoDTO.class);
+		} catch (Exception e1) {
+			logger.error(loggerId + "支付信息转DIZQUserBetInfoDTO对象失败！", e1);
+			return ResultGenerator.genFailResult("支付信息异常，支付失败！");
+		}
+		Integer userBonusId = Integer.valueOf(dto.getBonusId());//form paytoken
+		BigDecimal ticketAmount = BigDecimal.valueOf(dto.getMoney());//from paytoken
+		BigDecimal bonusAmount = BigDecimal.valueOf(dto.getBonusAmount());//from paytoken
+		BigDecimal moneyPaid = BigDecimal.valueOf(dto.getMoney() - dto.getBonusAmount());;//from paytoken
+		BigDecimal surplus = BigDecimal.valueOf(dto.getSurplus());//from paytoken
+		BigDecimal thirdPartyPaid = BigDecimal.valueOf(dto.getThirdPartyPaid());
+		Integer orderFrom = dto.getRequestFrom();//from paytoken
+		List<DIZQUserBetCellInfoDTO> userBetCellInfos = dto.getUserBetCellInfos();
+		List<TicketDetail> ticketDetails = userBetCellInfos.stream().map(betCell->{
+			TicketDetail ticketDetail = new TicketDetail();
+			ticketDetail.setMatch_id(betCell.getMatchId());
+			ticketDetail.setChangci(betCell.getChangci());
+			ticketDetail.setMatchTime(Date.from(Instant.ofEpochSecond(betCell.getMatchTime())));
+			ticketDetail.setMatchTeam(betCell.getMatchTeam());
+			ticketDetail.setLotteryClassifyId(betCell.getLotteryClassifyId());
+			ticketDetail.setLotteryPlayClassifyId(betCell.getLotteryPlayClassifyId());
+			ticketDetail.setTicketData(betCell.getTicketData());
+			ticketDetail.setIsDan(betCell.getIsDan());
+			return ticketDetail;
+		}).collect(Collectors.toList());
 		//支付方式校验
 		String payCode = param.getPayCode();
 		if(StringUtils.isBlank(payCode)) {
@@ -104,12 +138,22 @@ public class PaymentController extends AbstractBaseController{
 		SubmitOrderParam submitOrderParam = new SubmitOrderParam();
 		submitOrderParam.setBonusAmount(bonusAmount);
 		submitOrderParam.setMoneyPaid(moneyPaid);
-		submitOrderParam.setOrderFrom(orderFrom);
 		submitOrderParam.setTicketAmount(ticketAmount);
-		submitOrderParam.setTicketDetails(ticketDetails);
-		submitOrderParam.setUserBonusId(userBonusId);
 		submitOrderParam.setSurplus(surplus);
 		submitOrderParam.setThirdPartyPaid(thirdPartyPaid);
+		submitOrderParam.setUserBonusId(userBonusId);
+		submitOrderParam.setBonusAmount(bonusAmount);
+		submitOrderParam.setOrderFrom(orderFrom);
+		submitOrderParam.setLotteryClassifyId(dto.getLotteryClassifyId());
+		submitOrderParam.setLotteryPlayClassifyId(dto.getLotteryPlayClassifyId());
+		Optional<TicketDetail> max = ticketDetails.stream().max((detail1, detail2)->detail1.getMatchTime().compareTo(detail2.getMatchTime()));
+		submitOrderParam.setMatchTime(max.get().getMatchTime());
+		submitOrderParam.setPassType(dto.getBetType());
+		submitOrderParam.setCathectic(dto.getTimes());
+		submitOrderParam.setForecastMoney(BigDecimal.valueOf(dto.getMaxBonus()));
+		
+		
+		submitOrderParam.setTicketDetails(ticketDetails);
 		BaseResult<OrderDTO> createOrder = orderService.createOrder(submitOrderParam);
 		if(createOrder.getCode() != 0) {
 			logger.info(loggerId + "订单创建失败！");

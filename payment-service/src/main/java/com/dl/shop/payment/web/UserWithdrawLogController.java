@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
+import com.dl.member.dto.UserWithdrawDTO;
 import com.dl.shop.payment.dto.UserWithdrawDetailDTO;
 import com.dl.shop.payment.dto.UserWithdrawLogDTO;
 import com.dl.shop.payment.model.UserWithdrawLog;
@@ -31,10 +32,15 @@ public class UserWithdrawLogController {
     @ApiOperation(value="提现进度详情")
     @PostMapping("/list")
     public BaseResult<UserWithdrawDetailDTO> detail(@RequestBody WithdrawDetailParam param) {
-    	String withdawSn = param.getWithdawSn();
-    	if(StringUtils.isBlank(withdawSn)) {
-    		return ResultGenerator.genFailResult("提现单号不能为空!", null);
+    	String accountId = param.getAccountId();
+    	if(StringUtils.isBlank(accountId)) {
+    		return ResultGenerator.genFailResult("提现流水号不能为空!", null);
     	}
+    	UserWithdrawDTO userWithdrawDTO = null;
+    	if(userWithdrawDTO == null) {
+    		return ResultGenerator.genFailResult("提现流水信息为空!", null);
+    	}
+    	String withdawSn = userWithdrawDTO.getWithdrawalSn();
         List<UserWithdrawLogDTO> userWithdrawLogs = userWithdrawLogService.findByWithdrawSn(withdawSn);
         UserWithdrawDetailDTO dto = new UserWithdrawDetailDTO();
         dto.setAmount("1.00");
