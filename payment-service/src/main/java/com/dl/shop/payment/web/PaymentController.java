@@ -188,6 +188,14 @@ public class PaymentController extends AbstractBaseController{
 		}
 		if(thirdPartyPaid == null || thirdPartyPaid.doubleValue() <= 0) {
 			//回调order,更新支付状态
+			UpdateOrderInfoParam param1 = new UpdateOrderInfoParam();
+			param1.setPayStatus(1);
+			int currentTime = DateUtil.getCurrentTimeLong();
+			param1.setPayTime(currentTime);
+			param1.setOrderStatus(1);
+			param1.setOrderSn(orderSn);
+			BaseResult<String> baseResult = orderService.updateOrderInfo(param1);
+			logger.info(loggerId + " 订单回调返回结果：status=" + baseResult.getCode()+" , message="+baseResult.getMsg());
 			logger.info(loggerId + "订单没有需要第三方支付金额，完全余额支付成功！");
 			return ResultGenerator.genSuccessResult("支付成功！");
 		}
@@ -489,6 +497,7 @@ public class PaymentController extends AbstractBaseController{
 			//更新order
 			UpdateOrderInfoParam param = new UpdateOrderInfoParam();
 			param.setPayStatus(1);
+			param.setOrderStatus(1);
 			param.setPayTime(currentTime);
 			param.setPaySn(payLog.getLogId()+"");
 			param.setPayName(payLog.getPayName());

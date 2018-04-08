@@ -129,6 +129,7 @@ public class WxpayNotifyController {
 						//order
 						UpdateOrderInfoParam param = new UpdateOrderInfoParam();
 						param.setPayStatus(1);
+						param.setOrderStatus(1);
 						param.setPayTime(currentTime);
 						param.setPaySn(payLog.getLogId()+"");
 						param.setPayName(payLog.getPayName());
