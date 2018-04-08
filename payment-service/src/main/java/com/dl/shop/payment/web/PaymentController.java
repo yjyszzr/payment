@@ -1,10 +1,12 @@
 package com.dl.shop.payment.web;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -130,6 +132,7 @@ public class PaymentController extends AbstractBaseController{
 			ticketDetail.setLotteryPlayClassifyId(betCell.getLotteryPlayClassifyId());
 			ticketDetail.setTicketData(betCell.getTicketData());
 			ticketDetail.setIsDan(betCell.getIsDan());
+			ticketDetail.setIssue(betCell.getPlayCode());
 			return ticketDetail;
 		}).collect(Collectors.toList());
 		//支付方式校验
@@ -568,5 +571,14 @@ public class PaymentController extends AbstractBaseController{
 			}
 			return ResultGenerator.genFailResult("请求失败！", null);
 		}
+	}
+	
+	
+	public static void main(String[] args) {
+		TimeZone default1 = TimeZone.getDefault();
+		System.out.println(default1.getRawOffset());
+		Clock systemUTC = Clock.systemUTC();
+		Clock systemDefaultZone = Clock.systemDefaultZone();
+		System.out.println(systemUTC);
 	}
 }
