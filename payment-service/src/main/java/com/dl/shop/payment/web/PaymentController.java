@@ -103,6 +103,9 @@ public class PaymentController extends AbstractBaseController{
 			logger.error(loggerId + "支付信息转DIZQUserBetInfoDTO对象失败！", e1);
 			return ResultGenerator.genFailResult("支付信息异常，支付失败！");
 		}
+		if(null == dto) {
+			return ResultGenerator.genFailResult("支付信息异常，支付失败！");
+		}
 		Integer userId = dto.getUserId();
 		Integer currentId = SessionUtil.getUserId();
 		if(userId != currentId) {
