@@ -94,13 +94,19 @@ public class PaymentController extends AbstractBaseController{
 		String jsonData = stringRedisTemplate.opsForValue().get(payToken);
 		if(StringUtils.isBlank(jsonData)) {
 			logger.info(loggerId + "支付信息获取为空！");
-			return ResultGenerator.genFailResult("支付信息不存在或失效，支付失败！");
+			return ResultGenerator.genFailResult("支付信息不存在或已失效，支付失败！");
 		}
 		DIZQUserBetInfoDTO dto = null;
 		try {
 			dto = JSONHelper.getSingleBean(jsonData, DIZQUserBetInfoDTO.class);
 		} catch (Exception e1) {
 			logger.error(loggerId + "支付信息转DIZQUserBetInfoDTO对象失败！", e1);
+			return ResultGenerator.genFailResult("支付信息异常，支付失败！");
+		}
+		Integer userId = dto.getUserId();
+		Integer currentId = SessionUtil.getUserId();
+		if(userId != currentId) {
+			logger.info(loggerId + "支付信息不是当前用户的待支付彩票！");
 			return ResultGenerator.genFailResult("支付信息异常，支付失败！");
 		}
 		Integer userBonusId = Integer.valueOf(dto.getBonusId());//form paytoken
