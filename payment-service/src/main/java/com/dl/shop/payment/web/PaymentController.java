@@ -213,6 +213,7 @@ public class PaymentController extends AbstractBaseController{
 			BigDecimal userSurplus = changeUserAccountByPay.getData().getUserSurplus();
 			BigDecimal userSurplusLimit = changeUserAccountByPay.getData().getUserSurplusLimit();
 			UpdateOrderInfoParam updateOrderInfoParam = new UpdateOrderInfoParam();
+			updateOrderInfoParam.setOrderSn(orderSn);
 			updateOrderInfoParam.setUserSurplus(userSurplus);
 			updateOrderInfoParam.setUserSurplusLimit(userSurplusLimit);
 			BaseResult<String> updateOrderInfo = orderService.updateOrderInfo(updateOrderInfoParam);
