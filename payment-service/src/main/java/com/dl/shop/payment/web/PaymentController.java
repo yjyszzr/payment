@@ -202,6 +202,7 @@ public class PaymentController extends AbstractBaseController{
 			surplusPayParam.setBonusMoney(bonusAmount);
 			int payType1 = 0;
 			surplusPayParam.setPayType(payType1);
+			surplusPayParam.setMoneyPaid(moneyPaid);
 			surplusPayParam.setThirdPartName(paymentDto!=null?paymentDto.getPayName():"");
 			surplusPayParam.setThirdPartPaid(thirdPartyPaid);
 			BaseResult<SurplusPaymentCallbackDTO> changeUserAccountByPay = userAccountService.changeUserAccountByPay(surplusPayParam);
