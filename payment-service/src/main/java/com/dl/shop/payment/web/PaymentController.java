@@ -1,12 +1,13 @@
 package com.dl.shop.payment.web;
 
 import java.math.BigDecimal;
-import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -32,15 +33,19 @@ import com.dl.lottery.dto.DIZQUserBetCellInfoDTO;
 import com.dl.lottery.dto.DIZQUserBetInfoDTO;
 import com.dl.member.api.IUserAccountService;
 import com.dl.member.api.IUserBankService;
+import com.dl.member.api.IUserMessageService;
+import com.dl.member.api.IUserService;
 import com.dl.member.dto.SurplusPaymentCallbackDTO;
 import com.dl.member.dto.UserBankDTO;
+import com.dl.member.dto.UserDTO;
 import com.dl.member.dto.UserRechargeDTO;
 import com.dl.member.dto.UserWithdrawDTO;
 import com.dl.member.param.AmountParam;
 import com.dl.member.param.IDParam;
+import com.dl.member.param.MessageAddParam;
+import com.dl.member.param.StrParam;
 import com.dl.member.param.SurplusPayParam;
 import com.dl.member.param.UpdateUserRechargeParam;
-import com.dl.member.param.UpdateUserWithdrawParam;
 import com.dl.member.param.UserWithdrawParam;
 import com.dl.order.api.IOrderService;
 import com.dl.order.dto.OrderDTO;
@@ -52,11 +57,13 @@ import com.dl.shop.payment.dto.PaymentDTO;
 import com.dl.shop.payment.model.OrderQueryResponse;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.UnifiedOrderParam;
+import com.dl.shop.payment.model.UserWithdrawLog;
 import com.dl.shop.payment.param.GoPayParam;
 import com.dl.shop.payment.param.RechargeParam;
 import com.dl.shop.payment.param.WithdrawParam;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
+import com.dl.shop.payment.service.UserWithdrawLogService;
 import com.dl.shop.payment.utils.WxpayUtil;
 
 import io.swagger.annotations.ApiOperation;
@@ -78,8 +85,14 @@ public class PaymentController extends AbstractBaseController{
 	private IOrderService orderService;
 	@Autowired
 	private IUserBankService userBankService;
-	 @Resource
-	 private StringRedisTemplate stringRedisTemplate;
+	@Resource
+	private StringRedisTemplate stringRedisTemplate;
+	@Resource
+	private UserWithdrawLogService userWithdrawLogService;
+	@Resource
+	private IUserMessageService userMessageService;
+	@Resource
+	private IUserService userService;
 	
 	@ApiOperation(value="app支付调用", notes="payToken:商品中心购买信息保存后的返回值 ，payCode：支付编码，app端微信支付为app_weixin")
 	@PostMapping("/app")
@@ -110,7 +123,7 @@ public class PaymentController extends AbstractBaseController{
 		}
 		Integer userId = dto.getUserId();
 		Integer currentId = SessionUtil.getUserId();
-		if(userId != currentId) {
+		if(!userId.equals(currentId)) {
 			logger.info(loggerId + "支付信息不是当前用户的待支付彩票！");
 			return ResultGenerator.genFailResult("支付信息异常，支付失败！");
 		}
@@ -135,16 +148,20 @@ public class PaymentController extends AbstractBaseController{
 			ticketDetail.setIssue(betCell.getPlayCode());
 			return ticketDetail;
 		}).collect(Collectors.toList());
-		//支付方式校验
-		String payCode = param.getPayCode();
-		if(StringUtils.isBlank(payCode)) {
-			logger.info(loggerId + "订单第三支付没有提供paycode！");
-			return ResultGenerator.genFailResult("对不起，您还没有选择第三方支付！", null);
-		}
-		BaseResult<PaymentDTO> paymentResult = paymentService.queryByCode(payCode);
-		if(paymentResult.getCode() == 1) {
-			logger.info(loggerId + "订单第三方支付提供paycode有误！payCode="+payCode);
-			return ResultGenerator.genFailResult("请选择有效的支付方式！", null);
+		PaymentDTO paymentDto = null;
+		if(thirdPartyPaid != null && thirdPartyPaid.doubleValue() > 0) {
+			//支付方式校验
+			String payCode = param.getPayCode();
+			if(StringUtils.isBlank(payCode)) {
+				logger.info(loggerId + "订单第三支付没有提供paycode！");
+				return ResultGenerator.genFailResult("对不起，您还没有选择第三方支付！", null);
+			}
+			BaseResult<PaymentDTO> paymentResult = paymentService.queryByCode(payCode);
+			if(paymentResult.getCode() != 0) {
+				logger.info(loggerId + "订单第三方支付提供paycode有误！payCode="+payCode);
+				return ResultGenerator.genFailResult("请选择有效的支付方式！", null);
+			}
+			paymentDto = paymentResult.getData();
 		}
 		//order生成
 		SubmitOrderParam submitOrderParam = new SubmitOrderParam();
@@ -158,13 +175,17 @@ public class PaymentController extends AbstractBaseController{
 		submitOrderParam.setOrderFrom(orderFrom);
 		submitOrderParam.setLotteryClassifyId(dto.getLotteryClassifyId());
 		submitOrderParam.setLotteryPlayClassifyId(dto.getLotteryPlayClassifyId());
-		Optional<TicketDetail> max = ticketDetails.stream().max((detail1, detail2)->detail1.getMatchTime().compareTo(detail2.getMatchTime()));
-		submitOrderParam.setMatchTime(max.get().getMatchTime());
+		if(ticketDetails.size() > 1) {
+			Optional<TicketDetail> max = ticketDetails.stream().max((detail1, detail2)->detail1.getMatchTime().compareTo(detail2.getMatchTime()));
+			submitOrderParam.setMatchTime(max.get().getMatchTime());
+		}else {
+			submitOrderParam.setMatchTime(ticketDetails.get(0).getMatchTime());
+		}
 		submitOrderParam.setPassType(dto.getBetType());
 		submitOrderParam.setCathectic(dto.getTimes());
 		submitOrderParam.setForecastMoney(BigDecimal.valueOf(dto.getMaxBonus()));
 		
-		
+		submitOrderParam.setIssue(dto.getIssue());
 		submitOrderParam.setTicketDetails(ticketDetails);
 		BaseResult<OrderDTO> createOrder = orderService.createOrder(submitOrderParam);
 		if(createOrder.getCode() != 0) {
@@ -180,7 +201,7 @@ public class PaymentController extends AbstractBaseController{
 			surplusPayParam.setBonusMoney(bonusAmount);
 			int payType1 = 0;
 			surplusPayParam.setPayType(payType1);
-			surplusPayParam.setThirdPartName(paymentResult.getData().getPayName());
+			surplusPayParam.setThirdPartName(paymentDto!=null?paymentDto.getPayName():"");
 			surplusPayParam.setThirdPartPaid(thirdPartyPaid);
 			BaseResult<SurplusPaymentCallbackDTO> changeUserAccountByPay = userAccountService.changeUserAccountByPay(surplusPayParam);
 			if(changeUserAccountByPay.getCode() != 0) {
@@ -212,9 +233,9 @@ public class PaymentController extends AbstractBaseController{
 			return ResultGenerator.genSuccessResult("支付成功！");
 		}
 		
-		String payName = paymentResult.getData().getPayName();
+		String payName = paymentDto.getPayName();
 		String payIp = this.getIpAddr(request);
-		PayLog payLog = super.newPayLog(orderSn, thirdPartyPaid, 0, payCode, payName, payIp);
+		PayLog payLog = super.newPayLog(orderSn, thirdPartyPaid, 0, paymentDto.getPayCode(), payName, payIp);
 		PayLog savePayLog = payLogService.savePayLog(payLog);
 		if(null == savePayLog) {
 			logger.info(loggerId + " payLog对象保存失败！"); 
@@ -228,7 +249,7 @@ public class PaymentController extends AbstractBaseController{
 		unifiedOrderParam.setIp(payIp);
 		unifiedOrderParam.setOrderNo(savePayLog.getLogId());
 		BaseResult payBaseResult = null;
-		if("app_weixin".equals(payCode)) {
+		if("app_weixin".equals(paymentDto.getPayCode())) {
 			payBaseResult = wxpayUtil.unifiedOrderForApp(unifiedOrderParam);
 		}
 		//处理支付失败的情况
@@ -241,7 +262,7 @@ public class PaymentController extends AbstractBaseController{
 				surplusPayParam.setBonusMoney(bonusAmount);
 				int payType1 = 0;
 				surplusPayParam.setPayType(payType1);
-				surplusPayParam.setThirdPartName(paymentResult.getData().getPayName());
+				surplusPayParam.setThirdPartName(paymentDto.getPayName());
 				surplusPayParam.setThirdPartPaid(thirdPartyPaid);
 				BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
 				if(rollbackUserAccountChangeByPay.getCode() != 0) {
@@ -336,6 +357,11 @@ public class PaymentController extends AbstractBaseController{
 	public BaseResult<Object> withdrawForApp(@RequestBody WithdrawParam param, HttpServletRequest request){
 		String loggerId = "withdrawForApp_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/withdraw, userId="+SessionUtil.getUserId()+", totalAmount="+param.getTotalAmount()+",userBankId="+param.getUserBankId());
+		BaseResult<UserDTO> userInfoExceptPass = userService.userInfoExceptPass(new StrParam());
+		if(userInfoExceptPass == null) {
+			return ResultGenerator.genFailResult("对不起，用户信息有误！", null);
+		}
+		String mobile = userInfoExceptPass.getData().getMobile();
 		double totalAmount = param.getTotalAmount();
 		if(totalAmount <= 0) {
 			logger.info(loggerId+"提现金额提供有误！");
@@ -368,42 +394,42 @@ public class PaymentController extends AbstractBaseController{
 			return ResultGenerator.genFailResult("提现失败！", null);
 		}
 		String orderSn = createUserWithdraw.getData().getWithdrawalSn();
-		//生成提现记录payLog
-		String payName = null;
+		//保存提现进度
+		UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
+		userWithdrawLog.setLogCode(1);
+		userWithdrawLog.setLogName("提现申请");
+		userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
+		userWithdrawLog.setWithdrawSn(orderSn);
+		userWithdrawLogService.save(userWithdrawLog);
+		//生成提现记录payLog,该操作在提现暂时不需要
+		/*String payName = "第三方接口";
 		String payIp = this.getIpAddr(request);
-		String payCode = null;
-		PayLog payLog = super.newPayLog(orderSn, BigDecimal.valueOf(totalAmount), 1, payCode, payName, payIp);
+		String payCode = "withdraw_api";
+		PayLog payLog = super.newPayLog(orderSn, BigDecimal.valueOf(totalAmount), 2, payCode, payName, payIp);
 		PayLog savePayLog = payLogService.savePayLog(payLog);
 		if(null == savePayLog) {
 			logger.info(loggerId + " payLog对象保存失败！"); 
 			return ResultGenerator.genFailResult("请求失败！", null);
-		}
-		//调用第三方提现
-		BaseResult payBaseResult = null;
-		
-		//处理支付失败的情况
-		if(null == payBaseResult || payBaseResult.getCode() != 0) {
-			try {
-				PayLog updatePayLog = new PayLog();
-				updatePayLog.setLogId(savePayLog.getLogId());
-				updatePayLog.setIsPaid(0);
-				updatePayLog.setPayMsg(payBaseResult.getMsg());
-				payLogService.updatePayMsg(updatePayLog);
-			} catch (Exception e) {
-				logger.error(loggerId + "paylogid="+savePayLog.getLogId()+" , paymsg="+payBaseResult.getMsg()+"保存失败记录时出错", e);
-			}
-		} else {
-			int currentTime = DateUtil.getCurrentTimeLong();
-			UpdateUserWithdrawParam updateUserWithdrawParam = new UpdateUserWithdrawParam();
-			updateUserWithdrawParam.setPaymentId(savePayLog.getLogId()+"");
-			updateUserWithdrawParam.setPayTime(currentTime);
-			updateUserWithdrawParam.setStatus("1");
-			updateUserWithdrawParam.setWithdrawalSn(orderSn);
-			BaseResult<String> updateUserWithdraw = userAccountService.updateUserWithdraw(updateUserWithdrawParam);
-			logger.info(loggerId + " paylogid="+savePayLog.getLogId()+" 提现成功回调用户提现记录更新结果 ， code="+updateUserWithdraw.getCode()+" , msg="+updateUserWithdraw.getMsg());
-		}
-		logger.info(loggerId + " result: code="+payBaseResult.getCode()+" , msg="+payBaseResult.getMsg());
-		return payBaseResult;
+		}*/
+		//消息
+		MessageAddParam messageAddParam = new MessageAddParam();
+		messageAddParam.setTitle("申请提现");
+		messageAddParam.setContent("提现"+totalAmount+"元");
+		messageAddParam.setContentDesc("提交申请");
+		messageAddParam.setMsgType(1);
+		messageAddParam.setReceiver(SessionUtil.getUserId());
+		messageAddParam.setReceiveMobile(mobile);
+		messageAddParam.setObjectType(2);
+		messageAddParam.setSendTime(DateUtil.getCurrentTimeLong());
+		Integer addTime = createUserWithdraw.getData().getAddTime();
+		LocalDateTime loclaTime = LocalDateTime.ofEpochSecond(addTime, 0, ZoneOffset.UTC);
+		StringBuilder msgDesc = new StringBuilder();
+		msgDesc.append("申请时间：").append(loclaTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:dd"))).append("\n")
+		.append("审核时间：").append("\n")
+		.append("提现成功时间：");
+		messageAddParam.setMsgDesc(msgDesc.toString());
+		userMessageService.add(messageAddParam);
+		return ResultGenerator.genSuccessResult("请求成功！");
 	}
 	
 	@ApiOperation(value="支付订单结果 查询 ", notes="")
@@ -574,11 +600,4 @@ public class PaymentController extends AbstractBaseController{
 	}
 	
 	
-	public static void main(String[] args) {
-		TimeZone default1 = TimeZone.getDefault();
-		System.out.println(default1.getRawOffset());
-		Clock systemUTC = Clock.systemUTC();
-		Clock systemDefaultZone = Clock.systemDefaultZone();
-		System.out.println(systemUTC);
-	}
 }

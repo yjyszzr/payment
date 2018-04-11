@@ -52,7 +52,7 @@ public class PayLog {
     private Integer lastTime;
 
     /**
-     * 支付类型：0-订单支付 1-充值
+     * 支付类型：0-订单支付 1-充值 2-提现
      */
     @Column(name = "pay_type")
     private Integer payType;
