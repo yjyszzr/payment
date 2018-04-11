@@ -165,8 +165,6 @@ public class PaymentController extends AbstractBaseController{
 		}
 		//order生成
 		SubmitOrderParam submitOrderParam = new SubmitOrderParam();
-		submitOrderParam.setPlayType(dto.getPlayType());
-		submitOrderParam.setBonusAmount(bonusAmount);
 		submitOrderParam.setMoneyPaid(moneyPaid);
 		submitOrderParam.setTicketAmount(ticketAmount);
 		submitOrderParam.setSurplus(surplus);
@@ -176,14 +174,16 @@ public class PaymentController extends AbstractBaseController{
 		submitOrderParam.setOrderFrom(orderFrom);
 		submitOrderParam.setLotteryClassifyId(dto.getLotteryClassifyId());
 		submitOrderParam.setLotteryPlayClassifyId(dto.getLotteryPlayClassifyId());
+		submitOrderParam.setPassType(dto.getBetType());
+		submitOrderParam.setPlayType(dto.getPlayType());
+		submitOrderParam.setBetNum(dto.getBetNum());
+		submitOrderParam.setCathectic(dto.getTimes());
 		if(ticketDetails.size() > 1) {
 			Optional<TicketDetail> max = ticketDetails.stream().max((detail1, detail2)->detail1.getMatchTime().compareTo(detail2.getMatchTime()));
 			submitOrderParam.setMatchTime(max.get().getMatchTime());
 		}else {
 			submitOrderParam.setMatchTime(ticketDetails.get(0).getMatchTime());
 		}
-		submitOrderParam.setPassType(dto.getBetType());
-		submitOrderParam.setCathectic(dto.getTimes());
 		submitOrderParam.setForecastMoney(BigDecimal.valueOf(dto.getMaxBonus()));
 		
 		submitOrderParam.setIssue(dto.getIssue());
