@@ -127,7 +127,7 @@ public class PaymentController extends AbstractBaseController{
 			logger.info(loggerId + "支付信息不是当前用户的待支付彩票！");
 			return ResultGenerator.genFailResult("支付信息异常，支付失败！");
 		}
-		Integer userBonusId = Integer.valueOf(dto.getBonusId());//form paytoken
+		Integer userBonusId = StringUtils.isBlank(dto.getBonusId())?0:Integer.valueOf(dto.getBonusId());//form paytoken
 		BigDecimal ticketAmount = BigDecimal.valueOf(dto.getMoney());//from paytoken
 		BigDecimal bonusAmount = BigDecimal.valueOf(dto.getBonusAmount());//from paytoken
 		BigDecimal moneyPaid = BigDecimal.valueOf(dto.getMoney() - dto.getBonusAmount());;//from paytoken
@@ -175,7 +175,7 @@ public class PaymentController extends AbstractBaseController{
 		submitOrderParam.setLotteryClassifyId(dto.getLotteryClassifyId());
 		submitOrderParam.setLotteryPlayClassifyId(dto.getLotteryPlayClassifyId());
 		submitOrderParam.setPassType(dto.getBetType());
-		submitOrderParam.setPlayType(dto.getPlayType());
+		submitOrderParam.setPlayType("0"+dto.getPlayType());
 		submitOrderParam.setBetNum(dto.getBetNum());
 		submitOrderParam.setCathectic(dto.getTimes());
 		if(ticketDetails.size() > 1) {
