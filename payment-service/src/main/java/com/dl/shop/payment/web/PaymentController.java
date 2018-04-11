@@ -165,6 +165,7 @@ public class PaymentController extends AbstractBaseController{
 		}
 		//order生成
 		SubmitOrderParam submitOrderParam = new SubmitOrderParam();
+		submitOrderParam.setPlayType(dto.getPlayType());
 		submitOrderParam.setBonusAmount(bonusAmount);
 		submitOrderParam.setMoneyPaid(moneyPaid);
 		submitOrderParam.setTicketAmount(ticketAmount);
