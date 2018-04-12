@@ -29,8 +29,10 @@ import com.dl.base.result.ResultGenerator;
 import com.dl.base.util.DateUtil;
 import com.dl.base.util.JSONHelper;
 import com.dl.base.util.SessionUtil;
+import com.dl.lottery.api.ILotteryPrintService;
 import com.dl.lottery.dto.DIZQUserBetCellInfoDTO;
 import com.dl.lottery.dto.DIZQUserBetInfoDTO;
+import com.dl.lottery.param.SaveLotteryPrintInfoParam;
 import com.dl.member.api.IUserAccountService;
 import com.dl.member.api.IUserBankService;
 import com.dl.member.api.IUserMessageService;
@@ -94,6 +96,8 @@ public class PaymentController extends AbstractBaseController{
 	private IUserMessageService userMessageService;
 	@Resource
 	private IUserService userService;
+	@Resource
+	private ILotteryPrintService lotteryPrintService;
 	
 	@ApiOperation(value="app支付调用", notes="payToken:商品中心购买信息保存后的返回值 ，payCode：支付编码，app端微信支付为app_weixin")
 	@PostMapping("/app")
@@ -149,9 +153,19 @@ public class PaymentController extends AbstractBaseController{
 			ticketDetail.setIssue(betCell.getPlayCode());
 			return ticketDetail;
 		}).collect(Collectors.toList());
+		//余额支付
+		boolean hasSurplus = false;
+		if(surplus != null && surplus.doubleValue() > 0) {
+			hasSurplus = true;
+		}
+		//第三方支付
+		boolean hasThird = false;
+		if(thirdPartyPaid != null && thirdPartyPaid.doubleValue() > 0) {
+			hasThird = true;
+		}
 		PaymentDTO paymentDto = null;
 		String payName = null;
-		if(thirdPartyPaid != null && thirdPartyPaid.doubleValue() > 0) {
+		if(hasThird) {
 			//支付方式校验
 			String payCode = param.getPayCode();
 			if(StringUtils.isBlank(payCode)) {
@@ -198,13 +212,17 @@ public class PaymentController extends AbstractBaseController{
 		}
 		String orderId = createOrder.getData().getOrderId().toString();
 		String orderSn = createOrder.getData().getOrderSn();
-		if(surplus != null && surplus.doubleValue() > 0) {
+		
+		if(hasSurplus) {
 			//用户余额扣除
 			SurplusPayParam surplusPayParam = new SurplusPayParam();
 			surplusPayParam.setOrderSn(orderSn);
 			surplusPayParam.setSurplus(surplus);
 			surplusPayParam.setBonusMoney(bonusAmount);
-			int payType1 = 0;
+			int payType1 = 2;
+			if(hasThird) {
+				payType1 = 3;
+			}
 			surplusPayParam.setPayType(payType1);
 			surplusPayParam.setMoneyPaid(moneyPaid);
 			surplusPayParam.setThirdPartName(paymentDto!=null?paymentDto.getPayName():"");
@@ -224,7 +242,6 @@ public class PaymentController extends AbstractBaseController{
 			BaseResult<String> updateOrderInfo = orderService.updateOrderInfo(updateOrderInfoParam);
 			if(updateOrderInfo.getCode() != 0) {
 				logger.info(loggerId + "订单回写用户余额扣减详情失败！");
-				surplusPayParam.setPayType(1);
 				BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
 				logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在回滚用户余额结束！ 订单回调返回结果：status=" + rollbackUserAccountChangeByPay.getCode()+" , message="+rollbackUserAccountChangeByPay.getMsg());
 				if(rollbackUserAccountChangeByPay.getCode() != 0) {
@@ -232,7 +249,7 @@ public class PaymentController extends AbstractBaseController{
 				}
 				return ResultGenerator.genFailResult("支付失败！");
 			}
-			if(thirdPartyPaid == null || thirdPartyPaid.doubleValue() <= 0) {
+			if(!hasThird) {
 				//回调order,更新支付状态,余额支付成功
 				UpdateOrderInfoParam param1 = new UpdateOrderInfoParam();
 				param1.setPayStatus(1);
@@ -243,11 +260,28 @@ public class PaymentController extends AbstractBaseController{
 				BaseResult<String> baseResult = orderService.updateOrderInfo(param1);
 				logger.info(loggerId + " 订单成功状态更新回调返回结果：status=" + baseResult.getCode()+" , message="+baseResult.getMsg());
 				if(baseResult.getCode() != 0) {
-					surplusPayParam.setPayType(1);
 					BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
 					logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在订单成功状态更新回滚用户余额结束！ 订单回调返回结果：status=" + rollbackUserAccountChangeByPay.getCode()+" , message="+rollbackUserAccountChangeByPay.getMsg());
 					if(rollbackUserAccountChangeByPay.getCode() != 0) {
 						logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在订单成功状态更新回滚用户余额时出错！");
+					}
+					return ResultGenerator.genFailResult("支付失败！");
+				}
+				SaveLotteryPrintInfoParam saveLotteryPrintParam = new SaveLotteryPrintInfoParam();
+				saveLotteryPrintParam.setOrderSn(orderSn);
+				BaseResult<String> saveLotteryPrintInfo = lotteryPrintService.saveLotteryPrintInfo(saveLotteryPrintParam);
+				if(saveLotteryPrintInfo.getCode() != 0) {
+					UpdateOrderInfoParam updateOrderInfoParam1 = new UpdateOrderInfoParam();
+					updateOrderInfoParam1.setOrderStatus(2);
+					updateOrderInfoParam1.setOrderSn(orderSn);
+					BaseResult<String> baseResult1 = orderService.updateOrderInfo(updateOrderInfoParam1);
+					if(baseResult1.getCode() != 0) {
+						logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在预出票失败后，更改订单状态为出票失败时出错！订单回调返回结果：status=" + baseResult1.getCode()+" , message="+baseResult1.getMsg());
+					}
+					BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
+					logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在预出票失败更新回滚用户余额结束！ 订单回调返回结果：status=" + rollbackUserAccountChangeByPay.getCode()+" , message="+rollbackUserAccountChangeByPay.getMsg());
+					if(rollbackUserAccountChangeByPay.getCode() != 0) {
+						logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在预出票失败更新回滚用户余额时出错！");
 					}
 					return ResultGenerator.genFailResult("支付失败！");
 				}
