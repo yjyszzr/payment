@@ -53,6 +53,7 @@ import com.dl.order.param.OrderSnParam;
 import com.dl.order.param.SubmitOrderParam;
 import com.dl.order.param.SubmitOrderParam.TicketDetail;
 import com.dl.order.param.UpdateOrderInfoParam;
+import com.dl.shop.payment.dto.PayReturnDTO;
 import com.dl.shop.payment.dto.PaymentDTO;
 import com.dl.shop.payment.model.OrderQueryResponse;
 import com.dl.shop.payment.model.PayLog;
@@ -97,7 +98,7 @@ public class PaymentController extends AbstractBaseController{
 	@ApiOperation(value="app支付调用", notes="payToken:商品中心购买信息保存后的返回值 ，payCode：支付编码，app端微信支付为app_weixin")
 	@PostMapping("/app")
 	@ResponseBody
-	public BaseResult<Object> unifiedOrderForApp(@RequestBody GoPayParam param, HttpServletRequest request) {
+	public BaseResult<PayReturnDTO> unifiedOrderForApp(@RequestBody GoPayParam param, HttpServletRequest request) {
 		String loggerId = "payment_app_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/app, userId="+SessionUtil.getUserId()+" ,payCode="+param.getPayCode());
 		String payToken = param.getPayToken();
@@ -149,6 +150,7 @@ public class PaymentController extends AbstractBaseController{
 			return ticketDetail;
 		}).collect(Collectors.toList());
 		PaymentDTO paymentDto = null;
+		String payName = null;
 		if(thirdPartyPaid != null && thirdPartyPaid.doubleValue() > 0) {
 			//支付方式校验
 			String payCode = param.getPayCode();
@@ -162,6 +164,7 @@ public class PaymentController extends AbstractBaseController{
 				return ResultGenerator.genFailResult("请选择有效的支付方式！", null);
 			}
 			paymentDto = paymentResult.getData();
+			payName = paymentDto.getPayName();
 		}
 		//order生成
 		SubmitOrderParam submitOrderParam = new SubmitOrderParam();
@@ -193,6 +196,7 @@ public class PaymentController extends AbstractBaseController{
 			logger.info(loggerId + "订单创建失败！");
 			return ResultGenerator.genFailResult("支付失败！");
 		}
+		String orderId = createOrder.getData().getOrderId().toString();
 		String orderSn = createOrder.getData().getOrderSn();
 		if(surplus != null && surplus.doubleValue() > 0) {
 			//用户余额扣除
@@ -210,6 +214,7 @@ public class PaymentController extends AbstractBaseController{
 				logger.info(loggerId + "用户余额扣减失败！");
 				return ResultGenerator.genFailResult("支付失败！");
 			}
+			//更新余额支付信息到订单
 			BigDecimal userSurplus = changeUserAccountByPay.getData().getUserSurplus();
 			BigDecimal userSurplusLimit = changeUserAccountByPay.getData().getUserSurplusLimit();
 			UpdateOrderInfoParam updateOrderInfoParam = new UpdateOrderInfoParam();
@@ -219,24 +224,40 @@ public class PaymentController extends AbstractBaseController{
 			BaseResult<String> updateOrderInfo = orderService.updateOrderInfo(updateOrderInfoParam);
 			if(updateOrderInfo.getCode() != 0) {
 				logger.info(loggerId + "订单回写用户余额扣减详情失败！");
+				surplusPayParam.setPayType(1);
+				BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
+				logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在回滚用户余额结束！ 订单回调返回结果：status=" + rollbackUserAccountChangeByPay.getCode()+" , message="+rollbackUserAccountChangeByPay.getMsg());
+				if(rollbackUserAccountChangeByPay.getCode() != 0) {
+					logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在回滚用户余额时出错！");
+				}
 				return ResultGenerator.genFailResult("支付失败！");
 			}
-		}
-		if(thirdPartyPaid == null || thirdPartyPaid.doubleValue() <= 0) {
-			//回调order,更新支付状态
-			UpdateOrderInfoParam param1 = new UpdateOrderInfoParam();
-			param1.setPayStatus(1);
-			int currentTime = DateUtil.getCurrentTimeLong();
-			param1.setPayTime(currentTime);
-			param1.setOrderStatus(1);
-			param1.setOrderSn(orderSn);
-			BaseResult<String> baseResult = orderService.updateOrderInfo(param1);
-			logger.info(loggerId + " 订单回调返回结果：status=" + baseResult.getCode()+" , message="+baseResult.getMsg());
-			logger.info(loggerId + "订单没有需要第三方支付金额，完全余额支付成功！");
-			return ResultGenerator.genSuccessResult("支付成功！");
+			if(thirdPartyPaid == null || thirdPartyPaid.doubleValue() <= 0) {
+				//回调order,更新支付状态,余额支付成功
+				UpdateOrderInfoParam param1 = new UpdateOrderInfoParam();
+				param1.setPayStatus(1);
+				int currentTime = DateUtil.getCurrentTimeLong();
+				param1.setPayTime(currentTime);
+				param1.setOrderStatus(1);
+				param1.setOrderSn(orderSn);
+				BaseResult<String> baseResult = orderService.updateOrderInfo(param1);
+				logger.info(loggerId + " 订单成功状态更新回调返回结果：status=" + baseResult.getCode()+" , message="+baseResult.getMsg());
+				if(baseResult.getCode() != 0) {
+					surplusPayParam.setPayType(1);
+					BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
+					logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在订单成功状态更新回滚用户余额结束！ 订单回调返回结果：status=" + rollbackUserAccountChangeByPay.getCode()+" , message="+rollbackUserAccountChangeByPay.getMsg());
+					if(rollbackUserAccountChangeByPay.getCode() != 0) {
+						logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在订单成功状态更新回滚用户余额时出错！");
+					}
+					return ResultGenerator.genFailResult("支付失败！");
+				}
+				logger.info(loggerId + "订单没有需要第三方支付金额，完全余额支付成功！");
+				PayReturnDTO payReturnDTO = new PayReturnDTO();
+				payReturnDTO.setOrderId(orderId);
+				return ResultGenerator.genSuccessResult("支付成功！", payReturnDTO);
+			}
 		}
 		
-		String payName = paymentDto.getPayName();
 		String payIp = this.getIpAddr(request);
 		PayLog payLog = super.newPayLog(orderSn, thirdPartyPaid, 0, paymentDto.getPayCode(), payName, payIp);
 		PayLog savePayLog = payLogService.savePayLog(payLog);
@@ -265,7 +286,7 @@ public class PaymentController extends AbstractBaseController{
 				surplusPayParam.setBonusMoney(bonusAmount);
 				int payType1 = 0;
 				surplusPayParam.setPayType(payType1);
-				surplusPayParam.setThirdPartName(paymentDto.getPayName());
+				surplusPayParam.setThirdPartName(payName);
 				surplusPayParam.setThirdPartPaid(thirdPartyPaid);
 				BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
 				if(rollbackUserAccountChangeByPay.getCode() != 0) {
