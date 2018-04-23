@@ -63,6 +63,7 @@ import com.dl.shop.payment.model.UnifiedOrderParam;
 import com.dl.shop.payment.model.UserWithdrawLog;
 import com.dl.shop.payment.param.GoPayParam;
 import com.dl.shop.payment.param.RechargeParam;
+import com.dl.shop.payment.param.RollbackOrderAmountParam;
 import com.dl.shop.payment.param.WithdrawParam;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
@@ -99,6 +100,52 @@ public class PaymentController extends AbstractBaseController{
 	@Resource
 	private ILotteryPrintService lotteryPrintService;
 	
+	@ApiOperation(value="用", notes="")
+	@PostMapping("/rollbackOrderAmount")
+	@ResponseBody
+	public BaseResult rollbackOrderAmount(@RequestBody RollbackOrderAmountParam param) {
+		String orderSn = param.getOrderSn();
+		OrderSnParam snParam = new OrderSnParam();
+		snParam.setOrderSn(orderSn);
+		BaseResult<OrderDTO> orderRst = orderService.getOrderInfoByOrderSn(snParam);
+		if(orderRst.getCode() != 0) {
+			return ResultGenerator.genFailResult();
+		}
+		OrderDTO order = orderRst.getData();
+		BigDecimal surplus = order.getSurplus();
+		BigDecimal bonusAmount = order.getBonus();
+		BigDecimal moneyPaid = order.getMoneyPaid();
+		String payName = order.getPayName();
+		BigDecimal thirdPartyPaid = order.getThirdPartyPaid();
+		//第三方支付
+		int payType = 1;//默认微信
+		if(surplus != null && surplus.doubleValue() > 0) {
+			payType = 2;
+		}
+		boolean hasThird = false;
+		if(thirdPartyPaid != null && thirdPartyPaid.doubleValue() > 0) {
+			hasThird = true;
+		}
+		if(hasThird && payType == 2) {
+			payType = 3;
+		}
+		if(payType ==2 || payType == 3) {
+			SurplusPayParam surplusPayParam = new SurplusPayParam();
+			surplusPayParam.setOrderSn(orderSn);
+			surplusPayParam.setSurplus(surplus);
+			surplusPayParam.setBonusMoney(bonusAmount);
+			surplusPayParam.setPayType(payType);
+			surplusPayParam.setMoneyPaid(moneyPaid);
+			surplusPayParam.setThirdPartName(payName);
+			surplusPayParam.setThirdPartPaid(thirdPartyPaid);
+			BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
+			logger.info(" orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在预出票失败更新回滚用户余额结束！ 订单回调返回结果：status=" + rollbackUserAccountChangeByPay.getCode()+" , message="+rollbackUserAccountChangeByPay.getMsg());
+			if(rollbackUserAccountChangeByPay.getCode() != 0) {
+				logger.info(" orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在预出票失败更新回滚用户余额时出错！");
+			}
+		}
+		return ResultGenerator.genSuccessResult();
+	}
 	@ApiOperation(value="app支付调用", notes="payToken:商品中心购买信息保存后的返回值 ，payCode：支付编码，app端微信支付为app_weixin")
 	@PostMapping("/app")
 	@ResponseBody
