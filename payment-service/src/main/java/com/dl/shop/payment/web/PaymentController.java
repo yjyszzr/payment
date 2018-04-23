@@ -182,6 +182,7 @@ public class PaymentController extends AbstractBaseController{
 		}
 		//order生成
 		SubmitOrderParam submitOrderParam = new SubmitOrderParam();
+		submitOrderParam.setTicketNum(dto.getTicketNum());
 		submitOrderParam.setMoneyPaid(moneyPaid);
 		submitOrderParam.setTicketAmount(ticketAmount);
 		submitOrderParam.setSurplus(surplus);
