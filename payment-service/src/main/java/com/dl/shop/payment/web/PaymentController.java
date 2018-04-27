@@ -104,11 +104,13 @@ public class PaymentController extends AbstractBaseController{
 	@PostMapping("/rollbackOrderAmount")
 	@ResponseBody
 	public BaseResult rollbackOrderAmount(@RequestBody RollbackOrderAmountParam param) {
+		logger.info("in rollbackOrderAmount ordersn=" + param.getOrderSn());
 		String orderSn = param.getOrderSn();
 		OrderSnParam snParam = new OrderSnParam();
 		snParam.setOrderSn(orderSn);
 		BaseResult<OrderDTO> orderRst = orderService.getOrderInfoByOrderSn(snParam);
 		if(orderRst.getCode() != 0) {
+			logger.info("orderService.getOrderInfoByOrderSn rst code="+orderRst.getCode()+" msg="+orderRst.getMsg());
 			return ResultGenerator.genFailResult();
 		}
 		OrderDTO order = orderRst.getData();
@@ -139,9 +141,9 @@ public class PaymentController extends AbstractBaseController{
 			surplusPayParam.setThirdPartName(payName);
 			surplusPayParam.setThirdPartPaid(thirdPartyPaid);
 			BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
-			logger.info(" orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在预出票失败更新回滚用户余额结束！ 订单回调返回结果：status=" + rollbackUserAccountChangeByPay.getCode()+" , message="+rollbackUserAccountChangeByPay.getMsg());
+			logger.info(" orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" rollbackOrderAmount回滚用户余额结束！ 订单回调返回结果：status=" + rollbackUserAccountChangeByPay.getCode()+" , message="+rollbackUserAccountChangeByPay.getMsg());
 			if(rollbackUserAccountChangeByPay.getCode() != 0) {
-				logger.info(" orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在预出票失败更新回滚用户余额时出错！");
+				logger.info(" orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" rollbackOrderAmount回滚用户余额时出错！");
 			}
 		}
 		return ResultGenerator.genSuccessResult();
@@ -249,7 +251,7 @@ public class PaymentController extends AbstractBaseController{
 		}else {
 			submitOrderParam.setMatchTime(ticketDetails.get(0).getMatchTime());
 		}
-		submitOrderParam.setForecastMoney(BigDecimal.valueOf(dto.getMaxBonus()));
+		submitOrderParam.setForecastMoney(dto.getForecastMoney());
 		
 		submitOrderParam.setIssue(dto.getIssue());
 		submitOrderParam.setTicketDetails(ticketDetails);

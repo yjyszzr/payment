@@ -20,20 +20,19 @@
         <java.version>1.8</java.version>
         <spring-cloud.version>Dalston.SR4</spring-cloud.version>
     </properties>
-
-    <!-- <distributionManagement>
+	<distributionManagement>
         <repository>
-            <id>nexus</id>
+            <id>deployRelease</id>
             <name>pugutang Internal Repository</name>
             <url>http://39.107.121.76:8081/repository/maven-releases/</url>
         </repository>
         <snapshotRepository>
-            <id>nexus</id>
+            <id>deploySnapshot</id>
             <name>pugutang Internal Repository</name>
             <url>http://39.107.121.76:8081/repository/maven-snapshots/</url>
             <uniqueVersion>false</uniqueVersion>
         </snapshotRepository>
-    </distributionManagement> -->
+    </distributionManagement>
     <modules>
         <module>payment-api</module>
         <module>payment-service</module>
