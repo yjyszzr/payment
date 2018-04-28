@@ -32,7 +32,7 @@ import io.swagger.annotations.ApiOperation;
 @Controller
 @RequestMapping("/payment/wxpay")
 public class WxpayNotifyController {
-
+	//url /payment/wxpay/notify
 	private final static Logger logger = LoggerFactory.getLogger(WxpayNotifyController.class);
 	@Resource
 	private WxpayConfig wxpayConfig;
