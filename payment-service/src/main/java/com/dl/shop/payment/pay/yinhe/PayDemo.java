@@ -1,6 +1,6 @@
 package com.dl.shop.payment.pay.yinhe;
 
-import java.util.Iterator;
+/*import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.dl.shop.payment.pay.common.HttpUtil;
+import com.dl.shop.payment.pay.common.HttpUtil;*/
 
 /****
  * 支付代码
