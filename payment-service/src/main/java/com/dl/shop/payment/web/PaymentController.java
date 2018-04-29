@@ -57,6 +57,8 @@ import com.dl.order.param.SubmitOrderParam.TicketDetail;
 import com.dl.order.param.UpdateOrderInfoParam;
 import com.dl.shop.payment.dto.PayReturnDTO;
 import com.dl.shop.payment.dto.PaymentDTO;
+import com.dl.shop.payment.dto.RongbaoPayResultDTO;
+import com.dl.shop.payment.dto.YinHeResultDTO;
 import com.dl.shop.payment.model.OrderQueryResponse;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.UnifiedOrderParam;
@@ -65,10 +67,12 @@ import com.dl.shop.payment.param.GoPayParam;
 import com.dl.shop.payment.param.RechargeParam;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
 import com.dl.shop.payment.param.WithdrawParam;
+import com.dl.shop.payment.pay.rongbao.entity.ReqRongEntity;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
 import com.dl.shop.payment.service.UserWithdrawLogService;
 import com.dl.shop.payment.utils.WxpayUtil;
+import com.google.gson.Gson;
 
 import io.swagger.annotations.ApiOperation;
 
@@ -358,7 +362,26 @@ public class PaymentController extends AbstractBaseController{
 		unifiedOrderParam.setOrderNo(savePayLog.getLogId());
 		BaseResult payBaseResult = null;
 		if("app_weixin".equals(paymentDto.getPayCode())) {
-			payBaseResult = wxpayUtil.unifiedOrderForApp(unifiedOrderParam);
+//			payBaseResult = wxpayUtil.unifiedOrderForApp(unifiedOrderParam);
+			//http://wxpay.wxutil.com/mch/pay/h5.v2.php
+			YinHeResultDTO yinHeRDTO = new YinHeResultDTO();
+			yinHeRDTO.setPayUrl("http://wxpay.wxutil.com/mch/pay/h5.v2.php");
+			payBaseResult = ResultGenerator.genSuccessResult("succ",yinHeRDTO);
+		}else if("app_rongbao".equals(paymentDto.getPayCode())) {
+			//生成支付链接信息
+			ReqRongEntity reqEntity = new ReqRongEntity();
+			reqEntity.setOrderId(savePayLog.getLogId().toString());
+			reqEntity.setUserId(savePayLog.getUserId().toString());
+			reqEntity.setTotal(savePayLog.getOrderAmount().doubleValue());
+			reqEntity.setPName("彩小秘");
+			reqEntity.setPDesc("彩小秘足彩支付");
+			reqEntity.setTransTime(savePayLog.getPayTime()+"");
+			Gson gson = new Gson();
+			String data = gson.toJson(reqEntity);
+			String url = "http://123.57.34.133:9090/reapal-h5-api/h5/indexH5.jsp?data="+data;
+			RongbaoPayResultDTO rongBaoREntity = new RongbaoPayResultDTO();
+			rongBaoREntity.setPayUrl(url);
+			payBaseResult = ResultGenerator.genSuccessResult("succ",rongBaoREntity);
 		}
 		//处理支付失败的情况
 		if(null == payBaseResult || payBaseResult.getCode() != 0) {
