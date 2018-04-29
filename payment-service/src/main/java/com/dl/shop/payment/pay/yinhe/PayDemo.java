@@ -15,7 +15,7 @@ import com.dl.shop.payment.pay.common.HttpUtil;
  */
 public class PayDemo {
 
-	public PayDemo() {
+	/*public PayDemo() {
 		ReqPayEntity reqEntity = ReqPayEntity.buildReqEntity();
 		ReqSignEntity signEntity = reqEntity.buildSignEntity();
 		Gson gson = new Gson();
@@ -65,6 +65,6 @@ public class PayDemo {
 			System.out.print(key + "=" +val + "\t");
 		}
 		System.out.println();
-	}
+	}*/
 	
 }
