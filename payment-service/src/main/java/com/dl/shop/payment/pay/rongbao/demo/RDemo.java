@@ -5,8 +5,8 @@ import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.alibaba.fastjson.JSON;
 import com.dl.shop.payment.pay.rongbao.entity.ReqRongEntity;
-import com.google.gson.Gson;
 
 public class RDemo {
 
@@ -24,8 +24,7 @@ public class RDemo {
 		reqEntity.setPDesc("彩小秘足彩支付");
 		reqEntity.setTransTime(strTransTime);
 		
-		Gson gson = new Gson();
-		String data = gson.toJson(reqEntity);
+		String data = JSON.toJSONString(reqEntity);
 		try {
 			data = URLEncoder.encode(data,"UTF-8");
 			String url = "http://localhost:8080/reapal-h5-api/h5/indexH5.jsp?data="+data;
