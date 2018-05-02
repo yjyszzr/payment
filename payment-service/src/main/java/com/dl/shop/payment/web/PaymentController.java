@@ -11,10 +11,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.base.util.DateUtil;
@@ -74,8 +73,6 @@ import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
 import com.dl.shop.payment.service.UserWithdrawLogService;
 import com.dl.shop.payment.utils.WxpayUtil;
-import com.google.gson.Gson;
-
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.swagger.annotations.ApiOperation;
 
@@ -389,8 +386,7 @@ public class PaymentController extends AbstractBaseController{
 			reqEntity.setPName("彩小秘");
 			reqEntity.setPDesc("彩小秘足彩支付");
 			reqEntity.setTransTime(savePayLog.getPayTime()+"");
-			Gson gson = new Gson();
-			String data = gson.toJson(reqEntity);
+			String data = JSON.toJSONString(reqEntity);
 			try {
 				data = URLEncoder.encode(data,"UTF-8");
 				String url = "http://39.106.18.39:8082/reapal-h5-api/h5/indexH5.jsp?data="+data;
