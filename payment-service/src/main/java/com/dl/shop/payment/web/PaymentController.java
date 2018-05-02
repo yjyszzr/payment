@@ -393,7 +393,7 @@ public class PaymentController extends AbstractBaseController{
 			String data = gson.toJson(reqEntity);
 			try {
 				data = URLEncoder.encode(data,"UTF-8");
-				String url = "http://123.57.34.133:9090/reapal-h5-api/h5/indexH5.jsp?data="+data;
+				String url = "http://39.106.18.39:8082/reapal-h5-api/h5/indexH5.jsp?data="+data;
 				RongbaoPayResultDTO rongBaoREntity = new RongbaoPayResultDTO();
 				rongBaoREntity.setPayUrl(url);
 				payBaseResult = ResultGenerator.genSuccessResult("succ",rongBaoREntity);
