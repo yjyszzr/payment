@@ -32,10 +32,8 @@ public class PayMentService extends AbstractService<PayMent> {
 		}
 		List<PaymentDTO> list = payments.stream().filter(payment->payment.getIsEnable() == 1).map(payment->{
 			PaymentDTO paymentDTO = new PaymentDTO();
-			paymentDTO.setIsEnable(payment.getIsEnable());
 			paymentDTO.setPayCode(payment.getPayCode());
 			paymentDTO.setPayDesc(payment.getPayDesc());
-			paymentDTO.setPayFee(payment.getPayFee());
 			paymentDTO.setPayId(payment.getPayId());
 			paymentDTO.setPayName(payment.getPayName());
 			paymentDTO.setPaySort(payment.getPaySort());

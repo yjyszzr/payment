@@ -114,7 +114,7 @@ public class PaymentController extends AbstractBaseController{
 		BaseResult<List<PaymentDTO>> findAllDto = paymentService.findAllDto();
 		return findAllDto;
 	}
-	@ApiOperation(value="用", notes="")
+	@ApiOperation(value="用户支付回退接口", notes="")
 	@PostMapping("/rollbackOrderAmount")
 	@ResponseBody
 	public BaseResult rollbackOrderAmount(@RequestBody RollbackOrderAmountParam param) {
