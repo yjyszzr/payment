@@ -6,7 +6,9 @@ import java.net.UnknownHostException;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.dl.base.enums.SNBusinessCodeEnum;
 import com.dl.base.util.DateUtil;
+import com.dl.base.util.SNGenerator;
 import com.dl.base.util.SessionUtil;
 import com.dl.shop.payment.model.PayLog;
 
@@ -37,6 +39,8 @@ public abstract class AbstractBaseController {
 		payLog.setAddTime(current);
 		payLog.setIsPaid(0);
 		payLog.setPayIp(payIp);
+		String sn = SNGenerator.nextSN(SNBusinessCodeEnum.PAY_SN.getCode());
+		payLog.setPayOrderSn(sn);
 		return payLog;
 	}
 	/**

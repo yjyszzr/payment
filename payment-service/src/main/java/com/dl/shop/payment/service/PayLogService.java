@@ -3,7 +3,6 @@ import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.dao.PayLogMapper;
 import com.dl.base.service.AbstractService;
 import com.dl.base.util.DateUtil;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,12 +14,12 @@ public class PayLogService extends AbstractService<PayLog> {
 	@Resource
 	private PayLogMapper payLogMapper;
 
-
 	public PayLog savePayLog(PayLog payLog) {
-		PayLog existPayLog = payLogMapper.existPayLog(payLog);
-		if(null != existPayLog && existPayLog.getLogId() != null) {
-			return existPayLog;
-		}
+//		PayLog existPayLog = payLogMapper.existPayLog(payLog);
+//		if(null != existPayLog && existPayLog.getLogId() != null) {
+//			return existPayLog;
+//		}
+		//生成的方法
 		int rst = payLogMapper.insert(payLog);
 		if(rst == 1) {
 			return payLog;

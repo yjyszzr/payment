@@ -18,7 +18,7 @@ public class PayLog {
     @Column(name = "order_sn")
     private String orderSn;
 
-    @Column(name = "parent_sn")
+	@Column(name = "parent_sn")
     private String parentSn;
 
     /**
@@ -78,7 +78,22 @@ public class PayLog {
     @Column(name = "pay_msg")
     private String payMsg;
 
-    /**
+    @Column(name="pay_order_sn")
+    private String payOrderSn;
+    
+    public String getPayOrderSn() {
+		return payOrderSn;
+	}
+
+    public String getOrderSn() {
+		return orderSn;
+	}
+    
+	public void setPayOrderSn(String payOrderSn) {
+		this.payOrderSn = payOrderSn;
+	}
+
+	/**
      * @return log_id
      */
     public Integer getLogId() {
@@ -113,7 +128,7 @@ public class PayLog {
     /**
      * @return order_sn
      */
-    public String getOrderSn() {
+    public String payOrder() {
         return orderSn;
     }
 

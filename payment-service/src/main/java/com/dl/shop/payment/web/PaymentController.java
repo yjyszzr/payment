@@ -1,6 +1,8 @@
 package com.dl.shop.payment.web;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -74,6 +76,7 @@ import com.dl.shop.payment.service.UserWithdrawLogService;
 import com.dl.shop.payment.utils.WxpayUtil;
 import com.google.gson.Gson;
 
+import io.netty.channel.nio.NioEventLoopGroup;
 import io.swagger.annotations.ApiOperation;
 
 @Controller
@@ -267,6 +270,7 @@ public class PaymentController extends AbstractBaseController{
 		String orderId = createOrder.getData().getOrderId().toString();
 		String orderSn = createOrder.getData().getOrderSn();
 		
+		
 		if(hasSurplus) {
 			//用户余额扣除
 			SurplusPayParam surplusPayParam = new SurplusPayParam();
@@ -346,8 +350,16 @@ public class PaymentController extends AbstractBaseController{
 			}
 		}
 		
+//		String orderSn = "2018050211202161310026";
+//		BigDecimal thirdPartyPaid = BigDecimal.valueOf(10);
+//		BaseResult<PaymentDTO> paymentResult = paymentService.queryByCode(param.getPayCode());
+//		if(paymentResult.getCode() != 0) {
+//			logger.info(loggerId + "订单第三方支付提供paycode有误！payCode="+payCode);
+//			return ResultGenerator.genFailResult("请选择有效的支付方式！", null);
+//		}
+//		PaymentDTO paymentDto = paymentResult.getData();
 		String payIp = this.getIpAddr(request);
-		PayLog payLog = super.newPayLog(orderSn, thirdPartyPaid, 0, paymentDto.getPayCode(), payName, payIp);
+		PayLog payLog = super.newPayLog(orderSn, thirdPartyPaid, 0, paymentDto.getPayCode(), paymentDto.getPayName(), payIp);
 		PayLog savePayLog = payLogService.savePayLog(payLog);
 		if(null == savePayLog) {
 			logger.info(loggerId + " payLog对象保存失败！"); 
@@ -369,8 +381,9 @@ public class PaymentController extends AbstractBaseController{
 			payBaseResult = ResultGenerator.genSuccessResult("succ",yinHeRDTO);
 		}else if("app_rongbao".equals(paymentDto.getPayCode())) {
 			//生成支付链接信息
+			String payOrder = savePayLog.getPayOrderSn();
 			ReqRongEntity reqEntity = new ReqRongEntity();
-			reqEntity.setOrderId(savePayLog.getLogId().toString());
+			reqEntity.setOrderId(payOrder);
 			reqEntity.setUserId(savePayLog.getUserId().toString());
 			reqEntity.setTotal(savePayLog.getOrderAmount().doubleValue());
 			reqEntity.setPName("彩小秘");
@@ -378,13 +391,18 @@ public class PaymentController extends AbstractBaseController{
 			reqEntity.setTransTime(savePayLog.getPayTime()+"");
 			Gson gson = new Gson();
 			String data = gson.toJson(reqEntity);
-			String url = "http://123.57.34.133:9090/reapal-h5-api/h5/indexH5.jsp?data="+data;
-			RongbaoPayResultDTO rongBaoREntity = new RongbaoPayResultDTO();
-			rongBaoREntity.setPayUrl(url);
-			payBaseResult = ResultGenerator.genSuccessResult("succ",rongBaoREntity);
+			try {
+				data = URLEncoder.encode(data,"UTF-8");
+				String url = "http://192.168.31.173:8080/reapal-h5-api/h5/indexH5.jsp?data="+data;
+				RongbaoPayResultDTO rongBaoREntity = new RongbaoPayResultDTO();
+				rongBaoREntity.setPayUrl(url);
+				payBaseResult = ResultGenerator.genSuccessResult("succ",rongBaoREntity);
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
 		}
 		//处理支付失败的情况
-		if(null == payBaseResult || payBaseResult.getCode() != 0) {
+		/*if(null == payBaseResult || payBaseResult.getCode() != 0) {
 			if(surplus != null && surplus.doubleValue() > 0){
 				//余额回滚
 				SurplusPayParam surplusPayParam = new SurplusPayParam();
@@ -409,7 +427,7 @@ public class PaymentController extends AbstractBaseController{
 			} catch (Exception e) {
 				logger.error(loggerId + "paylogid="+savePayLog.getLogId()+" , paymsg="+payBaseResult.getMsg()+"保存失败记录时出错", e);
 			}
-		}
+		}*/
 		logger.info(loggerId + " result: code="+payBaseResult.getCode()+" , msg="+payBaseResult.getMsg());
 		return payBaseResult;
 	}
