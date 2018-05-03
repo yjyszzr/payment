@@ -61,6 +61,7 @@ import com.dl.order.param.UpdateOrderInfoParam;
 import com.dl.shop.payment.dto.PayReturnDTO;
 import com.dl.shop.payment.dto.PaymentDTO;
 import com.dl.shop.payment.dto.RongbaoPayResultDTO;
+import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.dto.YinHeResultDTO;
 import com.dl.shop.payment.model.OrderQueryResponse;
 import com.dl.shop.payment.model.PayLog;
@@ -69,10 +70,13 @@ import com.dl.shop.payment.model.UserWithdrawLog;
 import com.dl.shop.payment.param.AllPaymentInfoParam;
 import com.dl.shop.payment.param.GoPayParam;
 import com.dl.shop.payment.param.RechargeParam;
+import com.dl.shop.payment.param.ReqOrderQueryParam;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
 import com.dl.shop.payment.param.WithdrawParam;
 import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
+import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
 import com.dl.shop.payment.pay.rongbao.entity.ReqRongEntity;
+import com.dl.shop.payment.pay.rongbao.entity.RspOrderQueryEntity;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
 import com.dl.shop.payment.service.UserWithdrawLogService;
@@ -591,32 +595,42 @@ public class PaymentController extends AbstractBaseController{
 	@ApiOperation(value="支付订单结果 查询 ", notes="")
 	@PostMapping("/query")
 	@ResponseBody
-	public BaseResult<Object> orderquery(String payLogId) {
+	public BaseResult<RspOrderQueryDTO> orderquery(@RequestBody ReqOrderQueryParam p) {
 		String loggerId = "orderquery_" + System.currentTimeMillis();
+		String payLogId = p.getPayLogId();
+		RspOrderQueryDTO rspEntity = new RspOrderQueryDTO();
 		if(StringUtils.isBlank(payLogId) ) {
-			return ResultGenerator.genFailResult("订单号不能为空！", null);
+			rspEntity.setCode(-1);
+			rspEntity.setMsg("订单号不能为空");
+			return ResultGenerator.genFailResult("订单号不能为空！",rspEntity);
 		}
 		logger.info(loggerId+" payLogId="+payLogId);
 		PayLog payLog = payLogService.findById(Integer.parseInt(payLogId));
 		if(null == payLog) {
+			rspEntity.setCode(-1);
+			rspEntity.setMsg("没有查询到对应的订单号");
 			logger.info(loggerId+" payLogId="+payLogId+" 没有查询到对应的订单号");
-			return ResultGenerator.genFailResult("请提供有效的订单号！", null);
+			return ResultGenerator.genFailResult("请提供有效的订单号！", rspEntity);
 		}
 		int isPaid = payLog.getIsPaid();
 		if(1== isPaid) {
+			rspEntity.setCode(0);
+			rspEntity.setMsg("订单已支付成功");
 			logger.info(loggerId+" 订单已支付成功");
-			return ResultGenerator.genSuccessResult("订单已支付成功！", null);
+			return ResultGenerator.genSuccessResult("订单已支付成功！",rspEntity);
 		}
 		String payCode = payLog.getPayCode();
-		BaseResult<OrderQueryResponse> baseResult = null;
-		if("app_weixin".equals(payCode)) {
-			baseResult = wxpayUtil.orderQuery(payLogId);
+		BaseResult<RspOrderQueryEntity> baseResult = null;
+		if("app_rongbao".equals(payCode)) {
+			baseResult = RongUtil.queryOrderInfo(payLog.getPayOrderSn());
 		}
 		if(baseResult.getCode() != 0) {
+			rspEntity.setCode(-1);
+			rspEntity.setMsg("订单查询请求异常");
 			logger.info(loggerId+" 订单查询请求异常"+baseResult.getMsg());
-			return ResultGenerator.genFailResult("请求异常！", null);
+			return ResultGenerator.genFailResult("请求异常！", rspEntity);
 		}
-		OrderQueryResponse response = baseResult.getData();
+		RspOrderQueryEntity response = baseResult.getData();
 		Integer payType = payLog.getPayType();
 		if(0 == payType) {
 			return orderOptions(loggerId, payLog, response);
@@ -633,9 +647,10 @@ public class PaymentController extends AbstractBaseController{
 	 * @param response
 	 * @return
 	 */
-	private BaseResult<Object> rechargeOptions(String loggerId, PayLog payLog, OrderQueryResponse response) {
-		Integer tradeState = response.getTradeState();
-		if(1 == tradeState) {
+	private BaseResult<RspOrderQueryDTO> rechargeOptions(String loggerId, PayLog payLog, RspOrderQueryEntity response) {
+//		Integer tradeState = response.getTradeState();
+		RspOrderQueryDTO rspEntity = new RspOrderQueryDTO();
+		if(response.isSucc()) {
 			int currentTime = DateUtil.getCurrentTimeLong();
 			//更新order
 			UpdateUserRechargeParam updateUserRechargeParam = new UpdateUserRechargeParam();
@@ -654,7 +669,7 @@ public class PaymentController extends AbstractBaseController{
 				PayLog updatePayLog = new PayLog();
 				updatePayLog.setPayTime(currentTime);
 				payLog.setLastTime(currentTime);
-				updatePayLog.setTradeNo(response.getTradeNo());
+				updatePayLog.setTradeNo(response.getTrade_no());
 				updatePayLog.setLogId(payLog.getLogId());
 				updatePayLog.setIsPaid(1);
 				updatePayLog.setPayMsg("支付成功");
@@ -662,19 +677,23 @@ public class PaymentController extends AbstractBaseController{
 			} catch (Exception e) {
 				logger.error(loggerId+" paylogid="+payLog.getLogId()+" , paymsg=支付成功，保存成功记录时出错", e);
 			}
-			return ResultGenerator.genSuccessResult("订单已支付成功！", null);
+			rspEntity.setCode(0);
+			rspEntity.setMsg("订单已支付成功");
+			return ResultGenerator.genSuccessResult("订单已支付成功！", rspEntity);
 		}else {
 			//更新paylog
 			try {
 				PayLog updatePayLog = new PayLog();
 				updatePayLog.setLogId(payLog.getLogId());
 				updatePayLog.setIsPaid(0);
-				updatePayLog.setPayMsg(response.getTradeStateDesc());
+				updatePayLog.setPayMsg(response.getResult_msg());
 				payLogService.updatePayMsg(updatePayLog);
 			} catch (Exception e) {
-				logger.error(loggerId + " paylogid="+payLog.getLogId()+" , paymsg="+response.getTradeStateDesc()+"，保存失败记录时出错", e);
+				logger.error(loggerId + " paylogid="+payLog.getLogId()+" , paymsg="+response.getResult_msg()+"，保存失败记录时出错", e);
 			}
-			return ResultGenerator.genFailResult("请求失败！", null);
+			rspEntity.setCode(-1);
+			rspEntity.setMsg("请求失败");
+			return ResultGenerator.genFailResult("请求失败！", rspEntity);
 		}
 	}
 	/**
@@ -684,9 +703,8 @@ public class PaymentController extends AbstractBaseController{
 	 * @param response
 	 * @return
 	 */
-	private BaseResult<Object> orderOptions(String loggerId, PayLog payLog, OrderQueryResponse response) {
-		Integer tradeState = response.getTradeState();
-		if(1 == tradeState) {
+	private BaseResult<RspOrderQueryDTO> orderOptions(String loggerId, PayLog payLog, RspOrderQueryEntity response) {
+		if(response.isSucc()) {
 			int currentTime = DateUtil.getCurrentTimeLong();
 			//更新order
 			UpdateOrderInfoParam param = new UpdateOrderInfoParam();
@@ -706,7 +724,7 @@ public class PaymentController extends AbstractBaseController{
 				PayLog updatePayLog = new PayLog();
 				updatePayLog.setPayTime(currentTime);
 				payLog.setLastTime(currentTime);
-				updatePayLog.setTradeNo(response.getTradeNo());
+				updatePayLog.setTradeNo(response.getTrade_no());
 				updatePayLog.setLogId(payLog.getLogId());
 				updatePayLog.setIsPaid(1);
 				updatePayLog.setPayMsg("支付成功");
@@ -746,10 +764,10 @@ public class PaymentController extends AbstractBaseController{
 				PayLog updatePayLog = new PayLog();
 				updatePayLog.setLogId(payLog.getLogId());
 				updatePayLog.setIsPaid(0);
-				updatePayLog.setPayMsg(response.getTradeStateDesc());
+				updatePayLog.setPayMsg(response.getResult_msg());
 				payLogService.updatePayMsg(updatePayLog);
 			} catch (Exception e) {
-				logger.error(loggerId + " paylogid="+payLog.getLogId()+" , paymsg="+response.getTradeStateDesc()+"，保存失败记录时出错", e);
+				logger.error(loggerId + " paylogid="+payLog.getLogId()+" , paymsg="+response.getResult_msg()+"，保存失败记录时出错", e);
 			}
 			return ResultGenerator.genFailResult("请求失败！", null);
 		}

@@ -28,7 +28,7 @@ public class ReapalH5Config {
 	public static String notify_url = "http://10.168.15.116:8080/reapal_notify.jsp";
 	// 返回地址，由商户提供 http://123.57.34.133:9090/reapal-h5-api/return.jsp
 	public static String return_url = "http://39.106.18.39:8082/reapal-h5-api/return.jsp";
-	// 商户私钥
+	// 商户私钥                /usr/local/cert
 	public static String privateKey = "/usr/local/cert/itrus001.pfx";
 	// 商户私钥密码
 	public static String password = "123456";
@@ -38,7 +38,7 @@ public class ReapalH5Config {
 	// ↑↑↑↑↑↑↑↑↑↑请在这里配置您的基本信息↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
 	// 版本号
 	public static String version = "3.1.2";
-	// 融宝公钥 正式环境不用修改
+	// 融宝公钥 正式环境不用修改  /usr/local/cert
 	public static String pubKeyUrl = "/usr/local/cert/itrus001.cer";
 	// 字符编码格式 目前支持 utf-8
 	public static String charset = "utf-8";
