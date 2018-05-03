@@ -17,6 +17,7 @@ package com.dl.shop.payment.pay.rongbao.config;
 public class ReapalH5Config {
 	// ↓↓↓↓↓↓↓↓↓↓请在这里配置您的基本信息↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
 	// 需要更换的信息
+	public static final String URL_PAY = "http://39.106.18.39:8082/reapal-h5-api/h5/indexH5.jsp";
 	// 商户ID，由纯数字组成的字符串
 	public static String merchant_id = "100000000000147";
 	// 交易安全检验码，由数字和字母组成的64位字符串
@@ -26,7 +27,7 @@ public class ReapalH5Config {
 	// 通知地址，由商户提供
 	public static String notify_url = "http://10.168.15.116:8080/reapal_notify.jsp";
 	// 返回地址，由商户提供 http://123.57.34.133:9090/reapal-h5-api/return.jsp
-	public static String return_url = "http://123.57.34.133:9090/reapal-h5-api/callback";
+	public static String return_url = "http://39.106.18.39:7076/rongbaopay/callback";
 	// 商户私钥
 	public static String privateKey = "c:\\cert\\itrus001.pfx";
 	// 商户私钥密码

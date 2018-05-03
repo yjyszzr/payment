@@ -1,22 +1,34 @@
 package com.dl.shop.payment.web;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.util.TextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.dl.base.result.BaseResult;
+import com.dl.base.util.DateUtil;
+import com.dl.member.api.IUserAccountService;
+import com.dl.member.param.UpdateUserRechargeParam;
+import com.dl.order.api.IOrderService;
+import com.dl.order.param.UpdateOrderInfoParam;
+import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
 import com.dl.shop.payment.pay.rongbao.entity.PayResultEntity;
 import com.dl.shop.payment.pay.rongbao.util.DecipherH5;
 import com.dl.shop.payment.pay.rongbao.util.Md5Utils;
+import com.dl.shop.payment.service.PayLogService;
+
 import io.swagger.annotations.ApiOperation;
 
 /***
@@ -27,6 +39,13 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/rongbaopay")
 public class RongbaoPlayController extends AbstractBaseController{
 	private final static Logger logger = LoggerFactory.getLogger(PaymentController.class);
+	
+	@Resource
+	private PayLogService payLogService;
+	@Autowired
+	private IUserAccountService userAccountService;
+	@Autowired
+	private IOrderService orderService;
 	
 	@ApiOperation(value="融宝支付回调")
 	@PostMapping("callback")
@@ -56,6 +75,21 @@ public class RongbaoPlayController extends AbstractBaseController{
 					logger.debug("验签成功...");
 					PayResultEntity rEntity = JSON.parseObject(jsonObject.toJSONString(),PayResultEntity.class);
 					//更新订单信息
+					String orderId = rEntity.order_no;
+					PayLog payLog = payLogService.findPayLogByOrderSign(orderId);
+					if(null == payLog) {
+						logger.info(rEntity.order_no + " payLog对象未查询到，返回失败！");
+						//fail
+						String xml = "<xml><return_code><![CDATA[FAIL]]></return_code> <return_msg><![CDATA[order no find]]></return_msg></xml>";
+						try {
+							response.getWriter().write(xml);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+						return;
+					}else {
+						call(rEntity,payLog,request,response);
+					}
 				}else {
 					logger.debug("验签失败...");
 				}
@@ -65,6 +99,80 @@ public class RongbaoPlayController extends AbstractBaseController{
 		}
 	}
 	
+	/***
+	 * 第三方回调订单逻辑
+	 * @param rEntity
+	 * @param payLog
+	 * @param request
+	 * @param response
+	 */
+	private void call(PayResultEntity rEntity,PayLog payLog,HttpServletRequest request, HttpServletResponse response) {
+		int isPaid = payLog.getIsPaid();
+		String loggerId = payLog.getPayOrderSn();
+		if(1== isPaid) {
+			logger.info(payLog.getPayOrderSn() + " paylog.ispaid=1,已支付成功，返回OK！");
+			String xml = "<xml><return_code><![CDATA[SUCCESS]]></return_code> <return_msg><![CDATA[OK]]></return_msg></xml>";
+			try {
+				response.getWriter().write(xml);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return;
+		}
+		int orderAmount = (int)(payLog.getOrderAmount().doubleValue()*100);
+		try {
+			int payType = payLog.getPayType();
+			int currentTime = DateUtil.getCurrentTimeLong();
+			boolean result = false;
+			if(0 == payType) {
+				//order
+				UpdateOrderInfoParam param = new UpdateOrderInfoParam();
+				param.setPayStatus(1);
+				param.setOrderStatus(1);
+				param.setPayTime(currentTime);
+				param.setPaySn(payLog.getLogId()+"");
+				param.setPayName(payLog.getPayName());
+				param.setPayCode(payLog.getPayCode());
+				param.setOrderSn(payLog.getOrderSn());
+				BaseResult<String> baseResult = orderService.updateOrderInfo(param);
+				logger.info(loggerId + " 订单回调返回结果：status=" + baseResult.getCode()+" , message="+baseResult.getMsg());
+				if(0 == baseResult.getCode()) {
+					result = true;
+				}
+			}else {
+				String rechargeSn = payLog.getOrderSn();
+				//更新order
+				UpdateUserRechargeParam updateUserRechargeParam = new UpdateUserRechargeParam();
+				updateUserRechargeParam.setPaymentCode(payLog.getPayCode());
+				updateUserRechargeParam.setPaymentId(payLog.getLogId()+"");
+				updateUserRechargeParam.setPaymentName(payLog.getPayName());
+				updateUserRechargeParam.setPayTime(currentTime);
+				updateUserRechargeParam.setStatus("1");
+				updateUserRechargeParam.setRechargeSn(payLog.getOrderSn());
+				BaseResult<String> baseResult = userAccountService.updateReCharege(updateUserRechargeParam);
+				logger.info(loggerId + " 充值回调返回结果：status=" + baseResult.getCode()+" , message="+baseResult.getMsg());
+				if(0 == baseResult.getCode()) {
+					result = true;
+				}
+			}
+			logger.info(loggerId + " 业务回调结果：result="+result);
+			if(result) {
+				//更新paylog状态为已支付
+				PayLog updatePayLog = new PayLog();
+				updatePayLog.setLogId(payLog.getLogId());
+				updatePayLog.setTradeNo(rEntity.trade_no);
+				updatePayLog.setIsPaid(1);
+				updatePayLog.setLastTime(currentTime);
+				updatePayLog.setPayTime(currentTime);
+				payLogService.update(payLog);
+				logger.info(loggerId + " 业务回调成功，payLog.对象状态回写结束");
+				String xml = "<xml><return_code><![CDATA[SUCCESS]]></return_code> <return_msg><![CDATA[OK]]></return_msg></xml>";
+				response.getWriter().write(xml);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	private String decodeRspSign(JSONObject jsonObject,String key) {
 		String mysign = null;

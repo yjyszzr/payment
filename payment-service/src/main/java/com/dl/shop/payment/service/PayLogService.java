@@ -36,4 +36,8 @@ public class PayLogService extends AbstractService<PayLog> {
 		payLog.setLastTime(DateUtil.getCurrentTimeLong());
 		return payLogMapper.updatePayMsg(payLog);
 	}
+	
+	public PayLog findPayLogByOrderSign(String orderSign) {
+		return payLogMapper.findPayLogByOrderSign(orderSign);
+	}
 }

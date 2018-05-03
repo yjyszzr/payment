@@ -70,6 +70,7 @@ import com.dl.shop.payment.param.GoPayParam;
 import com.dl.shop.payment.param.RechargeParam;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
 import com.dl.shop.payment.param.WithdrawParam;
+import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
 import com.dl.shop.payment.pay.rongbao.entity.ReqRongEntity;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
@@ -391,7 +392,7 @@ public class PaymentController extends AbstractBaseController{
 			String data = JSON.toJSONString(reqEntity);
 			try {
 				data = URLEncoder.encode(data,"UTF-8");
-				String url = "http://39.106.18.39:8082/reapal-h5-api/h5/indexH5.jsp?data="+data;
+				String url = ReapalH5Config.URL_PAY + "?data="+data;
 				RongbaoPayResultDTO rongBaoREntity = new RongbaoPayResultDTO();
 				rongBaoREntity.setPayUrl(url);
 				payBaseResult = ResultGenerator.genSuccessResult("succ",rongBaoREntity);
