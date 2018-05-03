@@ -84,31 +84,16 @@ public class RongbaoPlayController extends AbstractBaseController{
 					PayLog payLog = payLogService.findPayLogByOrderSign(orderId);
 					if(null == payLog) {
 						logger.info(rEntity.order_no + " payLog对象未查询到，返回失败！");
-						//fail
-						String xml = "<xml><return_code><![CDATA[FAIL]]></return_code> <return_msg><![CDATA[order no find]]></return_msg></xml>";
 						try {
-							response.getWriter().write(xml);
+							response.getWriter().write("success");
 						} catch (IOException e) {
-							e.printStackTrace();
-						}
-						OutputStream out;
-						try {
-							out = response.getOutputStream();
-							out.write("success".getBytes());
-							out.flush();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					}else {
 						call(rEntity,payLog,request,response);
-						OutputStream out;
 						try {
-							out = response.getOutputStream();
-							out.write("success".getBytes());
-							out.flush();
+							response.getWriter().write("success");
 						} catch (IOException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					}
