@@ -27,7 +27,7 @@ public class ReapalH5Config {
 	// 通知地址，由商户提供
 	public static String notify_url = "http://10.168.15.116:8080/reapal_notify.jsp";
 	// 返回地址，由商户提供 http://123.57.34.133:9090/reapal-h5-api/return.jsp
-	public static String return_url = "http://39.106.18.39:7076/rongbaopay/callback";
+	public static String return_url = "http://39.106.18.39:8082/reapal-h5-api/return.jsp";
 	// 商户私钥
 	public static String privateKey = "c:\\cert\\itrus001.pfx";
 	// 商户私钥密码

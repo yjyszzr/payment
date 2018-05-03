@@ -54,6 +54,7 @@ public class RongbaoPlayController extends AbstractBaseController{
 		String merchantId = request.getParameter("merchant_id");
 		String data = request.getParameter("data");
 		String encryptkey = request.getParameter("encryptkey");
+		System.out.println("資金方回调... data:" + data);
 		if(!TextUtils.isEmpty(data) && !TextUtils.isEmpty(encryptkey)) {
 			logger.debug("资金方返回原key:" + encryptkey);
 			logger.debug("资金方返回原数据:" + data);
