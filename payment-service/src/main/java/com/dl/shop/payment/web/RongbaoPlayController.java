@@ -53,7 +53,7 @@ public class RongbaoPlayController extends AbstractBaseController{
 	
 	@ApiOperation(value="融宝支付回调")
 	@PostMapping("callback")
-	public void payCallBack(HttpServletRequest request, HttpServletResponse response) {
+	public String payCallBack(HttpServletRequest request, HttpServletResponse response) {
 		String key = ReapalH5Config.key;
 		String merchantId = request.getParameter("merchant_id");
 		String data = request.getParameter("data");
@@ -84,26 +84,20 @@ public class RongbaoPlayController extends AbstractBaseController{
 					PayLog payLog = payLogService.findPayLogByOrderSign(orderId);
 					if(null == payLog) {
 						logger.info(rEntity.order_no + " payLog对象未查询到，返回失败！");
-						try {
-							response.getWriter().write("success");
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
 					}else {
 						call(rEntity,payLog,request,response);
-						try {
-							response.getWriter().write("success");
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
 					}
+					return "success";
 				}else {
 					logger.info("验签失败...");
+					return "error";
 				}
 			}
 		}else {
 			logger.info("资金方回调参数错误 data:" + data +" encryptkey:" + encryptkey);
+			return "error";
 		}
+		return "error";
 	}
 	
 	/***
