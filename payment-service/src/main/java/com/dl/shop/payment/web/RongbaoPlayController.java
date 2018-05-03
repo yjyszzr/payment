@@ -14,9 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.result.BaseResult;
+import com.dl.base.result.ResultGenerator;
 import com.dl.base.util.DateUtil;
 import com.dl.member.api.IUserAccountService;
 import com.dl.member.param.UpdateUserRechargeParam;
@@ -49,7 +52,8 @@ public class RongbaoPlayController extends AbstractBaseController{
 	
 	@ApiOperation(value="融宝支付回调")
 	@PostMapping("callback")
-	public void payCallBackk(HttpServletRequest request, HttpServletResponse response) {
+	@ResponseBody
+	public BaseResult<Object> payCallBackk(HttpServletRequest request, HttpServletResponse response) {
 		String key = ReapalH5Config.key;
 		String merchantId = request.getParameter("merchant_id");
 		String data = request.getParameter("data");
@@ -87,9 +91,10 @@ public class RongbaoPlayController extends AbstractBaseController{
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
-						return;
+						return ResultGenerator.genFailResult("error");
 					}else {
 						call(rEntity,payLog,request,response);
+						return ResultGenerator.genSuccessResult("succ");
 					}
 				}else {
 					logger.debug("验签失败...");
@@ -98,6 +103,7 @@ public class RongbaoPlayController extends AbstractBaseController{
 		}else {
 			logger.debug("资金方回调参数错误 data:" + data +" encryptkey:" + encryptkey);
 		}
+		return ResultGenerator.genFailResult("params error");
 	}
 	
 	/***
