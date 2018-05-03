@@ -1,6 +1,7 @@
 package com.dl.shop.payment.web;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,19 +53,18 @@ public class RongbaoPlayController extends AbstractBaseController{
 	
 	@ApiOperation(value="融宝支付回调")
 	@PostMapping("callback")
-	@ResponseBody
-	public BaseResult<Object> payCallBackk(HttpServletRequest request, HttpServletResponse response) {
+	public void payCallBack(HttpServletRequest request, HttpServletResponse response) {
 		String key = ReapalH5Config.key;
 		String merchantId = request.getParameter("merchant_id");
 		String data = request.getParameter("data");
 		String encryptkey = request.getParameter("encryptkey");
 		System.out.println("資金方回调... data:" + data);
 		if(!TextUtils.isEmpty(data) && !TextUtils.isEmpty(encryptkey)) {
-			logger.debug("资金方返回原key:" + encryptkey);
-			logger.debug("资金方返回原数据:" + data);
+			logger.info("资金方返回原key:" + encryptkey);
+			logger.info("资金方返回原数据:" + data);
 			//解密返回数据
 			String decryData = decodeRspInfo(data,encryptkey);
-			logger.debug("数据解密结果:" + decryData);
+			logger.info("数据解密结果:" + decryData);
 			if(!TextUtils.isEmpty(decryData)) {
 				//获取融宝支付的通知返回参数，可参考技术文档中页面跳转同步通知参数列表(以下仅供参考)//
 				JSONObject jsonObject = JSON.parseObject(decryData);	
@@ -72,12 +72,12 @@ public class RongbaoPlayController extends AbstractBaseController{
 				String sign = jsonObject.getString("sign");
 				//验签sign
 				String mysign = decodeRspSign(jsonObject,key);
-				logger.debug("验签:" + mysign);
-				logger.debug("返回sign:" + sign);
+				logger.info("验签:" + mysign);
+				logger.info("返回sign:" + sign);
 				boolean succ = sign.equals(mysign);
 				if(succ) {
 					//jsonObject -> 转换业务实体类
-					logger.debug("验签成功...");
+					logger.info("验签成功...");
 					PayResultEntity rEntity = JSON.parseObject(jsonObject.toJSONString(),PayResultEntity.class);
 					//更新订单信息
 					String orderId = rEntity.order_no;
@@ -91,19 +91,34 @@ public class RongbaoPlayController extends AbstractBaseController{
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
-						return ResultGenerator.genFailResult("error");
+						OutputStream out;
+						try {
+							out = response.getOutputStream();
+							out.write("success".getBytes());
+							out.flush();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}else {
 						call(rEntity,payLog,request,response);
-						return ResultGenerator.genSuccessResult("succ");
+						OutputStream out;
+						try {
+							out = response.getOutputStream();
+							out.write("success".getBytes());
+							out.flush();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 				}else {
-					logger.debug("验签失败...");
+					logger.info("验签失败...");
 				}
 			}
 		}else {
-			logger.debug("资金方回调参数错误 data:" + data +" encryptkey:" + encryptkey);
+			logger.info("资金方回调参数错误 data:" + data +" encryptkey:" + encryptkey);
 		}
-		return ResultGenerator.genFailResult("params error");
 	}
 	
 	/***
