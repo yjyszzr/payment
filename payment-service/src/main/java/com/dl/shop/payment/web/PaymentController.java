@@ -66,6 +66,7 @@ import com.dl.shop.payment.model.OrderQueryResponse;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.UnifiedOrderParam;
 import com.dl.shop.payment.model.UserWithdrawLog;
+import com.dl.shop.payment.param.AllPaymentInfoParam;
 import com.dl.shop.payment.param.GoPayParam;
 import com.dl.shop.payment.param.RechargeParam;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
@@ -107,7 +108,14 @@ public class PaymentController extends AbstractBaseController{
 	@Resource
 	private ILotteryPrintService lotteryPrintService;
 	
-	@ApiOperation(value="用", notes="")
+	@ApiOperation(value="系统可用第三方支付方式", notes="系统可用第三方支付方式")
+	@PostMapping("/allPayment")
+	@ResponseBody
+	public BaseResult<List<PaymentDTO>> allPaymentInfo(@RequestBody AllPaymentInfoParam param) {
+		BaseResult<List<PaymentDTO>> findAllDto = paymentService.findAllDto();
+		return findAllDto;
+	}
+	@ApiOperation(value="用户支付回退接口", notes="")
 	@PostMapping("/rollbackOrderAmount")
 	@ResponseBody
 	public BaseResult rollbackOrderAmount(@RequestBody RollbackOrderAmountParam param) {

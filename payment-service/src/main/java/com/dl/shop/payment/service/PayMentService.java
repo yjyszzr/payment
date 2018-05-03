@@ -1,12 +1,13 @@
 package com.dl.shop.payment.service;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -26,12 +27,13 @@ public class PayMentService extends AbstractService<PayMent> {
      */
     public BaseResult<List<PaymentDTO>> findAllDto() {
 		List<PayMent> payments = super.findAll();
+		if(CollectionUtils.isEmpty(payments)) {
+			return ResultGenerator.genSuccessResult("success", new ArrayList<PaymentDTO>(0));
+		}
 		List<PaymentDTO> list = payments.stream().filter(payment->payment.getIsEnable() == 1).map(payment->{
 			PaymentDTO paymentDTO = new PaymentDTO();
-			paymentDTO.setIsEnable(payment.getIsEnable());
 			paymentDTO.setPayCode(payment.getPayCode());
 			paymentDTO.setPayDesc(payment.getPayDesc());
-			paymentDTO.setPayFee(payment.getPayFee());
 			paymentDTO.setPayId(payment.getPayId());
 			paymentDTO.setPayName(payment.getPayName());
 			paymentDTO.setPaySort(payment.getPaySort());
