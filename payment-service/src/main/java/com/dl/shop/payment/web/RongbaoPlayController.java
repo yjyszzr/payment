@@ -112,66 +112,54 @@ public class RongbaoPlayController extends AbstractBaseController{
 		String loggerId = payLog.getPayOrderSn();
 		if(1== isPaid) {
 			logger.info(payLog.getPayOrderSn() + " paylog.ispaid=1,已支付成功，返回OK！");
-			String xml = "<xml><return_code><![CDATA[SUCCESS]]></return_code> <return_msg><![CDATA[OK]]></return_msg></xml>";
-			try {
-				response.getWriter().write(xml);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 			return;
 		}
 		int orderAmount = (int)(payLog.getOrderAmount().doubleValue()*100);
-		try {
-			int payType = payLog.getPayType();
-			int currentTime = DateUtil.getCurrentTimeLong();
-			boolean result = false;
-			if(0 == payType) {
-				//order
-				UpdateOrderInfoParam param = new UpdateOrderInfoParam();
-				param.setPayStatus(1);
-				param.setOrderStatus(1);
-				param.setPayTime(currentTime);
-				param.setPaySn(payLog.getLogId()+"");
-				param.setPayName(payLog.getPayName());
-				param.setPayCode(payLog.getPayCode());
-				param.setOrderSn(payLog.getOrderSn());
-				BaseResult<String> baseResult = orderService.updateOrderInfo(param);
-				logger.info(loggerId + " 订单回调返回结果：status=" + baseResult.getCode()+" , message="+baseResult.getMsg());
-				if(0 == baseResult.getCode()) {
-					result = true;
-				}
-			}else {
-				String rechargeSn = payLog.getOrderSn();
-				//更新order
-				UpdateUserRechargeParam updateUserRechargeParam = new UpdateUserRechargeParam();
-				updateUserRechargeParam.setPaymentCode(payLog.getPayCode());
-				updateUserRechargeParam.setPaymentId(payLog.getLogId()+"");
-				updateUserRechargeParam.setPaymentName(payLog.getPayName());
-				updateUserRechargeParam.setPayTime(currentTime);
-				updateUserRechargeParam.setStatus("1");
-				updateUserRechargeParam.setRechargeSn(payLog.getOrderSn());
-				BaseResult<String> baseResult = userAccountService.updateReCharege(updateUserRechargeParam);
-				logger.info(loggerId + " 充值回调返回结果：status=" + baseResult.getCode()+" , message="+baseResult.getMsg());
-				if(0 == baseResult.getCode()) {
-					result = true;
-				}
+		int payType = payLog.getPayType();
+		int currentTime = DateUtil.getCurrentTimeLong();
+		boolean result = false;
+		if(0 == payType) {
+			//order
+			UpdateOrderInfoParam param = new UpdateOrderInfoParam();
+			param.setPayStatus(1);
+			param.setOrderStatus(1);
+			param.setPayTime(currentTime);
+			param.setPaySn(payLog.getLogId()+"");
+			param.setPayName(payLog.getPayName());
+			param.setPayCode(payLog.getPayCode());
+			param.setOrderSn(payLog.getOrderSn());
+			BaseResult<String> baseResult = orderService.updateOrderInfo(param);
+			logger.info(loggerId + " 订单回调返回结果：status=" + baseResult.getCode()+" , message="+baseResult.getMsg());
+			if(0 == baseResult.getCode()) {
+				result = true;
 			}
-			logger.info(loggerId + " 业务回调结果：result="+result);
-			if(result) {
-				//更新paylog状态为已支付
-				PayLog updatePayLog = new PayLog();
-				updatePayLog.setLogId(payLog.getLogId());
-				updatePayLog.setTradeNo(rEntity.trade_no);
-				updatePayLog.setIsPaid(1);
-				updatePayLog.setLastTime(currentTime);
-				updatePayLog.setPayTime(currentTime);
-				payLogService.update(payLog);
-				logger.info(loggerId + " 业务回调成功，payLog.对象状态回写结束");
-				String xml = "<xml><return_code><![CDATA[SUCCESS]]></return_code> <return_msg><![CDATA[OK]]></return_msg></xml>";
-				response.getWriter().write(xml);
+		}else {
+			String rechargeSn = payLog.getOrderSn();
+			//更新order
+			UpdateUserRechargeParam updateUserRechargeParam = new UpdateUserRechargeParam();
+			updateUserRechargeParam.setPaymentCode(payLog.getPayCode());
+			updateUserRechargeParam.setPaymentId(payLog.getLogId()+"");
+			updateUserRechargeParam.setPaymentName(payLog.getPayName());
+			updateUserRechargeParam.setPayTime(currentTime);
+			updateUserRechargeParam.setStatus("1");
+			updateUserRechargeParam.setRechargeSn(payLog.getOrderSn());
+			BaseResult<String> baseResult = userAccountService.updateReCharege(updateUserRechargeParam);
+			logger.info(loggerId + " 充值回调返回结果：status=" + baseResult.getCode()+" , message="+baseResult.getMsg());
+			if(0 == baseResult.getCode()) {
+				result = true;
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
+		}
+		logger.info(loggerId + " 业务回调结果：result="+result);
+		if(result) {
+			//更新paylog状态为已支付
+			PayLog updatePayLog = new PayLog();
+			updatePayLog.setLogId(payLog.getLogId());
+			updatePayLog.setTradeNo(rEntity.trade_no);
+			updatePayLog.setIsPaid(1);
+			updatePayLog.setLastTime(currentTime);
+			updatePayLog.setPayTime(currentTime);
+			payLogService.update(payLog);
+			logger.info(loggerId + " 业务回调成功，payLog.对象状态回写结束");
 		}
 	}
 	
