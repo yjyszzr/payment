@@ -40,4 +40,8 @@ public class PayLogService extends AbstractService<PayLog> {
 	public PayLog findPayLogByOrderSign(String orderSign) {
 		return payLogMapper.findPayLogByOrderSign(orderSign);
 	}
+	
+	public int updatePayLog(PayLog payLog) {
+		return payLogMapper.updatePayLog(payLog);
+	}
 }

@@ -176,8 +176,8 @@ public class RongbaoPlayController extends AbstractBaseController{
 			updatePayLog.setIsPaid(1);
 			updatePayLog.setLastTime(currentTime);
 			updatePayLog.setPayTime(currentTime);
-			payLogService.update(payLog);
-			logger.info(loggerId + " 业务回调成功，payLog.对象状态回写结束");
+			int cnt = payLogService.updatePayLog(payLog);
+			logger.info(loggerId + " 业务回调成功，payLog.对象状态回写结束 cnt:" + cnt + " tradeNo:" + rEntity.trade_no);
 		}
 	}
 	

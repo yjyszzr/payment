@@ -40,4 +40,12 @@ public interface PayLogMapper extends Mapper<PayLog> {
 	 * @return
 	 */
 	PayLog findPayLogByOrderSign(String orderSign);
+	
+	
+	/**
+	 * 更新订单信息
+	 * @param payLog
+	 * @return
+	 */
+	int updatePayLog(PayLog payLog);
 }

@@ -49,4 +49,10 @@
 	  where pay_order_sn = #{pay_order_sn}
 	</select>
 	
+	
+	<update id="updatePayLog" resultMap="int">
+	  update dl_pay_log set is_paid=#{isPaid}, trade_no=#{tradeNo}, last_time=#{lastTime},pay_time=#{payTime} where log_id=#{logId} 
+	</update>
+	
+	
 </mapper>
