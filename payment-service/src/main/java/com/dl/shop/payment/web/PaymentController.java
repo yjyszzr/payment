@@ -388,7 +388,7 @@ public class PaymentController extends AbstractBaseController{
 			reqEntity.setTotal(savePayLog.getOrderAmount().doubleValue());
 			reqEntity.setPName("彩小秘");
 			reqEntity.setPDesc("彩小秘足彩支付");
-			reqEntity.setTransTime(savePayLog.getPayTime()+"");
+			reqEntity.setTransTime(savePayLog.getAddTime()+"");
 			String data = JSON.toJSONString(reqEntity);
 			try {
 				data = URLEncoder.encode(data,"UTF-8");
