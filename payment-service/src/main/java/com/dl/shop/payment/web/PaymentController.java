@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.util.TextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,7 @@ import com.dl.member.dto.UserBankDTO;
 import com.dl.member.dto.UserDTO;
 import com.dl.member.dto.UserRechargeDTO;
 import com.dl.member.dto.UserWithdrawDTO;
+import com.dl.member.enums.MemberEnums;
 import com.dl.member.param.AmountParam;
 import com.dl.member.param.IDParam;
 import com.dl.member.param.MessageAddParam;
@@ -759,10 +761,13 @@ public class PaymentController extends AbstractBaseController{
 			} catch (Exception e) {
 				logger.error(loggerId + " paylogid="+payLog.getLogId()+" , paymsg="+response.getResult_msg()+"，保存失败记录时出错", e);
 			}
-			String tips = response.getResult_msg();
-			return ResultGenerator.genFailResult(tips,null);
+			String code = response.getResult_code();
+			if(code.equals("3015")) {//订单不存在
+				return ResultGenerator.genResult(MemberEnums.PAY_RONGBAO_WAITING.getcode(),MemberEnums.PAY_RONGBAO_WAITING.getMsg());
+			}else {
+				String tips = response.getResult_msg();
+				return ResultGenerator.genResult(MemberEnums.PAY_RONGBAO_FAILURE.getcode(),"融宝服务返回[" + tips +"]");
+			}
 		}
 	}
-	
-	
 }
