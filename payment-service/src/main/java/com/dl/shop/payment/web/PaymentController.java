@@ -11,10 +11,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +23,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.alibaba.fastjson.JSON;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -63,7 +60,6 @@ import com.dl.shop.payment.dto.PaymentDTO;
 import com.dl.shop.payment.dto.RongbaoPayResultDTO;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.dto.YinHeResultDTO;
-import com.dl.shop.payment.model.OrderQueryResponse;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.UnifiedOrderParam;
 import com.dl.shop.payment.model.UserWithdrawLog;
@@ -81,7 +77,6 @@ import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
 import com.dl.shop.payment.service.UserWithdrawLogService;
 import com.dl.shop.payment.utils.WxpayUtil;
-
 import io.swagger.annotations.ApiOperation;
 
 @Controller
@@ -600,26 +595,19 @@ public class PaymentController extends AbstractBaseController{
 	public BaseResult<RspOrderQueryDTO> orderquery(@RequestBody ReqOrderQueryParam p) {
 		String loggerId = "orderquery_" + System.currentTimeMillis();
 		String payLogId = p.getPayLogId();
-		RspOrderQueryDTO rspEntity = new RspOrderQueryDTO();
 		if(StringUtils.isBlank(payLogId) ) {
-			rspEntity.setCode(-1);
-			rspEntity.setMsg("订单号不能为空");
-			return ResultGenerator.genFailResult("订单号不能为空！",rspEntity);
+			return ResultGenerator.genFailResult("订单号不能为空！",null);
 		}
 		logger.info(loggerId+" payLogId="+payLogId);
 		PayLog payLog = payLogService.findById(Integer.parseInt(payLogId));
 		if(null == payLog) {
-			rspEntity.setCode(-1);
-			rspEntity.setMsg("没有查询到对应的订单号");
 			logger.info(loggerId+" payLogId="+payLogId+" 没有查询到对应的订单号");
-			return ResultGenerator.genFailResult("请提供有效的订单号！", rspEntity);
+			return ResultGenerator.genFailResult("请提供有效的订单号！", null);
 		}
 		int isPaid = payLog.getIsPaid();
 		if(1== isPaid) {
-			rspEntity.setCode(0);
-			rspEntity.setMsg("订单已支付成功");
 			logger.info(loggerId+" 订单已支付成功");
-			return ResultGenerator.genSuccessResult("订单已支付成功！",rspEntity);
+			return ResultGenerator.genSuccessResult("订单已支付成功！",null);
 		}
 		String payCode = payLog.getPayCode();
 		BaseResult<RspOrderQueryEntity> baseResult = null;
@@ -627,10 +615,8 @@ public class PaymentController extends AbstractBaseController{
 			baseResult = RongUtil.queryOrderInfo(payLog.getPayOrderSn());
 		}
 		if(baseResult.getCode() != 0) {
-			rspEntity.setCode(-1);
-			rspEntity.setMsg("订单查询请求异常");
 			logger.info(loggerId+" 订单查询请求异常"+baseResult.getMsg());
-			return ResultGenerator.genFailResult("请求异常！", rspEntity);
+			return ResultGenerator.genFailResult("请求异常！",null);
 		}
 		RspOrderQueryEntity response = baseResult.getData();
 		Integer payType = payLog.getPayType();
