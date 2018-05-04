@@ -7,4 +7,5 @@ import lombok.Data;
 @Data
 public class YinHeResultDTO {
 	private String payUrl;
+	private String payLogId;
 }

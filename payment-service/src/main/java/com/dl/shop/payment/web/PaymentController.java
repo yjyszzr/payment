@@ -390,6 +390,7 @@ public class PaymentController extends AbstractBaseController{
 			//http://wxpay.wxutil.com/mch/pay/h5.v2.php
 			YinHeResultDTO yinHeRDTO = new YinHeResultDTO();
 			yinHeRDTO.setPayUrl("http://wxpay.wxutil.com/mch/pay/h5.v2.php");
+			yinHeRDTO.setPayLogId(savePayLog.getLogId()+"");
 			payBaseResult = ResultGenerator.genSuccessResult("succ",yinHeRDTO);
 		}else if("app_rongbao".equals(paymentDto.getPayCode())) {
 			//生成支付链接信息
@@ -407,6 +408,7 @@ public class PaymentController extends AbstractBaseController{
 				String url = ReapalH5Config.URL_PAY + "?data="+data;
 				RongbaoPayResultDTO rongBaoREntity = new RongbaoPayResultDTO();
 				rongBaoREntity.setPayUrl(url);
+				rongBaoREntity.setPayLogId(savePayLog.getLogId()+"");
 				payBaseResult = ResultGenerator.genSuccessResult("succ",rongBaoREntity);
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();

@@ -7,4 +7,5 @@ import lombok.Data;
 @Data
 public class RongbaoPayResultDTO {
 	private String payUrl;
+	private String payLogId;
 }
