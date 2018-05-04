@@ -77,6 +77,8 @@ import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
 import com.dl.shop.payment.pay.rongbao.entity.ReqRongEntity;
 import com.dl.shop.payment.pay.rongbao.entity.RspOrderQueryEntity;
+import com.dl.shop.payment.pay.yinhe.PayUtil;
+import com.dl.shop.payment.pay.yinhe.RspYinHeEntity;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
 import com.dl.shop.payment.service.UserWithdrawLogService;
@@ -386,11 +388,21 @@ public class PaymentController extends AbstractBaseController{
 		BaseResult payBaseResult = null;
 		if("app_weixin".equals(paymentDto.getPayCode())) {
 //			payBaseResult = wxpayUtil.unifiedOrderForApp(unifiedOrderParam);
-			//http://wxpay.wxutil.com/mch/pay/h5.v2.php
-			YinHeResultDTO yinHeRDTO = new YinHeResultDTO();
-			yinHeRDTO.setPayUrl("http://wxpay.wxutil.com/mch/pay/h5.v2.php");
-			yinHeRDTO.setPayLogId(savePayLog.getLogId()+"");
-			payBaseResult = ResultGenerator.genSuccessResult("succ",yinHeRDTO);
+			String amt = savePayLog.getOrderAmount().doubleValue()+"";
+			String orderNo = savePayLog.getPayOrderSn();
+			RspYinHeEntity rYinHeEntity = PayUtil.getWechatPayUrl(payIp, amt,orderNo);
+			if(rYinHeEntity != null) {
+				if(rYinHeEntity.isSucc() && !TextUtils.isEmpty(rYinHeEntity.qrCode)) {
+					YinHeResultDTO yinHeRDTO = new YinHeResultDTO();
+					yinHeRDTO.setPayUrl(rYinHeEntity.qrCode);
+					yinHeRDTO.setPayLogId(savePayLog.getLogId()+"");
+					payBaseResult = ResultGenerator.genSuccessResult("succ",yinHeRDTO);
+				}else {
+					payBaseResult = ResultGenerator.genFailResult("银河支付返回支付链接错误");
+				}
+			}else {
+				payBaseResult = ResultGenerator.genFailResult("银河支付返回数据有误");
+			}
 		}else if("app_rongbao".equals(paymentDto.getPayCode())) {
 			//生成支付链接信息
 			String payOrder = savePayLog.getPayOrderSn();
@@ -443,6 +455,14 @@ public class PaymentController extends AbstractBaseController{
 		logger.info(loggerId + " result: code="+payBaseResult.getCode()+" , msg="+payBaseResult.getMsg());
 		return payBaseResult;
 	}
+	
+	private String getRealIp(HttpServletRequest request) {
+		String ip = "";
+		
+		return ip;
+	}
+	
+	
 	
 	@ApiOperation(value="app充值调用", notes="payCode：支付编码，app端微信支付为app_weixin")
 	@PostMapping("/recharge")

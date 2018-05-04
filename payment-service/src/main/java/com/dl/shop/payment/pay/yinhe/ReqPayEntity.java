@@ -1,6 +1,8 @@
 package com.dl.shop.payment.pay.yinhe;
 
 import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -22,6 +24,7 @@ public class ReqPayEntity implements Serializable{
 	public String backUrl;
 	public String payType;
 	public String signValue;
+	public String ip;
 	
 	public static final String PAY_TYPE_WECHAT = "1";
 	public static final String PAY_TYPE_ZHIFUBAO = "2";
@@ -37,19 +40,20 @@ public class ReqPayEntity implements Serializable{
 		return sEntity;
 	}
 	
-	public static final ReqPayEntity buildReqEntity() {
+	public static final ReqPayEntity buildReqEntity(String ip,String amount,String orderNo) {
 		ReqPayEntity reqEntity = new ReqPayEntity();
 		reqEntity.orgNo = "2188";
 		reqEntity.charset = "UTF-8";
-		reqEntity.termNo = "XA026454";//设备号
+		reqEntity.termNo = "XA026454";  //设备号
 		reqEntity.termType = "RQ";		//终端类型
 		reqEntity.txtTime = getPayTime(); //交易时间，暂时写死
 		reqEntity.signType = "MD5";		//签名信息
-		reqEntity.transNo = "1000123" + RandomUtil.getRandNum(6);		//交易号 唯一
+		reqEntity.transNo = orderNo;	//交易号 唯一
 		reqEntity.merId = ConfigerPay.MERCHANT_NO;//商户号
-		reqEntity.amt = "3";			//交易金额
+		reqEntity.amt = amount;			//交易金额
 		reqEntity.backUrl = ConfigerPay.URL_PAY_CALLBACK;	//异步回调接口
 		reqEntity.payType = PAY_TYPE_WECHAT;
+		reqEntity.ip = ip;
 		return reqEntity;
 	}
 	
