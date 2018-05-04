@@ -759,7 +759,8 @@ public class PaymentController extends AbstractBaseController{
 			} catch (Exception e) {
 				logger.error(loggerId + " paylogid="+payLog.getLogId()+" , paymsg="+response.getResult_msg()+"，保存失败记录时出错", e);
 			}
-			return ResultGenerator.genFailResult("请求失败！", null);
+			String tips = response.getResult_msg();
+			return ResultGenerator.genFailResult(tips,null);
 		}
 	}
 	
