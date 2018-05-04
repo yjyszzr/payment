@@ -395,10 +395,11 @@ public class PaymentController extends AbstractBaseController{
 			RspYinHeEntity rYinHeEntity = PayUtil.getWechatPayUrl(payIp,strAmt,orderNo);
 			if(rYinHeEntity != null) {
 				if(rYinHeEntity.isSucc() && !TextUtils.isEmpty(rYinHeEntity.qrCode)) {
-					YinHeResultDTO yinHeRDTO = new YinHeResultDTO();
-					yinHeRDTO.setPayUrl(rYinHeEntity.qrCode);
-					yinHeRDTO.setPayLogId(savePayLog.getLogId()+"");
-					payBaseResult = ResultGenerator.genSuccessResult("succ",yinHeRDTO);
+					PayReturnDTO rEntity = new PayReturnDTO();
+					rEntity.setPayUrl(rYinHeEntity.qrCode);
+					rEntity.setPayLogId(savePayLog.getLogId()+"");
+					rEntity.setOrderId(orderId);
+					payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
 				}else {
 					payBaseResult = ResultGenerator.genFailResult("银河支付返回支付链接错误");
 				}
@@ -419,10 +420,11 @@ public class PaymentController extends AbstractBaseController{
 			try {
 				data = URLEncoder.encode(data,"UTF-8");
 				String url = ReapalH5Config.URL_PAY + "?data="+data;
-				RongbaoPayResultDTO rongBaoREntity = new RongbaoPayResultDTO();
-				rongBaoREntity.setPayUrl(url);
-				rongBaoREntity.setPayLogId(savePayLog.getLogId()+"");
-				payBaseResult = ResultGenerator.genSuccessResult("succ",rongBaoREntity);
+				PayReturnDTO rEntity = new PayReturnDTO();
+				rEntity.setPayUrl(url);
+				rEntity.setPayLogId(savePayLog.getLogId()+"");
+				rEntity.setOrderId(orderId);
+				payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}

@@ -8,4 +8,5 @@ import lombok.Data;
 public class RongbaoPayResultDTO {
 	private String payUrl;
 	private String payLogId;
+	private String orderId;
 }
