@@ -605,7 +605,7 @@ public class PaymentController extends AbstractBaseController{
 			return ResultGenerator.genFailResult("请提供有效的订单号！", null);
 		}
 		int isPaid = payLog.getIsPaid();
-		if(1== isPaid) {
+		if(1 == isPaid) {
 			logger.info(loggerId+" 订单已支付成功");
 			return ResultGenerator.genSuccessResult("订单已支付成功！",null);
 		}
@@ -614,16 +614,18 @@ public class PaymentController extends AbstractBaseController{
 		if("app_rongbao".equals(payCode)) {
 			baseResult = RongUtil.queryOrderInfo(payLog.getPayOrderSn());
 		}
-		if(baseResult.getCode() != 0) {
-			logger.info(loggerId+" 订单查询请求异常"+baseResult.getMsg());
-			return ResultGenerator.genFailResult("请求异常！",null);
-		}
-		RspOrderQueryEntity response = baseResult.getData();
-		Integer payType = payLog.getPayType();
-		if(0 == payType) {
-			return orderOptions(loggerId, payLog, response);
-		}else if(1 == payType){
-			return rechargeOptions(loggerId, payLog, response);
+		if(baseResult != null) {
+			if(baseResult.getCode() != 0) {
+				logger.info(loggerId+" 订单查询请求异常"+baseResult.getMsg());
+				return ResultGenerator.genFailResult("请求异常！",null);
+			}
+			RspOrderQueryEntity response = baseResult.getData();
+			Integer payType = payLog.getPayType();
+			if(0 == payType) {
+				return orderOptions(loggerId, payLog, response);
+			}else if(1 == payType){
+				return rechargeOptions(loggerId, payLog, response);
+			}
 		}
 		return ResultGenerator.genFailResult("请求失败！", null);
 	}
@@ -729,7 +731,7 @@ public class PaymentController extends AbstractBaseController{
 			BaseResult<OrderDTO> orderInfoByOrderSn = orderService.getOrderInfoByOrderSn(snParam);
 			if(orderInfoByOrderSn.getCode() != 0 || orderInfoByOrderSn.getData() == null) {
 				logger.info(loggerId+" 订单获取失败");
-				return ResultGenerator.genFailResult("请求失败！", null);
+				return ResultGenerator.genFailResult("订单获取失败！", null);
 			}
 			BigDecimal surplus = orderInfoByOrderSn.getData().getSurplus();
 			BigDecimal bonusAmount = orderInfoByOrderSn.getData().getBonus();
