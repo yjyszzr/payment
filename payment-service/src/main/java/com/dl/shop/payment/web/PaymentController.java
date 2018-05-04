@@ -739,6 +739,7 @@ public class PaymentController extends AbstractBaseController{
 			}
 			BigDecimal surplus = orderInfoByOrderSn.getData().getSurplus();
 			BigDecimal bonusAmount = orderInfoByOrderSn.getData().getBonus();
+			logger.info("surplus:" + surplus + " bonusAmount:" + bonusAmount);
 			if(surplus != null && surplus.doubleValue() > 0){
 				SurplusPayParam surplusPayParam = new SurplusPayParam();
 				surplusPayParam.setOrderSn(orderSn);
@@ -749,6 +750,8 @@ public class PaymentController extends AbstractBaseController{
 				surplusPayParam.setThirdPartName(payLog.getPayName());
 				surplusPayParam.setThirdPartPaid(payLog.getOrderAmount());
 				BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
+				logger.info("orderSn:" + orderSn + "surplus:" + surplus + " bonusAmount:" + bonusAmount + " payName:" + payLog.getPayName()
+						   + "getOrderAmount:" + payLog.getOrderAmount());
 				if(rollbackUserAccountChangeByPay.getCode() != 0) {
 					logger.error(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在回滚用户余额时出错！");
 				}
