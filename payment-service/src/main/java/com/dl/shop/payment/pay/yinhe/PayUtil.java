@@ -5,12 +5,10 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 import org.apache.http.util.TextUtils;
-
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.dl.base.util.MD5Utils;
 import com.dl.shop.payment.pay.common.HttpUtil;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 public class PayUtil {
 
@@ -59,15 +57,15 @@ public class PayUtil {
 		ReqPayEntity reqEntity = ReqPayEntity.buildReqEntity(ip, amount, orderNo);
 		ReqSignEntity signEntity = reqEntity.buildSignEntity();
 		String str = JSON.toJSONString(signEntity);
-		JsonObject jsonObj = JSON.parseObject(str,JsonObject.class);
-		Set<java.util.Map.Entry<String, JsonElement>> mSet = jsonObj.entrySet();
-		Iterator<java.util.Map.Entry<String, JsonElement>> iterator = mSet.iterator();
+		JSONObject jsonObj = JSON.parseObject(str,JSONObject.class);
+		Set<java.util.Map.Entry<String, Object>> mSet = jsonObj.entrySet();
+		Iterator<java.util.Map.Entry<String, Object>> iterator = mSet.iterator();
 		//sort key
 		TreeMap<String,Object> treeMap = new TreeMap<>(new PayKeyComparator());
 		while(iterator.hasNext()) {
-			java.util.Map.Entry<String, JsonElement> entry = iterator.next();
+			java.util.Map.Entry<String, Object> entry = iterator.next();
 			String key = entry.getKey();
-			String val = jsonObj.get(key).getAsString();
+			String val = jsonObj.get(key).toString();
 			treeMap.put(key,val);
 		}
 		//获取sign code 参数
