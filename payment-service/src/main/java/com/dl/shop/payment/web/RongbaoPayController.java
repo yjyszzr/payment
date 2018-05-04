@@ -1,10 +1,8 @@
 package com.dl.shop.payment.web;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -15,13 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import com.alibaba.druid.support.logging.Log;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.result.BaseResult;
-import com.dl.base.result.ResultGenerator;
 import com.dl.base.util.DateUtil;
 import com.dl.member.api.IUserAccountService;
 import com.dl.member.param.UpdateUserRechargeParam;
@@ -33,7 +27,6 @@ import com.dl.shop.payment.pay.rongbao.entity.PayResultEntity;
 import com.dl.shop.payment.pay.rongbao.util.DecipherH5;
 import com.dl.shop.payment.pay.rongbao.util.Md5Utils;
 import com.dl.shop.payment.service.PayLogService;
-
 import io.swagger.annotations.ApiOperation;
 
 /***
@@ -42,7 +35,7 @@ import io.swagger.annotations.ApiOperation;
  */
 @Controller
 @RequestMapping("/rongbaopay")
-public class RongbaoPlayController extends AbstractBaseController{
+public class RongbaoPayController extends AbstractBaseController{
 	private final static Logger logger = LoggerFactory.getLogger(PaymentController.class);
 	
 	@Resource
@@ -216,6 +209,5 @@ public class RongbaoPlayController extends AbstractBaseController{
 		}
 		return decryData;
 	}
-	
-	
 }
+
