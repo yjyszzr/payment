@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.shop.payment.pay.common.HttpUtil;
+import com.dl.shop.payment.pay.common.RspHttpEntity;
 
 /****
  * 支付代码
@@ -15,7 +16,7 @@ import com.dl.shop.payment.pay.common.HttpUtil;
 public class PayDemo {
 
 	public PayDemo() {
-		ReqPayEntity reqEntity = null;
+		ReqPayEntity reqEntity = ReqPayEntity.buildReqEntity("127.0.0.1","3", ""+System.currentTimeMillis());
 		ReqSignEntity signEntity = reqEntity.buildSignEntity();
 		String str = JSON.toJSONString(signEntity);
 		JSONObject jsonObj = JSON.parseObject(str,JSONObject.class);
@@ -44,8 +45,8 @@ public class PayDemo {
 		String reqStr = JSON.toJSONString(reqEntity);
 		System.out.println(reqStr);
 		//发送  yinHePay.action  -> yinHePayH5.action
-		String resultStr = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/yinHePayH5.action",true);
-		System.out.println(resultStr);
+		RspHttpEntity rspEntity = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/yinHePayH5.action",true);
+		System.out.println(rspEntity);
 	}
 	
 	public static void main(String[] args) {

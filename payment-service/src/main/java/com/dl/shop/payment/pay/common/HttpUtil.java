@@ -7,12 +7,19 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.dl.shop.payment.web.PaymentController;
+
 /***
  * Http工具类
  */
 public class HttpUtil {
-
-	 public static String sendMsg(String postData, String postUrl,boolean isJson) {
+	private final static Logger logger = LoggerFactory.getLogger(PaymentController.class);
+	
+	 public static RspHttpEntity sendMsg(String postData, String postUrl,boolean isJson) {
+		 RspHttpEntity rspEntity = new RspHttpEntity();
 		 OutputStreamWriter out = null;
 		 HttpURLConnection conn = null;
 	        try {
@@ -37,7 +44,9 @@ public class HttpUtil {
 	            //获取响应状态
 	            if (code != HttpURLConnection.HTTP_OK) {
 	                System.out.println("connect failed code:" + code);
-	                return "";
+	                rspEntity.isSucc = false;
+	                rspEntity.msg = "code:" + code;
+	                return rspEntity;
 	            }
 	            //获取响应内容体
 	            String line, result = "";
@@ -46,8 +55,12 @@ public class HttpUtil {
 	                result += line + "\n";
 	            }
 	            in.close();
-	            return result;
+	            rspEntity.msg = result;
+	            rspEntity.isSucc = true;
+	            return rspEntity;
 	        } catch (IOException e) {
+	        	rspEntity.isSucc = false;
+	        	rspEntity.msg = e.getMessage();
 	            e.printStackTrace(System.out);
 	        }finally {
 	        	if(out != null) {
@@ -58,7 +71,7 @@ public class HttpUtil {
 					}
 	        	}
 	        }
-	        return "";
+	        return rspEntity;
 	    }
 	 
 }

@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.util.MD5Utils;
 import com.dl.shop.payment.pay.common.HttpUtil;
+import com.dl.shop.payment.pay.common.RspHttpEntity;
 import com.dl.shop.payment.web.PaymentController;
 
 public class PayUtil {
@@ -86,10 +87,13 @@ public class PayUtil {
 		String reqStr = JSON.toJSONString(reqEntity);
 		logger.info(reqStr);
 		//发送  yinHePay.action  -> yinHePayH5.action
-		String resultStr = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/yinHePayH5.action",true);
-		logger.info("resultStr:" + resultStr);
-		if(!TextUtils.isEmpty(resultStr)) {
-			rEntity = JSON.parseObject(resultStr,RspYinHeEntity.class);
+		RspHttpEntity rspHttpEntity = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/yinHePayH5.action",true);
+		logger.info("resultStr:" + rspHttpEntity.toString());
+		if(rspHttpEntity.isSucc) {
+			rEntity = JSON.parseObject(rspHttpEntity.msg,RspYinHeEntity.class);
+		}else {
+			rEntity = new RspYinHeEntity();
+			rEntity.returnMsg = rspHttpEntity.msg;
 		}
 		return rEntity;
 	}
