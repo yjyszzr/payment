@@ -87,6 +87,7 @@ public class PayUtil {
 		logger.info(reqStr);
 		//发送  yinHePay.action  -> yinHePayH5.action
 		String resultStr = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/yinHePayH5.action",true);
+		logger.info("resultStr:" + resultStr);
 		if(!TextUtils.isEmpty(resultStr)) {
 			rEntity = JSON.parseObject(resultStr,RspYinHeEntity.class);
 		}
