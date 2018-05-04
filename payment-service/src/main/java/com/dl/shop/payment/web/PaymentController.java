@@ -763,7 +763,7 @@ public class PaymentController extends AbstractBaseController{
 			}
 			String code = response.getResult_code();
 			if(code.equals("3015")) {//订单不存在
-				return ResultGenerator.genResult(MemberEnums.PAY_RONGBAO_WAITING.getcode(),MemberEnums.PAY_RONGBAO_WAITING.getMsg());
+				return ResultGenerator.genResult(MemberEnums.PAY_RONGBAO_EMPTY.getcode(),MemberEnums.PAY_RONGBAO_EMPTY.getMsg());
 			}else {
 				String tips = response.getResult_msg();
 				return ResultGenerator.genResult(MemberEnums.PAY_RONGBAO_FAILURE.getcode(),"融宝服务返回[" + tips +"]");
