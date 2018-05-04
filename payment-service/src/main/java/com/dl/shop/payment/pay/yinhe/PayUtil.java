@@ -5,13 +5,18 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 import org.apache.http.util.TextUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.util.MD5Utils;
 import com.dl.shop.payment.pay.common.HttpUtil;
+import com.dl.shop.payment.web.PaymentController;
 
 public class PayUtil {
-
+	private final static Logger logger = LoggerFactory.getLogger(PaymentController.class);
+	
 	/**
 	 * 获取请求参数
 	 * @param treeMap
@@ -70,16 +75,16 @@ public class PayUtil {
 		}
 		//获取sign code 参数
 		String paraStr = PayUtil.getPayParams(treeMap);
-		System.out.println("sign code params:" + paraStr + " secret:" +ConfigerPay.SECRET);
+		logger.info("sign code params:" + paraStr + " secret:" +ConfigerPay.SECRET);
 		//生成signCode
 		String signCode = PayUtil.getSignCode(paraStr,ConfigerPay.SECRET);
 		signCode = signCode.toUpperCase();
-		System.out.println("sign code:" + signCode);
+		logger.info("sign code:" + signCode);
 		//赋值signCode
 		reqEntity.signValue = signCode;
 		//signCode添加到请求参数中
 		String reqStr = JSON.toJSONString(reqEntity);
-		System.out.println(reqStr);
+		logger.info(reqStr);
 		//发送  yinHePay.action  -> yinHePayH5.action
 		String resultStr = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/yinHePayH5.action",true);
 		if(!TextUtils.isEmpty(resultStr)) {
