@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSON;
+import com.dl.base.enums.PayEnum;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.base.util.DateUtil;
@@ -62,6 +63,7 @@ import com.dl.shop.payment.dto.PaymentDTO;
 import com.dl.shop.payment.dto.RongbaoPayResultDTO;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.dto.YinHeResultDTO;
+import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.UnifiedOrderParam;
 import com.dl.shop.payment.model.UserWithdrawLog;
@@ -763,10 +765,10 @@ public class PaymentController extends AbstractBaseController{
 			}
 			String code = response.getResult_code();
 			if(code.equals("3015")) {//订单不存在
-				return ResultGenerator.genResult(MemberEnums.PAY_RONGBAO_EMPTY.getcode(),MemberEnums.PAY_RONGBAO_EMPTY.getMsg());
+				return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
 			}else {
 				String tips = response.getResult_msg();
-				return ResultGenerator.genResult(MemberEnums.PAY_RONGBAO_FAILURE.getcode(),"融宝服务返回[" + tips +"]");
+				return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"融宝服务返回[" + tips +"]");
 			}
 		}
 	}
