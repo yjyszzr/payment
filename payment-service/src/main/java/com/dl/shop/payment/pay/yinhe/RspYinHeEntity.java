@@ -8,4 +8,11 @@ public class RspYinHeEntity {
 	public boolean isSucc() {
 		return "0000".equals(returnCode);
 	}
+
+	//支付
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return "returnCode:" + returnCode + " returnMsg:" + returnMsg +" qrCode:" + qrCode;
+	}
 }

@@ -1,5 +1,6 @@
 package com.dl.shop.payment.pay.yinhe;
 
+import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -16,7 +17,11 @@ import com.dl.shop.payment.pay.common.RspHttpEntity;
 public class PayDemo {
 
 	public PayDemo() {
-		ReqPayEntity reqEntity = ReqPayEntity.buildReqEntity("127.0.0.1","3", ""+System.currentTimeMillis());
+		String amt = "10.0";
+		BigDecimal bigD = new BigDecimal(amt);
+		amt = bigD.movePointRight(2).toString();
+		System.out.println(amt);
+		ReqPayEntity reqEntity = ReqPayEntity.buildReqEntity("127.0.0.1",amt, ""+System.currentTimeMillis());
 		ReqSignEntity signEntity = reqEntity.buildSignEntity();
 		String str = JSON.toJSONString(signEntity);
 		JSONObject jsonObj = JSON.parseObject(str,JSONObject.class);
@@ -47,6 +52,12 @@ public class PayDemo {
 		//发送  yinHePay.action  -> yinHePayH5.action
 		RspHttpEntity rspEntity = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/yinHePayH5.action",true);
 		System.out.println(rspEntity);
+		if(rspEntity.isSucc) {
+			RspYinHeEntity rEntity = JSON.parseObject(rspEntity.msg,RspYinHeEntity.class);
+			System.out.println("isSucc:" +rEntity.isSucc());
+		}else {
+			System.out.println(rspEntity);
+		}
 	}
 	
 	public static void main(String[] args) {

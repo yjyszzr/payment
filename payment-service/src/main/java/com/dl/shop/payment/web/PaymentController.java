@@ -388,9 +388,11 @@ public class PaymentController extends AbstractBaseController{
 		BaseResult payBaseResult = null;
 		if("app_weixin".equals(paymentDto.getPayCode())) {
 //			payBaseResult = wxpayUtil.unifiedOrderForApp(unifiedOrderParam);
-			String amt = savePayLog.getOrderAmount().doubleValue()+"";
+			String strAmt = savePayLog.getOrderAmount().doubleValue()+"";
+			BigDecimal bigD = new BigDecimal(strAmt);
+			strAmt = bigD.movePointRight(2).toString();
 			String orderNo = savePayLog.getPayOrderSn();
-			RspYinHeEntity rYinHeEntity = PayUtil.getWechatPayUrl(payIp, amt,orderNo);
+			RspYinHeEntity rYinHeEntity = PayUtil.getWechatPayUrl(payIp,strAmt,orderNo);
 			if(rYinHeEntity != null) {
 				if(rYinHeEntity.isSucc() && !TextUtils.isEmpty(rYinHeEntity.qrCode)) {
 					YinHeResultDTO yinHeRDTO = new YinHeResultDTO();
