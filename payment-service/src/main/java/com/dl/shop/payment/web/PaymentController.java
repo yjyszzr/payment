@@ -396,10 +396,22 @@ public class PaymentController extends AbstractBaseController{
 			if(rYinHeEntity != null) {
 				if(rYinHeEntity.isSucc() && !TextUtils.isEmpty(rYinHeEntity.qrCode)) {
 					PayReturnDTO rEntity = new PayReturnDTO();
-					rEntity.setPayUrl(rYinHeEntity.qrCode);
-					rEntity.setPayLogId(savePayLog.getLogId()+"");
-					rEntity.setOrderId(orderId);
-					payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
+					String encodeUrl = null;
+					try {
+						encodeUrl = URLEncoder.encode(rYinHeEntity.qrCode,"UTF-8");
+					} catch (UnsupportedEncodingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					if(!TextUtils.isEmpty(encodeUrl)) {
+						String url = ReapalH5Config.URL_PAY_WECHAT+"?data="+encodeUrl;
+						rEntity.setPayUrl(url);
+						rEntity.setPayLogId(savePayLog.getLogId()+"");
+						rEntity.setOrderId(orderId);
+						payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
+					}else {
+						payBaseResult = ResultGenerator.genFailResult("url decode失败",null);
+					}
 				}else {
 					payBaseResult = ResultGenerator.genFailResult("银河支付返回支付链接错误");
 				}
@@ -641,6 +653,8 @@ public class PaymentController extends AbstractBaseController{
 		BaseResult<RspOrderQueryEntity> baseResult = null;
 		if("app_rongbao".equals(payCode)) {
 			baseResult = RongUtil.queryOrderInfo(payLog.getPayOrderSn());
+		}else if("app_weixin".equals(payCode)) {
+			baseResult = null;
 		}
 		if(baseResult != null) {
 			if(baseResult.getCode() != 0) {
@@ -654,6 +668,8 @@ public class PaymentController extends AbstractBaseController{
 			}else if(1 == payType){
 				return rechargeOptions(loggerId, payLog, response);
 			}
+		}else {
+			return ResultGenerator.genFailResult("未获取到订单信息，开发中...", null);
 		}
 		return ResultGenerator.genFailResult("请求失败！", null);
 	}
