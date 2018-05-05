@@ -408,6 +408,7 @@ public class PaymentController extends AbstractBaseController{
 						rEntity.setPayUrl(url);
 						rEntity.setPayLogId(savePayLog.getLogId()+"");
 						rEntity.setOrderId(orderId);
+						logger.info("client jump url:" + url +" payLogId:" +savePayLog.getLogId() +" orderId:" + orderId);
 						payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
 					}else {
 						payBaseResult = ResultGenerator.genFailResult("url decode失败",null);
