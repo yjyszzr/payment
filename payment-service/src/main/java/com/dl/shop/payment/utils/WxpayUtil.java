@@ -39,6 +39,7 @@ import com.dl.shop.payment.model.UnifiedOrderParam;
 import com.dl.shop.payment.model.WxpayAppModel;
 import com.dl.shop.payment.model.WxpayOrderQuery;
 import com.dl.shop.payment.model.WxpayUnifiedOrder;
+import com.dl.shop.payment.pay.rongbao.entity.RspOrderQueryEntity;
 
 
 @Component
@@ -132,7 +133,7 @@ public class WxpayUtil {
 	 * @param param
 	 * @return
 	 */
-	public BaseResult<OrderQueryResponse> orderQuery(String orderNo){
+	public BaseResult<RspOrderQueryEntity> orderQuery(String orderNo){
 		WxpayOrderQuery queryOrder = new WxpayOrderQuery();
 		queryOrder.setOut_trade_no(orderNo);
 		queryOrder.setAppid(wxpayConfig.getWxAppAppId());
@@ -161,7 +162,7 @@ public class WxpayUtil {
 			String resultCode = response.getResult_code();
 			String returnCode = response.getReturn_code();
 			if("SUCCESS".equals(resultCode) && "SUCCESS".equals(returnCode)) {
-				OrderQueryResponse queryResponse = new OrderQueryResponse();
+				RspOrderQueryEntity queryResponse = new RspOrderQueryEntity();
 				if("SUCCESS".equals(response.getTrade_state())) {
 					String time_end = response.getTime_end();
 					LocalDateTime timeEnd = LocalDateTime.parse(time_end, DateUtil.yyyymmddhhmmss);

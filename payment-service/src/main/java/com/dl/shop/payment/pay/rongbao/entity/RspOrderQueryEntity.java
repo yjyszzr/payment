@@ -17,6 +17,12 @@ public class RspOrderQueryEntity implements Serializable{
 	private String total_fee;
 	private String trade_no;
 	
+	//微信支付使用
+	private Integer tradeState;
+	private String tradeStateDesc;
+	private String tradeNo;
+	private Integer tradeEndTime;
+	
 	public boolean isSucc() {
 		if(!TextUtils.isEmpty(result_code)) {
 			return result_code.equals("0000");

@@ -64,6 +64,7 @@ import com.dl.shop.payment.dto.RongbaoPayResultDTO;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.dto.YinHeResultDTO;
 import com.dl.shop.payment.enums.PayEnums;
+import com.dl.shop.payment.model.OrderQueryResponse;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.UnifiedOrderParam;
 import com.dl.shop.payment.model.UserWithdrawLog;
@@ -391,8 +392,8 @@ public class PaymentController extends AbstractBaseController{
 			String strAmt = savePayLog.getOrderAmount().doubleValue()+"";
 			BigDecimal bigD = new BigDecimal(strAmt);
 			strAmt = bigD.movePointRight(2).toString();
-			String orderNo = savePayLog.getPayOrderSn();
-			RspYinHeEntity rYinHeEntity = PayUtil.getWechatPayUrl(payIp,strAmt,orderNo);
+			String payOrderSn = savePayLog.getPayOrderSn();
+			RspYinHeEntity rYinHeEntity = PayUtil.getWechatPayUrl(payIp,strAmt,payOrderSn);
 			if(rYinHeEntity != null) {
 				if(rYinHeEntity.isSucc() && !TextUtils.isEmpty(rYinHeEntity.qrCode)) {
 					PayReturnDTO rEntity = new PayReturnDTO();
@@ -655,7 +656,7 @@ public class PaymentController extends AbstractBaseController{
 		if("app_rongbao".equals(payCode)) {
 			baseResult = RongUtil.queryOrderInfo(payLog.getPayOrderSn());
 		}else if("app_weixin".equals(payCode)) {
-			baseResult = null;
+			baseResult = wxpayUtil.orderQuery(payLog.getPayOrderSn());
 		}
 		if(baseResult != null) {
 			if(baseResult.getCode() != 0) {
