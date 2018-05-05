@@ -6,9 +6,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.Map.Entry;
-
-import org.springframework.web.bind.annotation.RequestBody;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.shop.payment.pay.common.HttpUtil;
@@ -21,6 +18,7 @@ public class PayDemo {
 
 	public PayDemo() {
 		testQuery();
+//		testPay();
 	}
 	
 	private void testQuery() {

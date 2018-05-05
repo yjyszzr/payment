@@ -13,6 +13,8 @@ public class ReqQueryEntity {
 	public String signValue;
 	public String transNo;
 	public String payType;
+	public String amt;
+	public String merId;
 	
 	public static final String PAY_TYPE_WECHAT = "1";
 	public static final String PAY_TYPE_ZHIFUBAO = "2";
@@ -28,6 +30,8 @@ public class ReqQueryEntity {
 		reqEntity.signType = "MD5";		//签名信息
 		reqEntity.transNo = orderNo;	//交易号 唯一
 		reqEntity.payType = PAY_TYPE_WECHAT;
+		reqEntity.amt = "";
+		reqEntity.merId = ConfigerPay.MERCHANT_NO;
 		return reqEntity;
 	}
 	
@@ -37,6 +41,8 @@ public class ReqQueryEntity {
 		sEntity.termNo = termNo;
 		sEntity.transNo = transNo;
 		sEntity.txtTime = txtTime;
+		sEntity.merId = merId;
+		sEntity.amt = "";
 		return sEntity;
 	}
 	
