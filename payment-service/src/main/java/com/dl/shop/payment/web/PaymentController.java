@@ -77,7 +77,9 @@ import com.dl.shop.payment.param.WithdrawParam;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
+import com.dl.shop.payment.pay.rongbao.entity.ReqRefundEntity;
 import com.dl.shop.payment.pay.rongbao.entity.ReqRongEntity;
+import com.dl.shop.payment.pay.rongbao.entity.RspRefundEntity;
 import com.dl.shop.payment.pay.yinhe.PayUtil;
 import com.dl.shop.payment.pay.yinhe.RspYinHeEntity;
 import com.dl.shop.payment.pay.yinhe.YinHeUtil;
@@ -157,11 +159,30 @@ public class PaymentController extends AbstractBaseController{
 		}
 		boolean succThird = false;
 		if(hasThird) {
-			String payCode = order.getPayCode();
-			if(payCode.equals("app_rongbao")) {
-				
-			}else if(payCode.equals("app_weixin")) {
-				
+			String payLogId = order.getPaySn();
+			if(payLogId != null) {
+				Integer intPayLogId = Integer.valueOf(payLogId);
+				PayLog payLog = payLogService.findById(intPayLogId);
+				String payCode = order.getPayCode();
+				if(payLog != null) {
+					if(payCode.equals("app_rongbao")) {
+						ReqRefundEntity reqEntity = new ReqRefundEntity();
+						reqEntity.setAmount(thirdPartyPaid.toString());
+						reqEntity.setNote("出票失败退款操作");
+						reqEntity.setOrig_order_no(payLog.getPayOrderSn());
+						try {
+							RspRefundEntity rEntity = RongUtil.refundOrderInfo(reqEntity);
+							logger.info("rEntity:" + rEntity.toString());
+							if(rEntity != null && rEntity.isSucc()) {
+								succThird = true;
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}else if(payCode.equals("app_weixin")) {
+						
+					}
+				}
 			}
 		}else {	//无第三方支付，默认第三支付成功
 			succThird = true;
