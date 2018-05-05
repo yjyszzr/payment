@@ -62,7 +62,7 @@ public class CashUtil {
 		ReqCashEntity reqEntity = new ReqCashEntity();
 		reqEntity.setBatch_no("1234567");
 		reqEntity.setBatch_count("1");
-		reqEntity.setContent("1,62220215080205389633,jack-cooper,工商银行,分行,支行,私,10,CNY,北京,北京,18910116131,身份证,420321199202150718,0001,12306,hh");
+		reqEntity.setContent("3,62220215080205389633,jack-cooper,工商银行,分行,支行,私,10,CNY,北京,北京,18910116131,身份证,420321199202150718,0001,12306,hh");
 		reqEntity.setBatch_amount("10");
 		reqEntity.setPay_type("1");
 		try {
@@ -74,6 +74,4 @@ public class CashUtil {
 	
 	public CashUtil() {
 	}
-
-	public String data;
 }
