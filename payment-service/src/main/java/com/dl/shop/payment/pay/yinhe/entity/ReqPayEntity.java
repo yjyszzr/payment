@@ -1,8 +1,10 @@
-package com.dl.shop.payment.pay.yinhe;
+package com.dl.shop.payment.pay.yinhe.entity;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
 
 public class ReqPayEntity implements Serializable{
 	private static final long serialVersionUID = 1L;

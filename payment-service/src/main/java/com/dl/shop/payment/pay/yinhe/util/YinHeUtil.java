@@ -1,11 +1,9 @@
-package com.dl.shop.payment.pay.yinhe;
+package com.dl.shop.payment.pay.yinhe.util;
 
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
-
 import org.springframework.stereotype.Component;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.result.BaseResult;
@@ -13,6 +11,10 @@ import com.dl.base.result.ResultGenerator;
 import com.dl.shop.payment.pay.common.HttpUtil;
 import com.dl.shop.payment.pay.common.RspHttpEntity;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
+import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
+import com.dl.shop.payment.pay.yinhe.entity.ReqQueryEntity;
+import com.dl.shop.payment.pay.yinhe.entity.ReqSignEntity;
+import com.dl.shop.payment.pay.yinhe.entity.RspQueryEntity;
 
 /****
  * 银河支付订单查询

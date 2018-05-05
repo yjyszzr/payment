@@ -1,4 +1,4 @@
-package com.dl.shop.payment.pay.yinhe;
+package com.dl.shop.payment.pay.yinhe.entity;
 
 public class ReqSignEntity {
 	public String orgNo;//机构号

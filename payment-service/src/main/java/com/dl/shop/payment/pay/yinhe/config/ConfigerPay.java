@@ -1,4 +1,4 @@
-package com.dl.shop.payment.pay.yinhe;
+package com.dl.shop.payment.pay.yinhe.config;
 
 public class ConfigerPay {
 	public static final String URL_PAY = "http://zfyun.com.cn:8080/YinHeLoan/yinHe";

@@ -1,4 +1,4 @@
-package com.dl.shop.payment.pay.yinhe;
+package com.dl.shop.payment.pay.yinhe.util;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -13,6 +13,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.dl.base.util.MD5Utils;
 import com.dl.shop.payment.pay.common.HttpUtil;
 import com.dl.shop.payment.pay.common.RspHttpEntity;
+import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
+import com.dl.shop.payment.pay.yinhe.entity.ReqPayEntity;
+import com.dl.shop.payment.pay.yinhe.entity.ReqSignEntity;
+import com.dl.shop.payment.pay.yinhe.entity.RspYinHeEntity;
 import com.dl.shop.payment.web.PaymentController;
 
 public class PayUtil {

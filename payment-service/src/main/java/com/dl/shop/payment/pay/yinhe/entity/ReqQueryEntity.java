@@ -1,7 +1,9 @@
-package com.dl.shop.payment.pay.yinhe;
+package com.dl.shop.payment.pay.yinhe.entity;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
 
 public class ReqQueryEntity {
 	public String orgNo;//机构号
