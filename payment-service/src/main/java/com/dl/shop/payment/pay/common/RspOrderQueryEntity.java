@@ -1,4 +1,4 @@
-package com.dl.shop.payment.pay.rongbao.entity;
+package com.dl.shop.payment.pay.common;
 
 import java.io.Serializable;
 import org.apache.http.util.TextUtils;
@@ -18,10 +18,8 @@ public class RspOrderQueryEntity implements Serializable{
 	private String trade_no;
 	
 	//微信支付使用
-	private Integer tradeState;
-	private String tradeStateDesc;
-	private String tradeNo;
 	private Integer tradeEndTime;
+	private String payCode;
 	
 	public boolean isSucc() {
 		if(!TextUtils.isEmpty(result_code)) {
@@ -29,4 +27,7 @@ public class RspOrderQueryEntity implements Serializable{
 		}
 		return false;
 	}
+
+	public static final String PAY_CODE_WECHAT = "app_weixin";
+	public static final String PAY_CODE_RONGBAO = "app_rongbao";
 }

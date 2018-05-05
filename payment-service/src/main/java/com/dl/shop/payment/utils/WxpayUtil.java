@@ -14,9 +14,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
 import javax.annotation.Resource;
-
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -39,7 +37,7 @@ import com.dl.shop.payment.model.UnifiedOrderParam;
 import com.dl.shop.payment.model.WxpayAppModel;
 import com.dl.shop.payment.model.WxpayOrderQuery;
 import com.dl.shop.payment.model.WxpayUnifiedOrder;
-import com.dl.shop.payment.pay.rongbao.entity.RspOrderQueryEntity;
+import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 
 
 @Component
@@ -163,18 +161,21 @@ public class WxpayUtil {
 			String returnCode = response.getReturn_code();
 			if("SUCCESS".equals(resultCode) && "SUCCESS".equals(returnCode)) {
 				RspOrderQueryEntity queryResponse = new RspOrderQueryEntity();
+				queryResponse.setPayCode(RspOrderQueryEntity.PAY_CODE_WECHAT);
 				if("SUCCESS".equals(response.getTrade_state())) {
 					String time_end = response.getTime_end();
 					LocalDateTime timeEnd = LocalDateTime.parse(time_end, DateUtil.yyyymmddhhmmss);
 					Instant instant = timeEnd.atZone(ZoneId.systemDefault()).toInstant();
 					int tradeEndTime = Math.toIntExact(instant.getEpochSecond());
-					queryResponse.setTradeState(1);
+					queryResponse.setStatus(1+"");
 					queryResponse.setTradeEndTime(tradeEndTime);
-					queryResponse.setTradeNo(response.getTransaction_id());
-					queryResponse.setTradeStateDesc("支付成功！");
+					queryResponse.setTrade_no(response.getTransaction_id());
+					queryResponse.setResult_msg("支付成功！");
+					queryResponse.setResult_code("0000");
 				}else {
-					queryResponse.setTradeState(0);
-					queryResponse.setTradeStateDesc(response.getTrade_state()+"_" + response.getTrade_state_desc());
+					queryResponse.setStatus(0+"");
+					queryResponse.setResult_msg(response.getTrade_state()+"_" + response.getTrade_state_desc());
+					queryResponse.setResult_code(resultCode);
 				}
 				return ResultGenerator.genSuccessResult("success", queryResponse);
 			}else {

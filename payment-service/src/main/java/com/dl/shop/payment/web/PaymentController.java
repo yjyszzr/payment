@@ -74,12 +74,13 @@ import com.dl.shop.payment.param.RechargeParam;
 import com.dl.shop.payment.param.ReqOrderQueryParam;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
 import com.dl.shop.payment.param.WithdrawParam;
+import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
 import com.dl.shop.payment.pay.rongbao.entity.ReqRongEntity;
-import com.dl.shop.payment.pay.rongbao.entity.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.yinhe.PayUtil;
 import com.dl.shop.payment.pay.yinhe.RspYinHeEntity;
+import com.dl.shop.payment.pay.yinhe.YinHeUtil;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
 import com.dl.shop.payment.service.UserWithdrawLogService;
@@ -97,6 +98,8 @@ public class PaymentController extends AbstractBaseController{
 	private PayMentService paymentService;
 	@Resource
 	private WxpayUtil wxpayUtil;
+	@Resource
+	private YinHeUtil yinHeUtil;
 	@Autowired
 	private IUserAccountService userAccountService;
 	@Autowired
@@ -152,7 +155,18 @@ public class PaymentController extends AbstractBaseController{
 		if(hasThird && payType == 2) {
 			payType = 3;
 		}
-		if(payType ==2 || payType == 3) {
+		boolean succThird = false;
+		if(hasThird) {
+			String payCode = order.getPayCode();
+			if(payCode.equals("app_rongbao")) {
+				
+			}else if(payCode.equals("app_weixin")) {
+				
+			}
+		}else {	//无第三方支付，默认第三支付成功
+			succThird = true;
+		}
+		if(succThird && (payType ==2 || payType == 3)) {
 			SurplusPayParam surplusPayParam = new SurplusPayParam();
 			surplusPayParam.setOrderSn(orderSn);
 			surplusPayParam.setSurplus(surplus);
@@ -656,7 +670,8 @@ public class PaymentController extends AbstractBaseController{
 		if("app_rongbao".equals(payCode)) {
 			baseResult = RongUtil.queryOrderInfo(payLog.getPayOrderSn());
 		}else if("app_weixin".equals(payCode)) {
-			baseResult = wxpayUtil.orderQuery(payLog.getPayOrderSn());
+//			baseResult = wxpayUtil.orderQuery(payLog.getPayOrderSn());
+			baseResult = yinHeUtil.orderQuery(payLog.getPayOrderSn());
 		}
 		if(baseResult != null) {
 			if(baseResult.getCode() != 0) {
@@ -808,13 +823,23 @@ public class PaymentController extends AbstractBaseController{
 			} catch (Exception e) {
 				logger.error(loggerId + " paylogid="+payLog.getLogId()+" , paymsg="+response.getResult_msg()+"，保存失败记录时出错", e);
 			}
-			String code = response.getResult_code();
-			if(code.equals("3015")) {//订单不存在
-				return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
-			}else {
+			String payCode = response.getPayCode();
+			//融宝处理
+			if(RspOrderQueryEntity.PAY_CODE_RONGBAO.equals(payCode)) {
+				String code = response.getResult_code();
+				if(code.equals("3015")) {//订单不存在
+					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
+				}else {
+					String tips = response.getResult_msg();
+					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"融宝服务返回[" + tips +"]");
+				}
+			//微信处理	
+			}else if(RspOrderQueryEntity.PAY_CODE_WECHAT.equals(payCode)){//wechat pay
+				String code = response.getResult_code();
 				String tips = response.getResult_msg();
-				return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"融宝服务返回[" + tips +"]");
+				return ResultGenerator.genResult(PayEnums.PAY_WEIXIN_FAILURE.getcode(),"微信服务返回[" + tips +"]");
 			}
+			return null;
 		}
 	}
 }

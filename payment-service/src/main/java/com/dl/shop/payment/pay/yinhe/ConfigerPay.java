@@ -2,7 +2,7 @@ package com.dl.shop.payment.pay.yinhe;
 
 public class ConfigerPay {
 	public static final String URL_PAY = "http://zfyun.com.cn:8080/YinHeLoan/yinHe";
-	public static final String URL_PAY_CALLBACK = "http://api.caixiaomi.net/callback";
+	public static final String URL_PAY_CALLBACK = "http://39.106.18.39:7076/payment/wxpay/notify";
 	
 	public static final String MERCHANT_NO = "1344296701";
 									   //388bef8044e16a554bd0f46bc2768071

@@ -1,43 +1,25 @@
 package com.dl.shop.payment.pay.yinhe;
 
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class ReqPayEntity implements Serializable{
-	private static final long serialVersionUID = 1L;
-	
+public class ReqQueryEntity {
 	public String orgNo;//机构号
 	public String charset;
 	public String termNo;
 	public String termType;
 	public String txtTime;
 	public String signType;
-	public String transNo;
-	public String merId;
-	public String amt;
-	public String subject;
-	public String backUrl;
-	public String payType;
 	public String signValue;
-	public String ip;
+	public String transNo;
+	public String payType;
 	
 	public static final String PAY_TYPE_WECHAT = "1";
 	public static final String PAY_TYPE_ZHIFUBAO = "2";
 	
-	public ReqSignEntity buildSignEntity() {
-		ReqSignEntity sEntity = new ReqSignEntity();
-		sEntity.orgNo = orgNo;
-		sEntity.amt = amt;
-		sEntity.termNo = termNo;
-		sEntity.merId = merId;
-		sEntity.transNo = transNo;
-		sEntity.txtTime = txtTime;
-		return sEntity;
-	}
 	
-	public static final ReqPayEntity buildReqEntity(String ip,String amount,String orderNo) {
-		ReqPayEntity reqEntity = new ReqPayEntity();
+	public static ReqQueryEntity buildReqQueryEntity(String orderNo) {
+		ReqQueryEntity reqEntity = new ReqQueryEntity();
 		reqEntity.orgNo = "2188";
 		reqEntity.charset = "UTF-8";
 		reqEntity.termNo = "XA026454";  //设备号
@@ -45,12 +27,17 @@ public class ReqPayEntity implements Serializable{
 		reqEntity.txtTime = getPayTime(); //交易时间，暂时写死
 		reqEntity.signType = "MD5";		//签名信息
 		reqEntity.transNo = orderNo;	//交易号 唯一
-		reqEntity.merId = ConfigerPay.MERCHANT_NO;//商户号
-		reqEntity.amt = amount;			//交易金额
-		reqEntity.backUrl = ConfigerPay.URL_PAY_CALLBACK;	//异步回调接口
 		reqEntity.payType = PAY_TYPE_WECHAT;
-		reqEntity.ip = ip;
 		return reqEntity;
+	}
+	
+	public ReqSignEntity buildSignEntity() {
+		ReqSignEntity sEntity = new ReqSignEntity();
+		sEntity.orgNo = orgNo;
+		sEntity.termNo = termNo;
+		sEntity.transNo = transNo;
+		sEntity.txtTime = txtTime;
+		return sEntity;
 	}
 	
 	public static String getPayTime() {
@@ -59,10 +46,5 @@ public class ReqPayEntity implements Serializable{
 		String str = sdfTime.format(date);
 		return str;
 	}
-	
-	public static void main(String[] args) {
-		
-	}
-	
 	
 }

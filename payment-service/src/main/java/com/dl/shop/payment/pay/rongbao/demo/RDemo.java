@@ -27,6 +27,7 @@ public class RDemo {
 		String data = JSON.toJSONString(reqEntity);
 		try {
 			data = URLEncoder.encode(data,"UTF-8");
+			System.out.println("data:" + data);
 			String url = "http://localhost:8080/reapal-h5-api/h5/indexH5.jsp?data="+data;
 			System.out.println(url);
 		} catch (UnsupportedEncodingException e) {
