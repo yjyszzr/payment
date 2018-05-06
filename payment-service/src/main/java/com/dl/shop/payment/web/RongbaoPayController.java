@@ -79,7 +79,7 @@ public class RongbaoPayController extends AbstractBaseController{
 					if(null == payLog) {
 						logger.info(rEntity.order_no + " payLog对象未查询到，返回失败！");
 					}else {
-						call(rEntity,payLog,request,response);
+//						call(rEntity,payLog,request,response);
 					}
 					try {
 						logger.info("返回success...");
