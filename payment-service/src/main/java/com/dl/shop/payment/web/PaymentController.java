@@ -847,7 +847,7 @@ public class PaymentController extends AbstractBaseController{
 			//融宝处理
 			if(RspOrderQueryEntity.PAY_CODE_RONGBAO.equals(payCode)) {
 				String code = response.getResult_code();
-				if(code.equals("3015")) {//订单不存在
+				if(StringUtils.isBlank(code) || "3015".equals(code)) {//订单不存在
 					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
 				}else {
 					String tips = response.getResult_msg();
