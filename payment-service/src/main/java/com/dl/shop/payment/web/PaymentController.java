@@ -566,22 +566,62 @@ public class PaymentController extends AbstractBaseController{
 		unifiedOrderParam.setOrderNo(savePayLog.getLogId());
 		BaseResult payBaseResult = null;
 		if("app_weixin".equals(payCode)) {
-			payBaseResult = wxpayUtil.unifiedOrderForApp(unifiedOrderParam);
+//			payBaseResult = wxpayUtil.unifiedOrderForApp(unifiedOrderParam);
+		}else if("app_rongbao".equals(payCode)) {
+			//生成支付链接信息
+			String payOrder = savePayLog.getPayOrderSn();
+			ReqRongEntity reqEntity = new ReqRongEntity();
+			reqEntity.setOrderId(payOrder);
+			reqEntity.setUserId(savePayLog.getUserId().toString());
+			reqEntity.setTotal(savePayLog.getOrderAmount().doubleValue());
+			reqEntity.setPName("彩小秘");
+			reqEntity.setPDesc("彩小秘足彩支付");
+			reqEntity.setTransTime(savePayLog.getAddTime()+"");
+			String data = JSON.toJSONString(reqEntity);
+			try {
+				data = URLEncoder.encode(data,"UTF-8");
+				String url = ReapalH5Config.URL_PAY + "?data="+data;
+				PayReturnDTO rEntity = new PayReturnDTO();
+				rEntity.setPayUrl(url);
+				rEntity.setPayLogId(savePayLog.getLogId()+"");
+				rEntity.setOrderId(orderSn);
+				payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
 		}
 		//处理支付失败的情况
 		if(null == payBaseResult || payBaseResult.getCode() != 0) {
-			try {
-				PayLog updatePayLog = new PayLog();
-				updatePayLog.setLogId(savePayLog.getLogId());
-				updatePayLog.setIsPaid(0);
-				updatePayLog.setPayMsg(payBaseResult.getMsg());
-				payLogService.updatePayMsg(updatePayLog);
-			} catch (Exception e) {
-				logger.error(loggerId + "paylogid="+savePayLog.getLogId()+" , paymsg="+payBaseResult.getMsg()+"保存失败记录时出错", e);
+			//充值失败逻辑
+			//更改充值单状态
+			UpdateUserRechargeParam updateUserRechargeParam = new UpdateUserRechargeParam();
+			updateUserRechargeParam.setPaymentCode(payLog.getPayCode());
+			updateUserRechargeParam.setPaymentId(payLog.getLogId()+"");
+			updateUserRechargeParam.setPaymentName(payLog.getPayName());
+			updateUserRechargeParam.setPayTime(DateUtil.getCurrentTimeLong());
+			updateUserRechargeParam.setStatus("2");
+			updateUserRechargeParam.setRechargeSn(payLog.getOrderSn());
+			BaseResult<String> baseResult = userAccountService.updateReCharege(updateUserRechargeParam);
+			logger.info(loggerId + " 充值失败更改充值单返回信息：status=" + baseResult.getCode()+" , message="+baseResult.getMsg());
+			if(baseResult.getCode() == 0) {
+				//更改流水信息
+				try {
+					PayLog updatePayLog = new PayLog();
+					updatePayLog.setLogId(savePayLog.getLogId());
+					updatePayLog.setIsPaid(0);
+					updatePayLog.setPayMsg(payBaseResult.getMsg());
+					payLogService.updatePayMsg(updatePayLog);
+				} catch (Exception e) {
+					logger.error(loggerId + "paylogid="+savePayLog.getLogId()+" , paymsg="+payBaseResult.getMsg()+"保存失败记录时出错", e);
+				}
 			}
 		}
-		logger.info(loggerId + " result: code="+payBaseResult.getCode()+" , msg="+payBaseResult.getMsg());
-		return payBaseResult;
+		if(payBaseResult != null) {
+			logger.info(loggerId + " result: code="+payBaseResult.getCode()+" , msg="+payBaseResult.getMsg());
+			return payBaseResult;
+		}else {
+			return ResultGenerator.genFailResult("参数异常");
+		}
 	}
 	
 	@ApiOperation(value="app提现调用", notes="")
