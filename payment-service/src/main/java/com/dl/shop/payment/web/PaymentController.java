@@ -575,7 +575,7 @@ public class PaymentController extends AbstractBaseController{
 			reqEntity.setUserId(savePayLog.getUserId().toString());
 			reqEntity.setTotal(savePayLog.getOrderAmount().doubleValue());
 			reqEntity.setPName("彩小秘");
-			reqEntity.setPDesc("彩小秘足彩支付");
+			reqEntity.setPDesc("彩小秘充值支付");
 			reqEntity.setTransTime(savePayLog.getAddTime()+"");
 			String data = JSON.toJSONString(reqEntity);
 			try {
