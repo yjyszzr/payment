@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.http.util.TextUtils;
+import org.apache.log4j.Logger;
+
 import com.alibaba.fastjson.JSON;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -17,6 +19,7 @@ import com.dl.shop.payment.pay.rongbao.util.DecipherH5;
 import com.dl.shop.payment.pay.rongbao.util.ReapalSubmit;
 
 public class RongUtil {
+	private final static Logger log = Logger.getLogger(RongUtil.class);
 	
 	public static final RspRefundEntity refundOrderInfo(ReqRefundEntity reqEntity) throws Exception {
 		RspRefundEntity rEntity = null;
@@ -36,7 +39,7 @@ public class RongUtil {
 		String url = "/fast/refund";
 		String post;
 		post = ReapalSubmit.buildSubmit(map, url);
-		System.out.println("返回结果post==========>" + post);
+		log.info("返回结果post==========>" + post);
 		//解密返回的数据
 		String res = DecipherH5.decryptData(post);
 		if(!TextUtils.isEmpty(res)) {
@@ -57,10 +60,10 @@ public class RongUtil {
 		String post;
 		try {
 			post = ReapalSubmit.buildSubmit(map, url);
-			System.out.println("返回结果post==========>" + post);
+			log.info("返回结果post==========>" + post);
 		    //解密返回的数据
 		    String res = DecipherH5.decryptData(post);
-		    System.out.println("解密返回的数据==========>" + res);
+		    log.info("解密返回的数据==========>" + res);
 		    if(!TextUtils.isEmpty(res)) {
 		    	rEntity = JSON.parseObject(res,RspOrderQueryEntity.class);
 		    	rEntity.setPayCode(RspOrderQueryEntity.PAY_CODE_RONGBAO);
@@ -78,7 +81,7 @@ public class RongUtil {
 	public static void main(String[] args) {
 //		try {
 //			BaseResult<RspOrderQueryEntity> rEntity = queryOrderInfo("20180503182485710280002");
-//			System.out.println("rEntity:" + rEntity);
+//			log.info("rEntity:" + rEntity);
 //		} catch (Exception e) {
 //			e.printStackTrace();
 //		}
