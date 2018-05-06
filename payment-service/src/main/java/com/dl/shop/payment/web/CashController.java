@@ -71,7 +71,11 @@ public class CashController {
 		if(userInfoExceptPass == null) {
 			return ResultGenerator.genFailResult("对不起，用户信息有误！", null);
 		}
-		String mobile = userInfoExceptPass.getData().getMobile();
+		UserDTO userDTO = userInfoExceptPass.getData();
+		if(userDTO == null) {
+			return ResultGenerator.genFailResult("未查询到该用户信息");
+		}
+		String mobile = userDTO.getMobile();
 		double totalAmount = param.getTotalAmount();
 		if(totalAmount <= 0) {
 			logger.info(loggerId+"提现金额提供有误！");
