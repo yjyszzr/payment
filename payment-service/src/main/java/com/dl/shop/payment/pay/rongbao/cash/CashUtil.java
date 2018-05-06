@@ -5,9 +5,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Resource;
+
+import org.apache.http.util.TextUtils;
+
 import com.alibaba.fastjson.JSON;
 import com.dl.shop.payment.pay.rongbao.cash.cfg.CashConfig;
 import com.dl.shop.payment.pay.rongbao.cash.entity.ReqCashEntity;
+import com.dl.shop.payment.pay.rongbao.cash.entity.RspCashEntity;
 import com.dl.shop.payment.pay.rongbao.cash.model.AgentPayRequest;
 import com.dl.shop.payment.pay.rongbao.cash.util.ReapalUtil;
 import com.dl.shop.payment.pay.rongbao.util.HttpClientUtil;
@@ -23,7 +27,8 @@ public class CashUtil {
 	 * 发起提现请求
 	 * @throws Exception 
 	 */
-	public static final void sendGetCashInfo(ReqCashEntity reqEntity) throws Exception {
+	public static final RspCashEntity sendGetCashInfo(ReqCashEntity reqEntity) throws Exception {
+		RspCashEntity rspEntity = null;
 		String batch_no = reqEntity.getBatch_no();
         String batch_count = reqEntity.getBatch_count();
         String batch_amount = reqEntity.getBatch_amount();
@@ -56,13 +61,17 @@ public class CashUtil {
 		String post = HttpClientUtil.post(ReapalUtil.getUrl() + "agentpay/pay", maps);
 		String res = ReapalUtil.pubkey(post);
 		System.out.println("result:" + res);
+		if(!TextUtils.isEmpty(res)) {
+			rspEntity = JSON.parseObject(res,RspCashEntity.class);
+		}
+		return rspEntity;
 	}
 	
 	public static void main(String[] args) {
 		ReqCashEntity reqEntity = new ReqCashEntity();
-		reqEntity.setBatch_no("1234567");
+		reqEntity.setBatch_no("1234568");
 		reqEntity.setBatch_count("1");
-		reqEntity.setContent("3,62220215080205389633,jack-cooper,工商银行,分行,支行,私,10,CNY,北京,北京,18910116131,身份证,420321199202150718,0001,12306,hh");
+		reqEntity.setContent("1,62220215080205389633,jack-cooper,工商银行,分行,支行,私,10,CNY,北京,北京,18910116131,身份证,420321199202150718,0001,12306,hh");
 		reqEntity.setBatch_amount("10");
 		reqEntity.setPay_type("1");
 		try {

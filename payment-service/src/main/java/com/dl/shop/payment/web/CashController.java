@@ -34,6 +34,10 @@ import com.dl.member.param.StrParam;
 import com.dl.member.param.UserWithdrawParam;
 import com.dl.shop.payment.model.UserWithdrawLog;
 import com.dl.shop.payment.param.WithdrawParam;
+import com.dl.shop.payment.pay.rongbao.cash.CashUtil;
+import com.dl.shop.payment.pay.rongbao.cash.entity.ReqCashContentEntity;
+import com.dl.shop.payment.pay.rongbao.cash.entity.ReqCashEntity;
+import com.dl.shop.payment.pay.rongbao.cash.entity.RspCashEntity;
 import com.dl.shop.payment.service.UserWithdrawLogService;
 
 import io.swagger.annotations.ApiOperation;
@@ -136,7 +140,34 @@ public class CashController {
 		messageAddParam.setMsgDesc(msgDesc.toString());
 		userMessageService.add(messageAddParam);
 		//第三方提现接口
-		
+		ReqCashEntity reqCashEntity = new ReqCashEntity();
+		//提现序号
+		reqCashEntity.setBatch_no(orderSn);
+		reqCashEntity.setBatch_count("1");
+		reqCashEntity.setBatch_amount(totalAmount+"");
+		reqCashEntity.setPay_type("1");
+		ReqCashContentEntity reqCashContentEntity = ReqCashContentEntity.buildTestReqCashEntity("001",""+totalAmount,"18910116131");
+		reqCashEntity.setBatch_count(reqCashContentEntity.buildContent());
+		boolean isSucc = false;
+		String tips = null;
+		try {
+			RspCashEntity rspEntity = CashUtil.sendGetCashInfo(reqCashEntity);
+			if(rspEntity != null && rspEntity.isSucc()) {
+				isSucc = true;
+			}else {
+				if(rspEntity != null) {
+					tips = rspEntity.result_msg;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			tips = e.getMessage();
+		}
+		if(isSucc) {
+			ResultGenerator.genSuccessResult("提现成功");
+		}else {
+			ResultGenerator.genFailResult("提现失败[" +tips +"]");
+		}
 		return ResultGenerator.genSuccessResult("请求成功！");
 	}
 	
