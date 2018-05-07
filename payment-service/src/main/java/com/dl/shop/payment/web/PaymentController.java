@@ -783,7 +783,6 @@ public class PaymentController extends AbstractBaseController{
 			if(updateReCharege.getCode() != 0) {
 				logger.error(loggerId+" paylogid="+"ordersn=" + payLog.getOrderSn()+"更新充值单成功状态失败");
 			}
-			
 			RecharegeParam recharegeParam = new RecharegeParam();
 			recharegeParam.setAmount(payLog.getOrderAmount());
 			recharegeParam.setPayId(response.getOrder_no());
@@ -808,10 +807,7 @@ public class PaymentController extends AbstractBaseController{
 			} catch (Exception e) {
 				logger.error(loggerId+" paylogid="+payLog.getLogId()+" , paymsg=支付成功，保存成功记录时出错", e);
 			}
-			rspEntity.setCode(0);
-			rspEntity.setMsg("订单已支付成功");
-			
-			return ResultGenerator.genSuccessResult("订单已支付成功！", rspEntity);
+			return ResultGenerator.genSuccessResult("订单已支付成功");
 		}else {
 			//更新paylog
 			try {
@@ -823,9 +819,18 @@ public class PaymentController extends AbstractBaseController{
 			} catch (Exception e) {
 				logger.error(loggerId + " paylogid="+payLog.getLogId()+" , paymsg="+response.getResult_msg()+"，保存失败记录时出错", e);
 			}
-			rspEntity.setCode(-1);
-			rspEntity.setMsg("请求失败");
-			return ResultGenerator.genFailResult("请求失败！", rspEntity);
+			String payCode = response.getPayCode();
+			if(RspOrderQueryEntity.PAY_CODE_RONGBAO.equals(payCode)) {
+				String code = response.getResult_code();
+				if(StringUtils.isBlank(code) || "3015".equals(code)) {//订单不存在
+					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
+				}else {
+					String tips = response.getResult_msg();
+					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"融宝服务返回[" + tips +"]");
+				}
+			}else {
+				return ResultGenerator.genResult(PayEnums.PAY_WEIXIN_FAILURE.getcode(),"微信回调暂未开发~");
+			}
 		}
 	}
 	/**
