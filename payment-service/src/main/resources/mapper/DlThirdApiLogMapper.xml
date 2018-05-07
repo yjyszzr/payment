@@ -4,7 +4,7 @@
   <resultMap id="BaseResultMap" type="com.dl.shop.payment.model.DlThirdApiLog">
     <id column="id" jdbcType="INTEGER" property="id" />
     <result column="api_name" jdbcType="VARCHAR" property="apiName" />
-    <result column="api_type" jdbcType="Integer" property="apiType" />
+    <result column="api_type" jdbcType="INTEGER" property="apiType" />
     <result column="api_desc" jdbcType="VARCHAR" property="apiDesc" />
     <result column="option_time" jdbcType="TIMESTAMP" property="optionTime" />
     <result column="api_param" jdbcType="LONGVARCHAR" property="apiParam" />

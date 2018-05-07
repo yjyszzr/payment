@@ -12,4 +12,17 @@ public class ProjectConstant {
 
     public static final String MAPPER_INTERFACE_REFERENCE = BASE_PACKAGE + ".mapper.Mapper";//Mapper插件基础接口的完全限定名
     public static final String MAPPER_BASE = "com.dl.base.mapper.Mapper";//Mapper插件基础接口的完全限定名
+    
+    
+    public static final String NOT_FINISH = "0";// 用户未完成
+    public static final String FINISH = "1";//用户已完成
+    public static final String FAILURE = "2";//失败
+    
+    public static final Integer REWARD = 1;//奖金
+    public static final Integer RECHARGE = 2;//充值
+    public static final Integer BUY = 3;//购彩
+    public static final Integer WITHDRAW = 4;//提现
+    public static final Integer BONUS =5;//红包
+    public static final Integer ACCOUNT_ROLLBACK =6;//账户回滚
+    public static final Integer REFOUND =7;
 }

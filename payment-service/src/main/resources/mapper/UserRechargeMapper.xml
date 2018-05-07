@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dl.shop.payment.dao.UserRechargeMapper">
+  <resultMap id="BaseResultMap" type="com.dl.shop.payment.model.UserRecharge">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="recharge_sn" jdbcType="VARCHAR" property="rechargeSn" />
+    <result column="user_id" jdbcType="INTEGER" property="userId" />
+    <result column="amount" jdbcType="DECIMAL" property="amount" />
+    <result column="account_id" jdbcType="INTEGER" property="accountId" />
+    <result column="add_time" jdbcType="INTEGER" property="addTime" />
+    <result column="status" jdbcType="BIT" property="status" />
+    <result column="process_type" jdbcType="BIT" property="processType" />
+    <result column="payment_code" jdbcType="VARCHAR" property="paymentCode" />
+    <result column="payment_name" jdbcType="VARCHAR" property="paymentName" />
+    <result column="pay_time" jdbcType="INTEGER" property="payTime" />
+    <result column="payment_id" jdbcType="VARCHAR" property="paymentId" />
+    <result column="donation_id" jdbcType="VARCHAR" property="donationId" />
+  </resultMap>
+  
+  <insert id="insertUserRecharge"  parameterType="com.dl.shop.payment.model.UserRecharge">
+     INSERT INTO dl_user_recharge(recharge_sn,user_id,amount,add_time,status)
+     VALUES(#{rechargeSn},#{userId},#{amount},#{addTime},#{status});
+  </insert>
+  
+  
+  <update id="updateUserRechargeBySelective" parameterType="com.dl.shop.payment.model.UserRecharge">
+   	 UPDATE dl_user_recharge
+		 <trim prefix="set" suffixOverrides=",">
+		  <if test="status">status=#{status},</if>
+		  <if test="paymentCode!=null">payment_code=#{paymentCode},</if>
+		  <if test="paymentName">payment_name=#{paymentName},</if>
+		  <if test="payTime!=null">pay_time=#{payTime},</if>
+		  <if test="paymentId!=null">payment_id=#{paymentId},</if>
+		 </trim>
+	 WHERE recharge_sn = #{rechargeSn}  
+  </update>
+  
+  <select id="queryUserChargeBySelective" parameterType="com.dl.shop.payment.model.UserRecharge" resultMap="BaseResultMap">
+  	 select * from dl_user_recharge 
+  	 <where>
+	  	<if test="userId != null">
+	        AND user_id = #{userId}
+	    </if>
+	    <if test="rechargeSn != null">
+	        AND recharge_sn = #{rechargeSn}
+	    </if>
+
+	    <if test="status != null">
+	        AND status = #{status}
+	    </if>
+	    <if test="id != null">
+	        AND id = #{id}
+	    </if>
+	     <if test="paymentCode!=null">
+	        AND payment_code = #{paymentCode}
+	    </if>
+    </where>
+    order by add_time
+  </select>
+</mapper>
