@@ -135,11 +135,14 @@ public class CashController {
 			logger.info(loggerId + " payLog对象保存失败！"); 
 			return ResultGenerator.genFailResult("请求失败！", null);
 		}*/
+		
+
 		//消息
 		MessageAddParam messageAddParam = new MessageAddParam();
 		messageAddParam.setTitle("申请提现");
 		messageAddParam.setContent("提现"+totalAmount+"元");
 		messageAddParam.setContentDesc("提交申请");
+		messageAddParam.setSender(SessionUtil.getUserId());
 		messageAddParam.setMsgType(1);
 		messageAddParam.setReceiver(SessionUtil.getUserId());
 		messageAddParam.setReceiveMobile(mobile);
