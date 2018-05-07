@@ -1,6 +1,7 @@
 package com.dl.shop.payment.web;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Resource;
@@ -18,9 +19,12 @@ import com.alibaba.fastjson.JSONObject;
 import com.dl.base.result.BaseResult;
 import com.dl.base.util.DateUtil;
 import com.dl.member.api.IUserAccountService;
+import com.dl.member.param.RecharegeParam;
 import com.dl.member.param.UpdateUserRechargeParam;
+import com.dl.member.param.UserAccountParamByType;
 import com.dl.order.api.IOrderService;
 import com.dl.order.param.UpdateOrderInfoParam;
+import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
 import com.dl.shop.payment.pay.rongbao.entity.PayResultEntity;
@@ -155,9 +159,22 @@ public class RongbaoPayController extends AbstractBaseController{
 			updateUserRechargeParam.setStatus("1");
 			updateUserRechargeParam.setRechargeSn(payLog.getOrderSn());
 			BaseResult<String> baseResult = userAccountService.updateReCharege(updateUserRechargeParam);
-			logger.info(loggerId + " 充值回调返回结果：status=" + baseResult.getCode()+" , message="+baseResult.getMsg());
+			logger.info(loggerId + " 充值" + baseResult.getCode()+" , message="+baseResult.getMsg());
+			
 			if(0 == baseResult.getCode()) {
 				result = true;
+			}
+			
+			//给用户不可提现余额充值
+			RecharegeParam recharegeParam = new RecharegeParam();
+			recharegeParam.setAmount(new BigDecimal(payLog.getOrderAmount().doubleValue()));
+			recharegeParam.setPayId(payLog.getPayOrderSn());
+			recharegeParam.setThirdPartName(payLog.getPayName());
+			recharegeParam.setThirdPartPaid(new BigDecimal(payLog.getOrderAmount().doubleValue()));
+			recharegeParam.setUserId(payLog.getUserId());
+			BaseResult<String> rechargeRst = userAccountService.rechargeUserMoneyLimit(recharegeParam);
+			if(rechargeRst.getCode() != 0) {
+				logger.info(loggerId + " 不可提现余额充值失败：status=" + rechargeRst.getCode()+" , message="+rechargeRst.getMsg());
 			}
 		}
 		logger.info(loggerId + " 业务回调结果：result="+result);
@@ -170,6 +187,26 @@ public class RongbaoPayController extends AbstractBaseController{
 			updatePayLog.setLastTime(currentTime);
 			updatePayLog.setPayTime(currentTime);
 			int cnt = payLogService.updatePayLog(updatePayLog);
+			
+			//记录账户流水
+			UserAccountParamByType userAccountParamByType = new UserAccountParamByType();
+			Integer accountType = ProjectConstant.BUY; 
+			if(0 != payType) {
+				accountType = ProjectConstant.RECHARGE;
+			}
+			userAccountParamByType.setAccountType(accountType);
+			userAccountParamByType.setAmount(new BigDecimal(payLog.getOrderAmount().doubleValue()));
+			userAccountParamByType.setBonusPrice(BigDecimal.ZERO);//暂无红包金额
+			userAccountParamByType.setOrderSn(payLog.getOrderSn());
+			userAccountParamByType.setPayId(payLog.getLogId());
+			userAccountParamByType.setPaymentName("融宝");
+			userAccountParamByType.setThirdPartPaid(new BigDecimal(payLog.getOrderAmount().doubleValue()));
+			userAccountParamByType.setUserId(payLog.getUserId());
+			BaseResult<String> accountRst = userAccountService.insertUserAccount(userAccountParamByType);
+			if(accountRst.getCode() != 0) {
+				logger.info(loggerId + "生成账户流水异常");
+			}
+			
 			logger.info(loggerId + " 业务回调成功，payLog.对象状态回写结束 cnt:" + cnt + " tradeNo:" + rEntity.trade_no + " payLog:" + payLog.getLogId());
 		}
 	}

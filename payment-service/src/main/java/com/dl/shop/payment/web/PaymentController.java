@@ -49,6 +49,7 @@ import com.dl.member.dto.UserWithdrawDTO;
 import com.dl.member.param.AmountParam;
 import com.dl.member.param.IDParam;
 import com.dl.member.param.MessageAddParam;
+import com.dl.member.param.RecharegeParam;
 import com.dl.member.param.StrParam;
 import com.dl.member.param.SurplusPayParam;
 import com.dl.member.param.UpdateUserRechargeParam;
@@ -83,6 +84,7 @@ import com.dl.shop.payment.pay.yinhe.util.PayUtil;
 import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
+import com.dl.shop.payment.service.UserRechargeService;
 import com.dl.shop.payment.service.UserWithdrawLogService;
 import com.dl.shop.payment.utils.WxpayUtil;
 
@@ -117,6 +119,8 @@ public class PaymentController extends AbstractBaseController{
 	private IUserService userService;
 	@Resource
 	private ILotteryPrintService lotteryPrintService;
+	@Resource
+	private UserRechargeService userRechargeService;
 	
 	@ApiOperation(value="系统可用第三方支付方式", notes="系统可用第三方支付方式")
 	@PostMapping("/allPayment")
@@ -230,6 +234,7 @@ public class PaymentController extends AbstractBaseController{
 		if(null == dto) {
 			return ResultGenerator.genFailResult("支付信息异常，支付失败！");
 		}
+		
 		Integer userId = dto.getUserId();
 		Integer currentId = SessionUtil.getUserId();
 		if(!userId.equals(currentId)) {
@@ -539,16 +544,17 @@ public class PaymentController extends AbstractBaseController{
 			return ResultGenerator.genFailResult("请选择有效的支付方式！", null);
 		}
 		//生成充值单
-		AmountParam amountParam = new AmountParam();
-		amountParam.setAmount(BigDecimal.valueOf(totalAmount));
-		BaseResult<UserRechargeDTO> createReCharege = userAccountService.createReCharege(amountParam);
+//		AmountParam amountParam = new AmountParam();
+//		amountParam.setAmount(BigDecimal.valueOf(totalAmount));
+//		BaseResult<UserRechargeDTO> createReCharege = userAccountService.createReCharege(amountParam);
 		
+		String rechargeSn = userRechargeService.saveReCharege(BigDecimal.valueOf(totalAmount));
 		
-		if(createReCharege.getCode() != 0) {
-			logger.info(loggerId + "生成充值单：code="+createReCharege.getCode()+" , msg="+createReCharege.getMsg());
+		if(StringUtils.isEmpty(rechargeSn)) {
+			logger.info(loggerId + "生成充值单失败");
 			return ResultGenerator.genFailResult("充值失败！", null);
 		}
-		String orderSn = createReCharege.getData().getRechargeSn();
+		String orderSn = rechargeSn;
 //		String orderSn = "test01";
 		//生成充值记录payLog
 		String payName = paymentResult.getData().getPayName();
@@ -777,6 +783,18 @@ public class PaymentController extends AbstractBaseController{
 			if(updateReCharege.getCode() != 0) {
 				logger.error(loggerId+" paylogid="+"ordersn=" + payLog.getOrderSn()+"更新充值单成功状态失败");
 			}
+			
+			RecharegeParam recharegeParam = new RecharegeParam();
+			recharegeParam.setAmount(payLog.getOrderAmount());
+			recharegeParam.setPayId(response.getOrder_no());
+			recharegeParam.setThirdPartName("融宝");
+			recharegeParam.setThirdPartPaid(payLog.getOrderAmount());
+			recharegeParam.setUserId(payLog.getUserId());
+			BaseResult<String>  rechargeRst = userAccountService.rechargeUserMoneyLimit(recharegeParam);
+			if(rechargeRst.getCode() != 0) {
+				logger.error(loggerId+" 给个人用户充值：code"+rechargeRst.getCode() +"message:"+rechargeRst.getMsg());
+			}
+			
 			//更新paylog
 			try {
 				PayLog updatePayLog = new PayLog();
@@ -792,6 +810,7 @@ public class PaymentController extends AbstractBaseController{
 			}
 			rspEntity.setCode(0);
 			rspEntity.setMsg("订单已支付成功");
+			
 			return ResultGenerator.genSuccessResult("订单已支付成功！", rspEntity);
 		}else {
 			//更新paylog

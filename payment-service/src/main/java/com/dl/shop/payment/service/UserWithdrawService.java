@@ -62,7 +62,8 @@ public class UserWithdrawService extends AbstractService<UserWithdraw> {
     	userWithdraw.setUserId(userId);
     	userWithdraw.setWithdrawalSn(withdrawalSn);
     	userWithdraw.setAmount(userWithdrawParam.getAmount());
-    	userWithdraw.setAddTime(DateUtil.getCurrentTimeLong());
+    	Integer addTime = DateUtil.getCurrentTimeLong();
+    	userWithdraw.setAddTime(addTime);
     	userWithdraw.setRealName(userWithdrawParam.getRealName());
     	userWithdraw.setCardNo(userWithdrawParam.getCardNo());
     	String cardNo = userWithdrawParam.getCardNo();
@@ -86,6 +87,7 @@ public class UserWithdrawService extends AbstractService<UserWithdraw> {
     	
     	WithdrawalSnDTO withdrawalSnDTO = new WithdrawalSnDTO();
     	withdrawalSnDTO.setWithdrawalSn(withdrawalSn);
+    	withdrawalSnDTO.setAddTime(addTime);
 		return  withdrawalSnDTO ;
     }
  

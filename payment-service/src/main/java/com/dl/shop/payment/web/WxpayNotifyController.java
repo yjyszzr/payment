@@ -3,6 +3,7 @@ package com.dl.shop.payment.web;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -19,9 +20,11 @@ import com.dl.base.result.BaseResult;
 import com.dl.base.util.DateUtil;
 import com.dl.member.api.IUserAccountService;
 import com.dl.member.param.UpdateUserRechargeParam;
+import com.dl.member.param.UserAccountParamByType;
 import com.dl.order.api.IOrderService;
 import com.dl.order.param.UpdateOrderInfoParam;
 import com.dl.shop.payment.configurer.WxpayConfig;
+import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.WxpayNotifyModel;
 import com.dl.shop.payment.service.PayLogService;
@@ -169,6 +172,24 @@ public class WxpayNotifyController {
 						logger.info(loggerId + " 业务回调成功，payLog.对象状态回写结束");
 						String xml = "<xml><return_code><![CDATA[SUCCESS]]></return_code> <return_msg><![CDATA[OK]]></return_msg></xml>";
 						response.getWriter().write(xml);
+						
+						UserAccountParamByType userAccountParamByType = new UserAccountParamByType();
+						Integer accountType = ProjectConstant.BUY; 
+						if(0 != payType) {
+							accountType = ProjectConstant.RECHARGE;
+						}
+						userAccountParamByType.setAccountType(accountType);
+						userAccountParamByType.setAmount(new BigDecimal(payLog.getOrderAmount().doubleValue()));
+						userAccountParamByType.setBonusPrice(BigDecimal.ZERO);//暂无红包金额
+						userAccountParamByType.setOrderSn(payLog.getOrderSn());
+						userAccountParamByType.setPayId(payLog.getLogId());
+						userAccountParamByType.setPaymentName("微信");
+						userAccountParamByType.setThirdPartPaid(new BigDecimal(payLog.getOrderAmount().doubleValue()));
+						userAccountParamByType.setUserId(payLog.getUserId());
+						BaseResult<String> accountRst = userAccountService.insertUserAccount(userAccountParamByType);
+						if(accountRst.getCode() != 0) {
+							logger.info(loggerId + "生成账户流水异常");
+						}
 					}
 				} catch (IOException e) {
 					e.printStackTrace();

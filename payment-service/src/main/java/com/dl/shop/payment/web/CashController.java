@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.druid.util.StringUtils;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.base.util.DateUtil;
@@ -28,10 +29,12 @@ import com.dl.member.api.IUserService;
 import com.dl.member.dto.UserBankDTO;
 import com.dl.member.dto.UserDTO;
 import com.dl.member.dto.UserWithdrawDTO;
+import com.dl.member.dto.WithdrawalSnDTO;
 import com.dl.member.param.IDParam;
 import com.dl.member.param.MessageAddParam;
 import com.dl.member.param.StrParam;
 import com.dl.member.param.UserWithdrawParam;
+import com.dl.member.param.WithDrawParam;
 import com.dl.shop.payment.model.UserWithdrawLog;
 import com.dl.shop.payment.param.WithdrawParam;
 import com.dl.shop.payment.pay.rongbao.cash.CashUtil;
@@ -39,6 +42,7 @@ import com.dl.shop.payment.pay.rongbao.cash.entity.ReqCashContentEntity;
 import com.dl.shop.payment.pay.rongbao.cash.entity.ReqCashEntity;
 import com.dl.shop.payment.pay.rongbao.cash.entity.RspCashEntity;
 import com.dl.shop.payment.service.UserWithdrawLogService;
+import com.dl.shop.payment.service.UserWithdrawService;
 
 import io.swagger.annotations.ApiOperation;
 
@@ -56,6 +60,10 @@ public class CashController {
 	private IUserBankService userBankService;
 	@Autowired
 	private IUserAccountService userAccountService;
+	
+	@Autowired
+	private UserWithdrawService userWithdrawService;
+	
 	@Resource
 	private UserWithdrawLogService userWithdrawLogService;
 	@Resource
@@ -102,12 +110,14 @@ public class CashController {
 		userWithdrawParam.setAmount(BigDecimal.valueOf(totalAmount));
 		userWithdrawParam.setCardNo(cardNo);
 		userWithdrawParam.setRealName(realName);
-		BaseResult<UserWithdrawDTO> createUserWithdraw = userAccountService.createUserWithdraw(userWithdrawParam);
-		if(createUserWithdraw.getCode() != 0) {
-			logger.info(loggerId+" 生成提现单，code="+createUserWithdraw.getCode()+" , msg="+createUserWithdraw.getMsg());
+		WithdrawalSnDTO withdrawalSnDTO = userWithdrawService.saveWithdraw(userWithdrawParam);
+		
+		if(StringUtils.isEmpty(withdrawalSnDTO.getWithdrawalSn())) {
+			logger.info(loggerId+" 生成提现单失败");
 			return ResultGenerator.genFailResult("提现失败！", null);
 		}
-		String orderSn = createUserWithdraw.getData().getWithdrawalSn();
+		
+		String orderSn = withdrawalSnDTO.getWithdrawalSn();
 		//保存提现进度
 		UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
 		userWithdrawLog.setLogCode(1);
@@ -135,7 +145,7 @@ public class CashController {
 		messageAddParam.setReceiveMobile(mobile);
 		messageAddParam.setObjectType(2);
 		messageAddParam.setSendTime(DateUtil.getCurrentTimeLong());
-		Integer addTime = createUserWithdraw.getData().getAddTime();
+		Integer addTime = withdrawalSnDTO.getAddTime();
 		LocalDateTime loclaTime = LocalDateTime.ofEpochSecond(addTime, 0, ZoneOffset.UTC);
 		StringBuilder msgDesc = new StringBuilder();
 		msgDesc.append("申请时间：").append(loclaTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:dd"))).append("\n")
@@ -168,11 +178,23 @@ public class CashController {
 			tips = e.getMessage();
 		}
 		if(isSucc) {
+			WithDrawParam withdrawParam = new WithDrawParam();
+			withdrawParam.setAmount(new BigDecimal(totalAmount));
+			withdrawParam.setPayId(orderSn);
+			withdrawParam.setThirdPartName("融宝");
+			withdrawParam.setThirdPartPaid(new BigDecimal(totalAmount));
+			withdrawParam.setUserId(SessionUtil.getUserId());
+			BaseResult<String> withdrawRst = userAccountService.withdrawUserMoney(withdrawParam);
+			if(withdrawRst.getCode() != 0) {
+				logger.info(loggerId+"用户可提现余额提现失败");
+			}
+			
 			ResultGenerator.genSuccessResult("提现成功");
 		}else {
 			ResultGenerator.genFailResult("提现失败[" +tips +"]");
 		}
 		return ResultGenerator.genSuccessResult("请求成功！");
 	}
+	
 	
 }
