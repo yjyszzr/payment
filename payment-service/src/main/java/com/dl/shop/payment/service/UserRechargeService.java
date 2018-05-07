@@ -42,6 +42,7 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
      * @param amount
      * @return
      */
+    @Transactional
     public String saveReCharege(BigDecimal amount){
     	Integer userId = SessionUtil.getUserId();
     	UserRecharge userRecharge = new UserRecharge();
@@ -54,6 +55,7 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
     	int rst = userRechargeMapper.insertUserRecharge(userRecharge);
     	if(1 != rst) {
     		log.error("保存数据库充值单失败");
+    		throw new ServiceException(MemberEnums.COMMON_ERROR.getcode(), "保存数据库充值单失败");
     	}
 
 		return rechargeSn;
@@ -103,10 +105,7 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
     		return ResultGenerator.genFailResult("更新数据库充值单失败");
     	}
   
-    	RecharegeParam recharegeParam = new RecharegeParam();
-    	BaseResult<String> rechargeRst = userAccountService.rechargeUserMoneyLimit(recharegeParam);
-    	
-		return ResultGenerator.genSuccessResult("更新数据库充值单成功", rechargeRst.getData());
+		return ResultGenerator.genSuccessResult("更新数据库充值单成功");
     
     }
 

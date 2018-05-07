@@ -54,6 +54,7 @@ public class UserWithdrawService extends AbstractService<UserWithdraw> {
      * @param amount
      * @return
      */
+     @Transactional
     public WithdrawalSnDTO saveWithdraw(UserWithdrawParam  userWithdrawParam){
     	Integer userId = SessionUtil.getUserId();
     	String withdrawalSn = SNGenerator.nextSN(SNBusinessCodeEnum.WITHDRAW_SN.getCode());
