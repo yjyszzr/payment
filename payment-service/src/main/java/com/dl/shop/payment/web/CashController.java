@@ -138,24 +138,25 @@ public class CashController {
 		
 
 		//消息
-		MessageAddParam messageAddParam = new MessageAddParam();
-		messageAddParam.setTitle("申请提现");
-		messageAddParam.setContent("提现"+totalAmount+"元");
-		messageAddParam.setContentDesc("提交申请");
-		messageAddParam.setSender(SessionUtil.getUserId());
-		messageAddParam.setMsgType(1);
-		messageAddParam.setReceiver(SessionUtil.getUserId());
-		messageAddParam.setReceiveMobile(mobile);
-		messageAddParam.setObjectType(2);
-		messageAddParam.setSendTime(DateUtil.getCurrentTimeLong());
-		Integer addTime = withdrawalSnDTO.getAddTime();
-		LocalDateTime loclaTime = LocalDateTime.ofEpochSecond(addTime, 0, ZoneOffset.UTC);
-		StringBuilder msgDesc = new StringBuilder();
-		msgDesc.append("申请时间：").append(loclaTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:dd"))).append("\n")
-		.append("审核时间：").append("\n")
-		.append("提现成功时间：");
-		messageAddParam.setMsgDesc(msgDesc.toString());
-		userMessageService.add(messageAddParam);
+//		MessageAddParam messageAddParam = new MessageAddParam();
+//		messageAddParam.setTitle("申请提现");
+//		messageAddParam.setContent("提现"+totalAmount+"元");
+//		messageAddParam.setContentDesc("提交申请");
+//		messageAddParam.setSender(SessionUtil.getUserId());
+//		messageAddParam.setMsgType(1);
+//		messageAddParam.setReceiver(SessionUtil.getUserId());
+//		messageAddParam.setReceiveMobile(mobile);
+//		messageAddParam.setObjectType(2);
+//		messageAddParam.setMsgUrl("");
+//		messageAddParam.setSendTime(DateUtil.getCurrentTimeLong());
+//		Integer addTime = withdrawalSnDTO.getAddTime();
+//		LocalDateTime loclaTime = LocalDateTime.ofEpochSecond(addTime, 0, ZoneOffset.UTC);
+//		StringBuilder msgDesc = new StringBuilder();
+//		msgDesc.append("申请时间：").append(loclaTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:dd"))).append("\n")
+//		.append("审核时间：").append("\n")
+//		.append("提现成功时间：");
+//		messageAddParam.setMsgDesc(msgDesc.toString());
+//		userMessageService.add(messageAddParam);
 		//第三方提现接口
 		ReqCashEntity reqCashEntity = new ReqCashEntity();
 		//提现序号
