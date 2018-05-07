@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dl.shop.payment.dao.DlThirdApiLogMapper">
+  <resultMap id="BaseResultMap" type="com.dl.shop.payment.model.DlThirdApiLog">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="api_name" jdbcType="VARCHAR" property="apiName" />
+    <result column="api_type" jdbcType="Integer" property="apiType" />
+    <result column="api_desc" jdbcType="VARCHAR" property="apiDesc" />
+    <result column="option_time" jdbcType="TIMESTAMP" property="optionTime" />
+    <result column="api_param" jdbcType="LONGVARCHAR" property="apiParam" />
+    <result column="api_result" jdbcType="LONGVARCHAR" property="apiResult" />
+  </resultMap>
+</mapper>
