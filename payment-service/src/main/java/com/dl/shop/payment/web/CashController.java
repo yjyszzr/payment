@@ -53,7 +53,7 @@ import io.swagger.annotations.ApiOperation;
 @Controller
 @RequestMapping("/cash")
 public class CashController {
-	private final static Logger logger = LoggerFactory.getLogger(PaymentController.class);
+	private final static Logger logger = LoggerFactory.getLogger(CashController.class);
 	@Resource
 	private IUserService userService;
 	@Autowired
@@ -170,6 +170,7 @@ public class CashController {
 		String tips = null;
 		try {
 			RspCashEntity rspEntity = CashUtil.sendGetCashInfo(reqCashEntity);
+			logger.info("RspCashEntity->"+rspEntity);
 			if(rspEntity != null && rspEntity.isSucc()) {
 				isSucc = true;
 			}else {
@@ -192,12 +193,10 @@ public class CashController {
 			if(withdrawRst.getCode() != 0) {
 				logger.info(loggerId+"用户可提现余额提现失败");
 			}
-			
-			ResultGenerator.genSuccessResult("提现成功");
+			return ResultGenerator.genSuccessResult("提现成功");
 		}else {
-			ResultGenerator.genFailResult("提现失败[" +tips +"]");
+			return ResultGenerator.genFailResult("提现失败[" +tips +"]");
 		}
-		return ResultGenerator.genSuccessResult("请求成功！");
 	}
 	
 	
