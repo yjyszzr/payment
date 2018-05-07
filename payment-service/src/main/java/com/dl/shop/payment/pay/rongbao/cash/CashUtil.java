@@ -10,6 +10,7 @@ import org.apache.http.util.TextUtils;
 
 import com.alibaba.fastjson.JSON;
 import com.dl.shop.payment.pay.rongbao.cash.cfg.CashConfig;
+import com.dl.shop.payment.pay.rongbao.cash.entity.ReqCashContentEntity;
 import com.dl.shop.payment.pay.rongbao.cash.entity.ReqCashEntity;
 import com.dl.shop.payment.pay.rongbao.cash.entity.RspCashEntity;
 import com.dl.shop.payment.pay.rongbao.cash.model.AgentPayRequest;
@@ -68,16 +69,37 @@ public class CashUtil {
 	}
 	
 	public static void main(String[] args) {
-		ReqCashEntity reqEntity = new ReqCashEntity();
-		reqEntity.setBatch_no("1234568");
-		reqEntity.setBatch_count("1");
-		reqEntity.setContent("1,62220215080205389633,jack-cooper,工商银行,分行,支行,私,10,CNY,北京,北京,18910116131,身份证,420321199202150718,0001,12306,hh");
-		reqEntity.setBatch_amount("10");
-		reqEntity.setPay_type("1");
+//		ReqCashEntity reqEntity = new ReqCashEntity();
+//		reqEntity.setBatch_no("1234568");
+//		reqEntity.setBatch_count("1");
+//		                     10,62220215080205389633,jack-cooper,工商银行,分行,支行,私,10.0,CNY,北京,北京,18910116131,身份证,420321199202150718,0001,12306,彩小秘充值信息
+//		reqEntity.setContent("1,62220215080205389633,jack-cooper,工商银行,分行,支行,私,10,CNY,北京,北京,18910116131,身份证,420321199202150718,0001,12306,hh");
+//		reqEntity.setBatch_amount("10");
+//		reqEntity.setPay_type("1");
+//		try {
+//			sendGetCashInfo(reqEntity);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+		
+		int totalAmount = 10;
+		//第三方提现接口
+		ReqCashEntity reqCashEntity = new ReqCashEntity();
+		//提现序号
+		reqCashEntity.setBatch_no("12345");
+		reqCashEntity.setBatch_count("1");
+		reqCashEntity.setBatch_amount(totalAmount+"");
+		reqCashEntity.setPay_type("1");
+		ReqCashContentEntity reqCashContentEntity = ReqCashContentEntity.buildTestReqCashEntity("1",""+totalAmount,"18910116131");
+		reqCashEntity.setContent(reqCashContentEntity.buildContent());
+		System.out.println(reqCashContentEntity.buildContent());
+		boolean isSucc = false;
+		String tips = null;
 		try {
-			sendGetCashInfo(reqEntity);
-		} catch (Exception e) {
-			e.printStackTrace();
+			RspCashEntity rspEntity = CashUtil.sendGetCashInfo(reqCashEntity);
+			System.out.println("RspCashEntity->"+rspEntity);
+		}catch(Exception ee) {
+			ee.printStackTrace();
 		}
 	}
 	

@@ -164,8 +164,9 @@ public class CashController {
 		reqCashEntity.setBatch_count("1");
 		reqCashEntity.setBatch_amount(totalAmount+"");
 		reqCashEntity.setPay_type("1");
-		ReqCashContentEntity reqCashContentEntity = ReqCashContentEntity.buildTestReqCashEntity("001",""+totalAmount,"18910116131");
-		reqCashEntity.setBatch_count(reqCashContentEntity.buildContent());
+		ReqCashContentEntity reqCashContentEntity = ReqCashContentEntity.buildTestReqCashEntity("1",""+totalAmount,"18910116131");
+		reqCashEntity.setContent(reqCashContentEntity.buildContent());
+		logger.info(reqCashContentEntity.buildContent());
 		boolean isSucc = false;
 		String tips = null;
 		try {
