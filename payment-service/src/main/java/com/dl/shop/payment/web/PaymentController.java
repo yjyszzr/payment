@@ -542,6 +542,8 @@ public class PaymentController extends AbstractBaseController{
 		AmountParam amountParam = new AmountParam();
 		amountParam.setAmount(BigDecimal.valueOf(totalAmount));
 		BaseResult<UserRechargeDTO> createReCharege = userAccountService.createReCharege(amountParam);
+		
+		
 		if(createReCharege.getCode() != 0) {
 			logger.info(loggerId + "生成充值单：code="+createReCharege.getCode()+" , msg="+createReCharege.getMsg());
 			return ResultGenerator.genFailResult("充值失败！", null);
