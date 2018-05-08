@@ -100,7 +100,7 @@ public class CashController {
 		}
 		if(totalAmount == null || totalAmount <= 0) {
 			logger.info(loggerId+"提现金额提供有误！");
-			return ResultGenerator.genFailResult("对不起，请提供有效的提现金额！", null);
+			return ResultGenerator.genResult(PayEnums.PAY_TOTAL_NOTRANGE.getcode(),PayEnums.PAY_TOTAL_NOTRANGE.getMsg());
 		}
 		String strMoney = userDTO.getUserMoney();
 		Double dMoney = null;
