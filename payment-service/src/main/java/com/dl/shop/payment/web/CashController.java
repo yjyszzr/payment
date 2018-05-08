@@ -29,11 +29,14 @@ import com.dl.member.param.StrParam;
 import com.dl.member.param.WithDrawParam;
 import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.enums.PayEnums;
+import com.dl.shop.payment.model.UserWithdraw;
 import com.dl.shop.payment.model.UserWithdrawLog;
+import com.dl.shop.payment.param.CashGetParam;
 import com.dl.shop.payment.param.UpdateUserWithdrawParam;
 import com.dl.shop.payment.param.UserWithdrawParam;
 import com.dl.shop.payment.param.WithdrawParam;
 import com.dl.shop.payment.pay.rongbao.cash.CashUtil;
+import com.dl.shop.payment.pay.rongbao.cash.entity.CashResultEntity;
 import com.dl.shop.payment.pay.rongbao.cash.entity.ReqCashContentEntity;
 import com.dl.shop.payment.pay.rongbao.cash.entity.ReqCashEntity;
 import com.dl.shop.payment.pay.rongbao.cash.entity.RspCashEntity;
@@ -192,34 +195,10 @@ public class CashController {
 			logger.info("单号:"+orderSn+"超出提现阈值,进入审核通道");
 			return ResultGenerator.genResult(PayEnums.CASH_REVIEWING.getcode(),PayEnums.CASH_REVIEWING.getMsg());
 		}else {
-			//第三方提现接口
-			ReqCashEntity reqCashEntity = new ReqCashEntity();
-			//提现序号
-			reqCashEntity.setBatch_no(orderSn);
-			reqCashEntity.setBatch_count("1");
-			reqCashEntity.setBatch_amount(totalAmount+"");
-			reqCashEntity.setPay_type("1");
-			ReqCashContentEntity reqCashContentEntity = ReqCashContentEntity.buildTestReqCashEntity("1",""+totalAmount,"18910116131");
-			reqCashEntity.setContent(reqCashContentEntity.buildContent());
-			logger.info(reqCashContentEntity.buildContent());
-			boolean isSucc = false;
-			String tips = null;
-			try {
-				RspCashEntity rspEntity = CashUtil.sendGetCashInfo(reqCashEntity);
-				logger.info("RspCashEntity->"+rspEntity);
-				if(rspEntity != null && rspEntity.isSucc()) {
-					isSucc = true;
-				}else {
-					if(rspEntity != null) {
-						tips = rspEntity.result_msg;
-					}
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				tips = e.getMessage();
-			}
-			if(isSucc) {
-				logger.info("单号:"+orderSn+"第三方扣款成功，扣除用户余额");
+			logger.info("进入第三方提现流程...");
+			CashResultEntity rEntity = callThirdGetCash(orderSn,totalAmount);
+			if(rEntity.isSucc) {
+				logger.info("单号:"+orderSn+"第三方提现成功，扣除用户余额");
 				//减少用户钱包余额
 				WithDrawParam withdrawParam = new WithDrawParam();
 				withdrawParam.setAmount(new BigDecimal(totalAmount));
@@ -243,10 +222,82 @@ public class CashController {
 				
 				return ResultGenerator.genSuccessResult("提现成功");
 			}else {
-				return ResultGenerator.genFailResult("提现失败[" +tips +"]");
+				return ResultGenerator.genFailResult("提现失败[" +rEntity.msg +"]");
 			}	
 		}
 	}
 	
+	/**
+	 * 调用第三方扣款流程
+	 * @param orderSn
+	 * @param totalAmount
+	 * @return
+	 */
+	private CashResultEntity callThirdGetCash(String orderSn,double totalAmount) {
+		CashResultEntity rEntity = new CashResultEntity();
+		//第三方提现接口
+		ReqCashEntity reqCashEntity = new ReqCashEntity();
+		//提现序号
+		reqCashEntity.setBatch_no(orderSn);
+		reqCashEntity.setBatch_count("1");
+		reqCashEntity.setBatch_amount(totalAmount+"");
+		reqCashEntity.setPay_type("1");
+		ReqCashContentEntity reqCashContentEntity = ReqCashContentEntity.buildTestReqCashEntity("1",""+totalAmount,"18910116131");
+		reqCashEntity.setContent(reqCashContentEntity.buildContent());
+		logger.info(reqCashContentEntity.buildContent());
+		boolean isSucc = false;
+		String tips = null;
+		try {
+			RspCashEntity rspEntity = CashUtil.sendGetCashInfo(reqCashEntity);
+			logger.info("RspCashEntity->"+rspEntity);
+			if(rspEntity != null && rspEntity.isSucc()) {
+				isSucc = true;
+				rEntity.isSucc = true;
+			}else {
+				if(rspEntity != null) {
+					tips = rspEntity.result_msg;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			tips = e.getMessage();
+			rEntity.msg = tips;
+		}
+		return rEntity;
+	}
 	
+	@ApiOperation(value="后台管理提现调用", notes="")
+	@PostMapping("/getcash")
+	@ResponseBody
+	public BaseResult<Object> getCash(@RequestBody CashGetParam param, HttpServletRequest request){
+		String sn = param.getWithdrawSn();
+		if(StringUtils.isEmpty(sn)) {
+			logger.info("提现单号不能为空");
+			return ResultGenerator.genFailResult("提现单号不能为空",null);
+		}
+		//查询该用户的提现金额
+		BaseResult<UserWithdraw> baseResult = userWithdrawService.queryUserWithdraw(sn);
+		if(baseResult.getCode() != 0 || baseResult.getData() == null) {
+			logger.info("查询提现单失败");
+			return ResultGenerator.genFailResult("提现单号不能为空",null);
+		}
+		UserWithdraw userEntity = baseResult.getData();
+		BigDecimal amt = userEntity.getAmount();
+		logger.info("进入到第三方提现流程，金额:" + amt.doubleValue() +" 用户名:" +userEntity.getUserId() +" sn:" + sn);
+		CashResultEntity cashREntity = callThirdGetCash(sn,amt.doubleValue());
+		if(cashREntity.isSucc) {
+			//更改提现单状态
+			logger.info("更改提现单流程为成功...");
+			UpdateUserWithdrawParam updateParams = new UpdateUserWithdrawParam();
+			updateParams.setWithdrawalSn(sn);
+			updateParams.setStatus(ProjectConstant.STATUS_SUCC);
+			updateParams.setPayTime(DateUtil.getCurrentTimeLong());
+			updateParams.setPaymentId(userEntity.getPaymentId());
+			updateParams.setPaymentName("彩小秘管理后台发起提现");
+			userWithdrawService.updateWithdraw(updateParams);
+			return ResultGenerator.genSuccessResult("第三方发起提现成功");
+		}else {
+			return ResultGenerator.genFailResult("提现失败[" +cashREntity.msg+"]");
+		}
+	}
 }
