@@ -11,10 +11,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.util.TextUtils;
 import org.slf4j.Logger;
@@ -26,7 +24,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.alibaba.fastjson.JSON;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -44,9 +41,7 @@ import com.dl.member.api.IUserService;
 import com.dl.member.dto.SurplusPaymentCallbackDTO;
 import com.dl.member.dto.UserBankDTO;
 import com.dl.member.dto.UserDTO;
-import com.dl.member.dto.UserRechargeDTO;
 import com.dl.member.dto.UserWithdrawDTO;
-import com.dl.member.param.AmountParam;
 import com.dl.member.param.IDParam;
 import com.dl.member.param.MessageAddParam;
 import com.dl.member.param.RecharegeParam;
@@ -433,37 +428,7 @@ public class PaymentController extends AbstractBaseController{
 		BaseResult payBaseResult = null;
 		if("app_weixin".equals(paymentDto.getPayCode())) {
 //			payBaseResult = wxpayUtil.unifiedOrderForApp(unifiedOrderParam);
-			String strAmt = savePayLog.getOrderAmount().doubleValue()+"";
-			BigDecimal bigD = new BigDecimal(strAmt);
-			strAmt = bigD.movePointRight(2).toString();
-			String payOrderSn = savePayLog.getPayOrderSn();
-			RspYinHeEntity rYinHeEntity = PayUtil.getWechatPayUrl(payIp,strAmt,payOrderSn);
-			if(rYinHeEntity != null) {
-				if(rYinHeEntity.isSucc() && !TextUtils.isEmpty(rYinHeEntity.qrCode)) {
-					PayReturnDTO rEntity = new PayReturnDTO();
-					String encodeUrl = null;
-					try {
-						encodeUrl = URLEncoder.encode(rYinHeEntity.qrCode,"UTF-8");
-					} catch (UnsupportedEncodingException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					if(!TextUtils.isEmpty(encodeUrl)) {
-						String url = ReapalH5Config.URL_PAY_WECHAT+"?data="+encodeUrl;
-						rEntity.setPayUrl(url);
-						rEntity.setPayLogId(savePayLog.getLogId()+"");
-						rEntity.setOrderId(orderId);
-						logger.info("client jump url:" + url +" payLogId:" +savePayLog.getLogId() +" orderId:" + orderId);
-						payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
-					}else {
-						payBaseResult = ResultGenerator.genFailResult("url decode失败",null);
-					}
-				}else {
-					payBaseResult = ResultGenerator.genFailResult("银河支付返回支付链接错误");
-				}
-			}else {
-				payBaseResult = ResultGenerator.genFailResult("银河支付返回数据有误");
-			}
+			payBaseResult = getWechatPayUrl(savePayLog, payIp, orderId);
 		}else if("app_rongbao".equals(paymentDto.getPayCode())) {
 			//生成支付链接信息
 			String payOrder = savePayLog.getPayOrderSn();
@@ -518,13 +483,6 @@ public class PaymentController extends AbstractBaseController{
 		return payBaseResult;
 	}
 	
-	private String getRealIp(HttpServletRequest request) {
-		String ip = "";
-		
-		return ip;
-	}
-	
-	
 	/***
 	 * 根据savePayLog生成微信支付链接
 	 * @param savePayLog
@@ -532,8 +490,8 @@ public class PaymentController extends AbstractBaseController{
 	 * @param orderId
 	 * @return
 	 */
-	private BaseResult getWechatPayUrl(PayLog savePayLog,String payIp,String orderId) {
-		BaseResult payBaseResult = null;
+	private BaseResult<?> getWechatPayUrl(PayLog savePayLog,String payIp,String orderId) {
+		BaseResult<?> payBaseResult = null;
 		String strAmt = savePayLog.getOrderAmount().doubleValue()+"";
 		BigDecimal bigD = new BigDecimal(strAmt);
 		strAmt = bigD.movePointRight(2).toString();
