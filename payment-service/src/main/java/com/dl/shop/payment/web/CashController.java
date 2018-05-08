@@ -1,13 +1,8 @@
 package com.dl.shop.payment.web;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-
 import org.apache.http.util.TextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.alibaba.druid.util.StringUtils;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -29,11 +23,10 @@ import com.dl.member.api.IUserMessageService;
 import com.dl.member.api.IUserService;
 import com.dl.member.dto.UserBankDTO;
 import com.dl.member.dto.UserDTO;
-import com.dl.member.dto.UserWithdrawDTO;
 import com.dl.member.dto.WithdrawalSnDTO;
 import com.dl.member.param.IDParam;
-import com.dl.member.param.MessageAddParam;
 import com.dl.member.param.StrParam;
+import com.dl.member.param.UpdateUserWithdrawParam;
 import com.dl.member.param.UserWithdrawParam;
 import com.dl.member.param.WithDrawParam;
 import com.dl.shop.payment.enums.PayEnums;
@@ -45,7 +38,6 @@ import com.dl.shop.payment.pay.rongbao.cash.entity.ReqCashEntity;
 import com.dl.shop.payment.pay.rongbao.cash.entity.RspCashEntity;
 import com.dl.shop.payment.service.UserWithdrawLogService;
 import com.dl.shop.payment.service.UserWithdrawService;
-
 import io.swagger.annotations.ApiOperation;
 
 /**
@@ -116,6 +108,8 @@ public class CashController {
 			logger.info(loggerId+"金额转换失败！");
 			return ResultGenerator.genFailResult("用户钱包金额转换失败！",null);
 		}
+		
+		//提现金额大于钱包数据
 		if(totalAmount > dMoney) {
 			logger.info(loggerId+"提现金额超出用户钱包数值~");
 			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_NOT_ENOUGH.getcode(),PayEnums.PAY_RONGBAO_NOT_ENOUGH.getMsg()); 
@@ -136,18 +130,23 @@ public class CashController {
 		UserBankDTO userBankDTO = queryUserBank.getData();
 		String realName = userBankDTO.getRealName();
 		String cardNo = userBankDTO.getCardNo();
+		boolean inReview = false;
+		//如果提现金额大于阈值
+	    if(totalAmount > 1000) {
+	    	inReview = true;
+	    }
 		//生成提现单
 		UserWithdrawParam userWithdrawParam = new UserWithdrawParam();
 		userWithdrawParam.setAmount(BigDecimal.valueOf(totalAmount));
 		userWithdrawParam.setCardNo(cardNo);
 		userWithdrawParam.setRealName(realName);
+		userWithdrawParam.setStatus(UserWithdrawParam.STATUS_UNCOMPLETE);
 		WithdrawalSnDTO withdrawalSnDTO = userWithdrawService.saveWithdraw(userWithdrawParam);
-		
 		if(StringUtils.isEmpty(withdrawalSnDTO.getWithdrawalSn())) {
 			logger.info(loggerId+" 生成提现单失败");
 			return ResultGenerator.genFailResult("提现失败！", null);
 		}
-		
+		//
 		String orderSn = withdrawalSnDTO.getWithdrawalSn();
 		//保存提现进度
 		UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
@@ -188,46 +187,63 @@ public class CashController {
 //		.append("提现成功时间：");
 //		messageAddParam.setMsgDesc(msgDesc.toString());
 //		userMessageService.add(messageAddParam);
-		//第三方提现接口
-		ReqCashEntity reqCashEntity = new ReqCashEntity();
-		//提现序号
-		reqCashEntity.setBatch_no(orderSn);
-		reqCashEntity.setBatch_count("1");
-		reqCashEntity.setBatch_amount(totalAmount+"");
-		reqCashEntity.setPay_type("1");
-		ReqCashContentEntity reqCashContentEntity = ReqCashContentEntity.buildTestReqCashEntity("1",""+totalAmount,"18910116131");
-		reqCashEntity.setContent(reqCashContentEntity.buildContent());
-		logger.info(reqCashContentEntity.buildContent());
-		boolean isSucc = false;
-		String tips = null;
-		try {
-			RspCashEntity rspEntity = CashUtil.sendGetCashInfo(reqCashEntity);
-			logger.info("RspCashEntity->"+rspEntity);
-			if(rspEntity != null && rspEntity.isSucc()) {
-				isSucc = true;
-			}else {
-				if(rspEntity != null) {
-					tips = rspEntity.result_msg;
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			tips = e.getMessage();
-		}
-		if(isSucc) {
-			WithDrawParam withdrawParam = new WithDrawParam();
-			withdrawParam.setAmount(new BigDecimal(totalAmount));
-			withdrawParam.setPayId(orderSn);
-			withdrawParam.setThirdPartName("融宝");
-			withdrawParam.setThirdPartPaid(new BigDecimal(totalAmount));
-			withdrawParam.setUserId(SessionUtil.getUserId());
-			BaseResult<String> withdrawRst = userAccountService.withdrawUserMoney(withdrawParam);
-			if(withdrawRst.getCode() != 0) {
-				logger.info(loggerId+"用户可提现余额提现失败");
-			}
-			return ResultGenerator.genSuccessResult("提现成功");
+		if(inReview) {
+			logger.info("单号:"+orderSn+"超出提现阈值,进入审核通道");
+			return ResultGenerator.genResult(PayEnums.CASH_REVIEWING.getcode(),PayEnums.CASH_REVIEWING.getMsg());
 		}else {
-			return ResultGenerator.genFailResult("提现失败[" +tips +"]");
+			//第三方提现接口
+			ReqCashEntity reqCashEntity = new ReqCashEntity();
+			//提现序号
+			reqCashEntity.setBatch_no(orderSn);
+			reqCashEntity.setBatch_count("1");
+			reqCashEntity.setBatch_amount(totalAmount+"");
+			reqCashEntity.setPay_type("1");
+			ReqCashContentEntity reqCashContentEntity = ReqCashContentEntity.buildTestReqCashEntity("1",""+totalAmount,"18910116131");
+			reqCashEntity.setContent(reqCashContentEntity.buildContent());
+			logger.info(reqCashContentEntity.buildContent());
+			boolean isSucc = false;
+			String tips = null;
+			try {
+				RspCashEntity rspEntity = CashUtil.sendGetCashInfo(reqCashEntity);
+				logger.info("RspCashEntity->"+rspEntity);
+				if(rspEntity != null && rspEntity.isSucc()) {
+					isSucc = true;
+				}else {
+					if(rspEntity != null) {
+						tips = rspEntity.result_msg;
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				tips = e.getMessage();
+			}
+			if(isSucc) {
+				logger.info("单号:"+orderSn+"第三方扣款成功，扣除用户余额");
+				//减少用户钱包余额
+				WithDrawParam withdrawParam = new WithDrawParam();
+				withdrawParam.setAmount(new BigDecimal(totalAmount));
+				withdrawParam.setPayId(orderSn);
+				withdrawParam.setThirdPartName("融宝");
+				withdrawParam.setThirdPartPaid(new BigDecimal(totalAmount));
+				withdrawParam.setUserId(SessionUtil.getUserId());
+				BaseResult<String> withdrawRst = userAccountService.withdrawUserMoney(withdrawParam);
+				if(withdrawRst.getCode() != 0) {
+					logger.info(loggerId+"用户可提现余额提现失败");
+				}
+				//更新提现单
+				logger.info("提现单号:"+orderSn+"更新提现单位成功状态");
+				UpdateUserWithdrawParam updateParams = new UpdateUserWithdrawParam();
+				updateParams.setWithdrawalSn(withdrawalSnDTO.getWithdrawalSn());
+				updateParams.setStatus(UserWithdrawParam.STATUS_SUCC);
+				updateParams.setPayTime(DateUtil.getCurrentTimeLong());
+				updateParams.setPaymentId(orderSn);
+				updateParams.setPaymentName("融宝提现");
+				userWithdrawService.updateWithdraw(updateParams);
+				
+				return ResultGenerator.genSuccessResult("提现成功");
+			}else {
+				return ResultGenerator.genFailResult("提现失败[" +tips +"]");
+			}	
 		}
 	}
 	

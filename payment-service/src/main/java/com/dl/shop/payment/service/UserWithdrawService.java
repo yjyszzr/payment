@@ -66,8 +66,8 @@ public class UserWithdrawService extends AbstractService<UserWithdraw> {
     	userWithdraw.setAddTime(addTime);
     	userWithdraw.setRealName(userWithdrawParam.getRealName());
     	userWithdraw.setCardNo(userWithdrawParam.getCardNo());
+    	userWithdraw.setStatus(userWithdrawParam.getStatus());
     	String cardNo = userWithdrawParam.getCardNo();
-    	
     	UserBankQueryParam userBankQueryParam = new UserBankQueryParam();
     	userBankQueryParam.setBankCardCode(cardNo);
     	userBankQueryParam.setUserId(userId);
