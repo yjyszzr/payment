@@ -86,8 +86,19 @@ public class CashController {
 			return ResultGenerator.genFailResult("未查询到该用户信息");
 		}
 		String mobile = userDTO.getMobile();
-		double totalAmount = param.getTotalAmount();
-		if(totalAmount <= 0) {
+		String strTotalAmount = param.getTotalAmount();
+		//长度超过1000000 -> 7位数
+		if(StringUtils.isEmpty(strTotalAmount) || strTotalAmount.length() > 7) {
+			logger.info(loggerId+"输入金额超出有效范围~");
+			return ResultGenerator.genResult(PayEnums.PAY_TOTAL_NOTRANGE.getcode(), PayEnums.PAY_TOTAL_NOTRANGE.getMsg());
+		}
+		Double totalAmount = null;
+		try {
+			totalAmount = Double.valueOf(strTotalAmount);
+		}catch(Exception ee) {
+			ee.printStackTrace();
+		}
+		if(totalAmount == null || totalAmount <= 0) {
 			logger.info(loggerId+"提现金额提供有误！");
 			return ResultGenerator.genFailResult("对不起，请提供有效的提现金额！", null);
 		}
