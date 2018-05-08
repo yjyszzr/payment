@@ -271,6 +271,11 @@ public class PaymentController extends AbstractBaseController{
 		boolean hasThird = false;
 		if(thirdPartyPaid != null && thirdPartyPaid.doubleValue() > 0) {
 			hasThird = true;
+			String payCode = param.getPayCode();
+			if(StringUtils.isBlank(payCode)) {
+				logger.info(loggerId + "第三方支付，paycode为空~");
+				return ResultGenerator.genResult(PayEnums.PAY_STYLE.getcode(),PayEnums.PAY_STYLE.getMsg());
+			}
 		}
 		PaymentDTO paymentDto = null;
 		String payName = null;

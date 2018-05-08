@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.http.util.TextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ import com.dl.member.param.MessageAddParam;
 import com.dl.member.param.StrParam;
 import com.dl.member.param.UserWithdrawParam;
 import com.dl.member.param.WithDrawParam;
+import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.UserWithdrawLog;
 import com.dl.shop.payment.param.WithdrawParam;
 import com.dl.shop.payment.pay.rongbao.cash.CashUtil;
@@ -89,18 +91,36 @@ public class CashController {
 			logger.info(loggerId+"提现金额提供有误！");
 			return ResultGenerator.genFailResult("对不起，请提供有效的提现金额！", null);
 		}
+		String strMoney = userDTO.getUserMoney();
+		Double dMoney = null;
+		logger.info("钱包金额:" + strMoney + " 用户提现金额:" + strMoney);
+		if(!TextUtils.isEmpty(strMoney)) {
+			try {
+				dMoney = Double.valueOf(strMoney);
+			}catch(Exception ee) {
+				ee.printStackTrace();
+			}
+		}
+		if(dMoney == null) {
+			logger.info(loggerId+"金额转换失败！");
+			return ResultGenerator.genFailResult("用户钱包金额转换失败！",null);
+		}
+		if(totalAmount > dMoney) {
+			logger.info(loggerId+"提现金额超出用户钱包数值~");
+			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_NOT_ENOUGH.getcode(),PayEnums.PAY_RONGBAO_NOT_ENOUGH.getMsg()); 
+		}
 		//支付方式
 		int userBankId = param.getUserBankId();
 		if(userBankId < 1) {
 			logger.info(loggerId + "用户很行卡信息id提供有误！");
-			return ResultGenerator.genFailResult("对不起，请选择有效的很行卡！", null);
+			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_BANK_QUERY_ERROR.getcode(),PayEnums.PAY_RONGBAO_BANK_QUERY_ERROR.getMsg());
 		}
 		IDParam idParam = new IDParam();
 		idParam.setId(userBankId);
 		BaseResult<UserBankDTO> queryUserBank = userBankService.queryUserBank(idParam);
 		if(queryUserBank.getCode() != 0) {
 			logger.info(loggerId+"用户银行卡信息获取有误！");
-			return ResultGenerator.genFailResult("对不起，请提供有效的银行卡！", null);
+			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_BANK_QUERY_ERROR.getcode(),PayEnums.PAY_RONGBAO_BANK_QUERY_ERROR.getMsg());
 		}
 		UserBankDTO userBankDTO = queryUserBank.getData();
 		String realName = userBankDTO.getRealName();
