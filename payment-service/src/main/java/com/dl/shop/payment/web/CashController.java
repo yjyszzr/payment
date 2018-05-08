@@ -26,11 +26,12 @@ import com.dl.member.dto.UserDTO;
 import com.dl.member.dto.WithdrawalSnDTO;
 import com.dl.member.param.IDParam;
 import com.dl.member.param.StrParam;
-import com.dl.member.param.UpdateUserWithdrawParam;
-import com.dl.member.param.UserWithdrawParam;
 import com.dl.member.param.WithDrawParam;
+import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.UserWithdrawLog;
+import com.dl.shop.payment.param.UpdateUserWithdrawParam;
+import com.dl.shop.payment.param.UserWithdrawParam;
 import com.dl.shop.payment.param.WithdrawParam;
 import com.dl.shop.payment.pay.rongbao.cash.CashUtil;
 import com.dl.shop.payment.pay.rongbao.cash.entity.ReqCashContentEntity;
@@ -140,7 +141,7 @@ public class CashController {
 		userWithdrawParam.setAmount(BigDecimal.valueOf(totalAmount));
 		userWithdrawParam.setCardNo(cardNo);
 		userWithdrawParam.setRealName(realName);
-		userWithdrawParam.setStatus(UserWithdrawParam.STATUS_UNCOMPLETE);
+		userWithdrawParam.setStatus(ProjectConstant.STATUS_UNCOMPLETE);
 		WithdrawalSnDTO withdrawalSnDTO = userWithdrawService.saveWithdraw(userWithdrawParam);
 		if(StringUtils.isEmpty(withdrawalSnDTO.getWithdrawalSn())) {
 			logger.info(loggerId+" 生成提现单失败");
@@ -234,7 +235,7 @@ public class CashController {
 				logger.info("提现单号:"+orderSn+"更新提现单位成功状态");
 				UpdateUserWithdrawParam updateParams = new UpdateUserWithdrawParam();
 				updateParams.setWithdrawalSn(withdrawalSnDTO.getWithdrawalSn());
-				updateParams.setStatus(UserWithdrawParam.STATUS_SUCC);
+				updateParams.setStatus(ProjectConstant.STATUS_SUCC);
 				updateParams.setPayTime(DateUtil.getCurrentTimeLong());
 				updateParams.setPaymentId(orderSn);
 				updateParams.setPaymentName("融宝提现");
