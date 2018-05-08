@@ -42,7 +42,7 @@ public class ReqPayEntity implements Serializable{
 		ReqPayEntity reqEntity = new ReqPayEntity();
 		reqEntity.orgNo = "2188";
 		reqEntity.charset = "UTF-8";
-		reqEntity.termNo = "XA026454";  //设备号
+		reqEntity.termNo = ConfigerPay.DEVICE_NO;  //设备号
 		reqEntity.termType = "RQ";		//终端类型
 		reqEntity.txtTime = getPayTime(); //交易时间，暂时写死
 		reqEntity.signType = "MD5";		//签名信息
