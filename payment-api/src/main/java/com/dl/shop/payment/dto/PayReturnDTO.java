@@ -15,5 +15,4 @@ public class PayReturnDTO {
    private String orderId;
    @ApiModelProperty(value="微信预支付信息")
    private WxpayAppDTO wxAppPayInfo;
-
 }

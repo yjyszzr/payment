@@ -127,7 +127,7 @@ public class PaymentController extends AbstractBaseController{
 	@ApiOperation(value="用户支付回退接口", notes="")
 	@PostMapping("/rollbackOrderAmount")
 	@ResponseBody
-	public BaseResult rollbackOrderAmount(@RequestBody RollbackOrderAmountParam param) {
+	public BaseResult<?> rollbackOrderAmount(@RequestBody RollbackOrderAmountParam param) {
 		logger.info("in rollbackOrderAmount ordersn=" + param.getOrderSn());
 		String orderSn = param.getOrderSn();
 		OrderSnParam snParam = new OrderSnParam();
@@ -535,18 +535,18 @@ public class PaymentController extends AbstractBaseController{
 		double totalAmount = param.getTotalAmount();
 		if(totalAmount <= 0) {
 			logger.info(loggerId + "充值金额有误！totalAmount="+totalAmount);
-			return ResultGenerator.genFailResult("对不起，请提供有效的充值金额！", null);
+			return ResultGenerator.genResult(PayEnums.RECHARGE_AMT_ERROR.getcode(),PayEnums.RECHARGE_AMT_ERROR.getMsg());
 		}
 		//支付方式
 		String payCode = param.getPayCode();
 		if(StringUtils.isBlank(payCode)) {
 			logger.info(loggerId + "订单第三支付没有提供paycode！");
-			return ResultGenerator.genFailResult("对不起，您还没有选择第三方支付！", null);
+			return ResultGenerator.genResult(PayEnums.RECHARGE_PAY_STYLE_EMPTY.getcode(),PayEnums.RECHARGE_PAY_STYLE_EMPTY.getMsg());
 		}
 		BaseResult<PaymentDTO> paymentResult = paymentService.queryByCode(payCode);
 		if(paymentResult.getCode() != 0) {
 			logger.info(loggerId + "订单第三方支付提供paycode有误！");
-			return ResultGenerator.genFailResult("请选择有效的支付方式！", null);
+			return ResultGenerator.genResult(PayEnums.RECHARGE_PAY_STYLE_EMPTY.getcode(), PayEnums.RECHARGE_PAY_STYLE_EMPTY.getMsg());
 		}
 		//生成充值单
 //		AmountParam amountParam = new AmountParam();
@@ -579,8 +579,10 @@ public class PaymentController extends AbstractBaseController{
 		unifiedOrderParam.setOrderNo(savePayLog.getLogId());
 		BaseResult payBaseResult = null;
 		if("app_weixin".equals(payCode)) {
+			logger.info("微信支付url开始生成...");
 //			payBaseResult = wxpayUtil.unifiedOrderForApp(unifiedOrderParam);
 			payBaseResult = getWechatPayUrl(savePayLog, payIp, orderSn);
+			logger.info("微信支付url生成成功 code" + payBaseResult.getCode() +" data:" +payBaseResult.getData());
 		}else if("app_rongbao".equals(payCode)) {
 			//生成支付链接信息
 			String payOrder = savePayLog.getPayOrderSn();

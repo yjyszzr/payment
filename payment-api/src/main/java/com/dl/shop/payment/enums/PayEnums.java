@@ -11,7 +11,9 @@ public enum PayEnums {
 	PAY_RONGBAO_BANK_QUERY_ERROR(304041,"对不起，请选择有效的很行卡"),
 	PAY_STYLE_BLANK(304042,"请提供有效支付方式"),
 	PAY_TOTAL_NOTRANGE(304043,"输入金额超出范围"),
-	CASH_REVIEWING(304044,"超出提现阈值,进入审核通道");
+	CASH_REVIEWING(304044,"超出提现阈值,进入审核通道"),
+	RECHARGE_AMT_ERROR(304045,"对不起，请提供有效的充值金额"),
+	RECHARGE_PAY_STYLE_EMPTY(304046,"对不起，请提供有效的充值金额");
 	
 	private Integer code;
     private String msg;
