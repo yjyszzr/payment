@@ -51,6 +51,8 @@ public class WxpayNotifyController {
 	public void payNotify(HttpServletRequest request, HttpServletResponse response) {
 		String loggerId = "wxNotify_"+System.currentTimeMillis();
 		logger.warn(loggerId + " in controller /payment/wxpay/notify");
+		String val = request.getParameter("result");
+		logger.info("微信回掉处理:" + val);
 		// 将微信的回调的参数转化为String并打印
 		StringBuffer strBuf1 = new StringBuffer();
 		String line = null;
