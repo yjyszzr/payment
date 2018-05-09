@@ -2,6 +2,9 @@ package com.dl.shop.payment.pay.common;
 
 import java.io.Serializable;
 import org.apache.http.util.TextUtils;
+
+import com.netflix.ribbon.hystrix.ResultCommandPair;
+
 import lombok.Data;
 
 @Data
@@ -28,6 +31,10 @@ public class RspOrderQueryEntity implements Serializable{
 		return false;
 	}
 
+	public boolean isYinHeWeChatNotPay() {
+		return "104".equals(result_code);
+	}
+	
 	public static final String PAY_CODE_WECHAT = "app_weixin";
 	public static final String PAY_CODE_RONGBAO = "app_rongbao";
 }

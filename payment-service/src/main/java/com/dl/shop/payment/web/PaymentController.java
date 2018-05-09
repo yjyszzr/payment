@@ -843,8 +843,8 @@ public class PaymentController extends AbstractBaseController{
 				}
 			}else {
 				String code = response.getResult_code();
-				if(StringUtils.isBlank(code)) {
-					return ResultGenerator.genResult(PayEnums.PAY_WEIXIN_FAILURE.getcode(),"xxx");
+				if(StringUtils.isBlank(code) || response.isYinHeWeChatNotPay()) {
+					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
 				}else {
 					String tips = response.getResult_msg();
 					return ResultGenerator.genResult(PayEnums.PAY_WEIXIN_FAILURE.getcode(),"微信支付失败["+tips+"]");	
