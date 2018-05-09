@@ -24,8 +24,8 @@ import com.dl.shop.payment.pay.yinhe.util.PayUtil;
 public class PayDemo {
 
 	public PayDemo() {
-//		testQuery();
-		testPay();
+		testQuery();
+//		testPay();
 	}
 	
 	private void testQuery() {
