@@ -18,7 +18,7 @@ public class ReapalH5Config {
 	// ↓↓↓↓↓↓↓↓↓↓请在这里配置您的基本信息↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
 	// 需要更换的信息
 	public static final String URL_PAY = "http://39.106.18.39:8082/reapal-h5-api/h5/indexH5.jsp";
-	public static final String URL_PAY_WECHAT = "http://api.caixiaomi.net:8082/reapal-h5-api/wechat/pay.jsp";
+	public static final String URL_PAY_WECHAT = "http://zf.caixiaomi.net/reapal-h5-api/wechat/pay.jsp";
 	
 	// 商户ID，由纯数字组成的字符串
 	public static String merchant_id = "100000000000147";
