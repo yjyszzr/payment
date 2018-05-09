@@ -2,9 +2,9 @@ package com.dl.shop.payment.enums;
 
 public enum PayEnums {
 	
-	PAY_RONGBAO_FAILURE(304035,"融宝支付失败"),
-	PAY_RONGBAO_EMPTY(304036,"未查询到该订单信息"),
-	PAY_WEIXIN_FAILURE(304037,"微信支付失败"),
+	PAY_RONGBAO_FAILURE(304035,"支付失败"),
+	PAY_RONGBAO_EMPTY(304036,"未查询到该订单信息"), 
+	// PAY_WEIXIN_FAILURE(304037,"微信支付失败"), PAY_WEIXIN_FAILURE
 	PAY_RONGBAO_NOT_ENOUGH(304038,"提现金额超出提现数值"),
 	PAY_RONGBAO_BANK_ERROR(304039,"银行卡信息有误"),
 	PAY_RONGBAO_AMT_ERROR(304040,"请提供有效金额信息"),

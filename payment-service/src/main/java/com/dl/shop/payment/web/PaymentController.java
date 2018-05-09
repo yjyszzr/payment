@@ -847,7 +847,7 @@ public class PaymentController extends AbstractBaseController{
 					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
 				}else {
 					String tips = response.getResult_msg();
-					return ResultGenerator.genResult(PayEnums.PAY_WEIXIN_FAILURE.getcode(),"微信支付失败["+tips+"]");	
+					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"微信支付失败["+tips+"]");	
 				}
 			}
 		}
@@ -943,7 +943,11 @@ public class PaymentController extends AbstractBaseController{
 			}else if(RspOrderQueryEntity.PAY_CODE_WECHAT.equals(payCode)){//wechat pay
 				String code = response.getResult_code();
 				String tips = response.getResult_msg();
-				return ResultGenerator.genResult(PayEnums.PAY_WEIXIN_FAILURE.getcode(),"微信服务返回[" + tips +"]");
+				if(StringUtils.isBlank(code) || response.isYinHeWeChatNotPay()) {
+					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
+				}else {
+					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"微信支付失败["+tips+"]");	
+				}
 			}
 			return null;
 		}
