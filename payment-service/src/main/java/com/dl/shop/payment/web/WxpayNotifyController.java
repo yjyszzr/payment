@@ -96,11 +96,11 @@ public class WxpayNotifyController {
 			logger.debug(loggerId + " trade_type:" + responseModel.getTrade_type());
 			logger.debug(loggerId + " 解析完毕！！*********");
 
-			String payLogId = responseModel.getOut_trade_no();//prePayJo.getString("out_trade_no");
-			logger.info(loggerId + " payLogId="+payLogId);
+			String payOrderSn = responseModel.getOut_trade_no();//prePayJo.getString("out_trade_no");
+			logger.info(loggerId + " payOrderSn="+payOrderSn);
 			String tradeNo = responseModel.getTransaction_id();//prePayJo.getString("transaction_id");
 			int amount = responseModel.getTotal_fee();
-			PayLog payLog = payLogService.findById(Integer.parseInt(payLogId));
+			PayLog payLog = payLogService.findPayLogByOrderSign(payOrderSn);
 			if(null == payLog) {
 				logger.info(loggerId + " payLog对象未查询到，返回失败！");
 				//fail
