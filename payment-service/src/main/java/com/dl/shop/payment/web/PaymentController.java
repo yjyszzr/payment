@@ -842,7 +842,7 @@ public class PaymentController extends AbstractBaseController{
 					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"融宝服务返回[" + tips +"]");
 				}
 			}else {
-				String code = response.getResult_code();
+				String code = response.getResult_code(); //104 -> 未支付  404 -> 订单不存在
 				if(StringUtils.isBlank(code) || response.isYinHeWeChatNotPay()) {
 					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
 				}else {

@@ -30,9 +30,11 @@ public class RspOrderQueryEntity implements Serializable{
 		}
 		return false;
 	}
-
+	
+	//104 -> 未支付  
+	//404 -> 订单不存在
 	public boolean isYinHeWeChatNotPay() {
-		return "104".equals(result_code);
+		return "104".equals(result_code) || "404".equals(result_code);
 	}
 	
 	public static final String PAY_CODE_WECHAT = "app_weixin";
