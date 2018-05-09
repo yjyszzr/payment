@@ -84,7 +84,7 @@ public class CashController {
 		String mobile = userDTO.getMobile();
 		String strTotalAmount = param.getTotalAmount();
 		//长度超过1000000 -> 7位数
-		if(StringUtils.isEmpty(strTotalAmount) || strTotalAmount.length() > 7) {
+		if(StringUtils.isEmpty(strTotalAmount) || strTotalAmount.length() > 10) {
 			logger.info(loggerId+"输入金额超出有效范围~");
 			return ResultGenerator.genResult(PayEnums.PAY_TOTAL_NOTRANGE.getcode(), PayEnums.PAY_TOTAL_NOTRANGE.getMsg());
 		}
