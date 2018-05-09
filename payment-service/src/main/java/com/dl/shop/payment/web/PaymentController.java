@@ -502,7 +502,8 @@ public class PaymentController extends AbstractBaseController{
 				PayReturnDTO rEntity = new PayReturnDTO();
 				String encodeUrl = null;
 				try {
-					encodeUrl = URLEncoder.encode(rYinHeEntity.qrCode,"UTF-8");
+					String qrCode = rYinHeEntity.qrCode +"&redirect_uri=caixiaomi.net";
+					encodeUrl = URLEncoder.encode(qrCode,"UTF-8");
 				} catch (UnsupportedEncodingException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
