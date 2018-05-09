@@ -27,6 +27,7 @@ import com.dl.shop.payment.configurer.WxpayConfig;
 import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.WxpayNotifyModel;
+import com.dl.shop.payment.pay.common.PayConfig;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.utils.XmlUtil;
 
@@ -124,7 +125,8 @@ public class WxpayNotifyController {
 				return;
 			}
 			int orderAmount = (int)(payLog.getOrderAmount().doubleValue()*100);
-			if (amount == orderAmount && ((appid.equals(wxpayConfig.getWxAppAppId()) && mchId.equals(wxpayConfig.getWxAppMchId())) || (appid.equals(wxpayConfig.getWxJsAppId()) && mchId.equals(wxpayConfig.getWxJsMchId())))) {
+			logger.info("实际交易金额:" + amount +" 订单金额:" + orderAmount);
+			if ((PayConfig.isDebug() || amount == orderAmount) && ((appid.equals(wxpayConfig.getWxAppAppId()) && mchId.equals(wxpayConfig.getWxAppMchId())) || (appid.equals(wxpayConfig.getWxJsAppId()) && mchId.equals(wxpayConfig.getWxJsMchId())))) {
 				logger.info(loggerId + " 订单金额或appid,mchId校验成功，前去回调订单服务！");
 				try {
 					int payType = payLog.getPayType();
