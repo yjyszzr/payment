@@ -24,8 +24,8 @@ import com.dl.shop.payment.pay.yinhe.util.PayUtil;
 public class PayDemo {
 
 	public PayDemo() {
-		testQuery();
-//		testPay();
+//		testQuery();
+		testPay();
 	}
 	
 	private void testQuery() {
@@ -56,7 +56,7 @@ public class PayDemo {
 		reqEntity.signValue = signCode;
 		//signCode添加到请求参数中
 		String reqStr = JSON.toJSONString(reqEntity);
-		System.out.println(reqStr);
+		System.out.println(reqStr);//查询queryPayInfo.action
 		RspHttpEntity rspEntity = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/queryPayInfo.action",true);
 		System.out.println(rspEntity);
 	}

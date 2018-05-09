@@ -63,6 +63,9 @@ public class PayUtil {
 	 * @return
 	 */
 	public static final RspYinHeEntity getWechatPayUrl(String ip,String amount,String orderNo){
+		//test amt
+		amount = "1";
+		
 		RspYinHeEntity rEntity = null;
 		ReqPayEntity reqEntity = ReqPayEntity.buildReqEntity(ip, amount, orderNo);
 		ReqSignEntity signEntity = reqEntity.buildSignEntity();
