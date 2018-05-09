@@ -53,17 +53,17 @@ public class WxpayNotifyController {
 		logger.warn(loggerId + " in controller /payment/wxpay/notify");
 		String val = request.getParameter("result");
 		logger.info("微信回掉处理:" + val);
-		// 将微信的回调的参数转化为String并打印
-		StringBuffer strBuf1 = new StringBuffer();
-		String line = null;
-		try(BufferedReader reader = new BufferedReader(new InputStreamReader(request.getInputStream()))){
-			while ((line = reader.readLine()) != null) {
-				strBuf1.append(line).append("\n");
-			}
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		String requestStr = strBuf1.toString();
+//		// 将微信的回调的参数转化为String并打印
+//		StringBuffer strBuf1 = new StringBuffer();
+//		String line = null;
+//		try(BufferedReader reader = new BufferedReader(new InputStreamReader(request.getInputStream()))){
+//			while ((line = reader.readLine()) != null) {
+//				strBuf1.append(line).append("\n");
+//			}
+//		}catch(Exception e){
+//			e.printStackTrace();
+//		}
+		String requestStr = val;
 		logger.warn(loggerId + "  /payment/wxpay/notify requestStr 微信支付 验证信息: " + requestStr);
 		WxpayNotifyModel responseModel = null;
 		try {
