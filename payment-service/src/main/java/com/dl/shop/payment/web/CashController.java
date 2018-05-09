@@ -193,7 +193,8 @@ public class CashController {
 //		userMessageService.add(messageAddParam);
 		if(inReview) {
 			logger.info("单号:"+orderSn+"超出提现阈值,进入审核通道");
-			return ResultGenerator.genResult(PayEnums.CASH_REVIEWING.getcode(),PayEnums.CASH_REVIEWING.getMsg());
+//			return ResultGenerator.genResult(PayEnums.CASH_REVIEWING.getcode(),PayEnums.CASH_REVIEWING.getMsg());
+			return ResultGenerator.genSuccessResult("提现成功");
 		}else {
 			logger.info("进入第三方提现流程...");
 			CashResultEntity rEntity = callThirdGetCash(orderSn,totalAmount);
