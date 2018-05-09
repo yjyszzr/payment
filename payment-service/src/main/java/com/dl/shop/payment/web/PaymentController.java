@@ -745,6 +745,7 @@ public class PaymentController extends AbstractBaseController{
 		}
 		String payCode = payLog.getPayCode();
 		BaseResult<RspOrderQueryEntity> baseResult = null;
+		logger.info("调用第三方订单查询接口 payCode:" + payCode + " payOrderSn:" + payLog.getPayOrderSn());
 		if("app_rongbao".equals(payCode)) {
 			baseResult = RongUtil.queryOrderInfo(payLog.getPayOrderSn());
 		}else if("app_weixin".equals(payCode)) {
@@ -756,8 +757,11 @@ public class PaymentController extends AbstractBaseController{
 				logger.info(loggerId+" 订单查询请求异常"+baseResult.getMsg());
 				return ResultGenerator.genFailResult("请求异常！",null);
 			}
-			RspOrderQueryEntity response = baseResult.getData();
 			Integer payType = payLog.getPayType();
+			RspOrderQueryEntity response = baseResult.getData();
+			logger.info("调用第三方订单查询接口 返回成功" + 
+			response.getResult_msg() +" payType:" +payType + " isSucc:" + response.isSucc() + 
+			"resultCode:"+response.getResult_code());
 			if(0 == payType) {
 				return orderOptions(loggerId, payLog, response);
 			}else if(1 == payType){
@@ -803,7 +807,6 @@ public class PaymentController extends AbstractBaseController{
 			if(rechargeRst.getCode() != 0) {
 				logger.error(loggerId+" 给个人用户充值：code"+rechargeRst.getCode() +"message:"+rechargeRst.getMsg());
 			}
-			
 			//更新paylog
 			try {
 				PayLog updatePayLog = new PayLog();
@@ -839,10 +842,17 @@ public class PaymentController extends AbstractBaseController{
 					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"融宝服务返回[" + tips +"]");
 				}
 			}else {
-				return ResultGenerator.genResult(PayEnums.PAY_WEIXIN_FAILURE.getcode(),"微信回调暂未开发~");
+				String code = response.getResult_code();
+				if(StringUtils.isBlank(code)) {
+					return ResultGenerator.genResult(PayEnums.PAY_WEIXIN_FAILURE.getcode(),"xxx");
+				}else {
+					String tips = response.getResult_msg();
+					return ResultGenerator.genResult(PayEnums.PAY_WEIXIN_FAILURE.getcode(),"微信支付失败["+tips+"]");	
+				}
 			}
 		}
 	}
+	
 	/**
 	 * 对支付结果的一个回写处理
 	 * @param loggerId
