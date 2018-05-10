@@ -13,7 +13,8 @@ public enum PayEnums {
 	PAY_TOTAL_NOTRANGE(304043,"输入金额超出范围"),
 	CASH_REVIEWING(304044,"超出提现阈值,进入审核通道"),
 	RECHARGE_AMT_ERROR(304045,"对不起，请提供有效的充值金额"),
-	RECHARGE_PAY_STYLE_EMPTY(304046,"对不起，请提供有效的充值金额");
+	RECHARGE_PAY_STYLE_EMPTY(304046,"对不起，请提供有效的充值金额"),
+	PAY_YINHE_INNER_ERROR(304047,"银河内部失败");
 	
 	private Integer code;
     private String msg;

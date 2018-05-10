@@ -27,7 +27,13 @@ public class PayDemo {
 	public PayDemo() {
 //		testQuery();
 //		testPay();
-		testQRBarPay();
+//		testQRBarPay();
+		testUtil();
+	}
+
+	private void testUtil() {
+		RspYinHeEntity rspEntity = PayUtil.getWechatPayUrl(false,"39.155.221.148","2",System.currentTimeMillis()+"");
+		System.out.println("rspEntity:" + rspEntity);
 	}
 	
 	private void testQRBarPay() {

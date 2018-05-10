@@ -522,7 +522,7 @@ public class PaymentController extends AbstractBaseController{
 					payBaseResult = ResultGenerator.genFailResult("url decode失败",null);
 				}
 			}else {
-				payBaseResult = ResultGenerator.genFailResult("银河支付返回支付链接错误");
+				payBaseResult = ResultGenerator.genResult(PayEnums.PAY_YINHE_INNER_ERROR.getcode(),PayEnums.PAY_YINHE_INNER_ERROR.getMsg()+"[" + rYinHeEntity.returnMsg+"]");
 			}
 		}else {
 			payBaseResult = ResultGenerator.genFailResult("银河支付返回数据有误");

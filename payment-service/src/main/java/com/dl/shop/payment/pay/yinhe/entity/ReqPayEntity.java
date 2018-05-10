@@ -1,9 +1,6 @@
 package com.dl.shop.payment.pay.yinhe.entity;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
 
 public class ReqPayEntity implements Serializable{
@@ -41,7 +38,7 @@ public class ReqPayEntity implements Serializable{
 		reqEntity.charset = "UTF-8";
 		reqEntity.termNo = ConfigerPay.DEVICE_NO;  //设备号
 		reqEntity.termType = "RQ";		//终端类型
-		reqEntity.txtTime = ConfigerPay.getPayTime(); //交易时间，暂时写死
+		reqEntity.txtTime = ConfigerPay.getPayTime(); //交易时间
 		reqEntity.signType = "MD5";		//签名信息
 		reqEntity.transNo = orderNo;	//交易号 唯一
 		reqEntity.merId = ConfigerPay.MERCHANT_NO;//商户号
