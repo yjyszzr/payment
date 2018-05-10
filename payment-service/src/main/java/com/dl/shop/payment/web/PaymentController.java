@@ -760,7 +760,7 @@ public class PaymentController extends AbstractBaseController{
 			baseResult = RongUtil.queryOrderInfo(payLog.getPayOrderSn());
 		}else if("app_weixin".equals(payCode)) {
 //			baseResult = wxpayUtil.orderQuery(payLog.getPayOrderSn());
-			baseResult = yinHeUtil.orderQuery(payLog.getPayOrderSn());
+			baseResult = yinHeUtil.orderQuery(false,payLog.getPayOrderSn());
 		}
 		if(baseResult != null) {
 			if(baseResult.getCode() != 0) {
