@@ -197,6 +197,8 @@ public class WxpayNotifyController {
 						BaseResult<String> accountRst = userAccountService.insertUserAccount(userAccountParamByType);
 						if(accountRst.getCode() != 0) {
 							logger.info(loggerId + "生成账户流水异常");
+						}else {
+							logger.info("生成账户流水成功");
 						}
 					}
 				} catch (IOException e) {
