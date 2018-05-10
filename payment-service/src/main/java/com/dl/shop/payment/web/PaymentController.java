@@ -621,14 +621,14 @@ public class PaymentController extends AbstractBaseController{
 		if(null == payBaseResult || payBaseResult.getCode() != 0) {
 			//充值失败逻辑
 			//更改充值单状态
-			UpdateUserRechargeParam updateUserRechargeParam = new UpdateUserRechargeParam();
-			updateUserRechargeParam.setPaymentCode(payLog.getPayCode());
-			updateUserRechargeParam.setPaymentId(payLog.getLogId()+"");
-			updateUserRechargeParam.setPaymentName(payLog.getPayName());
-			updateUserRechargeParam.setPayTime(DateUtil.getCurrentTimeLong());
-			updateUserRechargeParam.setStatus("2");
-			updateUserRechargeParam.setRechargeSn(payLog.getOrderSn());
-			BaseResult<String> baseResult = userAccountService.updateReCharege(updateUserRechargeParam);
+			UpdateUserRechargeParam updateUserParams = new UpdateUserRechargeParam();
+			updateUserParams.setPaymentCode(payLog.getPayCode());
+			updateUserParams.setPaymentId(payLog.getLogId()+"");
+			updateUserParams.setPaymentName(payLog.getPayName());
+			updateUserParams.setPayTime(DateUtil.getCurrentTimeLong());
+			updateUserParams.setRechargeSn(rechargeSn);
+			updateUserParams.setStatus("2");
+			BaseResult<String> baseResult = userRechargeService.updateReCharege(updateUserParams);
 			logger.info(loggerId + " 充值失败更改充值单返回信息：status=" + baseResult.getCode()+" , message="+baseResult.getMsg());
 			if(baseResult.getCode() == 0) {
 				//更改流水信息
