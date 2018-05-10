@@ -97,7 +97,7 @@ public class PayUtil {
 		if(isInnerWechat) {
 			secret = ConfigerPay.SECRET_PUBLIC;
 		}else {
-			secret = ConfigerPay.SECRET;
+			secret = ConfigerPay.SECRET_PUBLIC;
 		}
 		logger.info("sign code params:" + paraStr + " secret:" + secret);
 		//生成signCode
