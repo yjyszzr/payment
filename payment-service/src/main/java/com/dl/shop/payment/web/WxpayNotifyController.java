@@ -29,6 +29,7 @@ import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.WxpayNotifyModel;
 import com.dl.shop.payment.pay.common.PayConfig;
 import com.dl.shop.payment.service.PayLogService;
+import com.dl.shop.payment.service.UserRechargeService;
 import com.dl.shop.payment.utils.XmlUtil;
 
 import io.swagger.annotations.ApiOperation;
@@ -46,7 +47,9 @@ public class WxpayNotifyController {
 	private IUserAccountService userAccountService;
 	@Autowired
 	private IOrderService orderService;
-
+	@Autowired
+	private UserRechargeService userRService;
+	
 	@ApiOperation(value="微信支付回调")
 	@PostMapping("notify")
 	public void payNotify(HttpServletRequest request, HttpServletResponse response) {
@@ -150,14 +153,14 @@ public class WxpayNotifyController {
 					}else {
 						String rechargeSn = payLog.getOrderSn();
 						//更新order
-						UpdateUserRechargeParam updateUserRechargeParam = new UpdateUserRechargeParam();
-						updateUserRechargeParam.setPaymentCode(payLog.getPayCode());
-						updateUserRechargeParam.setPaymentId(payLog.getLogId()+"");
-						updateUserRechargeParam.setPaymentName(payLog.getPayName());
-						updateUserRechargeParam.setPayTime(currentTime);
-						updateUserRechargeParam.setStatus("1");
-						updateUserRechargeParam.setRechargeSn(payLog.getOrderSn());
-						BaseResult<String> baseResult = userAccountService.updateReCharege(updateUserRechargeParam);
+						UpdateUserRechargeParam updateRParams = new UpdateUserRechargeParam();
+						updateRParams.setRechargeSn(rechargeSn);
+						updateRParams.setStatus("1");
+						updateRParams.setPaymentCode("app_weixin");
+						updateRParams.setPaymentName("微信充值");
+						updateRParams.setPayTime(currentTime);
+						updateRParams.setPaymentId(payLog.getLogId()+"");
+						BaseResult<String> baseResult = userRService.updateReCharege(updateRParams);
 						logger.info(loggerId + " 充值回调返回结果：status=" + baseResult.getCode()+" , message="+baseResult.getMsg());
 						if(0 == baseResult.getCode()) {
 							result = true;

@@ -550,10 +550,6 @@ public class PaymentController extends AbstractBaseController{
 			return ResultGenerator.genResult(PayEnums.RECHARGE_PAY_STYLE_EMPTY.getcode(), PayEnums.RECHARGE_PAY_STYLE_EMPTY.getMsg());
 		}
 		//生成充值单
-//		AmountParam amountParam = new AmountParam();
-//		amountParam.setAmount(BigDecimal.valueOf(totalAmount));
-//		BaseResult<UserRechargeDTO> createReCharege = userAccountService.createReCharege(amountParam);
-		
 		String rechargeSn = userRechargeService.saveReCharege(BigDecimal.valueOf(totalAmount));
 		
 		if(StringUtils.isEmpty(rechargeSn)) {
