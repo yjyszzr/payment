@@ -74,6 +74,7 @@ import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
 import com.dl.shop.payment.pay.rongbao.entity.ReqRefundEntity;
 import com.dl.shop.payment.pay.rongbao.entity.ReqRongEntity;
 import com.dl.shop.payment.pay.rongbao.entity.RspRefundEntity;
+import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
 import com.dl.shop.payment.pay.yinhe.entity.RspYinHeEntity;
 import com.dl.shop.payment.pay.yinhe.util.PayUtil;
 import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
@@ -505,7 +506,7 @@ public class PaymentController extends AbstractBaseController{
 				try {
 					String qrCode = rYinHeEntity.qrCode;
 					encodeUrl = URLEncoder.encode(qrCode,"UTF-8");
-					redirectUri = URLEncoder.encode("caixiaomi.net","UTF-8");
+					redirectUri = URLEncoder.encode(ConfigerPay.URL_REDIRECT,"UTF-8");
 				} catch (UnsupportedEncodingException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
