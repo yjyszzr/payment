@@ -10,4 +10,6 @@ public class RechargeParam {
 	private int totalAmount;
 	@ApiModelProperty("支付方式编码")
 	private String payCode;
+	@ApiModelProperty("是否在微信内部打开支付？0不是微信内部 1微信内部")
+	private int innerWechat;
 }

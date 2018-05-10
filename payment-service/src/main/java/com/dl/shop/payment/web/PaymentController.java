@@ -429,7 +429,7 @@ public class PaymentController extends AbstractBaseController{
 		BaseResult payBaseResult = null;
 		if("app_weixin".equals(paymentDto.getPayCode())) {
 //			payBaseResult = wxpayUtil.unifiedOrderForApp(unifiedOrderParam);
-			payBaseResult = getWechatPayUrl(savePayLog, payIp, orderId);
+			payBaseResult = getWechatPayUrl(param.getInnerWechat()==1,savePayLog, payIp, orderId);
 		}else if("app_rongbao".equals(paymentDto.getPayCode())) {
 			//生成支付链接信息
 			String payOrder = savePayLog.getPayOrderSn();
@@ -491,13 +491,13 @@ public class PaymentController extends AbstractBaseController{
 	 * @param orderId
 	 * @return
 	 */
-	private BaseResult<?> getWechatPayUrl(PayLog savePayLog,String payIp,String orderId) {
+	private BaseResult<?> getWechatPayUrl(boolean isInnerWeChat,PayLog savePayLog,String payIp,String orderId) {
 		BaseResult<?> payBaseResult = null;
 		String strAmt = savePayLog.getOrderAmount().doubleValue()+"";
 		BigDecimal bigD = new BigDecimal(strAmt);
 		strAmt = bigD.movePointRight(2).toString();
 		String payOrderSn = savePayLog.getPayOrderSn();
-		RspYinHeEntity rYinHeEntity = PayUtil.getWechatPayUrl(payIp,strAmt,payOrderSn);
+		RspYinHeEntity rYinHeEntity = PayUtil.getWechatPayUrl(isInnerWeChat,payIp,strAmt,payOrderSn);
 		if(rYinHeEntity != null) {
 			if(rYinHeEntity.isSucc() && !TextUtils.isEmpty(rYinHeEntity.qrCode)) {
 				PayReturnDTO rEntity = new PayReturnDTO();
@@ -581,7 +581,7 @@ public class PaymentController extends AbstractBaseController{
 		if("app_weixin".equals(payCode)) {
 			logger.info("微信支付url开始生成...");
 //			payBaseResult = wxpayUtil.unifiedOrderForApp(unifiedOrderParam);
-			payBaseResult = getWechatPayUrl(savePayLog, payIp, orderSn);
+			payBaseResult = getWechatPayUrl(param.getInnerWechat()==1,savePayLog, payIp, orderSn);
 			logger.info("微信支付url生成成功 code" + payBaseResult.getCode() +" data:" +payBaseResult.getData());
 		}else if("app_rongbao".equals(payCode)) {
 			//生成支付链接信息

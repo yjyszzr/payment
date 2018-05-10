@@ -12,9 +12,11 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.util.MD5Utils;
 import com.dl.shop.payment.pay.common.HttpUtil;
+import com.dl.shop.payment.pay.common.PayConfig;
 import com.dl.shop.payment.pay.common.RspHttpEntity;
 import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
 import com.dl.shop.payment.pay.yinhe.entity.ReqPayEntity;
+import com.dl.shop.payment.pay.yinhe.entity.ReqQRPayEntity;
 import com.dl.shop.payment.pay.yinhe.entity.ReqSignEntity;
 import com.dl.shop.payment.pay.yinhe.entity.RspYinHeEntity;
 import com.dl.shop.payment.web.PaymentController;
@@ -62,13 +64,21 @@ public class PayUtil {
 	 * 获取微信支付url
 	 * @return
 	 */
-	public static final RspYinHeEntity getWechatPayUrl(String ip,String amount,String orderNo){
-		//test amt
-		amount = "1";
-		
+	public static final RspYinHeEntity getWechatPayUrl(boolean isInnerWechat,String ip,String amount,String orderNo){
+		if(PayConfig.isDebug()) {
+			amount = "1";
+		}
 		RspYinHeEntity rEntity = null;
-		ReqPayEntity reqEntity = ReqPayEntity.buildReqEntity(ip, amount, orderNo);
-		ReqSignEntity signEntity = reqEntity.buildSignEntity();
+		ReqQRPayEntity reqQRPayEntity = null;
+		ReqPayEntity reqH5Entity = null;
+		ReqSignEntity signEntity = null;
+		if(isInnerWechat) {
+			reqQRPayEntity = ReqQRPayEntity.buildReqEntity(amount,orderNo);
+			signEntity = reqQRPayEntity.buildSignEntity();
+		}else {
+			reqH5Entity = ReqPayEntity.buildReqEntity(ip, amount, orderNo);			
+			signEntity = reqH5Entity.buildSignEntity();
+		}
 		String str = JSON.toJSONString(signEntity);
 		JSONObject jsonObj = JSON.parseObject(str,JSONObject.class);
 		Set<java.util.Map.Entry<String, Object>> mSet = jsonObj.entrySet();
@@ -88,13 +98,24 @@ public class PayUtil {
 		String signCode = PayUtil.getSignCode(paraStr,ConfigerPay.SECRET);
 		signCode = signCode.toUpperCase();
 		logger.info("sign code:" + signCode);
+		String reqStr = null;
 		//赋值signCode
-		reqEntity.signValue = signCode;
+		if(isInnerWechat) {
+			reqQRPayEntity.signValue = signCode;
+			reqStr = JSON.toJSONString(reqQRPayEntity);
+		}else {
+			reqH5Entity.signValue = signCode;
+			reqStr = JSON.toJSONString(reqH5Entity);
+		}
 		//signCode添加到请求参数中
-		String reqStr = JSON.toJSONString(reqEntity);
 		logger.info(reqStr);
-		//发送  yinHePay.action  -> yinHePayH5.action
-		RspHttpEntity rspHttpEntity = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/yinHePayH5.action",true);
+		RspHttpEntity rspHttpEntity = null;
+		if(isInnerWechat) {
+			rspHttpEntity = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/yinHePay.action",true);
+		}else {
+			//发送  yinHePay.action  -> yinHePayH5.action
+			rspHttpEntity = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/yinHePayH5.action",true);			
+		}
 		logger.info("resultStr:" + rspHttpEntity.toString());
 		if(rspHttpEntity.isSucc) {
 			rEntity = JSON.parseObject(rspHttpEntity.msg,RspYinHeEntity.class);
