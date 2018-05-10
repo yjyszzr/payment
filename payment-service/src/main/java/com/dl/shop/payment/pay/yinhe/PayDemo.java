@@ -19,7 +19,7 @@ import com.dl.shop.payment.pay.yinhe.entity.RspYinHeEntity;
 import com.dl.shop.payment.pay.yinhe.util.PayKeyComparator;
 import com.dl.shop.payment.pay.yinhe.util.PayUtil;
 
-/****
+/***
  * 支付代码
  */
 public class PayDemo {

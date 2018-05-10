@@ -50,6 +50,7 @@ public class UserWithdrawLogController {
         dto.setUserWithdrawLogs(userWithdrawLogs);
         return ResultGenerator.genSuccessResult(null, dto);
     }
+    
     @ApiOperation(value="添加提现进度")
     @PostMapping("/add")
     public BaseResult add(UserWithdrawLog userWithdrawLog) {
