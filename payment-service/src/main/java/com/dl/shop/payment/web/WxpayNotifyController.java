@@ -152,7 +152,7 @@ public class WxpayNotifyController {
 						}
 					}else {
 						String rechargeSn = payLog.getOrderSn();
-						//更新order
+						//更新账单信息
 						UpdateUserRechargeParam updateRParams = new UpdateUserRechargeParam();
 						updateRParams.setRechargeSn(rechargeSn);
 						updateRParams.setStatus("1");
@@ -191,6 +191,7 @@ public class WxpayNotifyController {
 						userAccountParamByType.setOrderSn(payLog.getOrderSn());
 						userAccountParamByType.setPayId(payLog.getLogId());
 						userAccountParamByType.setPaymentName("微信");
+						userAccountParamByType.setThirdPartName("微信");
 						userAccountParamByType.setThirdPartPaid(new BigDecimal(payLog.getOrderAmount().doubleValue()));
 						userAccountParamByType.setUserId(payLog.getUserId());
 						BaseResult<String> accountRst = userAccountService.insertUserAccount(userAccountParamByType);
