@@ -501,15 +501,17 @@ public class PaymentController extends AbstractBaseController{
 			if(rYinHeEntity.isSucc() && !TextUtils.isEmpty(rYinHeEntity.qrCode)) {
 				PayReturnDTO rEntity = new PayReturnDTO();
 				String encodeUrl = null;
+				String redirectUri = null;
 				try {
-					String qrCode = rYinHeEntity.qrCode +"&redirect_uri=caixiaomi.net";
+					String qrCode = rYinHeEntity.qrCode;
 					encodeUrl = URLEncoder.encode(qrCode,"UTF-8");
+					redirectUri = URLEncoder.encode("caixiaomi.net","UTF-8");
 				} catch (UnsupportedEncodingException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				if(!TextUtils.isEmpty(encodeUrl)) {
-					String url = ReapalH5Config.URL_PAY_WECHAT+"?data="+encodeUrl;
+					String url = ReapalH5Config.URL_PAY_WECHAT+"?data="+encodeUrl+"&redirect_uri=" + redirectUri;
 					rEntity.setPayUrl(url);
 					rEntity.setPayLogId(savePayLog.getLogId()+"");
 					rEntity.setOrderId(orderId);
