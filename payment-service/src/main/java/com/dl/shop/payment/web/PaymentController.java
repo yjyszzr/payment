@@ -617,8 +617,6 @@ public class PaymentController extends AbstractBaseController{
 				e.printStackTrace();
 			}
 		}
-		//test code
-		payBaseResult = null;
 		//处理支付失败的情况
 		if(null == payBaseResult || payBaseResult.getCode() != 0) {
 			//充值失败逻辑
