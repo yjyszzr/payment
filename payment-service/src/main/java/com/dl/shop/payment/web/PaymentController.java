@@ -638,10 +638,10 @@ public class PaymentController extends AbstractBaseController{
 					PayLog updatePayLog = new PayLog();
 					updatePayLog.setLogId(savePayLog.getLogId());
 					updatePayLog.setIsPaid(0);
-					updatePayLog.setPayMsg(payBaseResult.getMsg());
+					updatePayLog.setPayMsg(baseResult.getMsg());
 					payLogService.updatePayMsg(updatePayLog);
 				} catch (Exception e) {
-					logger.error(loggerId + "paylogid="+savePayLog.getLogId()+" , paymsg="+payBaseResult.getMsg()+"保存失败记录时出错", e);
+					logger.error(loggerId + "paylogid="+savePayLog.getLogId()+" , paymsg="+baseResult.getMsg()+"保存失败记录时出错", e);
 				}
 			}
 		}
