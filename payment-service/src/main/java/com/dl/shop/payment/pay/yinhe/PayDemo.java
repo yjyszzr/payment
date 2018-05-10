@@ -32,7 +32,7 @@ public class PayDemo {
 	}
 
 	private void testUtil() {
-		RspYinHeEntity rspEntity = PayUtil.getWechatPayUrl(false,"39.155.221.148","2",System.currentTimeMillis()+"");
+		RspYinHeEntity rspEntity = PayUtil.getWechatPayUrl(true,"39.155.221.148","2",System.currentTimeMillis()+"");
 		System.out.println("rspEntity:" + rspEntity);
 	}
 	
