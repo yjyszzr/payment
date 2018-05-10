@@ -497,22 +497,33 @@ public class PaymentController extends AbstractBaseController{
 		BigDecimal bigD = new BigDecimal(strAmt);
 		strAmt = bigD.movePointRight(2).toString();
 		String payOrderSn = savePayLog.getPayOrderSn();
+		String payLogId = savePayLog.getPayIp();
 		RspYinHeEntity rYinHeEntity = PayUtil.getWechatPayUrl(isInnerWeChat,payIp,strAmt,payOrderSn);
 		if(rYinHeEntity != null) {
 			if(rYinHeEntity.isSucc() && !TextUtils.isEmpty(rYinHeEntity.qrCode)) {
 				PayReturnDTO rEntity = new PayReturnDTO();
 				String encodeUrl = null;
 				String redirectUri = null;
-				try {
-					String qrCode = rYinHeEntity.qrCode;
-					encodeUrl = URLEncoder.encode(qrCode,"UTF-8");
-					redirectUri = URLEncoder.encode(ConfigerPay.URL_REDIRECT,"UTF-8");
-				} catch (UnsupportedEncodingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				String url = null;
+				if(!isInnerWeChat) {
+					try {
+						String qrCode = rYinHeEntity.qrCode;
+						encodeUrl = URLEncoder.encode(qrCode,"UTF-8");
+						redirectUri = URLEncoder.encode(ConfigerPay.URL_REDIRECT+"?payLogId="+payLogId,"UTF-8");
+					} catch (UnsupportedEncodingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						logger.error(e.getMessage());
+					}
+					if(!TextUtils.isEmpty(encodeUrl)) {
+						url = ReapalH5Config.URL_PAY_WECHAT+"?data="+encodeUrl+"&redirect_uri=" + redirectUri;
+					}else {
+						logger.info("encodeUrl失败~");
+					}
+				}else {
+					url = rYinHeEntity.qrCode;
 				}
-				if(!TextUtils.isEmpty(encodeUrl)) {
-					String url = ReapalH5Config.URL_PAY_WECHAT+"?data="+encodeUrl+"&redirect_uri=" + redirectUri;
+				if(!TextUtils.isEmpty(url)) {
 					rEntity.setPayUrl(url);
 					rEntity.setPayLogId(savePayLog.getLogId()+"");
 					rEntity.setOrderId(orderId);
