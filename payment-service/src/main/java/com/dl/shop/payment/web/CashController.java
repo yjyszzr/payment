@@ -28,6 +28,7 @@ import com.dl.member.param.IDParam;
 import com.dl.member.param.StrParam;
 import com.dl.member.param.WithDrawParam;
 import com.dl.shop.payment.core.ProjectConstant;
+import com.dl.shop.payment.enums.CashEnums;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.UserWithdraw;
 import com.dl.shop.payment.model.UserWithdrawLog;
@@ -154,8 +155,8 @@ public class CashController {
 		String orderSn = withdrawalSnDTO.getWithdrawalSn();
 		//保存提现进度
 		UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
-		userWithdrawLog.setLogCode(1);
-		userWithdrawLog.setLogName("提现申请");
+		userWithdrawLog.setLogCode(CashEnums.CASH_APPLY.getcode());
+		userWithdrawLog.setLogName(CashEnums.CASH_APPLY.getMsg());
 		userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
 		userWithdrawLog.setWithdrawSn(orderSn);
 		userWithdrawLogService.save(userWithdrawLog);
@@ -193,6 +194,13 @@ public class CashController {
 //		userMessageService.add(messageAddParam);
 		if(inReview) {
 			logger.info("单号:"+orderSn+"超出提现阈值,进入审核通道");
+			//保存'提现中'状态到dl_user_withdraw_log
+			userWithdrawLog = new UserWithdrawLog();
+			userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
+			userWithdrawLog.setLogName(CashEnums.CASH_REVIEWING.getMsg());
+			userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
+			userWithdrawLog.setWithdrawSn(orderSn);
+			userWithdrawLogService.save(userWithdrawLog);
 //			return ResultGenerator.genResult(PayEnums.CASH_REVIEWING.getcode(),PayEnums.CASH_REVIEWING.getMsg());
 			return ResultGenerator.genSuccessResult("提现成功");
 		}else {
@@ -221,10 +229,38 @@ public class CashController {
 				updateParams.setPaymentName("融宝提现");
 				userWithdrawService.updateWithdraw(updateParams);
 				
+				//保存提现中状态记录 dl_user_withdraw_log
+				userWithdrawLog = new UserWithdrawLog();
+				userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
+				userWithdrawLog.setLogName(CashEnums.CASH_REVIEWING.getMsg());
+				userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
+				userWithdrawLog.setWithdrawSn(orderSn);
+				userWithdrawLogService.save(userWithdrawLog);
+				
+				//提现中，提现成功两条记录到 withdraw_log中
+				userWithdrawLog = new UserWithdrawLog();
+				userWithdrawLog.setLogCode(CashEnums.CASH_SUCC.getcode());
+				userWithdrawLog.setLogName(CashEnums.CASH_SUCC.getMsg());
+				userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
+				userWithdrawLog.setWithdrawSn(orderSn);
+				userWithdrawLogService.save(userWithdrawLog);
 				return ResultGenerator.genSuccessResult("提现成功");
 			}else {
-				return ResultGenerator.genFailResult("提现失败[" +rEntity.msg +"]");
-			}	
+				//保存提现中状态记录 dl_user_withdraw_log
+				userWithdrawLog = new UserWithdrawLog();
+				userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
+				userWithdrawLog.setLogName(CashEnums.CASH_REVIEWING.getMsg());
+				userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
+				userWithdrawLog.setWithdrawSn(orderSn);
+				userWithdrawLogService.save(userWithdrawLog);
+				
+				userWithdrawLog = new UserWithdrawLog();
+				userWithdrawLog.setLogCode(CashEnums.CASH_FAILURE.getcode());
+				userWithdrawLog.setLogName(CashEnums.CASH_FAILURE.getMsg()+"[" +rEntity.msg+"]");
+				userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
+				userWithdrawLog.setWithdrawSn(orderSn);
+				return ResultGenerator.genResult(PayEnums.CASH_FAILURE.getcode(),"提现失败[" +rEntity.msg +"]");
+			}
 		}
 	}
 	

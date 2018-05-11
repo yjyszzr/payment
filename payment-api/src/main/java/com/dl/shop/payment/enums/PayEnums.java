@@ -14,7 +14,10 @@ public enum PayEnums {
 	CASH_REVIEWING(304044,"超出提现阈值,进入审核通道"),
 	RECHARGE_AMT_ERROR(304045,"对不起，请提供有效的充值金额"),
 	RECHARGE_PAY_STYLE_EMPTY(304046,"对不起，请提供有效的充值金额"),
-	PAY_YINHE_INNER_ERROR(304047,"银河内部失败");
+	PAY_YINHE_INNER_ERROR(304047,"银河内部失败"),
+	CASH_FAILURE(304048,"银河内部失败"),
+	WITHDRAW_EMPTY(304049,"提现流水为空"),
+	WITHDRAW_USER_ACC_EMPTY(304050,"提现查询user表为空");
 	
 	private Integer code;
     private String msg;

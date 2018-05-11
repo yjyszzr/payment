@@ -7,6 +7,6 @@ import lombok.Data;
 public class WithdrawDetailParam {
 
 	@ApiModelProperty("流水id")
-	private String accountId;
+	private String withdraw_sn;
 	
 }
