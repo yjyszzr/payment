@@ -2,7 +2,6 @@ package com.dl.shop.payment.dto;
 
 import java.io.Serializable;
 import java.util.List;
-
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 

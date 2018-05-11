@@ -12,11 +12,11 @@ public class UserWithdrawLogDTO implements Serializable{
 	
 	@ApiModelProperty("提现单号")
     private String withdrawSn;
-	@ApiModelProperty("提现单号")
+	@ApiModelProperty("提现时间")
     private String logTime;
-	@ApiModelProperty("提现单号")
+	@ApiModelProperty("提现")
     private Integer logCode;
-	@ApiModelProperty("提现单号")
+	@ApiModelProperty("提现名称")
     private String logName;
 	@ApiModelProperty("提现金额")
     private String amount;

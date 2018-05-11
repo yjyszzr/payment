@@ -1,4 +1,5 @@
 package com.dl.shop.payment.web;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -44,6 +45,7 @@ public class UserWithdrawLogController {
     	if(StringUtils.isBlank(withDrawSn)) {
     		return ResultGenerator.genFailResult("提现流水号不能为空!", null);
     	}
+    	//UserWithdrawLogDTO
     	List<UserWithdrawLogDTO> rList = userWithdrawLogService.findByWithdrawSn(withDrawSn);
     	logger.info("detail -> rList.size:" + rList.size());
     	if(rList == null || rList.size() <= 0) {
@@ -57,14 +59,13 @@ public class UserWithdrawLogController {
     	}else {
         	logger.info("detail -> userWithDraw:" + userWithDraw.getRealName() + "查询到提现记录..");
     	}
-        List<UserWithdrawLogDTO> userWithdrawLogs = rList;
         UserWithdrawDetailDTO dto = new UserWithdrawDetailDTO();
         dto.setAmount(userWithDraw.getAmount().toString());
         dto.setCard(userWithDraw.getBankName()+"(尾号" + userWithDraw.getCardNo()+")");
         String strStatus = getStatus(rList);
         dto.setStatus(strStatus);
         dto.setWithdrawSn(withDrawSn);
-        dto.setUserWithdrawLogs(userWithdrawLogs);
+        dto.setUserWithdrawLogs(rList);
         return ResultGenerator.genSuccessResult(null, dto);
     }
     
