@@ -25,14 +25,14 @@ import com.dl.shop.payment.pay.yinhe.util.PayUtil;
 public class PayDemo {
 
 	public PayDemo() {
-		testQuery();
+//		testQuery();
 //		testPay();
 //		testQRBarPay();
-//		testUtil();
+		testUtil();
 	}
 
 	private void testUtil() {
-		RspYinHeEntity rspEntity = PayUtil.getWechatPayUrl(false,"39.155.221.148","2",System.currentTimeMillis()+"");
+		RspYinHeEntity rspEntity = PayUtil.getWechatPayUrl(true,"39.155.221.148","2",System.currentTimeMillis()+"");
 		System.out.println("rspEntity:" + rspEntity);
 	}
 	

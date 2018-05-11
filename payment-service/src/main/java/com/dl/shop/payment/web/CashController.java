@@ -204,21 +204,22 @@ public class CashController {
 //			return ResultGenerator.genResult(PayEnums.CASH_REVIEWING.getcode(),PayEnums.CASH_REVIEWING.getMsg());
 			return ResultGenerator.genSuccessResult("提现成功");
 		}else {
+			//先减少用户钱包余额
 			logger.info("进入第三方提现流程...");
+			WithDrawParam withdrawParam = new WithDrawParam();
+			withdrawParam.setAmount(new BigDecimal(totalAmount));
+			withdrawParam.setPayId(orderSn);
+			withdrawParam.setThirdPartName("融宝");
+			withdrawParam.setThirdPartPaid(new BigDecimal(totalAmount));
+			withdrawParam.setUserId(SessionUtil.getUserId());
+			BaseResult<String> withdrawRst = userAccountService.withdrawUserMoney(withdrawParam);
+			if(withdrawRst.getCode() != 0) {
+				logger.info(loggerId+"用户可提现余额提现失败,用户资金钱包未变化");
+				return ResultGenerator.genResult(PayEnums.CASH_USER_MOENY_REDUC_ERROR.getcode(),PayEnums.CASH_USER_MOENY_REDUC_ERROR.getMsg());
+			}
 			CashResultEntity rEntity = callThirdGetCash(orderSn,totalAmount);
 			if(rEntity.isSucc) {
 				logger.info("单号:"+orderSn+"第三方提现成功，扣除用户余额");
-				//减少用户钱包余额
-				WithDrawParam withdrawParam = new WithDrawParam();
-				withdrawParam.setAmount(new BigDecimal(totalAmount));
-				withdrawParam.setPayId(orderSn);
-				withdrawParam.setThirdPartName("融宝");
-				withdrawParam.setThirdPartPaid(new BigDecimal(totalAmount));
-				withdrawParam.setUserId(SessionUtil.getUserId());
-				BaseResult<String> withdrawRst = userAccountService.withdrawUserMoney(withdrawParam);
-				if(withdrawRst.getCode() != 0) {
-					logger.info(loggerId+"用户可提现余额提现失败");
-				}
 				//更新提现单
 				logger.info("提现单号:"+orderSn+"更新提现单位成功状态");
 				UpdateUserWithdrawParam updateParams = new UpdateUserWithdrawParam();
@@ -246,6 +247,17 @@ public class CashController {
 				userWithdrawLogService.save(userWithdrawLog);
 				return ResultGenerator.genSuccessResult("提现成功");
 			}else {
+				//三方返回失败，用户资金回滚
+				logger.info("进入第三方提现失败，资金回滚...");
+//				withdrawParam = new WithDrawParam();
+//				withdrawParam.setAmount(new BigDecimal(totalAmount));
+//				withdrawParam.setPayId(orderSn);
+//				withdrawParam.setThirdPartName("融宝");
+//				withdrawParam.setThirdPartPaid(new BigDecimal(totalAmount));
+//				withdrawParam.setUserId(SessionUtil.getUserId());
+//				userAccountService.updateUserWithdraw(updateUserWithdrawParam)
+				
+				
 				//保存提现中状态记录 dl_user_withdraw_log
 				userWithdrawLog = new UserWithdrawLog();
 				userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
@@ -254,6 +266,7 @@ public class CashController {
 				userWithdrawLog.setWithdrawSn(orderSn);
 				userWithdrawLogService.save(userWithdrawLog);
 				
+				//
 				userWithdrawLog = new UserWithdrawLog();
 				userWithdrawLog.setLogCode(CashEnums.CASH_FAILURE.getcode());
 				userWithdrawLog.setLogName(CashEnums.CASH_FAILURE.getMsg()+"[" +rEntity.msg+"]");
@@ -334,6 +347,8 @@ public class CashController {
 			userWithdrawService.updateWithdraw(updateParams);
 			return ResultGenerator.genSuccessResult("第三方发起提现成功");
 		}else {
+			//增加用于余额信息
+			
 			return ResultGenerator.genFailResult("提现失败[" +cashREntity.msg+"]");
 		}
 	}

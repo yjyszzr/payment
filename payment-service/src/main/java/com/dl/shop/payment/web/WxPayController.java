@@ -131,5 +131,11 @@ public class WxPayController extends AbstractBaseController{
 		}
 	}*/
 	
-	
+	@PostMapping("/app")
+	@ResponseBody
+	public BaseResult<WxpayAppDTO> getCode(HttpServletRequest request){
+		BaseResult<WxpayAppDTO> baseResult = ResultGenerator.genFailResult();
+		
+		return baseResult;
+	}
 }

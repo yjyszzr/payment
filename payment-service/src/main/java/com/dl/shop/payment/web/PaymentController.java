@@ -2,6 +2,7 @@ package com.dl.shop.payment.web;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -498,7 +499,20 @@ public class PaymentController extends AbstractBaseController{
 		strAmt = bigD.movePointRight(2).toString();
 		String payOrderSn = savePayLog.getPayOrderSn();
 		String payLogId = savePayLog.getPayIp();
-		RspYinHeEntity rYinHeEntity = PayUtil.getWechatPayUrl(isInnerWeChat,payIp,strAmt,payOrderSn);
+		RspYinHeEntity rYinHeEntity = null;
+		if(isInnerWeChat) {
+			rYinHeEntity = new RspYinHeEntity();
+			rYinHeEntity.returnCode = "0000";
+			try {
+				String redirect_uri = URLDecoder.decode("http://zf.caixiaomi.net/reapal-h5-api/wechat/reqcode.jsp","UTF-8");
+				rYinHeEntity.qrCode = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx50d353a8b7b77225&redirect_uri="+redirect_uri+"&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect";
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}else {
+			rYinHeEntity = PayUtil.getWechatPayUrl(isInnerWeChat,payIp,strAmt,payOrderSn);
+		}
 		if(rYinHeEntity != null) {
 			if(rYinHeEntity.isSucc() && !TextUtils.isEmpty(rYinHeEntity.qrCode)) {
 				PayReturnDTO rEntity = new PayReturnDTO();

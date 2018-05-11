@@ -117,7 +117,7 @@ public class PayUtil {
 		logger.info(reqStr);
 		RspHttpEntity rspHttpEntity = null;
 		if(isInnerWechat) {	//yinHePay->动态二维码方式   yinHePayPublic
-			rspHttpEntity = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/yinHePayPublic.action",true);
+			rspHttpEntity = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/yinHePublicWxPay.action",true);
 		}else {
 			//发送  yinHePay.action  -> yinHePayH5.action
 			rspHttpEntity = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/yinHePayH5.action",true);			
