@@ -501,15 +501,17 @@ public class PaymentController extends AbstractBaseController{
 		String payLogId = savePayLog.getPayIp();
 		RspYinHeEntity rYinHeEntity = null;
 		if(isInnerWeChat) {
-			rYinHeEntity = new RspYinHeEntity();
-			rYinHeEntity.returnCode = "0000";
-			try {
-				String redirect_uri = URLDecoder.decode("http://zf.caixiaomi.net/reapal-h5-api/wechat/reqcode.jsp","UTF-8");
-				rYinHeEntity.qrCode = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx50d353a8b7b77225&redirect_uri="+redirect_uri+"&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect";
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			//公共账号方式支付
+//			rYinHeEntity = new RspYinHeEntity();
+//			rYinHeEntity.returnCode = "0000";
+//			try {
+//				String redirect_uri = URLDecoder.decode("http://zf.caixiaomi.net/reapal-h5-api/wechat/reqcode.jsp","UTF-8");
+//				rYinHeEntity.qrCode = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx50d353a8b7b77225&redirect_uri="+redirect_uri+"&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect";
+//			} catch (UnsupportedEncodingException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+			rYinHeEntity = PayUtil.getWechatPayUrl(isInnerWeChat,payIp,strAmt,payOrderSn);
 		}else {
 			rYinHeEntity = PayUtil.getWechatPayUrl(isInnerWeChat,payIp,strAmt,payOrderSn);
 		}

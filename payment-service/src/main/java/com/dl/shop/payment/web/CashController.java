@@ -21,10 +21,12 @@ import com.dl.member.api.IUserAccountService;
 import com.dl.member.api.IUserBankService;
 import com.dl.member.api.IUserMessageService;
 import com.dl.member.api.IUserService;
+import com.dl.member.dto.SurplusPaymentCallbackDTO;
 import com.dl.member.dto.UserBankDTO;
 import com.dl.member.dto.UserDTO;
 import com.dl.member.dto.WithdrawalSnDTO;
 import com.dl.member.param.IDParam;
+import com.dl.member.param.MemWithDrawSnParam;
 import com.dl.member.param.StrParam;
 import com.dl.member.param.WithDrawParam;
 import com.dl.shop.payment.core.ProjectConstant;
@@ -152,13 +154,13 @@ public class CashController {
 			return ResultGenerator.genFailResult("提现失败！", null);
 		}
 		//
-		String orderSn = withdrawalSnDTO.getWithdrawalSn();
+		String widthDrawSn = withdrawalSnDTO.getWithdrawalSn();
 		//保存提现进度
 		UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
 		userWithdrawLog.setLogCode(CashEnums.CASH_APPLY.getcode());
 		userWithdrawLog.setLogName(CashEnums.CASH_APPLY.getMsg());
 		userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
-		userWithdrawLog.setWithdrawSn(orderSn);
+		userWithdrawLog.setWithdrawSn(widthDrawSn);
 		userWithdrawLogService.save(userWithdrawLog);
 		//生成提现记录payLog,该操作在提现暂时不需要
 		/*String payName = "第三方接口";
@@ -193,13 +195,13 @@ public class CashController {
 //		messageAddParam.setMsgDesc(msgDesc.toString());
 //		userMessageService.add(messageAddParam);
 		if(inReview) {
-			logger.info("单号:"+orderSn+"超出提现阈值,进入审核通道");
+			logger.info("单号:"+widthDrawSn+"超出提现阈值,进入审核通道");
 			//保存'提现中'状态到dl_user_withdraw_log
 			userWithdrawLog = new UserWithdrawLog();
 			userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
 			userWithdrawLog.setLogName(CashEnums.CASH_REVIEWING.getMsg());
 			userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
-			userWithdrawLog.setWithdrawSn(orderSn);
+			userWithdrawLog.setWithdrawSn(widthDrawSn);
 			userWithdrawLogService.save(userWithdrawLog);
 //			return ResultGenerator.genResult(PayEnums.CASH_REVIEWING.getcode(),PayEnums.CASH_REVIEWING.getMsg());
 			return ResultGenerator.genSuccessResult("提现成功");
@@ -208,7 +210,7 @@ public class CashController {
 			logger.info("进入第三方提现流程...");
 			WithDrawParam withdrawParam = new WithDrawParam();
 			withdrawParam.setAmount(new BigDecimal(totalAmount));
-			withdrawParam.setPayId(orderSn);
+			withdrawParam.setPayId(widthDrawSn);
 			withdrawParam.setThirdPartName("融宝");
 			withdrawParam.setThirdPartPaid(new BigDecimal(totalAmount));
 			withdrawParam.setUserId(SessionUtil.getUserId());
@@ -217,16 +219,16 @@ public class CashController {
 				logger.info(loggerId+"用户可提现余额提现失败,用户资金钱包未变化");
 				return ResultGenerator.genResult(PayEnums.CASH_USER_MOENY_REDUC_ERROR.getcode(),PayEnums.CASH_USER_MOENY_REDUC_ERROR.getMsg());
 			}
-			CashResultEntity rEntity = callThirdGetCash(orderSn,totalAmount);
+			CashResultEntity rEntity = callThirdGetCash(widthDrawSn,totalAmount);
 			if(rEntity.isSucc) {
-				logger.info("单号:"+orderSn+"第三方提现成功，扣除用户余额");
+				logger.info("单号:"+widthDrawSn+"第三方提现成功，扣除用户余额");
 				//更新提现单
-				logger.info("提现单号:"+orderSn+"更新提现单位成功状态");
+				logger.info("提现单号:"+widthDrawSn+"更新提现单位成功状态");
 				UpdateUserWithdrawParam updateParams = new UpdateUserWithdrawParam();
 				updateParams.setWithdrawalSn(withdrawalSnDTO.getWithdrawalSn());
 				updateParams.setStatus(ProjectConstant.STATUS_SUCC);
 				updateParams.setPayTime(DateUtil.getCurrentTimeLong());
-				updateParams.setPaymentId(orderSn);
+				updateParams.setPaymentId(widthDrawSn);
 				updateParams.setPaymentName("融宝提现");
 				userWithdrawService.updateWithdraw(updateParams);
 				
@@ -235,7 +237,7 @@ public class CashController {
 				userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
 				userWithdrawLog.setLogName(CashEnums.CASH_REVIEWING.getMsg());
 				userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
-				userWithdrawLog.setWithdrawSn(orderSn);
+				userWithdrawLog.setWithdrawSn(widthDrawSn);
 				userWithdrawLogService.save(userWithdrawLog);
 				
 				//提现中，提现成功两条记录到 withdraw_log中
@@ -243,27 +245,24 @@ public class CashController {
 				userWithdrawLog.setLogCode(CashEnums.CASH_SUCC.getcode());
 				userWithdrawLog.setLogName(CashEnums.CASH_SUCC.getMsg());
 				userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
-				userWithdrawLog.setWithdrawSn(orderSn);
+				userWithdrawLog.setWithdrawSn(widthDrawSn);
 				userWithdrawLogService.save(userWithdrawLog);
 				return ResultGenerator.genSuccessResult("提现成功");
 			}else {
 				//三方返回失败，用户资金回滚
 				logger.info("进入第三方提现失败，资金回滚...");
-//				withdrawParam = new WithDrawParam();
-//				withdrawParam.setAmount(new BigDecimal(totalAmount));
-//				withdrawParam.setPayId(orderSn);
-//				withdrawParam.setThirdPartName("融宝");
-//				withdrawParam.setThirdPartPaid(new BigDecimal(totalAmount));
-//				withdrawParam.setUserId(SessionUtil.getUserId());
-//				userAccountService.updateUserWithdraw(updateUserWithdrawParam)
-				
-				
+				MemWithDrawSnParam snParams = new MemWithDrawSnParam();
+				snParams.setWithDrawSn(widthDrawSn);
+				BaseResult<SurplusPaymentCallbackDTO> baseR = userAccountService.rollbackUserMoneyWithDrawFailure(snParams);
+				if(baseR != null && baseR.getCode() == 0) {
+					logger.info("进入第三方提现失败，资金回滚成功");
+				}
 				//保存提现中状态记录 dl_user_withdraw_log
 				userWithdrawLog = new UserWithdrawLog();
 				userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
 				userWithdrawLog.setLogName(CashEnums.CASH_REVIEWING.getMsg());
 				userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
-				userWithdrawLog.setWithdrawSn(orderSn);
+				userWithdrawLog.setWithdrawSn(widthDrawSn);
 				userWithdrawLogService.save(userWithdrawLog);
 				
 				//
@@ -271,7 +270,7 @@ public class CashController {
 				userWithdrawLog.setLogCode(CashEnums.CASH_FAILURE.getcode());
 				userWithdrawLog.setLogName(CashEnums.CASH_FAILURE.getMsg()+"[" +rEntity.msg+"]");
 				userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
-				userWithdrawLog.setWithdrawSn(orderSn);
+				userWithdrawLog.setWithdrawSn(widthDrawSn);
 				return ResultGenerator.genResult(PayEnums.CASH_FAILURE.getcode(),"提现失败[" +rEntity.msg +"]");
 			}
 		}

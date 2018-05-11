@@ -1,21 +1,16 @@
 package com.dl.shop.payment.web;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.math.BigDecimal;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
 import com.dl.base.result.BaseResult;
 import com.dl.base.util.DateUtil;
 import com.dl.member.api.IUserAccountService;
@@ -31,7 +26,6 @@ import com.dl.shop.payment.pay.common.PayConfig;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.UserRechargeService;
 import com.dl.shop.payment.utils.XmlUtil;
-
 import io.swagger.annotations.ApiOperation;
 
 @Controller

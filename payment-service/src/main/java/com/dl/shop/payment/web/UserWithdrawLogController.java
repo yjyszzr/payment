@@ -1,5 +1,6 @@
 package com.dl.shop.payment.web;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -42,7 +43,7 @@ public class UserWithdrawLogController {
     @ApiOperation(value="提现进度详情")
     @PostMapping("/list")
     public BaseResult<UserWithdrawDetailDTO> detail(@RequestBody WithdrawDetailParam param) {
-    	String withDrawSn = param.getWithdraw_sn();
+    	String withDrawSn = param.getWithdrawSn();
     	if(StringUtils.isBlank(withDrawSn)) {
     		return ResultGenerator.genFailResult("提现流水号不能为空!", null);
     	}
@@ -66,6 +67,8 @@ public class UserWithdrawLogController {
         String strStatus = getStatus(rList);
         dto.setStatus(strStatus);
         dto.setWithdrawSn(withDrawSn);
+        //list倒序
+        Collections.reverse(rList);
         dto.setUserWithdrawLogs(rList);
         return ResultGenerator.genSuccessResult(null, dto);
     }
