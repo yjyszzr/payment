@@ -14,6 +14,7 @@ import javax.annotation.Resource;
 
 @Service
 @Transactional
+@RequestMapping("/payment/withdraw")
 public class UserWithdrawController extends AbstractService<UserWithdraw> {
     @Resource
     private UserWithdrawService userWithdrawService;
@@ -21,7 +22,7 @@ public class UserWithdrawController extends AbstractService<UserWithdraw> {
     /**
      * 根据提现单号查询提现单
      */
- 	@RequestMapping(path="/payment/querUserWithDraw", method=RequestMethod.POST)
+ 	@RequestMapping(path="/querUserWithDraw", method=RequestMethod.POST)
     public BaseResult<UserWithdraw> queryUserWithdraw(WithDrawSnParam withdrawSnParam){
  		return userWithdrawService.queryUserWithdraw(withdrawSnParam.getWithDrawSn());
     }
@@ -29,7 +30,7 @@ public class UserWithdrawController extends AbstractService<UserWithdraw> {
     /**
      * 根据提现单号和userId查询提现单
      */
- 	@RequestMapping(path="/payment/queryUserWithdrawBySnAndUserId", method=RequestMethod.POST)
+ 	@RequestMapping(path="/queryUserWithdrawBySnAndUserId", method=RequestMethod.POST)
     public BaseResult<UserWithdrawDTO> queryUserWithdrawBySnAndUserId(WithDrawSnParam withDrawSn){
  		return userWithdrawService.queryUserWithdrawBySnAndUserId(withDrawSn.getWithDrawSn());
  	}
