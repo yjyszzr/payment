@@ -21,11 +21,11 @@ public interface IpaymentService {
      * 根据提现单号查询提现单
      */
 	@RequestMapping(path="/payment/withdraw/querUserWithDraw", method=RequestMethod.POST)
-	public BaseResult<UserWithdrawDetailDTO> querUserWithDrawDetail(WithDrawSnParam withDrawSnParam);
+	public BaseResult<UserWithdrawDetailDTO> querUserWithDrawDetail(@RequestBody WithDrawSnParam withDrawSnParam);
 	
     /**
      * 根据提现单号和userId查询提现单
      */
  	@RequestMapping(path="/payment/withdraw/queryUserWithdrawBySnAndUserId", method=RequestMethod.POST)
-    public BaseResult<UserWithdrawDTO> queryUserWithdrawBySnAndUserId(WithDrawSnParam withDrawSn);
+    public BaseResult<UserWithdrawDTO> queryUserWithdrawBySnAndUserId(@RequestBody WithDrawSnParam withDrawSn);
 }

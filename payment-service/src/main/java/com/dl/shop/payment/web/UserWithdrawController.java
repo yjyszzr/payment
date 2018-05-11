@@ -8,6 +8,7 @@ import com.dl.member.dto.UserWithdrawDTO;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import javax.annotation.Resource;
@@ -23,7 +24,7 @@ public class UserWithdrawController extends AbstractService<UserWithdraw> {
      * 根据提现单号查询提现单
      */
  	@RequestMapping(path="/querUserWithDraw", method=RequestMethod.POST)
-    public BaseResult<UserWithdraw> queryUserWithdraw(WithDrawSnParam withdrawSnParam){
+    public BaseResult<UserWithdraw> queryUserWithdraw(@RequestBody WithDrawSnParam withdrawSnParam){
  		return userWithdrawService.queryUserWithdraw(withdrawSnParam.getWithDrawSn());
     }
  	
@@ -31,7 +32,7 @@ public class UserWithdrawController extends AbstractService<UserWithdraw> {
      * 根据提现单号和userId查询提现单
      */
  	@RequestMapping(path="/queryUserWithdrawBySnAndUserId", method=RequestMethod.POST)
-    public BaseResult<UserWithdrawDTO> queryUserWithdrawBySnAndUserId(WithDrawSnParam withDrawSn){
+    public BaseResult<UserWithdrawDTO> queryUserWithdrawBySnAndUserId(@RequestBody WithDrawSnParam withDrawSn){
  		return userWithdrawService.queryUserWithdrawBySnAndUserId(withDrawSn.getWithDrawSn());
  	}
   
