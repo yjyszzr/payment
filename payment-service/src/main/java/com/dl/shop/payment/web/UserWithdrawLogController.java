@@ -76,14 +76,11 @@ public class UserWithdrawLogController {
     		if(entity != null && entity.getLogCode() == CashEnums.CASH_SUCC.getcode()) {
     			str = CashEnums.CASH_SUCC.getMsg();
     			break;
-    		}
-    		if(entity != null && entity.getLogCode() == CashEnums.CASH_FAILURE.getcode()) {
+    		}else if(entity != null && entity.getLogCode() == CashEnums.CASH_FAILURE.getcode()) {
     			str = CashEnums.CASH_FAILURE.getMsg();
     			break;
-    		}
-    		if(entity != null && entity.getLogCode() == CashEnums.CASH_REVIEWING.getcode()) {
+    		}else if(entity != null && entity.getLogCode() == CashEnums.CASH_REVIEWING.getcode()) {
     			str = CashEnums.CASH_REVIEWING.getMsg();
-    			break;
     		}
     	}
     	return str;
