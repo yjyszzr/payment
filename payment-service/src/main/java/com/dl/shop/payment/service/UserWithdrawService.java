@@ -104,6 +104,27 @@ public class UserWithdrawService extends AbstractService<UserWithdraw> {
     }
     
     /**
+     * 根据提现单号和userId查询提现单
+     */
+    public BaseResult<UserWithdrawDTO> queryUserWithdrawBySnAndUserId(String withDrawSn){
+    	Integer userId = SessionUtil.getUserId();
+    	UserWithdraw userWithdraw = new UserWithdraw();
+    	userWithdraw.setWithdrawalSn(withDrawSn);
+    	userWithdraw.setUserId(userId);
+    	List<UserWithdraw> userWithdrawList = userWithdrawMapper.queryUserWithdrawBySelective(userWithdraw);
+    	if(CollectionUtils.isEmpty(userWithdrawList)) {
+    		return ResultGenerator.genResult(MemberEnums.DBDATA_IS_NULL.getcode(), "提现单不存在");
+    	}
+    	
+    	UserWithdraw queryUserWithDraw = userWithdrawList.get(0);
+    	UserWithdrawDTO userWithdrawDTO = new UserWithdrawDTO();
+    	userWithdrawDTO.setStatus(queryUserWithDraw.getStatus());
+    	userWithdrawDTO.setAmount(queryUserWithDraw.getAmount());
+    	userWithdrawDTO.setWithdrawalSn(queryUserWithDraw.getWithdrawalSn());
+    	return ResultGenerator.genSuccessResult("查询提现单成功", userWithdrawDTO);
+    }
+    
+    /**
      * 根据accountId 查询提现单
      * @param accountId
      * @return
