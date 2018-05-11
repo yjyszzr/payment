@@ -18,8 +18,4 @@ public class UserWithdrawLogDTO implements Serializable{
     private Integer logCode;
 	@ApiModelProperty("提现名称")
     private String logName;
-	@ApiModelProperty("提现金额")
-    private String amount;
-	@ApiModelProperty("提现银行")
-    private String card;
 }
