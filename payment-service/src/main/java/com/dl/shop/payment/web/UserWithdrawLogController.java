@@ -22,6 +22,7 @@ import com.dl.shop.payment.model.UserWithdrawLog;
 import com.dl.shop.payment.param.WithdrawDetailParam;
 import com.dl.shop.payment.service.UserWithdrawLogService;
 import com.dl.shop.payment.service.UserWithdrawService;
+import com.dl.shop.payment.utils.BankNoUtil;
 
 import io.swagger.annotations.ApiOperation;
 
@@ -61,7 +62,7 @@ public class UserWithdrawLogController {
     	}
         UserWithdrawDetailDTO dto = new UserWithdrawDetailDTO();
         dto.setAmount(userWithDraw.getAmount().toString());
-        dto.setCard(userWithDraw.getBankName()+"(尾号" + userWithDraw.getCardNo()+")");
+        dto.setCard(userWithDraw.getBankName()+"(尾号" + BankNoUtil.getTailFourCardNo(userWithDraw.getCardNo())+")");
         String strStatus = getStatus(rList);
         dto.setStatus(strStatus);
         dto.setWithdrawSn(withDrawSn);
