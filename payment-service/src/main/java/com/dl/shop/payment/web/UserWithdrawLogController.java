@@ -2,17 +2,16 @@ package com.dl.shop.payment.web;
 import java.util.List;
 
 import javax.annotation.Resource;
-
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
-import com.dl.member.dto.UserWithdrawDTO;
 import com.dl.shop.payment.dto.UserWithdrawDetailDTO;
 import com.dl.shop.payment.dto.UserWithdrawLogDTO;
 import com.dl.shop.payment.enums.CashEnums;
@@ -31,6 +30,8 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/payment/withdraw")
 public class UserWithdrawLogController {
+	private final static Logger logger = LoggerFactory.getLogger(PaymentController.class);
+	
     @Resource
     private UserWithdrawLogService userWithdrawLogService;
     @Autowired
@@ -44,13 +45,17 @@ public class UserWithdrawLogController {
     		return ResultGenerator.genFailResult("提现流水号不能为空!", null);
     	}
     	List<UserWithdrawLogDTO> rList = userWithdrawLogService.findByWithdrawSn(withDrawSn);
+    	logger.info("detail -> rList.size:" + rList.size());
     	if(rList == null || rList.size() <= 0) {
     		return ResultGenerator.genResult(PayEnums.WITHDRAW_EMPTY.getcode(), PayEnums.WITHDRAW_EMPTY.getMsg());
     	}
     	BaseResult<UserWithdraw> baseResult = userWithdrawService.queryUserWithdraw(withDrawSn);
     	UserWithdraw userWithDraw = baseResult.getData();
     	if(baseResult.getCode() != 0 && userWithDraw != null) {
+        	logger.info("detail -> userWithDraw:" + userWithDraw.getRealName() + "查询提现记录失败..");
     		return ResultGenerator.genResult(PayEnums.WITHDRAW_USER_ACC_EMPTY.getcode(), PayEnums.WITHDRAW_USER_ACC_EMPTY.getMsg());
+    	}else {
+        	logger.info("detail -> userWithDraw:" + userWithDraw.getRealName() + "查询到提现记录..");
     	}
         List<UserWithdrawLogDTO> userWithdrawLogs = rList;
         UserWithdrawDetailDTO dto = new UserWithdrawDetailDTO();
