@@ -111,6 +111,7 @@ public class WxpayNotifyController {
 				return;
 			}
 			int isPaid = payLog.getIsPaid();
+			logger.info("=======isPaid:" + isPaid +" payLogId:" +payLog.getPayIp() +"==========");
 			if(1== isPaid) {
 				logger.info(loggerId + " paylog.ispaid=1,已支付成功，返回OK！");
 				String xml = "<xml><return_code><![CDATA[SUCCESS]]></return_code> <return_msg><![CDATA[OK]]></return_msg></xml>";
