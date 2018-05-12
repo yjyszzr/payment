@@ -274,7 +274,7 @@ public class CashController {
 				userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
 				userWithdrawLog.setWithdrawSn(widthDrawSn);
 				
-				//更新提现单位失败状态
+				//更新提现单失败状态
 				UpdateUserWithdrawParam updateParams = new UpdateUserWithdrawParam();
 				updateParams.setWithdrawalSn(widthDrawSn);
 				updateParams.setStatus(ProjectConstant.STATUS_SUCC);
@@ -377,6 +377,23 @@ public class CashController {
 				
 				return ResultGenerator.genSuccessResult("第三方发起提现成功");
 			}else {
+				//更新提现单失败状态
+				UpdateUserWithdrawParam updateParams = new UpdateUserWithdrawParam();
+				updateParams.setWithdrawalSn(sn);
+				updateParams.setStatus(ProjectConstant.STATUS_FAILURE);
+				updateParams.setPayTime(DateUtil.getCurrentTimeLong());
+				updateParams.setPaymentId(userEntity.getPaymentId());
+				updateParams.setPaymentName("审核被拒绝");
+				userWithdrawService.updateWithdraw(updateParams);
+				
+				//增加提现流水为拒绝
+				UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
+				userWithdrawLog.setLogCode(CashEnums.CASH_FAILURE.getcode());
+				userWithdrawLog.setLogName(CashEnums.CASH_FAILURE.getMsg());
+				userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
+				userWithdrawLog.setWithdrawSn(sn);
+				userWithdrawLogService.save(userWithdrawLog);
+				
 				//回滚余额信息
 				logger.info("第三方提现失败，进行资金回滚...");
 				MemWithDrawSnParam snParams = new MemWithDrawSnParam();
