@@ -156,33 +156,34 @@ public class WxpayNotifyController {
 						updatePayLog.setIsPaid(1);
 						updatePayLog.setLastTime(currentTime);
 						updatePayLog.setPayTime(currentTime);
-						payLogService.update(payLog);
+						payLogService.update(updatePayLog);
 						logger.info(loggerId + " 业务回调成功，payLog.对象状态回写结束");
 						String xml = "<xml><return_code><![CDATA[SUCCESS]]></return_code> <return_msg><![CDATA[OK]]></return_msg></xml>";
 						response.getWriter().write(xml);
 						
-//						UserAccountParamByType userAccountParamByType = new UserAccountParamByType();
-//						Integer accountType = -1;
-//						if(0 == payType) {
-//							accountType = ProjectConstant.BUY; 
-//						}else if(1 == payType){
-//							accountType = ProjectConstant.RECHARGE;
-//						}
-//						userAccountParamByType.setAccountType(accountType);
-//						userAccountParamByType.setAmount(new BigDecimal(payLog.getOrderAmount().doubleValue()));
-//						userAccountParamByType.setBonusPrice(BigDecimal.ZERO);//暂无红包金额
-//						userAccountParamByType.setOrderSn(payLog.getOrderSn());
-//						userAccountParamByType.setPayId(payLog.getLogId());
-//						userAccountParamByType.setPaymentName("微信");
-//						userAccountParamByType.setThirdPartName("微信");
-//						userAccountParamByType.setThirdPartPaid(new BigDecimal(payLog.getOrderAmount().doubleValue()));
-//						userAccountParamByType.setUserId(payLog.getUserId());
-//						BaseResult<String> accountRst = userAccountService.insertUserAccount(userAccountParamByType);
-//						if(accountRst.getCode() != 0) {
-//							logger.info(loggerId + "生成账户流水异常");
-//						}else {
-//							logger.info("生成账户流水成功");
-//						}
+						UserAccountParamByType userAccountParamByType = new UserAccountParamByType();
+						Integer accountType = -1;
+						if(0 == payType) {
+							accountType = ProjectConstant.BUY; 
+						}else if(1 == payType){
+							accountType = ProjectConstant.RECHARGE;
+						}
+						logger.info("===========更新用户流水表=======:" + accountType);
+						userAccountParamByType.setAccountType(accountType);
+						userAccountParamByType.setAmount(new BigDecimal(payLog.getOrderAmount().doubleValue()));
+						userAccountParamByType.setBonusPrice(BigDecimal.ZERO);//暂无红包金额
+						userAccountParamByType.setOrderSn(payLog.getOrderSn());
+						userAccountParamByType.setPayId(payLog.getLogId());
+						userAccountParamByType.setPaymentName("微信");
+						userAccountParamByType.setThirdPartName("微信");
+						userAccountParamByType.setThirdPartPaid(new BigDecimal(payLog.getOrderAmount().doubleValue()));
+						userAccountParamByType.setUserId(payLog.getUserId());
+						BaseResult<String> accountRst = userAccountService.insertUserAccount(userAccountParamByType);
+						if(accountRst.getCode() != 0) {
+							logger.info(loggerId + "生成账户流水异常");
+						}else {
+							logger.info("生成账户流水成功");
+						}
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
