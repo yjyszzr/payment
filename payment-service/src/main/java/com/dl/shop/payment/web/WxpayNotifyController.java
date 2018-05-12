@@ -80,20 +80,6 @@ public class WxpayNotifyController {
 			String appid = responseModel.getAppid();//prePayJo.getString("appid");
 			String mchId = responseModel.getMch_id();//prePayJo.getString("mch_id");
 			String bank_type = responseModel.getBank_type();//prePayJo.getString("bank_type");
-			logger.debug(loggerId + " appid:", appid);
-			logger.debug(loggerId + " bank_type:" + bank_type);
-			logger.debug(loggerId + " cash_fee:" + responseModel.getCash_fee());
-			logger.debug(loggerId + " mch_id:" + mchId);
-			logger.debug(loggerId + " nonce_str:" + responseModel.getNonce_str());
-			logger.debug(loggerId + " openid:" + responseModel.getOpenid());
-			logger.debug(loggerId + " out_trade_no:" + responseModel.getOut_trade_no());
-			logger.debug(loggerId + " transaction_id:" + responseModel.getTransaction_id());
-			logger.debug(loggerId + " sign:" + responseModel.getSign());
-			logger.debug(loggerId + " time_end:" + responseModel.getTime_end());
-			logger.debug(loggerId + " total_fee:" + responseModel.getTotal_fee());
-			logger.debug(loggerId + " trade_type:" + responseModel.getTrade_type());
-			logger.debug(loggerId + " 解析完毕！！*********");
-
 			String payOrderSn = responseModel.getOut_trade_no();//prePayJo.getString("out_trade_no");
 			logger.info(loggerId + " payOrderSn="+payOrderSn);
 			String tradeNo = responseModel.getTransaction_id();//prePayJo.getString("transaction_id");
@@ -111,7 +97,7 @@ public class WxpayNotifyController {
 				return;
 			}
 			int isPaid = payLog.getIsPaid();
-			logger.info("=======isPaid:" + isPaid +" payLogId:" +payLog.getPayIp() +"==========");
+			logger.info("=======isPaid:" + isPaid +" payLogId:" +payLog.getLogId() +"==========");
 			if(1== isPaid) {
 				logger.info(loggerId + " paylog.ispaid=1,已支付成功，返回OK！");
 				String xml = "<xml><return_code><![CDATA[SUCCESS]]></return_code> <return_msg><![CDATA[OK]]></return_msg></xml>";
@@ -131,7 +117,7 @@ public class WxpayNotifyController {
 					int currentTime = DateUtil.getCurrentTimeLong();
 					boolean result = false;
 					if(0 == payType) {
-						//order
+						//order 购彩
 						UpdateOrderInfoParam param = new UpdateOrderInfoParam();
 						param.setPayStatus(1);
 						param.setOrderStatus(1);
@@ -152,7 +138,7 @@ public class WxpayNotifyController {
 						updateRParams.setRechargeSn(rechargeSn);
 						updateRParams.setStatus("1");
 						updateRParams.setPaymentCode("app_weixin");
-						updateRParams.setPaymentName("微信充值");
+						updateRParams.setPaymentName("微信");
 						updateRParams.setPayTime(currentTime);
 						updateRParams.setPaymentId(payLog.getLogId()+"");
 						BaseResult<String> baseResult = userRService.updateReCharege(updateRParams);
@@ -175,26 +161,28 @@ public class WxpayNotifyController {
 						String xml = "<xml><return_code><![CDATA[SUCCESS]]></return_code> <return_msg><![CDATA[OK]]></return_msg></xml>";
 						response.getWriter().write(xml);
 						
-						UserAccountParamByType userAccountParamByType = new UserAccountParamByType();
-						Integer accountType = ProjectConstant.BUY; 
-						if(0 != payType) {
-							accountType = ProjectConstant.RECHARGE;
-						}
-						userAccountParamByType.setAccountType(accountType);
-						userAccountParamByType.setAmount(new BigDecimal(payLog.getOrderAmount().doubleValue()));
-						userAccountParamByType.setBonusPrice(BigDecimal.ZERO);//暂无红包金额
-						userAccountParamByType.setOrderSn(payLog.getOrderSn());
-						userAccountParamByType.setPayId(payLog.getLogId());
-						userAccountParamByType.setPaymentName("微信");
-						userAccountParamByType.setThirdPartName("微信");
-						userAccountParamByType.setThirdPartPaid(new BigDecimal(payLog.getOrderAmount().doubleValue()));
-						userAccountParamByType.setUserId(payLog.getUserId());
-						BaseResult<String> accountRst = userAccountService.insertUserAccount(userAccountParamByType);
-						if(accountRst.getCode() != 0) {
-							logger.info(loggerId + "生成账户流水异常");
-						}else {
-							logger.info("生成账户流水成功");
-						}
+//						UserAccountParamByType userAccountParamByType = new UserAccountParamByType();
+//						Integer accountType = -1;
+//						if(0 == payType) {
+//							accountType = ProjectConstant.BUY; 
+//						}else if(1 == payType){
+//							accountType = ProjectConstant.RECHARGE;
+//						}
+//						userAccountParamByType.setAccountType(accountType);
+//						userAccountParamByType.setAmount(new BigDecimal(payLog.getOrderAmount().doubleValue()));
+//						userAccountParamByType.setBonusPrice(BigDecimal.ZERO);//暂无红包金额
+//						userAccountParamByType.setOrderSn(payLog.getOrderSn());
+//						userAccountParamByType.setPayId(payLog.getLogId());
+//						userAccountParamByType.setPaymentName("微信");
+//						userAccountParamByType.setThirdPartName("微信");
+//						userAccountParamByType.setThirdPartPaid(new BigDecimal(payLog.getOrderAmount().doubleValue()));
+//						userAccountParamByType.setUserId(payLog.getUserId());
+//						BaseResult<String> accountRst = userAccountService.insertUserAccount(userAccountParamByType);
+//						if(accountRst.getCode() != 0) {
+//							logger.info(loggerId + "生成账户流水异常");
+//						}else {
+//							logger.info("生成账户流水成功");
+//						}
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
