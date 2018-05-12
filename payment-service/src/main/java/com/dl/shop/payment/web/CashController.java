@@ -230,6 +230,8 @@ public class CashController {
 			//先减少用户钱包余额
 			logger.info("进入第三方提现流程...系统阈值:" + limit);
 			CashResultEntity rEntity = callThirdGetCash(widthDrawSn,totalAmount);
+			//test code
+			rEntity.isSucc = false;
 			if(rEntity.isSucc) {
 				logger.info("单号:"+widthDrawSn+"第三方提现成功，扣除用户余额");
 				//更新提现单
@@ -357,9 +359,6 @@ public class CashController {
 			BigDecimal amt = userEntity.getAmount();
 			logger.info("进入到第三方提现流程，金额:" + amt.doubleValue() +" 用户名:" +userEntity.getUserId() +" sn:" + sn);
 			CashResultEntity cashREntity = callThirdGetCash(sn,amt.doubleValue());
-			//test code
-			cashREntity.isSucc = false;
-			
 			if(cashREntity.isSucc) {
 				//更改提现单状态
 				logger.info("更改提现单流程为成功...");
