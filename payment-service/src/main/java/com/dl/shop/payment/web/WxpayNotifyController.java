@@ -5,6 +5,9 @@ import java.math.BigDecimal;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.zookeeper.Op;
+import org.bouncycastle.crypto.modes.SICBlockCipher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.dl.base.result.BaseResult;
 import com.dl.base.util.DateUtil;
 import com.dl.member.api.IUserAccountService;
+import com.dl.member.param.RecharegeParam;
 import com.dl.member.param.UpdateUserRechargeParam;
 import com.dl.member.param.UserAccountParamByType;
 import com.dl.order.api.IOrderService;
@@ -42,7 +46,7 @@ public class WxpayNotifyController {
 	@Autowired
 	private IOrderService orderService;
 	@Autowired
-	private UserRechargeService userRService;
+	private UserRechargeService userRechargeService;
 	
 	@ApiOperation(value="微信支付回调")
 	@PostMapping("notify")
@@ -117,35 +121,9 @@ public class WxpayNotifyController {
 					int currentTime = DateUtil.getCurrentTimeLong();
 					boolean result = false;
 					if(0 == payType) {
-						//order 购彩
-						UpdateOrderInfoParam param = new UpdateOrderInfoParam();
-						param.setPayStatus(1);
-						param.setOrderStatus(1);
-						param.setPayTime(currentTime);
-						param.setPaySn(payLog.getLogId()+"");
-						param.setPayName(payLog.getPayName());
-						param.setPayCode(payLog.getPayCode());
-						param.setOrderSn(payLog.getOrderSn());
-						BaseResult<String> baseResult = orderService.updateOrderInfo(param);
-						logger.info(loggerId + " 订单回调返回结果：status=" + baseResult.getCode()+" , message="+baseResult.getMsg());
-						if(0 == baseResult.getCode()) {
-							result = true;
-						}
+						result = orderOptionsSucc(tradeNo, payLog);
 					}else {
-						String rechargeSn = payLog.getOrderSn();
-						//更新账单信息
-						UpdateUserRechargeParam updateRParams = new UpdateUserRechargeParam();
-						updateRParams.setRechargeSn(rechargeSn);
-						updateRParams.setStatus("1");
-						updateRParams.setPaymentCode("app_weixin");
-						updateRParams.setPaymentName("微信");
-						updateRParams.setPayTime(currentTime);
-						updateRParams.setPaymentId(payLog.getLogId()+"");
-						BaseResult<String> baseResult = userRService.updateReCharege(updateRParams);
-						logger.info(loggerId + " 充值回调返回结果：status=" + baseResult.getCode()+" , message="+baseResult.getMsg());
-						if(0 == baseResult.getCode()) {
-							result = true;
-						}
+						result = recharageOptionSucc(tradeNo, payLog);
 					}
 					logger.info(loggerId + " 业务回调结果：result="+result);
 					if(result) {
@@ -192,5 +170,60 @@ public class WxpayNotifyController {
 				logger.info(loggerId + " 订单金额或appid,mchId校验失败！");
 			}
 		}
+	}
+	
+	/***
+	 * 订单支付，微信回调成功
+	 */
+	private boolean orderOptionsSucc(String tradeNo,PayLog payLog) {
+		boolean isSucc = false;
+		int currentTime = DateUtil.getCurrentTimeLong();
+		//更新order
+		UpdateOrderInfoParam param = new UpdateOrderInfoParam();
+		param.setPayStatus(1);
+		param.setOrderStatus(1);
+		param.setPayTime(currentTime);
+		param.setPaySn(payLog.getLogId()+"");
+		param.setPayName(payLog.getPayName());
+		param.setPayCode(payLog.getPayCode());
+		param.setOrderSn(payLog.getOrderSn());
+		BaseResult<String> updateOrderInfo = orderService.updateOrderInfo(param);
+		if(updateOrderInfo.getCode() != 0) {
+			logger.error("ordersn=" + payLog.getOrderSn()+"更新订单成功状态失败");
+		}else {
+			isSucc = true;
+		}
+		return isSucc;
+	}
+
+	/***
+	 * 订单支付，微信回调
+	 */
+	private boolean recharageOptionSucc(String tradeNo,PayLog payLog) {
+		boolean isSucc = false;
+		int currentTime = DateUtil.getCurrentTimeLong();
+		//更新order
+		UpdateUserRechargeParam updateUserRechargeParam = new UpdateUserRechargeParam();
+		updateUserRechargeParam.setPaymentCode(payLog.getPayCode());
+		updateUserRechargeParam.setPaymentId(payLog.getLogId()+"");
+		updateUserRechargeParam.setPaymentName(payLog.getPayName());
+		updateUserRechargeParam.setPayTime(currentTime);
+		updateUserRechargeParam.setStatus("1");
+		updateUserRechargeParam.setRechargeSn(payLog.getOrderSn());
+		userRechargeService.updateReCharege(updateUserRechargeParam);
+		
+		RecharegeParam recharegeParam = new RecharegeParam();
+		recharegeParam.setAmount(payLog.getOrderAmount());
+		recharegeParam.setPayId(tradeNo);
+		recharegeParam.setThirdPartName("微信");
+		recharegeParam.setThirdPartPaid(payLog.getOrderAmount());
+		recharegeParam.setUserId(payLog.getUserId());
+		BaseResult<String>  rechargeRst = userAccountService.rechargeUserMoneyLimit(recharegeParam);
+		if(rechargeRst.getCode() != 0) {
+			logger.error("给个人用户充值：code"+rechargeRst.getCode() +"message:"+rechargeRst.getMsg());
+		}else {
+			isSucc = true;
+		}
+		return isSucc;
 	}
 }
