@@ -18,7 +18,8 @@ public enum PayEnums {
 	CASH_FAILURE(304048,"银河内部失败"),
 	WITHDRAW_EMPTY(304049,"提现流水为空"),
 	WITHDRAW_USER_ACC_EMPTY(304050,"提现查询user表为空"),
-	CASH_USER_MOENY_REDUC_ERROR(304051,"用户余额预扣除失败");
+	CASH_USER_MOENY_REDUC_ERROR(304051,"用户余额预扣除失败"),
+	PAY_RONGBAO_LOW_LIMIT(304052,"最低提现金额为3元");
 	
 	private Integer code;
     private String msg;

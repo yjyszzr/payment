@@ -118,6 +118,12 @@ public class CashController {
 			return ResultGenerator.genFailResult("用户钱包金额转换失败！",null);
 		}
 		
+		//是否小于3元钱
+		if(totalAmount < 3) {
+			logger.info(loggerId+"最低提现金额大于3元~");
+			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_LOW_LIMIT.getcode(),PayEnums.PAY_RONGBAO_LOW_LIMIT.getMsg()); 
+		}
+		
 		//提现金额大于钱包数据
 		if(totalAmount > dMoney) {
 			logger.info(loggerId+"提现金额超出用户钱包数值~");

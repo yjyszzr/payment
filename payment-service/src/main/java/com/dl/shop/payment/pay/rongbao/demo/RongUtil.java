@@ -21,6 +21,12 @@ import com.dl.shop.payment.pay.rongbao.util.ReapalSubmit;
 public class RongUtil {
 	private final static Logger log = Logger.getLogger(RongUtil.class);
 	
+	/**
+	 * 融宝订单回退
+	 * @param reqEntity
+	 * @return
+	 * @throws Exception
+	 */
 	public static final RspRefundEntity refundOrderInfo(ReqRefundEntity reqEntity) throws Exception {
 		RspRefundEntity rEntity = null;
 		//原订单号
