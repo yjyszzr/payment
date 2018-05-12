@@ -424,7 +424,7 @@ public class CashController {
 			userWithdrawLog.setWithdrawSn(sn);
 			userWithdrawLogService.save(userWithdrawLog);
 			
-			logger.info("后台管理审核拒绝，资金进行回滚...");
+			logger.info("后台管理审核拒绝，资金进行回滚...sn:" + sn + "userId:" + userId);
 			MemWithDrawSnParam snParams = new MemWithDrawSnParam();
 			snParams.setWithDrawSn(sn);
 			snParams.setUserId(userId);

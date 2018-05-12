@@ -79,19 +79,19 @@ public class UserWithdrawLogController {
     		if(sList.size() == 1) {
     			UserWithdrawLogDTO sEntity = new UserWithdrawLogDTO();
     			sEntity.setLogCode(CashEnums.CASH_REVIEWING.getcode());
-    			sEntity.setLogTime(CashEnums.CASH_REVIEWING.getMsg());
+    			sEntity.setLogName(CashEnums.CASH_REVIEWING.getMsg());
     			sEntity.setLogTime(null);
     			sList.add(sEntity);
     			
     			sEntity = new UserWithdrawLogDTO();
     			sEntity.setLogCode(CashEnums.CASH_SUCC.getcode());
-    			sEntity.setLogTime(CashEnums.CASH_SUCC.getMsg());
+    			sEntity.setLogName(CashEnums.CASH_SUCC.getMsg());
     			sEntity.setLogTime(null);
     			sList.add(sEntity);
     		}else if(sList.size() == 2) {
     			UserWithdrawLogDTO sEntity = new UserWithdrawLogDTO();
     			sEntity.setLogCode(CashEnums.CASH_SUCC.getcode());
-    			sEntity.setLogTime(CashEnums.CASH_SUCC.getMsg());
+    			sEntity.setLogName(CashEnums.CASH_SUCC.getMsg());
     			sEntity.setLogTime(null);
     			sList.add(sEntity);
     		}
