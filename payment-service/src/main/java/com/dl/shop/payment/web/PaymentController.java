@@ -589,7 +589,6 @@ public class PaymentController extends AbstractBaseController{
 			return ResultGenerator.genFailResult("充值失败！", null);
 		}
 		String orderSn = rechargeSn;
-//		String orderSn = "test01";
 		//生成充值记录payLog
 		String payName = paymentResult.getData().getPayName();
 		String payIp = this.getIpAddr(request);
@@ -598,6 +597,8 @@ public class PaymentController extends AbstractBaseController{
 		if(null == savePayLog) {
 			logger.info(loggerId + " payLog对象保存失败！"); 
 			return ResultGenerator.genFailResult("请求失败！", null);
+		}else {
+			logger.info("save paylog succ:" + " id:" + payLog.getPayIp() + " paycode:" + payCode + " payOrderSn:" + payLog.getPayOrderSn());
 		}
 		//第三方支付调用
 		UnifiedOrderParam unifiedOrderParam = new UnifiedOrderParam();
@@ -766,6 +767,7 @@ public class PaymentController extends AbstractBaseController{
 			logger.info(loggerId+" payLogId="+payLogId+" 没有查询到对应的订单号");
 			return ResultGenerator.genFailResult("请提供有效的订单号！", null);
 		}
+		logger.info("查询订单:" + loggerId + " payCode:"  +payLog.getPayCode());
 		int isPaid = payLog.getIsPaid();
 		if(1 == isPaid) {
 			logger.info(loggerId+" 订单已支付成功");
