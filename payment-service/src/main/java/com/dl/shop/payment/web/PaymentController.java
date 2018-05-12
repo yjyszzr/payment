@@ -419,6 +419,8 @@ public class PaymentController extends AbstractBaseController{
 		if(null == savePayLog) {
 			logger.info(loggerId + " payLog对象保存失败！"); 
 			return ResultGenerator.genFailResult("请求失败！", null);
+		}else {
+			logger.info("paylog save succ:" + " payLogId:" + payLog.getPayIp() + " paycode:" + payLog.getPayCode() + " payname:" + payLog.getPayName());
 		}
 		//更新订单号为paylogId
 		UnifiedOrderParam unifiedOrderParam = new UnifiedOrderParam();
@@ -824,7 +826,12 @@ public class PaymentController extends AbstractBaseController{
 			RecharegeParam recharegeParam = new RecharegeParam();
 			recharegeParam.setAmount(payLog.getOrderAmount());
 			recharegeParam.setPayId(response.getOrder_no());
-			recharegeParam.setThirdPartName("融宝");
+			String payCode = response.getPayCode();
+			if(payCode.equals("app_weixin")) {
+				recharegeParam.setThirdPartName("微信");
+			}else if(payCode.equals("app_rongbao")){
+				recharegeParam.setThirdPartName("融宝");
+			}
 			recharegeParam.setThirdPartPaid(payLog.getOrderAmount());
 			recharegeParam.setUserId(payLog.getUserId());
 			BaseResult<String>  rechargeRst = userAccountService.rechargeUserMoneyLimit(recharegeParam);
@@ -839,7 +846,7 @@ public class PaymentController extends AbstractBaseController{
 				updatePayLog.setTradeNo(response.getTrade_no());
 				updatePayLog.setLogId(payLog.getLogId());
 				updatePayLog.setIsPaid(1);
-				updatePayLog.setPayMsg("支付成功");
+				updatePayLog.setPayMsg("充值成功");
 				payLogService.update(updatePayLog);
 			} catch (Exception e) {
 				logger.error(loggerId+" paylogid="+payLog.getLogId()+" , paymsg=支付成功，保存成功记录时出错", e);
