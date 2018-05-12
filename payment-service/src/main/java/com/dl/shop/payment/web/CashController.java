@@ -279,10 +279,10 @@ public class CashController {
 				//更新提现单失败状态
 				UpdateUserWithdrawParam updateParams = new UpdateUserWithdrawParam();
 				updateParams.setWithdrawalSn(widthDrawSn);
-				updateParams.setStatus(ProjectConstant.STATUS_SUCC);
+				updateParams.setStatus(ProjectConstant.STATUS_FAILURE);
 				updateParams.setPayTime(DateUtil.getCurrentTimeLong());
 				updateParams.setPaymentId(widthDrawSn);
-				updateParams.setPaymentName("彩小秘管理后台发起提现");
+				updateParams.setPaymentName("用户发起提现");
 				userWithdrawService.updateWithdraw(updateParams);
 				
 				//三方返回失败，用户资金回滚
@@ -292,6 +292,8 @@ public class CashController {
 				BaseResult<SurplusPaymentCallbackDTO> baseR = userAccountService.rollbackUserMoneyWithDrawFailure(snParams);
 				if(baseR != null && baseR.getCode() == 0) {
 					logger.info("进入第三方提现失败，资金回滚成功...");
+				}else {
+					logger.info("进入第三方提现失败，资金回滚失败...");
 				}
 				return ResultGenerator.genResult(PayEnums.CASH_FAILURE.getcode(),"提现失败[" +rEntity.msg +"]");
 			}
