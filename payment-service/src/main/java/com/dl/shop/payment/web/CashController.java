@@ -259,14 +259,6 @@ public class CashController {
 				userWithdrawLogService.save(userWithdrawLog);
 				return ResultGenerator.genSuccessResult("提现成功");
 			}else {
-				//三方返回失败，用户资金回滚
-				logger.info("进入第三方提现失败，资金回滚...");
-				MemWithDrawSnParam snParams = new MemWithDrawSnParam();
-				snParams.setWithDrawSn(widthDrawSn);
-				BaseResult<SurplusPaymentCallbackDTO> baseR = userAccountService.rollbackUserMoneyWithDrawFailure(snParams);
-				if(baseR != null && baseR.getCode() == 0) {
-					logger.info("进入第三方提现失败，资金回滚成功...");
-				}
 				//保存提现中状态记录 dl_user_withdraw_log
 				userWithdrawLog = new UserWithdrawLog();
 				userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
@@ -275,12 +267,30 @@ public class CashController {
 				userWithdrawLog.setWithdrawSn(widthDrawSn);
 				userWithdrawLogService.save(userWithdrawLog);
 				
-				//
+				//保存提现中状态记录位失败到数据库中...
 				userWithdrawLog = new UserWithdrawLog();
 				userWithdrawLog.setLogCode(CashEnums.CASH_FAILURE.getcode());
 				userWithdrawLog.setLogName(CashEnums.CASH_FAILURE.getMsg()+"[" +rEntity.msg+"]");
 				userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
 				userWithdrawLog.setWithdrawSn(widthDrawSn);
+				
+				//更新提现单位失败状态
+				UpdateUserWithdrawParam updateParams = new UpdateUserWithdrawParam();
+				updateParams.setWithdrawalSn(widthDrawSn);
+				updateParams.setStatus(ProjectConstant.STATUS_SUCC);
+				updateParams.setPayTime(DateUtil.getCurrentTimeLong());
+				updateParams.setPaymentId(widthDrawSn);
+				updateParams.setPaymentName("彩小秘管理后台发起提现");
+				userWithdrawService.updateWithdraw(updateParams);
+				
+				//三方返回失败，用户资金回滚
+				logger.info("进入第三方提现失败，资金回滚...");
+				MemWithDrawSnParam snParams = new MemWithDrawSnParam();
+				snParams.setWithDrawSn(widthDrawSn);
+				BaseResult<SurplusPaymentCallbackDTO> baseR = userAccountService.rollbackUserMoneyWithDrawFailure(snParams);
+				if(baseR != null && baseR.getCode() == 0) {
+					logger.info("进入第三方提现失败，资金回滚成功...");
+				}
 				return ResultGenerator.genResult(PayEnums.CASH_FAILURE.getcode(),"提现失败[" +rEntity.msg +"]");
 			}
 		}
@@ -340,31 +350,52 @@ public class CashController {
 			logger.info("查询提现单失败");
 			return ResultGenerator.genFailResult("提现单号不能为空",null);
 		}
-		UserWithdraw userEntity = baseResult.getData();
-		BigDecimal amt = userEntity.getAmount();
-		logger.info("进入到第三方提现流程，金额:" + amt.doubleValue() +" 用户名:" +userEntity.getUserId() +" sn:" + sn);
-		CashResultEntity cashREntity = callThirdGetCash(sn,amt.doubleValue());
-		if(cashREntity.isSucc) {
-			//更改提现单状态
-			logger.info("更改提现单流程为成功...");
-			UpdateUserWithdrawParam updateParams = new UpdateUserWithdrawParam();
-			updateParams.setWithdrawalSn(sn);
-			updateParams.setStatus(ProjectConstant.STATUS_SUCC);
-			updateParams.setPayTime(DateUtil.getCurrentTimeLong());
-			updateParams.setPaymentId(userEntity.getPaymentId());
-			updateParams.setPaymentName("彩小秘管理后台发起提现");
-			userWithdrawService.updateWithdraw(updateParams);
-			return ResultGenerator.genSuccessResult("第三方发起提现成功");
+		if(param.isPass()) {
+			logger.info("后台管理审核通过...");
+			UserWithdraw userEntity = baseResult.getData();
+			BigDecimal amt = userEntity.getAmount();
+			logger.info("进入到第三方提现流程，金额:" + amt.doubleValue() +" 用户名:" +userEntity.getUserId() +" sn:" + sn);
+			CashResultEntity cashREntity = callThirdGetCash(sn,amt.doubleValue());
+			if(cashREntity.isSucc) {
+				//更改提现单状态
+				logger.info("更改提现单流程为成功...");
+				UpdateUserWithdrawParam updateParams = new UpdateUserWithdrawParam();
+				updateParams.setWithdrawalSn(sn);
+				updateParams.setStatus(ProjectConstant.STATUS_SUCC);
+				updateParams.setPayTime(DateUtil.getCurrentTimeLong());
+				updateParams.setPaymentId(userEntity.getPaymentId());
+				updateParams.setPaymentName("彩小秘管理后台发起提现");
+				userWithdrawService.updateWithdraw(updateParams);
+				
+				//增加提现流水为成功
+				UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
+				userWithdrawLog.setLogCode(CashEnums.CASH_SUCC.getcode());
+				userWithdrawLog.setLogName(CashEnums.CASH_SUCC.getMsg());
+				userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
+				userWithdrawLog.setWithdrawSn(sn);
+				userWithdrawLogService.save(userWithdrawLog);
+				
+				return ResultGenerator.genSuccessResult("第三方发起提现成功");
+			}else {
+				//回滚余额信息
+				logger.info("第三方提现失败，进行资金回滚...");
+				MemWithDrawSnParam snParams = new MemWithDrawSnParam();
+				snParams.setWithDrawSn(sn);
+				BaseResult<SurplusPaymentCallbackDTO> baseR = userAccountService.rollbackUserMoneyWithDrawFailure(snParams);
+				if(baseR != null && baseR.getCode() == 0) {
+					logger.info("进入第三方提现失败，资金回滚成功...");
+				}
+				return ResultGenerator.genFailResult("提现失败[" +cashREntity.msg+"]");
+			}
 		}else {
-			//回滚余额信息
-			logger.info("第三方提现失败，进行资金回滚...");
+			logger.info("后台管理审核拒绝，资金进行回滚...");
 			MemWithDrawSnParam snParams = new MemWithDrawSnParam();
 			snParams.setWithDrawSn(sn);
 			BaseResult<SurplusPaymentCallbackDTO> baseR = userAccountService.rollbackUserMoneyWithDrawFailure(snParams);
 			if(baseR != null && baseR.getCode() == 0) {
 				logger.info("进入第三方提现失败，资金回滚成功...");
 			}
-			return ResultGenerator.genFailResult("提现失败[" +cashREntity.msg+"]");
+			return ResultGenerator.genFailResult("后台管理审核拒绝成功...");
 		}
 	}
 }

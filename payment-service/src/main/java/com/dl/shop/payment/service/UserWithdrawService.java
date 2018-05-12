@@ -149,28 +149,13 @@ public class UserWithdrawService extends AbstractService<UserWithdraw> {
     public BaseResult<String> updateWithdraw(UpdateUserWithdrawParam updateUserWithdrawParam){
     	String inPrams = JSON.toJSONString(updateUserWithdrawParam);
     	log.info(DateUtil.getCurrentDateTime()+"更新提现单参数:"+inPrams);
-    	
-    	BaseResult<UserWithdraw> userWithdrawRst = this.queryUserWithdraw(updateUserWithdrawParam.getWithdrawalSn());
-    	if(userWithdrawRst.getCode() != 0) {
-    		return ResultGenerator.genResult(userWithdrawRst.getCode(), userWithdrawRst.getMsg());
-    	}
-    	BigDecimal amount = userWithdrawRst.getData().getAmount();
-    	
     	UserWithdraw userWithdraw = new UserWithdraw();
-    	userWithdraw.setPaymentId(updateUserWithdrawParam.getPaymentId());
+//    	userWithdraw.setPaymentId(updateUserWithdrawParam.getPaymentId());
     	userWithdraw.setPayTime(updateUserWithdrawParam.getPayTime());
     	userWithdraw.setStatus(updateUserWithdrawParam.getStatus());
     	userWithdraw.setWithdrawalSn(updateUserWithdrawParam.getWithdrawalSn());
-    	int rst = userWithdrawMapper.updateUserWithdrawBySelective(userWithdraw);
-    	if(1 != rst) {
-    		log.error("更新数据库提现单失败");
-    		return ResultGenerator.genFailResult("更新数据库提现单失败");
-    	}
-    	
-    	WithDrawParam withDrawParam = new WithDrawParam();
-    	BaseResult<String> withdrawRst = userAccountService.withdrawUserMoney(withDrawParam);
-    	
-		return ResultGenerator.genSuccessResult("更新数据库提现单成功", withdrawRst.getData());
+    	userWithdrawMapper.updateUserWithdrawBySelective(userWithdraw);
+		return ResultGenerator.genSuccessResult("更新数据库提现单成功",null);
     }
     
 }

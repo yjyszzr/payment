@@ -7,4 +7,6 @@ import lombok.Data;
 public class CashGetParam {
 	@ApiModelProperty("提现单号")
 	private String withdrawSn;
+	@ApiModelProperty("是否审核通过")
+	private boolean isPass;	
 }
