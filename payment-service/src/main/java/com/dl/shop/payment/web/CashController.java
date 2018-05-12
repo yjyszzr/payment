@@ -357,6 +357,9 @@ public class CashController {
 			BigDecimal amt = userEntity.getAmount();
 			logger.info("进入到第三方提现流程，金额:" + amt.doubleValue() +" 用户名:" +userEntity.getUserId() +" sn:" + sn);
 			CashResultEntity cashREntity = callThirdGetCash(sn,amt.doubleValue());
+			//test code
+			cashREntity.isSucc = false;
+			
 			if(cashREntity.isSucc) {
 				//更改提现单状态
 				logger.info("更改提现单流程为成功...");
@@ -431,6 +434,8 @@ public class CashController {
 			BaseResult<SurplusPaymentCallbackDTO> baseR = userAccountService.rollbackUserMoneyWithDrawFailure(snParams);
 			if(baseR != null && baseR.getCode() == 0) {
 				logger.info("进入第三方提现失败，资金回滚成功...");
+			}else {
+				logger.info("资金回滚失败...");
 			}
 			return ResultGenerator.genFailResult("后台管理审核拒绝成功...");
 		}
