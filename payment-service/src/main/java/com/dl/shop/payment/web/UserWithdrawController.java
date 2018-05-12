@@ -1,5 +1,6 @@
 package com.dl.shop.payment.web;
 import com.dl.shop.payment.model.UserWithdraw;
+import com.dl.shop.payment.param.WithDrawSnAndUserIdParam;
 import com.dl.shop.payment.param.WithDrawSnParam;
 import com.dl.shop.payment.service.UserWithdrawService;
 import com.dl.base.result.BaseResult;
@@ -31,8 +32,8 @@ public class UserWithdrawController extends AbstractService<UserWithdraw> {
      * 根据提现单号和userId查询提现单
      */
  	@RequestMapping(path="/queryUserWithdrawBySnAndUserId", method=RequestMethod.POST)
-    public BaseResult<UserWithdrawDTO> queryUserWithdrawBySnAndUserId(@RequestBody WithDrawSnParam withDrawSn){
- 		return userWithdrawService.queryUserWithdrawBySnAndUserId(withDrawSn.getWithDrawSn());
+    public BaseResult<UserWithdrawDTO> queryUserWithdrawBySnAndUserId(@RequestBody WithDrawSnAndUserIdParam withDrawSnAndUserIdParam){
+ 		return userWithdrawService.queryUserWithdrawBySnAndUserId(withDrawSnAndUserIdParam.getWithDrawSn(),withDrawSnAndUserIdParam.getUserId());
  	}
   
 }

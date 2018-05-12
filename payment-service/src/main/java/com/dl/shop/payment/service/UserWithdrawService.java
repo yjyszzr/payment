@@ -106,8 +106,7 @@ public class UserWithdrawService extends AbstractService<UserWithdraw> {
     /**
      * 根据提现单号和userId查询提现单
      */
-    public BaseResult<UserWithdrawDTO> queryUserWithdrawBySnAndUserId(String withDrawSn){
-    	Integer userId = SessionUtil.getUserId();
+    public BaseResult<UserWithdrawDTO> queryUserWithdrawBySnAndUserId(String withDrawSn,Integer userId){
     	UserWithdraw userWithdraw = new UserWithdraw();
     	userWithdraw.setWithdrawalSn(withDrawSn);
     	userWithdraw.setUserId(userId);

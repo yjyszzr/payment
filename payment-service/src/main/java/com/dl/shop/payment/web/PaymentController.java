@@ -819,10 +819,8 @@ public class PaymentController extends AbstractBaseController{
 			updateUserRechargeParam.setPayTime(currentTime);
 			updateUserRechargeParam.setStatus("1");
 			updateUserRechargeParam.setRechargeSn(payLog.getOrderSn());
-			BaseResult<String> updateReCharege = userAccountService.updateReCharege(updateUserRechargeParam);
-			if(updateReCharege.getCode() != 0) {
-				logger.error(loggerId+" paylogid="+"ordersn=" + payLog.getOrderSn()+"更新充值单成功状态失败");
-			}
+			userRechargeService.updateReCharege(updateUserRechargeParam);
+			
 			RecharegeParam recharegeParam = new RecharegeParam();
 			recharegeParam.setAmount(payLog.getOrderAmount());
 			recharegeParam.setPayId(response.getOrder_no());

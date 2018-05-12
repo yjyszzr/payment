@@ -9,6 +9,7 @@ import com.dl.base.result.BaseResult;
 import com.dl.shop.payment.dto.UserWithdrawDTO;
 import com.dl.shop.payment.dto.UserWithdrawDetailDTO;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
+import com.dl.shop.payment.param.WithDrawSnAndUserIdParam;
 import com.dl.shop.payment.param.WithDrawSnParam;
 
 @FeignClient(value="payment-service")
@@ -27,5 +28,5 @@ public interface IpaymentService {
      * 根据提现单号和userId查询提现单
      */
  	@RequestMapping(path="/payment/withdraw/queryUserWithdrawBySnAndUserId", method=RequestMethod.POST)
-    public BaseResult<UserWithdrawDTO> queryUserWithdrawBySnAndUserId(@RequestBody WithDrawSnParam withDrawSn);
+    public BaseResult<UserWithdrawDTO> queryUserWithdrawBySnAndUserId(@RequestBody WithDrawSnAndUserIdParam withDrawSnAndUserIdParam);
 }

@@ -85,25 +85,10 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
     	String inPrams = JSON.toJSONString(updateUserRechargeParam);
     	log.info(DateUtil.getCurrentDateTime()+"更新充值单参数:"+inPrams);
     	
-    	BaseResult<UserRecharge> userRechargeRst =  this.queryUserRecharge(updateUserRechargeParam.getRechargeSn());
-    	if(userRechargeRst.getCode() != 0) {
-    		throw new ServiceException(userRechargeRst.getCode(), userRechargeRst.getMsg());
-    	}
-    	BigDecimal amount = userRechargeRst.getData().getAmount();
-    	
     	UserRecharge userRecharge = new UserRecharge();
-    	userRecharge.setAmount(amount);
-    	userRecharge.setPaymentCode(updateUserRechargeParam.getPaymentCode());
-    	userRecharge.setPaymentId(updateUserRechargeParam.getPaymentId());
-    	userRecharge.setPaymentName(updateUserRechargeParam.getPaymentName());
-    	userRecharge.setPayTime(updateUserRechargeParam.getPayTime());
     	userRecharge.setStatus(updateUserRechargeParam.getStatus());
     	userRecharge.setRechargeSn(updateUserRechargeParam.getRechargeSn());
-    	int rst = userRechargeMapper.updateUserRechargeBySelective(userRecharge);
-    	if(1 != rst) {
-    		log.error("更新数据库充值单失败");
-    		return ResultGenerator.genFailResult("更新数据库充值单失败");
-    	}
+    	userRechargeMapper.updateUserRechargeBySelective(userRecharge);
   
 		return ResultGenerator.genSuccessResult("更新数据库充值单成功");
     
