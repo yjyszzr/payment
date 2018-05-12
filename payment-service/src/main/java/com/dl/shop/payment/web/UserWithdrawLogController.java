@@ -68,9 +68,35 @@ public class UserWithdrawLogController {
         dto.setStatus(strStatus);
         dto.setWithdrawSn(withDrawSn);
         //list倒序
+        rList = buildFakeList(rList);
         Collections.reverse(rList);
         dto.setUserWithdrawLogs(rList);
         return ResultGenerator.genSuccessResult(null, dto);
+    }
+    
+    private List<UserWithdrawLogDTO> buildFakeList(List<UserWithdrawLogDTO> sList){
+    	if(sList != null) {
+    		if(sList.size() == 1) {
+    			UserWithdrawLogDTO sEntity = new UserWithdrawLogDTO();
+    			sEntity.setLogCode(CashEnums.CASH_REVIEWING.getcode());
+    			sEntity.setLogTime(CashEnums.CASH_REVIEWING.getMsg());
+    			sEntity.setLogTime(null);
+    			sList.add(sEntity);
+    			
+    			sEntity = new UserWithdrawLogDTO();
+    			sEntity.setLogCode(CashEnums.CASH_SUCC.getcode());
+    			sEntity.setLogTime(CashEnums.CASH_SUCC.getMsg());
+    			sEntity.setLogTime(null);
+    			sList.add(sEntity);
+    		}else if(sList.size() == 2) {
+    			UserWithdrawLogDTO sEntity = new UserWithdrawLogDTO();
+    			sEntity.setLogCode(CashEnums.CASH_SUCC.getcode());
+    			sEntity.setLogTime(CashEnums.CASH_SUCC.getMsg());
+    			sEntity.setLogTime(null);
+    			sList.add(sEntity);
+    		}
+    	}
+    	return sList;
     }
     
     private String getStatus(List<UserWithdrawLogDTO> rList) {

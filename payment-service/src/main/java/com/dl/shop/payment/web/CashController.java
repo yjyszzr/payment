@@ -346,13 +346,14 @@ public class CashController {
 		}
 		//查询该用户的提现金额
 		BaseResult<UserWithdraw> baseResult = userWithdrawService.queryUserWithdraw(sn);
-		if(baseResult.getCode() != 0 || baseResult.getData() == null) {
+		UserWithdraw userEntity = baseResult.getData();
+		int userId = userEntity.getUserId();
+		if(baseResult.getCode() != 0 || userEntity == null) {
 			logger.info("查询提现单失败");
 			return ResultGenerator.genFailResult("提现单号不能为空",null);
 		}
 		if(param.isPass()) {
 			logger.info("后台管理审核通过...");
-			UserWithdraw userEntity = baseResult.getData();
 			BigDecimal amt = userEntity.getAmount();
 			logger.info("进入到第三方提现流程，金额:" + amt.doubleValue() +" 用户名:" +userEntity.getUserId() +" sn:" + sn);
 			CashResultEntity cashREntity = callThirdGetCash(sn,amt.doubleValue());
@@ -426,6 +427,7 @@ public class CashController {
 			logger.info("后台管理审核拒绝，资金进行回滚...");
 			MemWithDrawSnParam snParams = new MemWithDrawSnParam();
 			snParams.setWithDrawSn(sn);
+			snParams.setUserId(userId);
 			BaseResult<SurplusPaymentCallbackDTO> baseR = userAccountService.rollbackUserMoneyWithDrawFailure(snParams);
 			if(baseR != null && baseR.getCode() == 0) {
 				logger.info("进入第三方提现失败，资金回滚成功...");
