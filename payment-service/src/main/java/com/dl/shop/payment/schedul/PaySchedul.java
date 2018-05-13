@@ -58,8 +58,8 @@ public class PaySchedul {
     		log.error("-------------------查询支付超时订单失败"+orderDTORst.getMsg());
     		return;
     	}
-    	
     	List<OrderDTO> orderDTOList = orderDTORst.getData();
+    	logger.info("---------支付超时订单数："+orderDTOList.size());
     	for(OrderDTO or:orderDTOList) {
     		payMentService.dealBeyondPayTimeOrder(or);
     		
