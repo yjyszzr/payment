@@ -529,7 +529,8 @@ public class PaymentController extends AbstractBaseController{
 						logger.error(e.getMessage());
 					}
 					if(!TextUtils.isEmpty(encodeUrl)) {
-						url = ReapalH5Config.URL_PAY_WECHAT+"?data="+encodeUrl;
+						url = "https://wx.tenpay.com/cgi-bin/mmpayweb-bin/checkmweb";
+//						url = ReapalH5Config.URL_PAY_WECHAT+"?data="+encodeUrl;
 //						url = ReapalH5Config.URL_PAY_WECHAT+"?data="+encodeUrl+"&redirect_uri=" + redirectUri;
 					}else {
 						logger.info("encodeUrl失败~");
