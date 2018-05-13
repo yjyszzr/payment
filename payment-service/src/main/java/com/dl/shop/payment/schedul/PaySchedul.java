@@ -19,6 +19,7 @@ import com.dl.member.dto.SurplusPaymentCallbackDTO;
 import com.dl.member.param.SurplusPayParam;
 import com.dl.order.api.IOrderService;
 import com.dl.order.dto.OrderDTO;
+import com.dl.order.param.OrderCondtionParam;
 import com.dl.order.param.OrderSnParam;
 import com.dl.order.param.UpdateOrderInfoParam;
 import com.dl.shop.payment.pay.common.PayManager;
@@ -46,10 +47,23 @@ public class PaySchedul {
 	@Resource
 	private PayMentService payMentService;
 	
-	@Scheduled(cron = "0 0/15 * * * ?")
+	@Scheduled(cron = "0 0/1 * * * ?")
     public void dealBeyondPayTimeOrder() {
 		logger.info("开始执行支付超时订单任务");
-		payMentService.dealBeyondPayTimeOrder();
+		OrderCondtionParam orderQueryParam = new OrderCondtionParam();
+    	orderQueryParam.setOrderStatus(0);
+    	orderQueryParam.setPayStatus(0);
+    	BaseResult<List<OrderDTO>> orderDTORst = orderService.queryOrderListByCondition(orderQueryParam);
+    	if(orderDTORst.getCode() != 0) {
+    		log.error("-------------------查询支付超时订单失败"+orderDTORst.getMsg());
+    		return;
+    	}
+    	
+    	List<OrderDTO> orderDTOList = orderDTORst.getData();
+    	for(OrderDTO or:orderDTOList) {
+    		payMentService.dealBeyondPayTimeOrder(or);
+    		
+    	}
 		log.info("结束执行支付超时订单任务");
 	}
 	

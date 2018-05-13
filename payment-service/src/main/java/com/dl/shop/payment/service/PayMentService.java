@@ -77,40 +77,29 @@ public class PayMentService extends AbstractService<PayMent> {
     /**
      * 处理支付超时订单
      */
-    public void dealBeyondPayTimeOrder() {
-    	OrderCondtionParam orderQueryParam = new OrderCondtionParam();
-    	orderQueryParam.setOrderStatus(1);
-    	orderQueryParam.setPayStatus(0);
-    	orderQueryParam.setTime(DateUtil.getCurrentTimeLong());
-    	BaseResult<List<OrderDTO>> orderDTORst = orderService.queryOrderListByCondition(orderQueryParam);
-    	if(orderDTORst.getCode() != 0) {
-    		log.error("-------------------查询支付超时订单失败"+orderDTORst.getMsg());
+    public void dealBeyondPayTimeOrder(OrderDTO or) {
+    	UpdateOrderInfoParam updateOrderInfoParam = new UpdateOrderInfoParam();
+    	updateOrderInfoParam.setOrderSn(or.getOrderSn());
+    	updateOrderInfoParam.setOrderStatus(8);//支付失败
+    	updateOrderInfoParam.setPayStatus(2);//支付失败
+    	updateOrderInfoParam.setPayTime(DateUtil.getCurrentTimeLong());
+    	BaseResult<String> updateRst = orderService.updateOrderInfoStatus(updateOrderInfoParam);
+    	if(updateRst.getCode() != 0) {
+    		log.error("-------------------支付超时订单更新订单为出票失败 异常"+updateRst.getMsg());
     		return;
     	}
-    	
-    	List<OrderDTO> orderDTOList = orderDTORst.getData();
-    	for(OrderDTO or:orderDTOList) {
-    		SurplusPayParam surplusPayParam = new SurplusPayParam();
-    		surplusPayParam.setOrderSn(or.getOrderSn());
-    		BaseResult<SurplusPaymentCallbackDTO> rollRst = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
-    		if(rollRst.getCode() != 0) {
-    			log.error("-------------------支付超时订单回滚用户余额异常"+orderDTORst.getMsg());
-    			continue;
-    		}
+
+    	SurplusPayParam surplusPayParam = new SurplusPayParam();
+    	surplusPayParam.setOrderSn(or.getOrderSn());
+    	BaseResult<SurplusPaymentCallbackDTO> rollRst = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
+    	if(rollRst.getCode() != 0) {
+    		log.error("-------------------支付超时订单回滚用户余额异常"+rollRst.getMsg());
+    	}else {
+    		
     		SurplusPaymentCallbackDTO spcd = rollRst.getData();
     		log.info(JSON.toJSONString("用户"+or.getUserId()+"超时支付订单"+or.getOrderSn()+"已回滚账户余额"));
-    		
-    		UpdateOrderInfoParam updateOrderInfoParam = new UpdateOrderInfoParam();
-    		updateOrderInfoParam.setOrderSn(or.getOrderSn());
-    		updateOrderInfoParam.setOrderStatus(2);//出票失败
-    		updateOrderInfoParam.setPayStatus(2);//支付失败
-    		BaseResult<String> updateRst = orderService.updateOrderInfo(updateOrderInfoParam);
-    		if(updateRst.getCode() != 0) {
-    			log.error("-------------------支付超时订单更新订单为出票失败 异常"+orderDTORst.getMsg());
-    			continue;
-    		}
     	}
-    	 	
+
     }
     
 	
