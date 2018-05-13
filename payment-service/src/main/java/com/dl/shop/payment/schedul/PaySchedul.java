@@ -26,6 +26,7 @@ import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.common.PayManager.QueueItemEntity;
 import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
 import com.dl.shop.payment.service.PayLogService;
+import com.dl.shop.payment.service.PayMentService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,27 +43,38 @@ public class PaySchedul {
 	@Resource
 	private PayLogService payLogService;
 	
+	@Resource
+	private PayMentService payMentService;
+	
+	@Scheduled(cron = "0 0/1 * * * ?")
+    public void dealBeyondPayTimeOrder() {
+		logger.info("开始执行支付超时订单任务");
+		payMentService.dealBeyondPayTimeOrder();
+		log.info("结束执行支付超时订单任务");
+	}
+	
+	
 	/**
 	 * 处理订单支付超时的定时任务
 	 */
 //	@Scheduled(cron = "0 0/1 * * * ?")
 	@Scheduled(fixedRate = 1000*20)
-    public void dealWithNotPayAndBeyondTimeOrder() {
-		logger.info("查询第三方订单信息定时器...");
-//		log.info("结束执行处理订单支付超时的定时任务");
-		List<QueueItemEntity> mVector = PayManager.getInstance().getList();
-		if(mVector.size() > 0) {
-			for(int i = 0;i < mVector.size();i++) {
-				QueueItemEntity entity = mVector.get(i);
-				int cnt = entity.cnt;
-				if(cnt >= QueueItemEntity.MAX_CNT) {
-					mVector.remove(entity);
-				}
-				entity.cnt++;
-				task(entity);
-			}	
-		}
-	}
+//    public void dealWithNotPayAndBeyondTimeOrder() {
+//		logger.info("查询第三方订单信息定时器...");
+////		log.info("结束执行处理订单支付超时的定时任务");
+//		List<QueueItemEntity> mVector = PayManager.getInstance().getList();
+//		if(mVector.size() > 0) {
+//			for(int i = 0;i < mVector.size();i++) {
+//				QueueItemEntity entity = mVector.get(i);
+//				int cnt = entity.cnt;
+//				if(cnt >= QueueItemEntity.MAX_CNT) {
+//					mVector.remove(entity);
+//				}
+//				entity.cnt++;
+//				task(entity);
+//			}	
+//		}
+//	}
 
 	private void task(QueueItemEntity entity) {
 		//http request
