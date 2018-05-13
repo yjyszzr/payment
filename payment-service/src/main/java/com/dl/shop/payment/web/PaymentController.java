@@ -354,6 +354,8 @@ public class PaymentController extends AbstractBaseController{
 			}
 			surplusPayParam.setPayType(payType1);
 			surplusPayParam.setMoneyPaid(surplus);
+			surplusPayParam.setThirdPartName(param.getPayCode());
+			surplusPayParam.setThirdPartPaid(thirdPartyPaid);
 			BaseResult<SurplusPaymentCallbackDTO> changeUserAccountByPay = userAccountService.changeUserAccountByPay(surplusPayParam);
 			if(changeUserAccountByPay.getCode() != 0) {
 				logger.info(loggerId + "用户余额扣减失败！");
