@@ -102,7 +102,7 @@ public class PayMentService extends AbstractService<PayMent> {
     		
     		UpdateOrderInfoParam updateOrderInfoParam = new UpdateOrderInfoParam();
     		updateOrderInfoParam.setOrderSn(or.getOrderSn());
-    		updateOrderInfoParam.setOrderStatus(2);//出票失败
+    		updateOrderInfoParam.setOrderStatus(8);//支付失败
     		updateOrderInfoParam.setPayStatus(2);//支付失败
     		BaseResult<String> updateRst = orderService.updateOrderInfo(updateOrderInfoParam);
     		if(updateRst.getCode() != 0) {
