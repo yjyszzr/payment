@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.shop.payment.pay.common.HttpUtil;
+import com.dl.shop.payment.pay.common.PayManager;
 import com.dl.shop.payment.pay.common.RspHttpEntity;
 import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
 import com.dl.shop.payment.pay.yinhe.entity.ReqPayEntity;
@@ -30,9 +31,14 @@ public class PayDemo {
 //		testPay();
 //		testQRBarPay();
 //		testUtil();
-		testRefund();
+//		testRefund();
+		testPayManager();
 	}
 
+	private void testPayManager() {
+		PayManager.getInstance().addReqQueue("123456",null,"app_weixin");
+	}
+	
 	private void testRefund(){
 		String orderNo = "20180513110608810330221";
 		String amt = "1";
