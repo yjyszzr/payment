@@ -57,7 +57,7 @@ public class PayManager {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				System.out.println("run...payLogService：" + payLogService);
+				logger.info("run...payLogService：" + payLogService);
 				if(mVector.size() > 0) {
 					for(int i = 0;i < mVector.size();i++) {
 						QueueItemEntity entity = mVector.get(i);
