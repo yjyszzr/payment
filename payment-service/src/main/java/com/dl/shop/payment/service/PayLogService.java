@@ -44,4 +44,8 @@ public class PayLogService extends AbstractService<PayLog> {
 	public int updatePayLog(PayLog payLog) {
 		return payLogMapper.updatePayLog(payLog);
 	}
+	
+	public int updatePayLogByOrderSn(PayLog payLog) {
+		return payLogMapper.updatePayLogByOrderSn(payLog);
+	}
 }

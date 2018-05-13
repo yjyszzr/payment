@@ -22,8 +22,10 @@ import com.dl.order.dto.OrderDTO;
 import com.dl.order.param.OrderCondtionParam;
 import com.dl.order.param.OrderQueryParam;
 import com.dl.order.param.UpdateOrderInfoParam;
+import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dao.PayMentMapper;
 import com.dl.shop.payment.dto.PaymentDTO;
+import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.PayMent;
 
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +41,9 @@ public class PayMentService extends AbstractService<PayMent> {
     
     @Resource
     private IUserAccountService userAccountService;
+    
+    @Resource
+    private PayLogService payLogService;
 
     /**
      * 查询所有可用的支付方式
@@ -89,6 +94,11 @@ public class PayMentService extends AbstractService<PayMent> {
     		return;
     	}
 
+    	PayLog payLog = new PayLog();
+    	payLog.setIsPaid(ProjectConstant.IS_PAID_FAILURE);
+    	payLog.setOrderSn(or.getOrderSn());
+    	payLogService.updatePayLogByOrderSn(payLog);
+    	
     	SurplusPayParam surplusPayParam = new SurplusPayParam();
     	surplusPayParam.setOrderSn(or.getOrderSn());
     	BaseResult<SurplusPaymentCallbackDTO> rollRst = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
