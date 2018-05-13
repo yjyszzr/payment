@@ -58,7 +58,7 @@ public class PaySchedul {
 	 * 处理订单支付超时的定时任务
 	 */
 //	@Scheduled(cron = "0 0/1 * * * ?")
-	@Scheduled(fixedRate = 1000*20)
+//	@Scheduled(fixedRate = 1000*20)
 //    public void dealWithNotPayAndBeyondTimeOrder() {
 //		logger.info("查询第三方订单信息定时器...");
 ////		log.info("结束执行处理订单支付超时的定时任务");
