@@ -9,11 +9,13 @@ import java.util.Map.Entry;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.shop.payment.pay.common.HttpUtil;
+import com.dl.shop.payment.pay.common.PayManager;
 import com.dl.shop.payment.pay.common.RspHttpEntity;
 import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
 import com.dl.shop.payment.pay.yinhe.entity.ReqPayEntity;
 import com.dl.shop.payment.pay.yinhe.entity.ReqQRPayEntity;
 import com.dl.shop.payment.pay.yinhe.entity.ReqQueryEntity;
+import com.dl.shop.payment.pay.yinhe.entity.ReqRefundOrderEntity;
 import com.dl.shop.payment.pay.yinhe.entity.ReqSignEntity;
 import com.dl.shop.payment.pay.yinhe.entity.RspYinHeEntity;
 import com.dl.shop.payment.pay.yinhe.util.PayKeyComparator;
@@ -28,9 +30,49 @@ public class PayDemo {
 //		testQuery();
 //		testPay();
 //		testQRBarPay();
-		testUtil();
+//		testUtil();
+//		testRefund();
+		testPayManager();
 	}
 
+	private void testPayManager() {
+		PayManager.getInstance().addReqQueue("123456",null,"app_weixin");
+	}
+	
+	private void testRefund(){
+		String orderNo = "20180513110608810330221";
+		String amt = "1";
+		ReqRefundOrderEntity reqEntity = ReqRefundOrderEntity.buildReqQueryEntity(orderNo,amt);
+		ReqSignEntity signEntity = reqEntity.buildSignEntity();
+		String str = JSON.toJSONString(signEntity);
+		JSONObject jsonObj = JSON.parseObject(str,JSONObject.class);
+		Set<java.util.Map.Entry<String, Object>> mSet = jsonObj.entrySet();
+		Iterator<java.util.Map.Entry<String, Object>> iterator = mSet.iterator();
+		//sort key
+		TreeMap<String,Object> treeMap = new TreeMap<>(new PayKeyComparator());
+		while(iterator.hasNext()) {
+			java.util.Map.Entry<String, Object> entry = iterator.next();
+			String key = entry.getKey();
+			String val = jsonObj.get(key).toString();
+			treeMap.put(key,val);
+		}
+		showTreeMap(treeMap);
+		//获取sign code 参数
+		String paraStr = PayUtil.getPayParams(treeMap);
+		System.out.println("sign code params:" + paraStr + " secret:" +ConfigerPay.SECRET);
+		//生成signCode
+		String signCode = PayUtil.getSignCode(paraStr,ConfigerPay.SECRET);
+		signCode = signCode.toUpperCase();
+		System.out.println("sign code:" + signCode);
+		//赋值signCode
+		reqEntity.signValue = signCode;
+		//signCode添加到请求参数中
+		String reqStr = JSON.toJSONString(reqEntity);
+		System.out.println(reqStr);//查询queryPayInfo.action
+		RspHttpEntity rspEntity = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/refundOrder.action",true);
+		System.out.println(rspEntity);
+	}
+	
 	private void testUtil() {
 		RspYinHeEntity rspEntity = PayUtil.getWechatPayUrl(false,"39.155.221.148","2",System.currentTimeMillis()+"");
 		System.out.println("rspEntity:" + rspEntity);

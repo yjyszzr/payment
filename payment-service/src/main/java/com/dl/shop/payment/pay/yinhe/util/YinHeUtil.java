@@ -3,9 +3,6 @@ package com.dl.shop.payment.pay.yinhe.util;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
-
-import javax.validation.Payload;
-
 import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -16,6 +13,7 @@ import com.dl.shop.payment.pay.common.RspHttpEntity;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
 import com.dl.shop.payment.pay.yinhe.entity.ReqQueryEntity;
+import com.dl.shop.payment.pay.yinhe.entity.ReqRefundOrderEntity;
 import com.dl.shop.payment.pay.yinhe.entity.ReqSignEntity;
 import com.dl.shop.payment.pay.yinhe.entity.RspQueryEntity;
 
@@ -24,6 +22,43 @@ import com.dl.shop.payment.pay.yinhe.entity.RspQueryEntity;
  */
 @Component
 public class YinHeUtil {
+	
+	/***
+	 * 资金回退接口
+	 * @param orderNo
+	 * @param amt
+	 * @return
+	 */
+	public RspHttpEntity orderRefund(String orderNo,String amt){
+		ReqRefundOrderEntity reqEntity = ReqRefundOrderEntity.buildReqQueryEntity(orderNo,amt);
+		ReqSignEntity signEntity = reqEntity.buildSignEntity();
+		String str = JSON.toJSONString(signEntity);
+		JSONObject jsonObj = JSON.parseObject(str,JSONObject.class);
+		Set<java.util.Map.Entry<String, Object>> mSet = jsonObj.entrySet();
+		Iterator<java.util.Map.Entry<String, Object>> iterator = mSet.iterator();
+		//sort key
+		TreeMap<String,Object> treeMap = new TreeMap<>(new PayKeyComparator());
+		while(iterator.hasNext()) {
+			java.util.Map.Entry<String, Object> entry = iterator.next();
+			String key = entry.getKey();
+			String val = jsonObj.get(key).toString();
+			treeMap.put(key,val);
+		}
+		//获取sign code 参数
+		String paraStr = PayUtil.getPayParams(treeMap);
+		System.out.println("sign code params:" + paraStr + " secret:" +ConfigerPay.SECRET);
+		//生成signCode
+		String signCode = PayUtil.getSignCode(paraStr,ConfigerPay.SECRET);
+		signCode = signCode.toUpperCase();
+		System.out.println("sign code:" + signCode);
+		//赋值signCode
+		reqEntity.signValue = signCode;
+		//signCode添加到请求参数中
+		String reqStr = JSON.toJSONString(reqEntity);
+		System.out.println(reqStr);//查询queryPayInfo.action
+		RspHttpEntity rspEntity = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/refundOrder.action",true);
+		return rspEntity;
+	}
 	
 	/**
 	 * 银河订单查询
@@ -88,9 +123,5 @@ public class YinHeUtil {
 		RspHttpEntity rspEntity = HttpUtil.sendMsg("",url,true);
 		System.out.println(rspEntity);
 		return "";
-	}
-	
-	public static void main(String[] args) {
-		getPayCode();
 	}
 }

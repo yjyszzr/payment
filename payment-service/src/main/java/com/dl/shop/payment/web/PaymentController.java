@@ -2,7 +2,6 @@ package com.dl.shop.payment.web;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -69,6 +68,8 @@ import com.dl.shop.payment.param.RechargeParam;
 import com.dl.shop.payment.param.ReqOrderQueryParam;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
 import com.dl.shop.payment.param.WithdrawParam;
+import com.dl.shop.payment.pay.common.PayManager;
+import com.dl.shop.payment.pay.common.RspHttpEntity;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
@@ -76,6 +77,7 @@ import com.dl.shop.payment.pay.rongbao.entity.ReqRefundEntity;
 import com.dl.shop.payment.pay.rongbao.entity.ReqRongEntity;
 import com.dl.shop.payment.pay.rongbao.entity.RspRefundEntity;
 import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
+import com.dl.shop.payment.pay.yinhe.entity.ReqRefundOrderEntity;
 import com.dl.shop.payment.pay.yinhe.entity.RspYinHeEntity;
 import com.dl.shop.payment.pay.yinhe.util.PayUtil;
 import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
@@ -180,7 +182,21 @@ public class PaymentController extends AbstractBaseController{
 							e.printStackTrace();
 						}
 					}else if(payCode.equals("app_weixin")) {
-						
+						String amt = thirdPartyPaid.toString();
+						BigDecimal bigDec = new BigDecimal(amt);
+						String amtFen = bigDec.movePointRight(2).intValue()+"";
+						RspHttpEntity rspEntity = yinHeUtil.orderRefund(payLog.getPayOrderSn(),amtFen);
+						if(rspEntity.isSucc) {
+							succThird = true;
+						}
+					}
+					//第三方资金退回
+					if(succThird) {
+						logger.info("第三方资金退回成功 payCode：" + payCode + " amt:" + thirdPartyPaid.toString());
+					}else {
+						payLog.setPayMsg("第三方资金退回失败");
+						payLogService.update(payLog);
+						logger.info("第三方资金退回失败 payCode：" + payCode + " amt:" + thirdPartyPaid.toString());
 					}
 				}
 			}
@@ -430,6 +446,7 @@ public class PaymentController extends AbstractBaseController{
 		unifiedOrderParam.setIp(payIp);
 		unifiedOrderParam.setOrderNo(savePayLog.getLogId());
 		BaseResult payBaseResult = null;
+		PayManager.getInstance().addReqQueue(orderSn,savePayLog.getPayOrderSn(),paymentDto.getPayCode());
 		if("app_weixin".equals(paymentDto.getPayCode())) {
 //			payBaseResult = wxpayUtil.unifiedOrderForApp(unifiedOrderParam);
 			payBaseResult = getWechatPayUrl(param.getInnerWechat()==1,savePayLog, payIp, orderId);
@@ -456,33 +473,6 @@ public class PaymentController extends AbstractBaseController{
 				e.printStackTrace();
 			}
 		}
-		//处理支付失败的情况
-		/*if(null == payBaseResult || payBaseResult.getCode() != 0) {
-			if(surplus != null && surplus.doubleValue() > 0){
-				//余额回滚
-				SurplusPayParam surplusPayParam = new SurplusPayParam();
-				surplusPayParam.setOrderSn(orderSn);
-				surplusPayParam.setSurplus(surplus);
-				surplusPayParam.setBonusMoney(bonusAmount);
-				int payType1 = 0;
-				surplusPayParam.setPayType(payType1);
-				surplusPayParam.setThirdPartName(payName);
-				surplusPayParam.setThirdPartPaid(thirdPartyPaid);
-				BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
-				if(rollbackUserAccountChangeByPay.getCode() != 0) {
-					logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在回滚用户余额时出错！");
-				}
-			}
-			try {
-				PayLog updatePayLog = new PayLog();
-				updatePayLog.setLogId(savePayLog.getLogId());
-				updatePayLog.setIsPaid(0);
-				updatePayLog.setPayMsg(payBaseResult.getMsg());
-				payLogService.updatePayMsg(updatePayLog);
-			} catch (Exception e) {
-				logger.error(loggerId + "paylogid="+savePayLog.getLogId()+" , paymsg="+payBaseResult.getMsg()+"保存失败记录时出错", e);
-			}
-		}*/
 		logger.info(loggerId + " result: code="+payBaseResult.getCode()+" , msg="+payBaseResult.getMsg());
 		return payBaseResult;
 	}
@@ -500,7 +490,7 @@ public class PaymentController extends AbstractBaseController{
 		BigDecimal bigD = new BigDecimal(strAmt);
 		strAmt = bigD.movePointRight(2).toString();
 		String payOrderSn = savePayLog.getPayOrderSn();
-		String payLogId = savePayLog.getPayIp();
+		String payLogId = savePayLog.getLogId()+"";
 		RspYinHeEntity rYinHeEntity = null;
 		if(isInnerWeChat) {
 			//公共账号方式支付
