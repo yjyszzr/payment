@@ -448,7 +448,12 @@ public class PaymentController extends AbstractBaseController{
 //		PayManager.getInstance().addReqQueue(orderSn,savePayLog.getPayOrderSn(),paymentDto.getPayCode());
 		if("app_weixin".equals(paymentDto.getPayCode())) {
 //			payBaseResult = wxpayUtil.unifiedOrderForApp(unifiedOrderParam);
+			logger.info("生成微信支付url:" + "inWechat:" + (param.getInnerWechat()==1) + " payCode:" +savePayLog.getPayCode());
 			payBaseResult = getWechatPayUrl(param.getInnerWechat()==1,savePayLog, payIp, orderId);
+			if(payBaseResult != null &&payBaseResult.getData() != null) {
+				String str = payBaseResult.getData()+"";
+				logger.info("生成支付url成功:" + str);
+			}
 		}else if("app_rongbao".equals(paymentDto.getPayCode())) {
 			//生成支付链接信息
 			String payOrder = savePayLog.getPayOrderSn();
@@ -535,7 +540,7 @@ public class PaymentController extends AbstractBaseController{
 					rEntity.setPayUrl(url);
 					rEntity.setPayLogId(savePayLog.getLogId()+"");
 					rEntity.setOrderId(orderId);
-					logger.info("client jump url:" + url +" payLogId:" +savePayLog.getLogId() +" orderId:" + orderId);
+					logger.info("client jump url:" + url +" payLogId:" +savePayLog.getLogId() +" orderId:" + orderId + " inWechat:" + isInnerWeChat);
 					payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
 				}else {
 					payBaseResult = ResultGenerator.genFailResult("url decode失败",null);
