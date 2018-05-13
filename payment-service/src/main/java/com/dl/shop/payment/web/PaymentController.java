@@ -502,9 +502,9 @@ public class PaymentController extends AbstractBaseController{
 //				// TODO Auto-generated catch block
 //				e.printStackTrace();
 //			}
-			rYinHeEntity = PayUtil.getWechatPayUrl(isInnerWeChat,payIp,strAmt,payOrderSn);
+			rYinHeEntity = PayUtil.getWechatPayUrl(false,payIp,strAmt,payOrderSn);
 		}else {
-			rYinHeEntity = PayUtil.getWechatPayUrl(isInnerWeChat,payIp,strAmt,payOrderSn);
+			rYinHeEntity = PayUtil.getWechatPayUrl(false,payIp,strAmt,payOrderSn);
 		}
 		if(rYinHeEntity != null) {
 			if(rYinHeEntity.isSucc() && !TextUtils.isEmpty(rYinHeEntity.qrCode)) {
@@ -516,7 +516,8 @@ public class PaymentController extends AbstractBaseController{
 					try {
 						String qrCode = rYinHeEntity.qrCode;
 						encodeUrl = URLEncoder.encode(qrCode,"UTF-8");
-						redirectUri = URLEncoder.encode(ConfigerPay.URL_REDIRECT+"?payLogId="+payLogId,"UTF-8");
+//						redirectUri = URLEncoder.encode(ConfigerPay.URL_REDIRECT+"?payLogId="+payLogId,"UTF-8");
+						redirectUri = ConfigerPay.URL_REDIRECT+"?payLogId="+payLogId;
 					} catch (UnsupportedEncodingException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -598,8 +599,7 @@ public class PaymentController extends AbstractBaseController{
 		unifiedOrderParam.setOrderNo(savePayLog.getLogId());
 		BaseResult payBaseResult = null;
 		if("app_weixin".equals(payCode)) {
-			logger.info("微信支付url开始生成...");
-//			payBaseResult = wxpayUtil.unifiedOrderForApp(unifiedOrderParam);
+			logger.info("微信支付url开始生成...isWechat:" + (param.getInnerWechat()==1) + " payCode:" + savePayLog.getPayCode());
 			payBaseResult = getWechatPayUrl(param.getInnerWechat()==1,savePayLog, payIp, orderSn);
 			logger.info("微信支付url生成成功 code" + payBaseResult.getCode() +" data:" +payBaseResult.getData());
 		}else if("app_rongbao".equals(payCode)) {

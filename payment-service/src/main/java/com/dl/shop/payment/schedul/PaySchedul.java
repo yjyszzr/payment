@@ -101,7 +101,7 @@ public class PaySchedul {
 				RspOrderQueryEntity dataEntity = baseResult.getData();
 				if(dataEntity != null && dataEntity.isSucc()) {//内部timer query
 					entity.cnt = QueueItemEntity.MAX_CNT;
-					logger.info("内部timer查詢支付成功... orderNo:" + dataEntity.getOrder_no());
+					logger.info("内部timer查詢支付成功... orderNo:" + entity.orderSn);
 					BaseResult<String> bResult = optionMoney(entity);
 					if(bResult != null && bResult.getCode() == 0) {
 						logger.info("混合支付扣除余额成功...");
