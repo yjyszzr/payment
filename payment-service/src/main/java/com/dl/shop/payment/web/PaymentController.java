@@ -521,8 +521,8 @@ public class PaymentController extends AbstractBaseController{
 					try {
 						String qrCode = rYinHeEntity.qrCode;
 						encodeUrl = URLEncoder.encode(qrCode,"UTF-8");
-//						redirectUri = URLEncoder.encode(ConfigerPay.URL_REDIRECT+"?payLogId="+payLogId,"UTF-8");
-						redirectUri = ConfigerPay.URL_REDIRECT+"?payLogId="+payLogId;
+						redirectUri = URLEncoder.encode(ConfigerPay.URL_REDIRECT+"?payLogId="+payLogId,"UTF-8");
+//						redirectUri = ConfigerPay.URL_REDIRECT+"?payLogId="+payLogId;
 					} catch (UnsupportedEncodingException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
