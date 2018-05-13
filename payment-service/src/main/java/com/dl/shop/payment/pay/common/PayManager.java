@@ -7,7 +7,10 @@ import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.ContextLoader;
+import org.springframework.web.context.WebApplicationContext;
 
 import com.dl.base.result.BaseResult;
 import com.dl.member.api.IUserAccountService;
@@ -15,21 +18,41 @@ import com.dl.order.api.IOrderService;
 import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
 import com.dl.shop.payment.service.PayLogService;
 
-@Service
 public class PayManager {
 	private final static Logger logger = LoggerFactory.getLogger(PayManager.class);
 	private static PayManager instance;
 	private List<QueueItemEntity> mVector;
-	@Resource
 	private IUserAccountService userAccountService;
-	@Resource
 	private IOrderService orderService;
-	@Resource
 	private PayLogService payLogService;
 	
 	private PayManager() {
 		mVector = new java.util.Vector<QueueItemEntity>();
 		thread.start();
+	}
+	
+	private IUserAccountService getUserAccountService() {
+		if(userAccountService == null) {
+			WebApplicationContext wac = ContextLoader.getCurrentWebApplicationContext();
+			userAccountService = wac.getBean(IUserAccountService.class);
+		}
+		return userAccountService;
+	}
+	
+	private IOrderService getOrderService() {
+		if(null == orderService) {
+			WebApplicationContext wac = ContextLoader.getCurrentWebApplicationContext();
+			orderService = wac.getBean(IOrderService.class);
+		}
+		return orderService;
+	}
+	
+	private PayLogService getPayLogService() {
+		if(null == payLogService) {
+			WebApplicationContext wac = ContextLoader.getCurrentWebApplicationContext();
+			payLogService = wac.getBean(PayLogService.class);
+		}
+		return payLogService;
 	}
 	
 	public static final PayManager getInstance() {
@@ -57,7 +80,7 @@ public class PayManager {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				logger.info("run...payLogService：" + payLogService);
+				logger.info("run...payLogService：" + getPayLogService());
 				if(mVector.size() > 0) {
 					for(int i = 0;i < mVector.size();i++) {
 						QueueItemEntity entity = mVector.get(i);
