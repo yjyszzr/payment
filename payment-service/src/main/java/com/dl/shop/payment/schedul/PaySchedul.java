@@ -67,10 +67,10 @@ public class PaySchedul {
 	private void task(QueueItemEntity entity) {
 		//http request
 		String payCode = entity.payCode;
-		String orderSn = entity.orderSn;
+		String payOrderSn = entity.payOrderSn;
 		if("app_weixin".equals(payCode)) {
 			YinHeUtil yinHeUtil = new YinHeUtil();
-			BaseResult<RspOrderQueryEntity> baseResult = yinHeUtil.orderQuery(false,orderSn);
+			BaseResult<RspOrderQueryEntity> baseResult = yinHeUtil.orderQuery(false,payOrderSn);
 			if(baseResult != null && baseResult.getCode() == 0) {
 				RspOrderQueryEntity dataEntity = baseResult.getData();
 				if(dataEntity != null && dataEntity.isSucc()) {//内部timer query
