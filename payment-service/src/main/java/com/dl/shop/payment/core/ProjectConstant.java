@@ -25,9 +25,17 @@ public class ProjectConstant {
     public static final Integer BONUS =5;//红包
     public static final Integer ACCOUNT_ROLLBACK =6;//账户回滚
     public static final Integer REFOUND =7;
-    
-    
+      
     public static final String STATUS_FAILURE = "2";
 	public static final String STATUS_SUCC = "1";
 	public static final String STATUS_UNCOMPLETE = "0";
+	
+	// 0-未支付;1-已支付;2-已取消;3-支付失败;4-已退款
+	public static final Integer IS_PAID_NOT_FINISH = 0;
+	public static final Integer IS_PAID_FINISH = 1;
+	public static final Integer IS_PAID_CANCLE = 2;
+	public static final Integer IS_PAID_FAILURE = 3;
+	public static final Integer IS_PAID_REFOUND = 4;
+	
+	
 }

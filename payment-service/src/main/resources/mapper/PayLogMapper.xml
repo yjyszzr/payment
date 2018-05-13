@@ -54,5 +54,8 @@
 	  update dl_pay_log set is_paid=#{isPaid}, trade_no=#{tradeNo}, last_time=#{lastTime},pay_time=#{payTime} where log_id=#{logId} 
 	</update>
 	
+	<update id="updatePayLog">
+	  update dl_pay_log set is_paid=#{isPaid}, last_time=#{lastTime} where order_sn=#{orderSn} 
+	</update>
 	
 </mapper>

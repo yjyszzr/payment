@@ -342,7 +342,7 @@ public class PaymentController extends AbstractBaseController{
 		String orderSn = createOrder.getData().getOrderSn();
 		
 		
-		if(!hasThird) {
+		if(hasSurplus) {
 			//用户余额扣除
 			SurplusPayParam surplusPayParam = new SurplusPayParam();
 			surplusPayParam.setOrderSn(orderSn);
@@ -353,8 +353,8 @@ public class PaymentController extends AbstractBaseController{
 				payType1 = 3;
 			}
 			surplusPayParam.setPayType(payType1);
-			surplusPayParam.setMoneyPaid(moneyPaid);
-			surplusPayParam.setThirdPartName(paymentDto!=null?paymentDto.getPayName():"");
+			surplusPayParam.setMoneyPaid(surplus);
+			surplusPayParam.setThirdPartName(param.getPayCode());
 			surplusPayParam.setThirdPartPaid(thirdPartyPaid);
 			BaseResult<SurplusPaymentCallbackDTO> changeUserAccountByPay = userAccountService.changeUserAccountByPay(surplusPayParam);
 			if(changeUserAccountByPay.getCode() != 0) {
@@ -378,7 +378,7 @@ public class PaymentController extends AbstractBaseController{
 				}
 				return ResultGenerator.genFailResult("支付失败！");
 			}
-			
+			if(!hasThird) {
 				//回调order,更新支付状态,余额支付成功
 				UpdateOrderInfoParam param1 = new UpdateOrderInfoParam();
 				param1.setPayStatus(1);
@@ -418,9 +418,8 @@ public class PaymentController extends AbstractBaseController{
 				PayReturnDTO payReturnDTO = new PayReturnDTO();
 				payReturnDTO.setOrderId(orderId);
 				return ResultGenerator.genSuccessResult("支付成功！", payReturnDTO);
-
-		}
-		
+			}
+		}		
 //		String orderSn = "2018050211202161310026";
 //		BigDecimal thirdPartyPaid = BigDecimal.valueOf(10);
 //		BaseResult<PaymentDTO> paymentResult = paymentService.queryByCode(param.getPayCode());
@@ -446,7 +445,7 @@ public class PaymentController extends AbstractBaseController{
 		unifiedOrderParam.setIp(payIp);
 		unifiedOrderParam.setOrderNo(savePayLog.getLogId());
 		BaseResult payBaseResult = null;
-		PayManager.getInstance().addReqQueue(orderSn,savePayLog.getPayOrderSn(),paymentDto.getPayCode());
+//		PayManager.getInstance().addReqQueue(orderSn,savePayLog.getPayOrderSn(),paymentDto.getPayCode());
 		if("app_weixin".equals(paymentDto.getPayCode())) {
 //			payBaseResult = wxpayUtil.unifiedOrderForApp(unifiedOrderParam);
 			payBaseResult = getWechatPayUrl(param.getInnerWechat()==1,savePayLog, payIp, orderId);

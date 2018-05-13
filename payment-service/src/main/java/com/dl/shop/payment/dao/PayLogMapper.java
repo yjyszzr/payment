@@ -48,4 +48,11 @@ public interface PayLogMapper extends Mapper<PayLog> {
 	 * @return
 	 */
 	int updatePayLog(PayLog payLog);
+	
+	/**
+	 * 根据订单号更新
+	 * @param payLog
+	 * @return
+	 */
+	int updatePayLogByOrderSn(PayLog payLog);
 }
