@@ -2,7 +2,6 @@ package com.dl.shop.payment.web;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -69,6 +68,7 @@ import com.dl.shop.payment.param.RechargeParam;
 import com.dl.shop.payment.param.ReqOrderQueryParam;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
 import com.dl.shop.payment.param.WithdrawParam;
+import com.dl.shop.payment.pay.common.RspHttpEntity;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
@@ -76,6 +76,7 @@ import com.dl.shop.payment.pay.rongbao.entity.ReqRefundEntity;
 import com.dl.shop.payment.pay.rongbao.entity.ReqRongEntity;
 import com.dl.shop.payment.pay.rongbao.entity.RspRefundEntity;
 import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
+import com.dl.shop.payment.pay.yinhe.entity.ReqRefundOrderEntity;
 import com.dl.shop.payment.pay.yinhe.entity.RspYinHeEntity;
 import com.dl.shop.payment.pay.yinhe.util.PayUtil;
 import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
@@ -180,7 +181,21 @@ public class PaymentController extends AbstractBaseController{
 							e.printStackTrace();
 						}
 					}else if(payCode.equals("app_weixin")) {
-						
+						String amt = thirdPartyPaid.toString();
+						BigDecimal bigDec = new BigDecimal(amt);
+						String amtFen = bigDec.movePointRight(2).intValue()+"";
+						RspHttpEntity rspEntity = yinHeUtil.orderRefund(payLog.getPayOrderSn(),amtFen);
+						if(rspEntity.isSucc) {
+							succThird = true;
+						}
+					}
+					//第三方资金退回
+					if(succThird) {
+						logger.info("第三方资金退回成功 payCode：" + payCode + " amt:" + thirdPartyPaid.toString());
+					}else {
+						payLog.setPayMsg("第三方资金退回失败");
+						payLogService.update(payLog);
+						logger.info("第三方资金退回失败 payCode：" + payCode + " amt:" + thirdPartyPaid.toString());
 					}
 				}
 			}
