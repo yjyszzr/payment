@@ -1,58 +1,18 @@
 package com.dl.shop.payment.pay.common;
 
-import java.math.BigDecimal;
 import java.util.List;
-
-import javax.annotation.Resource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-import org.springframework.web.context.ContextLoader;
-import org.springframework.web.context.WebApplicationContext;
-
 import com.dl.base.result.BaseResult;
-import com.dl.member.api.IUserAccountService;
-import com.dl.order.api.IOrderService;
 import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
-import com.dl.shop.payment.service.PayLogService;
 
 public class PayManager {
 	private final static Logger logger = LoggerFactory.getLogger(PayManager.class);
 	private static PayManager instance;
 	private List<QueueItemEntity> mVector;
-	private IUserAccountService userAccountService;
-	private IOrderService orderService;
-	private PayLogService payLogService;
 	
 	private PayManager() {
 		mVector = new java.util.Vector<QueueItemEntity>();
-		thread.start();
-	}
-	
-	private IUserAccountService getUserAccountService() {
-		if(userAccountService == null) {
-			WebApplicationContext wac = ContextLoader.getCurrentWebApplicationContext();
-			userAccountService = wac.getBean(IUserAccountService.class);
-		}
-		return userAccountService;
-	}
-	
-	private IOrderService getOrderService() {
-		if(null == orderService) {
-			WebApplicationContext wac = ContextLoader.getCurrentWebApplicationContext();
-			orderService = wac.getBean(IOrderService.class);
-		}
-		return orderService;
-	}
-	
-	private PayLogService getPayLogService() {
-		if(null == payLogService) {
-			WebApplicationContext wac = ContextLoader.getCurrentWebApplicationContext();
-			payLogService = wac.getBean(PayLogService.class);
-		}
-		return payLogService;
 	}
 	
 	public static final PayManager getInstance() {
@@ -62,6 +22,10 @@ public class PayManager {
 		return instance;
 	}
 
+	public List<QueueItemEntity> getList(){
+		return this.mVector;
+	}
+	
 	public void addReqQueue(String orderSn,String payOrderSn,String payCode) {
 		QueueItemEntity entity = new QueueItemEntity();
 		entity.orderSn = orderSn;
@@ -70,31 +34,6 @@ public class PayManager {
 		entity.cnt = 0;
 		mVector.add(entity);
 	}
-	
-	Thread thread = new Thread() {
-		@Override
-		public void run() {
-			while(true) {
-				try {
-					Thread.sleep(2*1000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				logger.info("run...payLogService：" + getPayLogService());
-				if(mVector.size() > 0) {
-					for(int i = 0;i < mVector.size();i++) {
-						QueueItemEntity entity = mVector.get(i);
-						int cnt = entity.cnt;
-						if(cnt >= QueueItemEntity.MAX_CNT) {
-							mVector.remove(entity);
-						}
-						entity.cnt++;
-						task(entity);
-					}	
-				}
-			}
-		};
-	};
 	
 	private void task(QueueItemEntity entity) {
 		//http request
@@ -168,7 +107,7 @@ public class PayManager {
 		public String payOrderSn;
 		public String payCode;
 		public int cnt;
-		public static final int MAX_CNT = 30;
+		public static final int MAX_CNT = 10;
 	}
 	
 	public static interface PayListener{
