@@ -99,7 +99,6 @@ public class PayUtil {
 		}else {
 			secret = ConfigerPay.SECRET_PUBLIC;
 		}
-		logger.info("sign code params:" + paraStr + " secret:" + secret);
 		//生成signCode
 		String signCode = PayUtil.getSignCode(paraStr,secret);
 		signCode = signCode.toUpperCase();
@@ -116,6 +115,7 @@ public class PayUtil {
 		//signCode添加到请求参数中
 		logger.info(reqStr);
 		RspHttpEntity rspHttpEntity = null;
+		logger.info("sign code params:" + paraStr + " secret:" + secret + " inwechat:" + isInnerWechat);
 		if(isInnerWechat) {	//yinHePay->动态二维码方式   yinHePayPublic
 			rspHttpEntity = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/yinHePublicWxPay.action",true);
 		}else {
