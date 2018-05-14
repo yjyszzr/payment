@@ -58,7 +58,6 @@ public class WxpayNotifyController {
 		if(TextUtils.isEmpty(val)) {
 			val = request.getParameter("returnCode");
 		}
-		
 		logger.info("微信回掉处理:" + val);
 //		// 将微信的回调的参数转化为String并打印
 //		StringBuffer strBuf1 = new StringBuffer();

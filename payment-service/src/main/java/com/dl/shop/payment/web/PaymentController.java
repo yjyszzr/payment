@@ -287,7 +287,7 @@ public class PaymentController extends AbstractBaseController{
 			String payCode = param.getPayCode();
 			if(StringUtils.isBlank(payCode)) {
 				logger.info(loggerId + "第三方支付，paycode为空~");
-				return ResultGenerator.genResult(PayEnums.PAY_STYLE_BLANK.getcode(),PayEnums.PAY_STYLE_BLANK.getMsg());
+				return ResultGenerator.genResult(PayEnums.PAY_CODE_BLANK.getcode(),PayEnums.PAY_CODE_BLANK.getMsg());
 			}
 		}
 		PaymentDTO paymentDto = null;
@@ -428,8 +428,16 @@ public class PaymentController extends AbstractBaseController{
 //			return ResultGenerator.genFailResult("请选择有效的支付方式！", null);
 //		}
 //		PaymentDTO paymentDto = paymentResult.getData();
+		//payCode处理
+		String payCode = paymentDto.getPayCode();
+		if("app_weixin".equals(payCode)) {
+			boolean isWechat = (param.getInnerWechat()==1);
+			if(isWechat) {
+				payCode = "app_weixin" + "_h5";
+			}
+		}
 		String payIp = this.getIpAddr(request);
-		PayLog payLog = super.newPayLog(orderSn, thirdPartyPaid, 0, paymentDto.getPayCode(), paymentDto.getPayName(), payIp);
+		PayLog payLog = super.newPayLog(orderSn, thirdPartyPaid,0,payCode,paymentDto.getPayName(), payIp);
 		PayLog savePayLog = payLogService.savePayLog(payLog);
 		if(null == savePayLog) {
 			logger.info(loggerId + " payLog对象保存失败！"); 
@@ -437,18 +445,10 @@ public class PaymentController extends AbstractBaseController{
 		}else {
 			logger.info("paylog save succ:" + " payLogId:" + payLog.getPayIp() + " paycode:" + payLog.getPayCode() + " payname:" + payLog.getPayName());
 		}
-		//更新订单号为paylogId
-		UnifiedOrderParam unifiedOrderParam = new UnifiedOrderParam();
-		unifiedOrderParam.setBody(null);
-		unifiedOrderParam.setSubject(null);
-		unifiedOrderParam.setTotalAmount(thirdPartyPaid.doubleValue());
-		unifiedOrderParam.setIp(payIp);
-		unifiedOrderParam.setOrderNo(savePayLog.getLogId());
 		BaseResult payBaseResult = null;
 //		PayManager.getInstance().addReqQueue(orderSn,savePayLog.getPayOrderSn(),paymentDto.getPayCode());
-		if("app_weixin".equals(paymentDto.getPayCode())) {
-//			payBaseResult = wxpayUtil.unifiedOrderForApp(unifiedOrderParam);
-			logger.info("生成微信支付url:" + "inWechat:" + (param.getInnerWechat()==1) + " payCode:" +savePayLog.getPayCode());
+		if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)) {
+			logger.info("生成微信支付url:" + "inWechat:" + (param.getInnerWechat()==1) + " payCode:" + savePayLog.getPayCode());
 			payBaseResult = getWechatPayUrl(param.getInnerWechat()==1,savePayLog, payIp, orderId);
 			if(payBaseResult != null &&payBaseResult.getData() != null) {
 				String str = payBaseResult.getData()+"";
@@ -773,9 +773,10 @@ public class PaymentController extends AbstractBaseController{
 		logger.info("调用第三方订单查询接口 payCode:" + payCode + " payOrderSn:" + payLog.getPayOrderSn());
 		if("app_rongbao".equals(payCode)) {
 			baseResult = RongUtil.queryOrderInfo(payLog.getPayOrderSn());
-		}else if("app_weixin".equals(payCode)) {
+		}else if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)) {
+			boolean isInWeixin = "app_wexin_h5".equals(payCode);
 //			baseResult = wxpayUtil.orderQuery(payLog.getPayOrderSn());
-			baseResult = yinHeUtil.orderQuery(false,payLog.getPayOrderSn());
+			baseResult = yinHeUtil.orderQuery(isInWeixin,payLog.getPayOrderSn());
 		}
 		if(baseResult != null) {
 			if(baseResult.getCode() != 0) {
