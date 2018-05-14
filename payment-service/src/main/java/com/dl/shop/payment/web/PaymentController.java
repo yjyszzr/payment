@@ -605,7 +605,7 @@ public class PaymentController extends AbstractBaseController{
 		unifiedOrderParam.setOrderNo(savePayLog.getLogId());
 		BaseResult payBaseResult = null;
 		if("app_weixin".equals(payCode)) {
-			logger.info("微信支付url开始生成...isWechat:" + (param.getInnerWechat()==1) + " payCode:" + savePayLog.getPayCode());
+			logger.info("微信支付url开始生成...isWechat:" + (param.getInnerWechat()==1) + " payOrderSn:" + savePayLog.getPayOrderSn());
 			payBaseResult = getWechatPayUrl(param.getInnerWechat()==1,savePayLog, payIp, orderSn);
 			logger.info("微信支付url生成成功 code" + payBaseResult.getCode() +" data:" +payBaseResult.getData());
 		}else if("app_rongbao".equals(payCode)) {
