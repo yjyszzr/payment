@@ -6,6 +6,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.http.util.TextUtils;
 import org.apache.zookeeper.Op;
 import org.bouncycastle.crypto.modes.SICBlockCipher;
 import org.slf4j.Logger;
@@ -54,6 +55,9 @@ public class WxpayNotifyController {
 		String loggerId = "wxNotify_"+System.currentTimeMillis();
 		logger.warn(loggerId + " in controller /payment/wxpay/notify");
 		String val = request.getParameter("result");
+		if(!TextUtils.isEmpty(val)) {
+			val = request.getParameter("retrunCode");
+		}
 		logger.info("微信回掉处理:" + val);
 //		// 将微信的回调的参数转化为String并打印
 //		StringBuffer strBuf1 = new StringBuffer();
