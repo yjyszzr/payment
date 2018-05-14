@@ -22,6 +22,7 @@ import com.dl.order.dto.OrderDTO;
 import com.dl.order.param.OrderCondtionParam;
 import com.dl.order.param.OrderSnParam;
 import com.dl.order.param.UpdateOrderInfoParam;
+import com.dl.shop.payment.dao.PayLogMapper;
 import com.dl.shop.payment.pay.common.PayManager;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.common.PayManager.QueueItemEntity;
@@ -54,6 +55,7 @@ public class PaySchedul {
     	orderQueryParam.setOrderStatus(0);
     	orderQueryParam.setPayStatus(0);
     	BaseResult<List<OrderDTO>> orderDTORst = orderService.queryOrderListByCondition(orderQueryParam);
+    	    	
     	if(orderDTORst.getCode() != 0) {
     		log.error("-------------------查询支付超时订单失败"+orderDTORst.getMsg());
     		return;

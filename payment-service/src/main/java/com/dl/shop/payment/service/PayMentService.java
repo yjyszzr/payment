@@ -23,10 +23,15 @@ import com.dl.order.param.OrderCondtionParam;
 import com.dl.order.param.OrderQueryParam;
 import com.dl.order.param.UpdateOrderInfoParam;
 import com.dl.shop.payment.core.ProjectConstant;
+import com.dl.shop.payment.dao.PayLogMapper;
 import com.dl.shop.payment.dao.PayMentMapper;
 import com.dl.shop.payment.dto.PaymentDTO;
+import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.PayMent;
+import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
+import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
+import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -44,6 +49,12 @@ public class PayMentService extends AbstractService<PayMent> {
     
     @Resource
     private PayLogService payLogService;
+    
+	@Resource
+	private PayLogMapper payLogMapper;
+	
+	@Resource
+	private YinHeUtil yinHeUtil;
 
     /**
      * 查询所有可用的支付方式
@@ -94,10 +105,31 @@ public class PayMentService extends AbstractService<PayMent> {
     		return;
     	}
 
-    	PayLog payLog = new PayLog();
-    	payLog.setIsPaid(ProjectConstant.IS_PAID_FAILURE);
-    	payLog.setOrderSn(or.getOrderSn());
-    	payLogService.updatePayLogByOrderSn(payLog);
+		//logger.info("调用第三方订单查询接口 payCode:" + payCode + " payOrderSn:" + payLog.getPayOrderSn());
+//    	BaseResult<RspOrderQueryEntity>  baseResult = null;
+//    	String payCode = or.getPayCode();
+//    	PayLog payLog = new PayLog();
+//    	payLog.setOrderSn(or.getOrderSn());
+//    	payLog.setPayCode(or.getPayCode());
+//    	payLog.setPayType(0);
+//    	PayLog payLogDelay = payLogMapper.existPayLog(payLog);
+//		if("app_rongbao".equals(payCode)) {
+//			baseResult = RongUtil.queryOrderInfo(payLogDelay.getPayOrderSn());
+//		}else if("app_weixin".equals(payCode)) {
+//			baseResult = yinHeUtil.orderQuery(false,payLog.getPayOrderSn());
+//		}
+//		if(baseResult.getCode() != 0) {
+//			log.error("查询第三方"+payCode+"异常:"+baseResult.getMsg());
+//		}
+//		RspOrderQueryEntity rspEntity = baseResult.getData();
+//		if(rspEntity.isSucc()) {
+//			return;//第三方付款成功，就不再回退余额
+//		}
+    	
+    	PayLog updatepayLog = new PayLog();
+    	updatepayLog.setIsPaid(ProjectConstant.IS_PAID_FAILURE);
+    	updatepayLog.setOrderSn(or.getOrderSn());
+    	payLogService.updatePayLogByOrderSn(updatepayLog);
     	
     	SurplusPayParam surplusPayParam = new SurplusPayParam();
     	surplusPayParam.setOrderSn(or.getOrderSn());
