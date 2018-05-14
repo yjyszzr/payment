@@ -521,15 +521,16 @@ public class PaymentController extends AbstractBaseController{
 					try {
 						String qrCode = rYinHeEntity.qrCode;
 						encodeUrl = URLEncoder.encode(qrCode,"UTF-8");
-						redirectUri = URLEncoder.encode(ConfigerPay.URL_REDIRECT+"?payLogId="+payLogId,"UTF-8");
+//						redirectUri = URLEncoder.encode(ConfigerPay.URL_REDIRECT+"?payLogId="+payLogId,"UTF-8");
+						redirectUri = URLEncoder.encode(ConfigerPay.URL_REDIRECT,"UTF-8");
 					} catch (UnsupportedEncodingException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 						logger.error(e.getMessage());
 					}
 					if(!TextUtils.isEmpty(encodeUrl)) {
-//						url = ReapalH5Config.URL_PAY_WECHAT+"?data="+encodeUrl+"&redirect_uri=" + redirectUri;
-						url = ReapalH5Config.URL_PAY_WECHAT+"?data="+encodeUrl;
+						url = ReapalH5Config.URL_PAY_WECHAT+"?data="+encodeUrl+"&redirect_uri=" + redirectUri;
+//						url = ReapalH5Config.URL_PAY_WECHAT+"?data="+encodeUrl;
 					}else {
 						logger.info("encodeUrl失败~");
 					}
