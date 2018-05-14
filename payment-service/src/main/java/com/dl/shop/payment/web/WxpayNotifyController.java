@@ -78,109 +78,145 @@ public class WxpayNotifyController {
 //		}catch(Exception e){
 //			e.printStackTrace();
 //		}
-		String requestStr = val;
-		logger.warn(loggerId + "  /payment/wxpay/notify requestStr 微信支付 验证信息: " + requestStr);
-		WxpayNotifyModel responseModel = null;
-		try {
-			responseModel = XmlUtil.xmlToBean(requestStr, WxpayNotifyModel.class);
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
-
-		String resultCode = null;
-		if(null != responseModel) {
-			resultCode = responseModel.getResult_code();
-		}
-		if ("SUCCESS".equals(resultCode)) {
-			// 获取回调的具体参数
-			logger.debug(loggerId + " 开始回调接口处理");
-			String appid = responseModel.getAppid();//prePayJo.getString("appid");
-			String mchId = responseModel.getMch_id();//prePayJo.getString("mch_id");
-			String bank_type = responseModel.getBank_type();//prePayJo.getString("bank_type");
-			String payOrderSn = responseModel.getOut_trade_no();//prePayJo.getString("out_trade_no");
-			logger.info(loggerId + " payOrderSn="+payOrderSn);
-			String tradeNo = responseModel.getTransaction_id();//prePayJo.getString("transaction_id");
-			int amount = responseModel.getTotal_fee();
-			PayLog payLog = payLogService.findPayLogByOrderSign(payOrderSn);
-			if(null == payLog) {
-				logger.info(loggerId + " payLog对象未查询到，返回失败！");
-				//fail
-				String xml = "<xml><return_code><![CDATA[FAIL]]></return_code> <return_msg><![CDATA[order no find]]></return_msg></xml>";
-				try {
-					response.getWriter().write(xml);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				return;
-			}
-			int isPaid = payLog.getIsPaid();
-			logger.info("=======isPaid:" + isPaid +" payLogId:" +payLog.getLogId() +"==========");
-			if(1== isPaid) {
-				logger.info(loggerId + " paylog.ispaid=1,已支付成功，返回OK！");
-				String xml = "<xml><return_code><![CDATA[SUCCESS]]></return_code> <return_msg><![CDATA[OK]]></return_msg></xml>";
-				try {
-					response.getWriter().write(xml);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				return;
-			}
-			int orderAmount = (int)(payLog.getOrderAmount().doubleValue()*100);
-			logger.info("实际交易金额:" + amount +" 订单金额:" + orderAmount);
-			if ((PayConfig.isDebug() || amount == orderAmount) && ((appid.equals(wxpayConfig.getWxAppAppId()) && mchId.equals(wxpayConfig.getWxAppMchId())) || (appid.equals(wxpayConfig.getWxJsAppId()) && mchId.equals(wxpayConfig.getWxJsMchId())))) {
-				logger.info(loggerId + " 订单金额或appid,mchId校验成功，前去回调订单服务！");
-				try {
-					int payType = payLog.getPayType();
-					int currentTime = DateUtil.getCurrentTimeLong();
-					boolean result = false;
-					if(0 == payType) {
-						result = orderOptionsSucc(tradeNo, payLog);
-					}else {
-						result = recharageOptionSucc(tradeNo, payLog);
-					}
-					logger.info(loggerId + " 业务回调结果：result="+result);
-					if(result) {
-						//更新paylog状态为已支付
-						PayLog updatePayLog = new PayLog();
-						updatePayLog.setLogId(payLog.getLogId());
-						updatePayLog.setTradeNo(tradeNo);
-						updatePayLog.setIsPaid(1);
-						updatePayLog.setLastTime(currentTime);
-						updatePayLog.setPayTime(currentTime);
-						payLogService.update(updatePayLog);
-						logger.info(loggerId + " 业务回调成功，payLog.对象状态回写结束");
-						String xml = "<xml><return_code><![CDATA[SUCCESS]]></return_code> <return_msg><![CDATA[OK]]></return_msg></xml>";
-						response.getWriter().write(xml);
-						
-						if(0 == payType) {
-							//订单支付付款成功就要生成流水
-							logger.info("订单支付付款成功就要生成流水...");
-							UserAccountParamByType userAccountParamByType = new UserAccountParamByType();
-							Integer accountType = ProjectConstant.BUY;
-							logger.info("===========更新用户流水表=======:" + accountType);
-							userAccountParamByType.setAccountType(accountType);
-							userAccountParamByType.setAmount(new BigDecimal(payLog.getOrderAmount().doubleValue()));
-							userAccountParamByType.setBonusPrice(BigDecimal.ZERO);//暂无红包金额
-							userAccountParamByType.setOrderSn(payLog.getOrderSn());
-							userAccountParamByType.setPayId(payLog.getLogId());
-							userAccountParamByType.setPaymentName("微信");
-							userAccountParamByType.setThirdPartName("微信");
-							userAccountParamByType.setThirdPartPaid(new BigDecimal(payLog.getOrderAmount().doubleValue()));
-							userAccountParamByType.setUserId(payLog.getUserId());
-							BaseResult<String> accountRst = userAccountService.insertUserAccount(userAccountParamByType);
-							if(accountRst.getCode() != 0) {
-								logger.info(loggerId + "生成账户流水异常");
-							}else {
-								logger.info("生成账户流水成功");
-							}
+		//微信内部H5支付处理逻辑
+		if(rspEntity != null) {
+			if(rspEntity.isSucc()) {
+				String transNo = rspEntity.transNo;
+				//获取payLog信息
+				PayLog payLog = payLogService.findPayLogByOrderSign(transNo);
+				if(payLog != null) {
+					String payCode = payLog.getPayCode();
+					String amt = payLog.getOrderAmount().movePointRight(2).intValue()+"";
+					int isPaid = payLog.getIsPaid();
+					if(!TextUtils.isEmpty(amt) && amt.equals(rspEntity.amt)) {
+						if(isPaid == 1) {
+							logger.info("该订单已支付更新~");
+							return;
 						}
+						logger.info("处理订单相关信息...");
+						operation(payLog,loggerId,transNo,null);
 					}
-				} catch (IOException e) {
-					e.printStackTrace();
+				}else {
+					logger.info("微信内部H5支付失败 订单查询payLog=空");
 				}
-			}else {
-				logger.info(loggerId + " 订单金额或appid,mchId校验失败！");
 			}
+		}else {	//微信外部回调处理逻辑
+			String requestStr = val;
+			logger.warn(loggerId + "  /payment/wxpay/notify requestStr 微信支付 验证信息: " + requestStr);
+			WxpayNotifyModel responseModel = null;
+			try {
+				responseModel = XmlUtil.xmlToBean(requestStr, WxpayNotifyModel.class);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+
+			String resultCode = null;
+			if(null != responseModel) {
+				resultCode = responseModel.getResult_code();
+			}
+			if ("SUCCESS".equals(resultCode)) {
+				// 获取回调的具体参数
+				logger.debug(loggerId + " 开始回调接口处理");
+				String appid = responseModel.getAppid();//prePayJo.getString("appid");
+				String mchId = responseModel.getMch_id();//prePayJo.getString("mch_id");
+				String bank_type = responseModel.getBank_type();//prePayJo.getString("bank_type");
+				String payOrderSn = responseModel.getOut_trade_no();//prePayJo.getString("out_trade_no");
+				logger.info(loggerId + " payOrderSn="+payOrderSn);
+				String tradeNo = responseModel.getTransaction_id();//prePayJo.getString("transaction_id");
+				int amount = responseModel.getTotal_fee();
+				PayLog payLog = payLogService.findPayLogByOrderSign(payOrderSn);
+				if(null == payLog) {
+					logger.info(loggerId + " payLog对象未查询到，返回失败！");
+					//fail
+					String xml = "<xml><return_code><![CDATA[FAIL]]></return_code> <return_msg><![CDATA[order no find]]></return_msg></xml>";
+					try {
+						response.getWriter().write(xml);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					return;
+				}
+				int isPaid = payLog.getIsPaid();
+				logger.info("=======isPaid:" + isPaid +" payLogId:" +payLog.getLogId() +"==========");
+				if(1== isPaid) {
+					logger.info(loggerId + " paylog.ispaid=1,已支付成功，返回OK！");
+					String xml = "<xml><return_code><![CDATA[SUCCESS]]></return_code> <return_msg><![CDATA[OK]]></return_msg></xml>";
+					try {
+						response.getWriter().write(xml);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					return;
+				}
+				int orderAmount = (int)(payLog.getOrderAmount().doubleValue()*100);
+				logger.info("实际交易金额:" + amount +" 订单金额:" + orderAmount);
+				if ((PayConfig.isDebug() || amount == orderAmount) && ((appid.equals(wxpayConfig.getWxAppAppId()) && mchId.equals(wxpayConfig.getWxAppMchId())) || (appid.equals(wxpayConfig.getWxJsAppId()) && mchId.equals(wxpayConfig.getWxJsMchId())))) {
+					logger.info(loggerId + " 订单金额或appid,mchId校验成功，前去回调订单服务！");
+					operation(payLog, loggerId, tradeNo,response);
+				}else {
+					logger.info(loggerId + " 订单金额或appid,mchId校验失败！");
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 处理PayLog,Log相关流水信息,回调订单相关逻辑
+	 * @param payLog
+	 * @param loggerId
+	 * @param tradeNo
+	 * @param response
+	 */
+	private void operation(PayLog payLog,String loggerId,String tradeNo,HttpServletResponse response) {
+		try {
+			int payType = payLog.getPayType();
+			int currentTime = DateUtil.getCurrentTimeLong();
+			boolean result = false;
+			if(0 == payType) {
+				result = orderOptionsSucc(tradeNo, payLog);
+			}else {
+				result = recharageOptionSucc(tradeNo, payLog);
+			}
+			logger.info(loggerId + " 业务回调结果：result="+result);
+			if(result) {
+				//更新paylog状态为已支付
+				PayLog updatePayLog = new PayLog();
+				updatePayLog.setLogId(payLog.getLogId());
+				updatePayLog.setTradeNo(tradeNo);
+				updatePayLog.setIsPaid(1);
+				updatePayLog.setLastTime(currentTime);
+				updatePayLog.setPayTime(currentTime);
+				payLogService.update(updatePayLog);
+				logger.info(loggerId + " 业务回调成功，payLog.对象状态回写结束");
+				if(response != null) {
+					String xml = "<xml><return_code><![CDATA[SUCCESS]]></return_code> <return_msg><![CDATA[OK]]></return_msg></xml>";
+					response.getWriter().write(xml);
+				}
+				if(0 == payType) {
+					//订单支付付款成功就要生成流水
+					logger.info("订单支付付款成功就要生成流水...");
+					UserAccountParamByType userAccountParamByType = new UserAccountParamByType();
+					Integer accountType = ProjectConstant.BUY;
+					logger.info("===========更新用户流水表=======:" + accountType);
+					userAccountParamByType.setAccountType(accountType);
+					userAccountParamByType.setAmount(new BigDecimal(payLog.getOrderAmount().doubleValue()));
+					userAccountParamByType.setBonusPrice(BigDecimal.ZERO);//暂无红包金额
+					userAccountParamByType.setOrderSn(payLog.getOrderSn());
+					userAccountParamByType.setPayId(payLog.getLogId());
+					userAccountParamByType.setPaymentName("微信");
+					userAccountParamByType.setThirdPartName("微信");
+					userAccountParamByType.setThirdPartPaid(new BigDecimal(payLog.getOrderAmount().doubleValue()));
+					userAccountParamByType.setUserId(payLog.getUserId());
+					BaseResult<String> accountRst = userAccountService.insertUserAccount(userAccountParamByType);
+					if(accountRst.getCode() != 0) {
+						logger.info(loggerId + "生成账户流水异常");
+					}else {
+						logger.info("生成账户流水成功");
+					}
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	
