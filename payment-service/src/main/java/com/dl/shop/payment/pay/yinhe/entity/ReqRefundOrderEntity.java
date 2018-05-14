@@ -1,7 +1,5 @@
 package com.dl.shop.payment.pay.yinhe.entity;
 
-import org.hamcrest.text.IsEqualIgnoringWhiteSpace;
-
 import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
 
 public class ReqRefundOrderEntity {
