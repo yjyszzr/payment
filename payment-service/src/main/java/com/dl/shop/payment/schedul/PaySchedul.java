@@ -47,7 +47,7 @@ public class PaySchedul {
 	@Resource
 	private PayMentService payMentService;
 	
-	@Scheduled(cron = "0 0/1 * * * ?")
+	@Scheduled(cron = "0 0/5 * * * ?")
     public void dealBeyondPayTimeOrder() {
 		logger.info("开始执行支付超时订单任务");
 		OrderCondtionParam orderQueryParam = new OrderCondtionParam();
@@ -59,10 +59,11 @@ public class PaySchedul {
     		return;
     	}
     	List<OrderDTO> orderDTOList = orderDTORst.getData();
+    	
     	logger.info("---------支付超时订单数："+orderDTOList.size());
+    	
     	for(OrderDTO or:orderDTOList) {
     		payMentService.dealBeyondPayTimeOrder(or);
-    		
     	}
 		log.info("结束执行支付超时订单任务");
 	}
