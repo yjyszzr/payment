@@ -5,10 +5,7 @@ import java.math.BigDecimal;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.http.util.TextUtils;
-import org.apache.zookeeper.Op;
-import org.bouncycastle.crypto.modes.SICBlockCipher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +25,7 @@ import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.WxpayNotifyModel;
 import com.dl.shop.payment.pay.common.PayConfig;
+import com.dl.shop.payment.pay.yinhe.entity.RspNotifyWeChatEntity;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.UserRechargeService;
 import com.dl.shop.payment.utils.XmlUtil;
@@ -55,10 +53,21 @@ public class WxpayNotifyController {
 		String loggerId = "wxNotify_"+System.currentTimeMillis();
 		logger.warn(loggerId + " in controller /payment/wxpay/notify");
 		String val = request.getParameter("result");
+		RspNotifyWeChatEntity rspEntity = null;
 		if(TextUtils.isEmpty(val)) {
 			val = request.getParameter("returnCode");
+			String transNo = request.getParameter("transNo");
+			String amt = request.getParameter("amt");
+			String transTime = request.getParameter("transTime");
+			if(!TextUtils.isEmpty(val)) {
+				rspEntity = new RspNotifyWeChatEntity();
+				rspEntity.code = val;
+				rspEntity.transNo = transNo;
+				rspEntity.amt = amt;
+				rspEntity.transTime = transTime;
+			}
 		}
-		logger.info("微信回掉处理:" + val);
+		logger.info("微信回掉处理:" + val + " rspEntity:" + rspEntity);
 //		// 将微信的回调的参数转化为String并打印
 //		StringBuffer strBuf1 = new StringBuffer();
 //		String line = null;
