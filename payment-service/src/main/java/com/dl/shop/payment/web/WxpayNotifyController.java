@@ -55,7 +55,7 @@ public class WxpayNotifyController {
 		String loggerId = "wxNotify_"+System.currentTimeMillis();
 		logger.warn(loggerId + " in controller /payment/wxpay/notify");
 		String val = request.getParameter("result");
-		if(!TextUtils.isEmpty(val)) {
+		if(TextUtils.isEmpty(val)) {
 			val = request.getParameter("retrunCode");
 		}
 		logger.info("微信回掉处理:" + val);
