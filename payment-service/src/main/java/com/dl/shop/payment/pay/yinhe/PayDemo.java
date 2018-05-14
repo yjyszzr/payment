@@ -30,9 +30,9 @@ public class PayDemo {
 //		testQuery();
 //		testPay();
 //		testQRBarPay();
-//		testUtil();
+		testUtil();
 //		testRefund();
-		testPayManager();
+//		testPayManager();
 	}
 
 	private void testPayManager() {
@@ -40,7 +40,7 @@ public class PayDemo {
 	}
 	
 	private void testRefund(){
-		String orderNo = "20180513110608810330221";
+		String orderNo = "20180514105599710330048";
 		String amt = "1";
 		ReqRefundOrderEntity reqEntity = ReqRefundOrderEntity.buildReqQueryEntity(orderNo,amt);
 		ReqSignEntity signEntity = reqEntity.buildSignEntity();
@@ -74,7 +74,7 @@ public class PayDemo {
 	}
 	
 	private void testUtil() {
-		RspYinHeEntity rspEntity = PayUtil.getWechatPayUrl(false,"39.155.221.148","2",System.currentTimeMillis()+"");
+		RspYinHeEntity rspEntity = PayUtil.getWechatPayUrl(true,"39.155.221.148","2",System.currentTimeMillis()+"");
 		System.out.println("rspEntity:" + rspEntity);
 	}
 	
