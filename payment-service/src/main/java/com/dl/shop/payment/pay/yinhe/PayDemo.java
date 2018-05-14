@@ -27,11 +27,11 @@ import com.dl.shop.payment.pay.yinhe.util.PayUtil;
 public class PayDemo {
 
 	public PayDemo() {
-		testQuery();
+//		testQuery();
 //		testPay();
 //		testQRBarPay();
 //		testUtil();
-//		testRefund();
+		testRefund();
 //		testPayManager();
 	}
 
@@ -40,7 +40,7 @@ public class PayDemo {
 	}
 	
 	private void testRefund(){
-		String orderNo = "20180514151645810300017";
+		String orderNo = "20180514170530910360015";
 		String amt = "1";
 		ReqRefundOrderEntity reqEntity = ReqRefundOrderEntity.buildReqQueryEntity(orderNo,amt);
 		ReqSignEntity signEntity = reqEntity.buildSignEntity();
@@ -112,7 +112,7 @@ public class PayDemo {
 	}
 	
 	private void testQuery() {//20180514160177010290042
-		String orderNo = "20180514160177010290042";
+		String orderNo = "20180514170530910360015";
 		ReqQueryEntity reqEntity = ReqQueryEntity.buildReqQueryEntity(true,orderNo);
 		ReqSignEntity signEntity = reqEntity.buildSignEntity();
 		String str = JSON.toJSONString(signEntity);

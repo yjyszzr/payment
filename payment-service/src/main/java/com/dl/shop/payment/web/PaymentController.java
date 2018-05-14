@@ -827,7 +827,7 @@ public class PaymentController extends AbstractBaseController{
 			if(payCode.equals("app_weixin")) {
 				recharegeParam.setThirdPartName("微信");
 			}else if(payCode.equals("app_rongbao")){
-				recharegeParam.setThirdPartName("融宝");
+				recharegeParam.setThirdPartName("银行卡");
 			}
 			recharegeParam.setThirdPartPaid(payLog.getOrderAmount());
 			recharegeParam.setUserId(payLog.getUserId());

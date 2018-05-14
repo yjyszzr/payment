@@ -199,7 +199,7 @@ public class RongbaoPayController extends AbstractBaseController{
 			userAccountParamByType.setBonusPrice(BigDecimal.ZERO);//暂无红包金额
 			userAccountParamByType.setOrderSn(payLog.getOrderSn());
 			userAccountParamByType.setPayId(payLog.getLogId());
-			userAccountParamByType.setPaymentName("融宝");
+			userAccountParamByType.setPaymentName("银行卡");
 			userAccountParamByType.setThirdPartPaid(new BigDecimal(payLog.getOrderAmount().doubleValue()));
 			userAccountParamByType.setUserId(payLog.getUserId());
 			BaseResult<String> accountRst = userAccountService.insertUserAccount(userAccountParamByType);

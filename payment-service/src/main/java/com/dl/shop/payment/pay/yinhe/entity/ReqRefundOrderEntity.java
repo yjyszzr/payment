@@ -14,6 +14,7 @@ public class ReqRefundOrderEntity {
 	public String merId;
 	public String amt;
 	public String payType;
+	public String inWechat = "0";
 	
 	public static ReqRefundOrderEntity buildReqQueryEntity(String orderNo,String amt){
 		ReqRefundOrderEntity reqEntity = new ReqRefundOrderEntity();
