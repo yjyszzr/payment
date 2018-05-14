@@ -42,7 +42,8 @@ public class PayDemo {
 	private void testRefund(){
 		String orderNo = "20180514170530910360015";
 		String amt = "1";
-		ReqRefundOrderEntity reqEntity = ReqRefundOrderEntity.buildReqQueryEntity(orderNo,amt);
+		boolean isInWeChat = true;
+		ReqRefundOrderEntity reqEntity = ReqRefundOrderEntity.buildReqQueryEntity(isInWeChat,orderNo,amt);
 		ReqSignEntity signEntity = reqEntity.buildSignEntity();
 		String str = JSON.toJSONString(signEntity);
 		JSONObject jsonObj = JSON.parseObject(str,JSONObject.class);

@@ -68,7 +68,6 @@ import com.dl.shop.payment.param.RechargeParam;
 import com.dl.shop.payment.param.ReqOrderQueryParam;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
 import com.dl.shop.payment.param.WithdrawParam;
-import com.dl.shop.payment.pay.common.PayManager;
 import com.dl.shop.payment.pay.common.RspHttpEntity;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
@@ -77,7 +76,6 @@ import com.dl.shop.payment.pay.rongbao.entity.ReqRefundEntity;
 import com.dl.shop.payment.pay.rongbao.entity.ReqRongEntity;
 import com.dl.shop.payment.pay.rongbao.entity.RspRefundEntity;
 import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
-import com.dl.shop.payment.pay.yinhe.entity.ReqRefundOrderEntity;
 import com.dl.shop.payment.pay.yinhe.entity.RspYinHeEntity;
 import com.dl.shop.payment.pay.yinhe.util.PayUtil;
 import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
@@ -86,7 +84,6 @@ import com.dl.shop.payment.service.PayMentService;
 import com.dl.shop.payment.service.UserRechargeService;
 import com.dl.shop.payment.service.UserWithdrawLogService;
 import com.dl.shop.payment.utils.WxpayUtil;
-
 import io.swagger.annotations.ApiOperation;
 
 @Controller
@@ -165,7 +162,7 @@ public class PaymentController extends AbstractBaseController{
 			if(payLogId != null) {
 				Integer intPayLogId = Integer.valueOf(payLogId);
 				PayLog payLog = payLogService.findById(intPayLogId);
-				String payCode = order.getPayCode();
+				String payCode = payLog.getPayCode();
 				if(payLog != null) {
 					if(payCode.equals("app_rongbao")) {
 						ReqRefundEntity reqEntity = new ReqRefundEntity();
@@ -181,11 +178,12 @@ public class PaymentController extends AbstractBaseController{
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
-					}else if(payCode.equals("app_weixin")) {
+					}else if(payCode.equals("app_weixin") || "app_weixin_h5".equals(payCode)){
+						boolean isInWeChat = "app_weixin_h5".equals(payCode);
 						String amt = thirdPartyPaid.toString();
 						BigDecimal bigDec = new BigDecimal(amt);
 						String amtFen = bigDec.movePointRight(2).intValue()+"";
-						RspHttpEntity rspEntity = yinHeUtil.orderRefund(payLog.getPayOrderSn(),amtFen);
+						RspHttpEntity rspEntity = yinHeUtil.orderRefund(isInWeChat,payLog.getPayOrderSn(),amtFen);
 						if(rspEntity.isSucc) {
 							succThird = true;
 						}

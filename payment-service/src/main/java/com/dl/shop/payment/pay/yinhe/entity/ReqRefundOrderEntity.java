@@ -1,5 +1,7 @@
 package com.dl.shop.payment.pay.yinhe.entity;
 
+import org.hamcrest.text.IsEqualIgnoringWhiteSpace;
+
 import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
 
 public class ReqRefundOrderEntity {
@@ -16,7 +18,7 @@ public class ReqRefundOrderEntity {
 	public String payType;
 	public String inWechat = "0";
 	
-	public static ReqRefundOrderEntity buildReqQueryEntity(String orderNo,String amt){
+	public static ReqRefundOrderEntity buildReqQueryEntity(boolean isInWeChat,String orderNo,String amt){
 		ReqRefundOrderEntity reqEntity = new ReqRefundOrderEntity();
 		reqEntity.orgNo = ConfigerPay.ORG_NO;
 		reqEntity.charset = ConfigerPay.CHAR_SET;
@@ -28,6 +30,11 @@ public class ReqRefundOrderEntity {
 		reqEntity.amt = amt;
 		reqEntity.merId = ConfigerPay.MERCHANT_NO;
 		reqEntity.payType = ConfigerPay.PAY_TYPE_WECHAT;
+		if(isInWeChat) {
+			reqEntity.inWechat = "1";
+		}else {
+			reqEntity.inWechat = "0";
+		}
 		return reqEntity;
 	}
 	

@@ -22,15 +22,14 @@ import com.dl.shop.payment.pay.yinhe.entity.RspQueryEntity;
  */
 @Component
 public class YinHeUtil {
-	
 	/***
 	 * 资金回退接口
 	 * @param orderNo
 	 * @param amt
 	 * @return
 	 */
-	public RspHttpEntity orderRefund(String orderNo,String amt){
-		ReqRefundOrderEntity reqEntity = ReqRefundOrderEntity.buildReqQueryEntity(orderNo,amt);
+	public RspHttpEntity orderRefund(boolean isInWeChat,String orderNo,String amt){
+		ReqRefundOrderEntity reqEntity = ReqRefundOrderEntity.buildReqQueryEntity(isInWeChat,orderNo,amt);
 		ReqSignEntity signEntity = reqEntity.buildSignEntity();
 		String str = JSON.toJSONString(signEntity);
 		JSONObject jsonObj = JSON.parseObject(str,JSONObject.class);
