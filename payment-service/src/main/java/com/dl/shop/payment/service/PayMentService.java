@@ -17,6 +17,7 @@ import com.dl.base.util.DateUtil;
 import com.dl.member.api.IUserAccountService;
 import com.dl.member.dto.SurplusPaymentCallbackDTO;
 import com.dl.member.param.SurplusPayParam;
+import com.dl.member.param.UserBonusParam;
 import com.dl.order.api.IOrderService;
 import com.dl.order.dto.OrderDTO;
 import com.dl.order.param.OrderCondtionParam;
@@ -134,6 +135,14 @@ public class PayMentService extends AbstractService<PayMent> {
     	SurplusPayParam surplusPayParam = new SurplusPayParam();
     	surplusPayParam.setOrderSn(or.getOrderSn());
     	BaseResult<SurplusPaymentCallbackDTO> rollRst = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
+    	
+    	Integer userBonusId = or.getUserBonusId();
+    	if(null != userBonusId) {
+    		UserBonusParam userbonusParam = new UserBonusParam();
+    		userbonusParam.setUserBonusId(userBonusId);
+    		userbonusParam.setOrderSn(or.getOrderSn());
+    		userAccountService.rollbackChangeUserAccountByCreateOrder(userbonusParam);
+    	}
     	if(rollRst.getCode() != 0) {
     		log.error("-------------------支付超时订单回滚用户余额异常,code="+rollRst.getCode()+"  msg:"+rollRst.getMsg()+" 订单号："+or.getOrderSn());
     	}else {
