@@ -50,24 +50,28 @@ public class PaySchedul {
 	
 	@Scheduled(cron = "0 0/2 * * * ?")
     public void dealBeyondPayTimeOrder() {
-		logger.info("开始执行支付超时订单任务");
+		logger.info("开始执行混合支付超时订单任务");
 		OrderCondtionParam orderQueryParam = new OrderCondtionParam();
     	orderQueryParam.setOrderStatus(0);
     	orderQueryParam.setPayStatus(0);
     	BaseResult<List<OrderDTO>> orderDTORst = orderService.queryOrderListByCondition(orderQueryParam);
     	    	
     	if(orderDTORst.getCode() != 0) {
-    		log.error("-------------------查询支付超时订单失败"+orderDTORst.getMsg());
+    		log.error("-------------------查询混合支付超时订单失败"+orderDTORst.getMsg());
     		return;
     	}
     	List<OrderDTO> orderDTOList = orderDTORst.getData();
     	
-    	logger.info("---------支付超时订单数："+orderDTOList.size());
+    	logger.info("---------混合支付超时订单数："+orderDTOList.size());
+    	if(orderDTOList.size() == 0) {
+    		logger.info("---------没有混合支付超时订单,定时任务结束");
+    		return;
+    	}
     	
     	for(OrderDTO or:orderDTOList) {
     		payMentService.dealBeyondPayTimeOrder(or);
     	}
-		log.info("结束执行支付超时订单任务");
+		log.info("结束执行支混合付超时订单任务");
 	}
 	
 	

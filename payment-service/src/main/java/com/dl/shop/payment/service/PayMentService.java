@@ -97,7 +97,7 @@ public class PayMentService extends AbstractService<PayMent> {
     public void dealBeyondPayTimeOrder(OrderDTO or) {
     	UpdateOrderInfoParam updateOrderInfoParam = new UpdateOrderInfoParam();
     	updateOrderInfoParam.setOrderSn(or.getOrderSn());
-    	updateOrderInfoParam.setOrderStatus(8);//支付失败
+    	updateOrderInfoParam.setOrderStatus(8);//订单失败
     	updateOrderInfoParam.setPayStatus(2);//支付失败
     	updateOrderInfoParam.setPayTime(DateUtil.getCurrentTimeLong());
     	BaseResult<String> updateRst = orderService.updateOrderInfoStatus(updateOrderInfoParam);
