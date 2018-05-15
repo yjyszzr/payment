@@ -4,10 +4,10 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.Map.Entry;
-import org.apache.http.util.TextUtils;
+import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.util.MD5Utils;
@@ -21,15 +21,23 @@ import com.dl.shop.payment.pay.yinhe.entity.ReqSignEntity;
 import com.dl.shop.payment.pay.yinhe.entity.RspYinHeEntity;
 import com.dl.shop.payment.web.PaymentController;
 
+@Component
 public class PayUtil {
 	private final static Logger logger = LoggerFactory.getLogger(PaymentController.class);
+
+	@Resource
+	private ConfigerPay cfgPay;
+	@Resource
+	private ReqQRPayEntity reqQRPayEntity;
+	@Resource 
+	private ReqPayEntity reqPayEntity;
 	
 	/**
 	 * 获取请求参数
 	 * @param treeMap
 	 * @return
 	 */
-	public static final String getPayParams(TreeMap<String, Object> treeMap) {
+	public final String getPayParams(TreeMap<String, Object> treeMap) {
 		StringBuilder builder = new StringBuilder();
 		Iterator<?> iterator = treeMap.entrySet().iterator();  
 		while(iterator.hasNext()) {
@@ -53,7 +61,7 @@ public class PayUtil {
 	 * @param s
 	 * @return
 	 */
-	public static final String getSignCode(String paraUrl,String s) {
+	public final String getSignCode(String paraUrl,String s) {
 		String str = paraUrl + s;
 		String strMD5 = MD5Utils.MD5(str);
 		return strMD5;
@@ -64,19 +72,19 @@ public class PayUtil {
 	 * 获取微信支付url
 	 * @return
 	 */
-	public static final RspYinHeEntity getWechatPayUrl(boolean isInnerWechat,String ip,String amount,String orderNo){
+	public final RspYinHeEntity getWechatPayUrl(boolean isInnerWechat,String ip,String amount,String orderNo){
 		if(PayConfig.isDebug()) {
 			amount = "1";
 		}
 		RspYinHeEntity rEntity = null;
-		ReqQRPayEntity reqQRPayEntity = null;
+		ReqQRPayEntity reqQREntity = null;
 		ReqPayEntity reqH5Entity = null;
 		ReqSignEntity signEntity = null;
 		if(isInnerWechat) {
-			reqQRPayEntity = ReqQRPayEntity.buildReqEntity(amount,orderNo);
-			signEntity = reqQRPayEntity.buildSignEntity();
+			reqQREntity = reqQRPayEntity.buildReqEntity(amount,orderNo);
+			signEntity = reqQREntity.buildSignEntity();
 		}else {
-			reqH5Entity = ReqPayEntity.buildReqEntity(ip, amount, orderNo);			
+			reqH5Entity = reqPayEntity.buildReqEntity(ip, amount, orderNo);			
 			signEntity = reqH5Entity.buildSignEntity();
 		}
 		String str = JSON.toJSONString(signEntity);
@@ -92,24 +100,24 @@ public class PayUtil {
 			treeMap.put(key,val);
 		}
 		//获取sign code 参数
-		String paraStr = PayUtil.getPayParams(treeMap);
+		String paraStr = getPayParams(treeMap);
 		String secret = null;
 		if(isInnerWechat) {
-			secret = ConfigerPay.SECRET_PUBLIC;
+			secret = cfgPay.getSECRET_PUBLIC();
 		}else {
-			secret = ConfigerPay.SECRET_PUBLIC;
+			secret = cfgPay.getSECRET_PUBLIC();
 		}
 		//生成signCode
-		String signCode = PayUtil.getSignCode(paraStr,secret);
+		String signCode = getSignCode(paraStr,secret);
 		signCode = signCode.toUpperCase();
 		logger.info("sign code:" + signCode);
 		String reqStr = null;
 		//赋值signCode
 		if(isInnerWechat) {
-			reqQRPayEntity.signValue = signCode;
-			reqStr = JSON.toJSONString(reqQRPayEntity);
+			reqQREntity.setSignValue(signCode);
+			reqStr = JSON.toJSONString(reqQREntity);
 		}else {
-			reqH5Entity.signValue = signCode;
+			reqH5Entity.setSignValue(signCode);
 			reqStr = JSON.toJSONString(reqH5Entity);
 		}
 		//signCode添加到请求参数中
@@ -117,10 +125,10 @@ public class PayUtil {
 		RspHttpEntity rspHttpEntity = null;
 		logger.info("sign code params:" + paraStr + " secret:" + secret + " inwechat:" + isInnerWechat);
 		if(isInnerWechat) {	//yinHePay->动态二维码方式   yinHePayPublic
-			rspHttpEntity = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/yinHePayPublic.action",true);
+			rspHttpEntity = HttpUtil.sendMsg(reqStr,cfgPay.getURL_PAY()+"/yinHePayPublic.action",true);
 		}else {
 			//发送  yinHePay.action  -> yinHePayH5.action
-			rspHttpEntity = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/yinHePayH5.action",true);			
+			rspHttpEntity = HttpUtil.sendMsg(reqStr,cfgPay.getURL_PAY()+"/yinHePayH5.action",true);			
 		}
 		logger.info("resultStr:" + rspHttpEntity.toString());
 		if(rspHttpEntity.isSucc) {

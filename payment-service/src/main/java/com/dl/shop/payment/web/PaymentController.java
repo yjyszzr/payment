@@ -118,6 +118,10 @@ public class PaymentController extends AbstractBaseController{
 	private ILotteryPrintService lotteryPrintService;
 	@Resource
 	private UserRechargeService userRechargeService;
+	@Resource
+	private PayUtil payUtil;
+	@Resource
+	private ConfigerPay cfgPay;
 	
 	@ApiOperation(value="系统可用第三方支付方式", notes="系统可用第三方支付方式")
 	@PostMapping("/allPayment")
@@ -508,9 +512,9 @@ public class PaymentController extends AbstractBaseController{
 //				// TODO Auto-generated catch block
 //				e.printStackTrace();
 //			}
-			rYinHeEntity = PayUtil.getWechatPayUrl(true,payIp,strAmt,payOrderSn);
+			rYinHeEntity = payUtil.getWechatPayUrl(true,payIp,strAmt,payOrderSn);
 		}else {
-			rYinHeEntity = PayUtil.getWechatPayUrl(false,payIp,strAmt,payOrderSn);
+			rYinHeEntity = payUtil.getWechatPayUrl(false,payIp,strAmt,payOrderSn);
 		}
 		if(rYinHeEntity != null) {
 			if(rYinHeEntity.isSucc() && !TextUtils.isEmpty(rYinHeEntity.qrCode)) {
@@ -522,7 +526,7 @@ public class PaymentController extends AbstractBaseController{
 					try {
 						String qrCode = rYinHeEntity.qrCode;
 						encodeUrl = URLEncoder.encode(qrCode,"UTF-8");
-						redirectUri = URLEncoder.encode(ConfigerPay.URL_REDIRECT+"?payLogId="+payLogId,"UTF-8");
+						redirectUri = URLEncoder.encode(cfgPay.getURL_REDIRECT()+"?payLogId="+payLogId,"UTF-8");
 //						redirectUri = URLEncoder.encode(ConfigerPay.URL_REDIRECT,"UTF-8");
 					} catch (UnsupportedEncodingException e) {
 						// TODO Auto-generated catch block

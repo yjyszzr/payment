@@ -36,209 +36,209 @@ public class PayDemo {
 //		testUtil();
 //		testRefund();
 //		testPayManager();
-		testListRemove();
+//		testListRemove();
 	}
 
-	private void testListRemove() {
-		List<Integer> mList = new ArrayList<Integer>();
-		mList.add(1);
-		mList.add(2);
-		mList.add(6);
-		mList.add(5);
-		mList.add(6);
-		mList.add(7);
-		int size = mList.size();
-		System.out.println("size:" + size);
-		showList(mList);
-		for(int i = 0;i < mList.size();i++) {
-			int data = mList.get(i);
-			if(data == 6 || data == 7) {
-				int rData = mList.remove(i);
-				System.out.println("remove data:" + rData);
-				showList(mList);
-			}
-		}
-		size = mList.size();
-		showList(mList);
-		System.out.println("size:" + size);
-		
-	}
-	
-	private void showList(List<Integer> mList) {
-		for(int i = 0;i < mList.size();i++) {
-			System.out.print(mList.get(i) + "\t");
-		}
-		System.out.println();
-	}
-	
-	private void testPayManager() {
-		PayManager.getInstance().addReqQueue("123456",null,"app_weixin");
-	}
-	
-	private void testRefund(){
-		String orderNo = "20180514170530910360015";
-		String amt = "1";
-		boolean isInWeChat = true;
-		ReqRefundOrderEntity reqEntity = ReqRefundOrderEntity.buildReqQueryEntity(isInWeChat,orderNo,amt);
-		ReqSignEntity signEntity = reqEntity.buildSignEntity();
-		String str = JSON.toJSONString(signEntity);
-		JSONObject jsonObj = JSON.parseObject(str,JSONObject.class);
-		Set<java.util.Map.Entry<String, Object>> mSet = jsonObj.entrySet();
-		Iterator<java.util.Map.Entry<String, Object>> iterator = mSet.iterator();
-		//sort key
-		TreeMap<String,Object> treeMap = new TreeMap<>(new PayKeyComparator());
-		while(iterator.hasNext()) {
-			java.util.Map.Entry<String, Object> entry = iterator.next();
-			String key = entry.getKey();
-			String val = jsonObj.get(key).toString();
-			treeMap.put(key,val);
-		}
-		showTreeMap(treeMap);
-		//获取sign code 参数
-		String paraStr = PayUtil.getPayParams(treeMap);
-		System.out.println("sign code params:" + paraStr + " secret:" +ConfigerPay.SECRET);
-		//生成signCode
-		String signCode = PayUtil.getSignCode(paraStr,ConfigerPay.SECRET);
-		signCode = signCode.toUpperCase();
-		System.out.println("sign code:" + signCode);
-		//赋值signCode
-		reqEntity.signValue = signCode;
-		//signCode添加到请求参数中
-		String reqStr = JSON.toJSONString(reqEntity);
-		System.out.println(reqStr);//查询queryPayInfo.action
-		RspHttpEntity rspEntity = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/refundOrder.action",true);
-		System.out.println(rspEntity);
-	}
-	
-	private void testUtil() {
-		RspYinHeEntity rspEntity = PayUtil.getWechatPayUrl(true,"39.155.221.148","2",System.currentTimeMillis()+"");
-		System.out.println("rspEntity:" + rspEntity);
-	}
-	
-	private void testQRBarPay() {
-		String orderNo = "123456";
-		ReqQRPayEntity reqEntity = ReqQRPayEntity.buildReqEntity("12",orderNo);
-		ReqSignEntity signEntity = reqEntity.buildSignEntity();
-		String str = JSON.toJSONString(signEntity);
-		JSONObject jsonObj = JSON.parseObject(str,JSONObject.class);
-		Set<java.util.Map.Entry<String, Object>> mSet = jsonObj.entrySet();
-		Iterator<java.util.Map.Entry<String, Object>> iterator = mSet.iterator();
-		//sort key
-		TreeMap<String,Object> treeMap = new TreeMap<>(new PayKeyComparator());
-		while(iterator.hasNext()) {
-			java.util.Map.Entry<String, Object> entry = iterator.next();
-			String key = entry.getKey();
-			String val = jsonObj.get(key).toString();
-			treeMap.put(key,val);
-		}
-		showTreeMap(treeMap);
-		//获取sign code 参数
-		String paraStr = PayUtil.getPayParams(treeMap);
-		System.out.println("sign code params:" + paraStr + " secret:" +ConfigerPay.SECRET);
-		//生成signCode
-		String signCode = PayUtil.getSignCode(paraStr,ConfigerPay.SECRET);
-		signCode = signCode.toUpperCase();
-		System.out.println("sign code:" + signCode);
-		//赋值signCode
-		reqEntity.signValue = signCode;
-		//signCode添加到请求参数中
-		String reqStr = JSON.toJSONString(reqEntity);
-		System.out.println(reqStr);//查询queryPayInfo.action
-		RspHttpEntity rspEntity = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/yinHePay.action",true);
-		System.out.println(rspEntity);
-	}
-	
-	private void testQuery() {//20180514160177010290042
-		String orderNo = "20180514170530910360015";
-		ReqQueryEntity reqEntity = ReqQueryEntity.buildReqQueryEntity(true,orderNo);
-		ReqSignEntity signEntity = reqEntity.buildSignEntity();
-		String str = JSON.toJSONString(signEntity);
-		JSONObject jsonObj = JSON.parseObject(str,JSONObject.class);
-		Set<java.util.Map.Entry<String, Object>> mSet = jsonObj.entrySet();
-		Iterator<java.util.Map.Entry<String, Object>> iterator = mSet.iterator();
-		//sort key
-		TreeMap<String,Object> treeMap = new TreeMap<>(new PayKeyComparator());
-		while(iterator.hasNext()) {
-			java.util.Map.Entry<String, Object> entry = iterator.next();
-			String key = entry.getKey();
-			String val = jsonObj.get(key).toString();
-			treeMap.put(key,val);
-		}
-		showTreeMap(treeMap);
-		//获取sign code 参数
-		String paraStr = PayUtil.getPayParams(treeMap);
-		System.out.println("sign code params:" + paraStr + " secret:" +ConfigerPay.SECRET);
-		//生成signCode
-		String signCode = PayUtil.getSignCode(paraStr,ConfigerPay.SECRET);
-		signCode = signCode.toUpperCase();
-		System.out.println("sign code:" + signCode);
-		//赋值signCode
-		reqEntity.signValue = signCode;
-		//signCode添加到请求参数中
-		String reqStr = JSON.toJSONString(reqEntity);
-		System.out.println(reqStr);//查询queryPayInfo.action
-		RspHttpEntity rspEntity = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/queryPayInfo.action",true);
-		System.out.println(rspEntity);
-	}
-	
-	public static void main(String[] args) {
-		new PayDemo();
-	}
-	
-	private static void showTreeMap(Map<String,Object> treeMap) {
-		System.out.println("==========================================");
-		Iterator<?> iterator = treeMap.entrySet().iterator();  
-		while(iterator.hasNext()) {
-			Entry<String, String> entry = (Entry<String, String>) iterator.next();
-			String key = entry.getKey();
-			Object val = entry.getValue();
-			System.out.print(key + "=" +val + "\t");
-		}
-		System.out.println();
-	}
-	
-	
-	private void testPay() {
-		String amt = "10.0";
-		BigDecimal bigD = new BigDecimal(amt);
-		amt = bigD.movePointRight(2).toString();
-		System.out.println(amt);
-		ReqPayEntity reqEntity = ReqPayEntity.buildReqEntity("127.0.0.1",amt, ""+System.currentTimeMillis());
-		ReqSignEntity signEntity = reqEntity.buildSignEntity();
-		String str = JSON.toJSONString(signEntity);
-		JSONObject jsonObj = JSON.parseObject(str,JSONObject.class);
-		Set<java.util.Map.Entry<String, Object>> mSet = jsonObj.entrySet();
-		Iterator<java.util.Map.Entry<String, Object>> iterator = mSet.iterator();
-		//sort key
-		TreeMap<String,Object> treeMap = new TreeMap<>(new PayKeyComparator());
-		while(iterator.hasNext()) {
-			java.util.Map.Entry<String, Object> entry = iterator.next();
-			String key = entry.getKey();
-			String val = jsonObj.get(key).toString();
-			treeMap.put(key,val);
-		}
-		//展示treemap
-		showTreeMap(treeMap);
-		//获取sign code 参数
-		String paraStr = PayUtil.getPayParams(treeMap);
-		System.out.println("sign code params:" + paraStr + " secret:" +ConfigerPay.SECRET);
-		//生成signCode
-		String signCode = PayUtil.getSignCode(paraStr,ConfigerPay.SECRET);
-		signCode = signCode.toUpperCase();
-		System.out.println("sign code:" + signCode);
-		//赋值signCode
-		reqEntity.signValue = signCode;
-		//signCode添加到请求参数中
-		String reqStr = JSON.toJSONString(reqEntity);
-		System.out.println(reqStr);
-		//发送  yinHePay.action  -> yinHePayH5.action
-		RspHttpEntity rspEntity = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/yinHePayH5.action",true);
-		System.out.println(rspEntity);
-		if(rspEntity.isSucc) {
-			RspYinHeEntity rEntity = JSON.parseObject(rspEntity.msg,RspYinHeEntity.class);
-			System.out.println("isSucc:" +rEntity.isSucc());
-		}else {
-			System.out.println(rspEntity);
-		}
-	}
+//	private void testListRemove() {
+//		List<Integer> mList = new ArrayList<Integer>();
+//		mList.add(1);
+//		mList.add(2);
+//		mList.add(6);
+//		mList.add(5);
+//		mList.add(6);
+//		mList.add(7);
+//		int size = mList.size();
+//		System.out.println("size:" + size);
+//		showList(mList);
+//		for(int i = 0;i < mList.size();i++) {
+//			int data = mList.get(i);
+//			if(data == 6 || data == 7) {
+//				int rData = mList.remove(i);
+//				System.out.println("remove data:" + rData);
+//				showList(mList);
+//			}
+//		}
+//		size = mList.size();
+//		showList(mList);
+//		System.out.println("size:" + size);
+//		
+//	}
+//	
+//	private void showList(List<Integer> mList) {
+//		for(int i = 0;i < mList.size();i++) {
+//			System.out.print(mList.get(i) + "\t");
+//		}
+//		System.out.println();
+//	}
+//	
+//	private void testPayManager() {
+//		PayManager.getInstance().addReqQueue("123456",null,"app_weixin");
+//	}
+//	
+//	private void testRefund(){
+//		String orderNo = "20180514170530910360015";
+//		String amt = "1";
+//		boolean isInWeChat = true;
+//		ReqRefundOrderEntity reqEntity = ReqRefundOrderEntity.buildReqQueryEntity(isInWeChat,orderNo,amt);
+//		ReqSignEntity signEntity = reqEntity.buildSignEntity();
+//		String str = JSON.toJSONString(signEntity);
+//		JSONObject jsonObj = JSON.parseObject(str,JSONObject.class);
+//		Set<java.util.Map.Entry<String, Object>> mSet = jsonObj.entrySet();
+//		Iterator<java.util.Map.Entry<String, Object>> iterator = mSet.iterator();
+//		//sort key
+//		TreeMap<String,Object> treeMap = new TreeMap<>(new PayKeyComparator());
+//		while(iterator.hasNext()) {
+//			java.util.Map.Entry<String, Object> entry = iterator.next();
+//			String key = entry.getKey();
+//			String val = jsonObj.get(key).toString();
+//			treeMap.put(key,val);
+//		}
+//		showTreeMap(treeMap);
+//		//获取sign code 参数
+//		String paraStr = PayUtil.getPayParams(treeMap);
+//		System.out.println("sign code params:" + paraStr + " secret:" +ConfigerPay.SECRET);
+//		//生成signCode
+//		String signCode = PayUtil.getSignCode(paraStr,ConfigerPay.SECRET);
+//		signCode = signCode.toUpperCase();
+//		System.out.println("sign code:" + signCode);
+//		//赋值signCode
+//		reqEntity.signValue = signCode;
+//		//signCode添加到请求参数中
+//		String reqStr = JSON.toJSONString(reqEntity);
+//		System.out.println(reqStr);//查询queryPayInfo.action
+//		RspHttpEntity rspEntity = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/refundOrder.action",true);
+//		System.out.println(rspEntity);
+//	}
+//	
+//	private void testUtil() {
+//		RspYinHeEntity rspEntity = PayUtil.getWechatPayUrl(true,"39.155.221.148","2",System.currentTimeMillis()+"");
+//		System.out.println("rspEntity:" + rspEntity);
+//	}
+//	
+//	private void testQRBarPay() {
+//		String orderNo = "123456";
+//		ReqQRPayEntity reqEntity = ReqQRPayEntity.buildReqEntity("12",orderNo);
+//		ReqSignEntity signEntity = reqEntity.buildSignEntity();
+//		String str = JSON.toJSONString(signEntity);
+//		JSONObject jsonObj = JSON.parseObject(str,JSONObject.class);
+//		Set<java.util.Map.Entry<String, Object>> mSet = jsonObj.entrySet();
+//		Iterator<java.util.Map.Entry<String, Object>> iterator = mSet.iterator();
+//		//sort key
+//		TreeMap<String,Object> treeMap = new TreeMap<>(new PayKeyComparator());
+//		while(iterator.hasNext()) {
+//			java.util.Map.Entry<String, Object> entry = iterator.next();
+//			String key = entry.getKey();
+//			String val = jsonObj.get(key).toString();
+//			treeMap.put(key,val);
+//		}
+//		showTreeMap(treeMap);
+//		//获取sign code 参数
+//		String paraStr = PayUtil.getPayParams(treeMap);
+//		System.out.println("sign code params:" + paraStr + " secret:" +ConfigerPay.SECRET);
+//		//生成signCode
+//		String signCode = PayUtil.getSignCode(paraStr,ConfigerPay.SECRET);
+//		signCode = signCode.toUpperCase();
+//		System.out.println("sign code:" + signCode);
+//		//赋值signCode
+//		reqEntity.signValue = signCode;
+//		//signCode添加到请求参数中
+//		String reqStr = JSON.toJSONString(reqEntity);
+//		System.out.println(reqStr);//查询queryPayInfo.action
+//		RspHttpEntity rspEntity = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/yinHePay.action",true);
+//		System.out.println(rspEntity);
+//	}
+//	
+//	private void testQuery() {//20180514160177010290042
+//		String orderNo = "20180514170530910360015";
+//		ReqQueryEntity reqEntity = ReqQueryEntity.buildReqQueryEntity(true,orderNo);
+//		ReqSignEntity signEntity = reqEntity.buildSignEntity();
+//		String str = JSON.toJSONString(signEntity);
+//		JSONObject jsonObj = JSON.parseObject(str,JSONObject.class);
+//		Set<java.util.Map.Entry<String, Object>> mSet = jsonObj.entrySet();
+//		Iterator<java.util.Map.Entry<String, Object>> iterator = mSet.iterator();
+//		//sort key
+//		TreeMap<String,Object> treeMap = new TreeMap<>(new PayKeyComparator());
+//		while(iterator.hasNext()) {
+//			java.util.Map.Entry<String, Object> entry = iterator.next();
+//			String key = entry.getKey();
+//			String val = jsonObj.get(key).toString();
+//			treeMap.put(key,val);
+//		}
+//		showTreeMap(treeMap);
+//		//获取sign code 参数
+//		String paraStr = PayUtil.getPayParams(treeMap);
+//		System.out.println("sign code params:" + paraStr + " secret:" +ConfigerPay.SECRET);
+//		//生成signCode
+//		String signCode = PayUtil.getSignCode(paraStr,ConfigerPay.SECRET);
+//		signCode = signCode.toUpperCase();
+//		System.out.println("sign code:" + signCode);
+//		//赋值signCode
+//		reqEntity.signValue = signCode;
+//		//signCode添加到请求参数中
+//		String reqStr = JSON.toJSONString(reqEntity);
+//		System.out.println(reqStr);//查询queryPayInfo.action
+//		RspHttpEntity rspEntity = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/queryPayInfo.action",true);
+//		System.out.println(rspEntity);
+//	}
+//	
+//	public static void main(String[] args) {
+//		new PayDemo();
+//	}
+//	
+//	private static void showTreeMap(Map<String,Object> treeMap) {
+//		System.out.println("==========================================");
+//		Iterator<?> iterator = treeMap.entrySet().iterator();  
+//		while(iterator.hasNext()) {
+//			Entry<String, String> entry = (Entry<String, String>) iterator.next();
+//			String key = entry.getKey();
+//			Object val = entry.getValue();
+//			System.out.print(key + "=" +val + "\t");
+//		}
+//		System.out.println();
+//	}
+//	
+//	
+//	private void testPay() {
+//		String amt = "10.0";
+//		BigDecimal bigD = new BigDecimal(amt);
+//		amt = bigD.movePointRight(2).toString();
+//		System.out.println(amt);
+//		ReqPayEntity reqEntity = ReqPayEntity.buildReqEntity("127.0.0.1",amt, ""+System.currentTimeMillis());
+//		ReqSignEntity signEntity = reqEntity.buildSignEntity();
+//		String str = JSON.toJSONString(signEntity);
+//		JSONObject jsonObj = JSON.parseObject(str,JSONObject.class);
+//		Set<java.util.Map.Entry<String, Object>> mSet = jsonObj.entrySet();
+//		Iterator<java.util.Map.Entry<String, Object>> iterator = mSet.iterator();
+//		//sort key
+//		TreeMap<String,Object> treeMap = new TreeMap<>(new PayKeyComparator());
+//		while(iterator.hasNext()) {
+//			java.util.Map.Entry<String, Object> entry = iterator.next();
+//			String key = entry.getKey();
+//			String val = jsonObj.get(key).toString();
+//			treeMap.put(key,val);
+//		}
+//		//展示treemap
+//		showTreeMap(treeMap);
+//		//获取sign code 参数
+//		String paraStr = PayUtil.getPayParams(treeMap);
+//		System.out.println("sign code params:" + paraStr + " secret:" +ConfigerPay.SECRET);
+//		//生成signCode
+//		String signCode = PayUtil.getSignCode(paraStr,ConfigerPay.SECRET);
+//		signCode = signCode.toUpperCase();
+//		System.out.println("sign code:" + signCode);
+//		//赋值signCode
+//		reqEntity.signValue = signCode;
+//		//signCode添加到请求参数中
+//		String reqStr = JSON.toJSONString(reqEntity);
+//		System.out.println(reqStr);
+//		//发送  yinHePay.action  -> yinHePayH5.action
+//		RspHttpEntity rspEntity = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/yinHePayH5.action",true);
+//		System.out.println(rspEntity);
+//		if(rspEntity.isSucc) {
+//			RspYinHeEntity rEntity = JSON.parseObject(rspEntity.msg,RspYinHeEntity.class);
+//			System.out.println("isSucc:" +rEntity.isSucc());
+//		}else {
+//			System.out.println(rspEntity);
+//		}
+//	}
 }
