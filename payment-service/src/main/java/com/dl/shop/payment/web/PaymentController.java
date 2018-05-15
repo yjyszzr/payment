@@ -772,6 +772,7 @@ public class PaymentController extends AbstractBaseController{
 		String payCode = payLog.getPayCode();
 		BaseResult<RspOrderQueryEntity> baseResult = null;
 		logger.info("调用第三方订单查询接口 payCode:" + payCode + " payOrderSn:" + payLog.getPayOrderSn());
+		
 		if("app_rongbao".equals(payCode)) {
 			baseResult = RongUtil.queryOrderInfo(payLog.getPayOrderSn());
 		}else if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)) {
@@ -779,11 +780,13 @@ public class PaymentController extends AbstractBaseController{
 //			baseResult = wxpayUtil.orderQuery(payLog.getPayOrderSn());
 			baseResult = yinHeUtil.orderQuery(isInWeixin,payLog.getPayOrderSn());
 		}
+		
 		if(baseResult != null) {
 			if(baseResult.getCode() != 0) {
 				logger.info(loggerId+" 订单查询请求异常"+baseResult.getMsg());
 				return ResultGenerator.genFailResult("请求异常！",null);
 			}
+			
 			Integer payType = payLog.getPayType();
 			RspOrderQueryEntity response = baseResult.getData();
 			logger.info("调用第三方订单查询接口 返回成功" + 
@@ -922,65 +925,72 @@ public class PaymentController extends AbstractBaseController{
 			}
 			return ResultGenerator.genSuccessResult("订单已支付成功！", null);
 		}else {
-			//退回用户余额
-			String orderSn = payLog.getOrderSn();
-			OrderSnParam snParam = new OrderSnParam();
-			snParam.setOrderSn(orderSn);
-			BaseResult<OrderDTO> orderInfoByOrderSn = orderService.getOrderInfoByOrderSn(snParam);
-			if(orderInfoByOrderSn.getCode() != 0 || orderInfoByOrderSn.getData() == null) {
-				logger.info(loggerId+" 订单获取失败");
-				return ResultGenerator.genFailResult("订单获取失败！", null);
-			}
-			BigDecimal surplus = orderInfoByOrderSn.getData().getSurplus();
-			BigDecimal bonusAmount = orderInfoByOrderSn.getData().getBonus();
-			logger.info("surplus:" + surplus + " bonusAmount:" + bonusAmount);
-			if(surplus != null && surplus.doubleValue() > 0){
-				SurplusPayParam surplusPayParam = new SurplusPayParam();
-				surplusPayParam.setOrderSn(orderSn);
-				surplusPayParam.setSurplus(surplus);
-				surplusPayParam.setBonusMoney(bonusAmount);
-				int payType1 = 0;
-				surplusPayParam.setPayType(payType1);
-				surplusPayParam.setThirdPartName(payLog.getPayName());
-				surplusPayParam.setThirdPartPaid(payLog.getOrderAmount());
-				BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
-				logger.info("orderSn:" + orderSn + "surplus:" + surplus + " bonusAmount:" + bonusAmount + " payName:" + payLog.getPayName()
-						   + "getOrderAmount:" + payLog.getOrderAmount());
-				if(rollbackUserAccountChangeByPay.getCode() != 0) {
-					logger.error(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在回滚用户余额时出错！");
-				}
-			}
-			//更新paylog
-			try {
-				PayLog updatePayLog = new PayLog();
-				updatePayLog.setLogId(payLog.getLogId());
-				updatePayLog.setIsPaid(0);
-				updatePayLog.setPayMsg(response.getResult_msg());
-				payLogService.updatePayMsg(updatePayLog);
-			} catch (Exception e) {
-				logger.error(loggerId + " paylogid="+payLog.getLogId()+" , paymsg="+response.getResult_msg()+"，保存失败记录时出错", e);
-			}
+			
 			String payCode = response.getPayCode();
-			//融宝处理
-			if(RspOrderQueryEntity.PAY_CODE_RONGBAO.equals(payCode)) {
-				String code = response.getResult_code();
-				if(StringUtils.isBlank(code) || "3015".equals(code)) {//订单不存在
-					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
-				}else {
-					String tips = response.getResult_msg();
-					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"融宝服务返回[" + tips +"]");
-				}
-			//微信处理	
-			}else if(RspOrderQueryEntity.PAY_CODE_WECHAT.equals(payCode)){//wechat pay
-				String code = response.getResult_code();
-				String tips = response.getResult_msg();
-				if(StringUtils.isBlank(code) || response.isYinHeWeChatNotPay()) {
-					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
-				}else {
-					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"微信支付失败["+tips+"]");	
-				}
+			String code = response.getResult_code();
+			if(StringUtils.isBlank(code) || "3015".equals(code) || response.isYinHeWeChatNotPay()) {//融宝和银河返回值  为 订单不存在和未支付
+				dealWithPayFailure(orderService, payLog,payLogService, response);
 			}
-			return null;
+//			//融宝处理
+//			if(RspOrderQueryEntity.PAY_CODE_RONGBAO.equals(payCode)) {
+//				String code = response.getResult_code();
+//				if(StringUtils.isBlank(code) || "3015".equals(code)) {//订单不存在
+//					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
+//				}else {
+//					String tips = response.getResult_msg();
+//					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"融宝服务返回[" + tips +"]");
+//				}
+//			//微信处理	
+//			}else if(RspOrderQueryEntity.PAY_CODE_WECHAT.equals(payCode)){//wechat pay
+//				String code = response.getResult_code();
+//				String tips = response.getResult_msg();
+//				if(StringUtils.isBlank(code) || response.isYinHeWeChatNotPay()) {
+//					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
+//				}else {
+//					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"微信支付失败["+tips+"]");	
+//				}
+//			}
+//			return null;
 		}
+		return null;
+	}
+	
+	/**
+	 * 第三方返回结果为非成功状态：包括不存在和失败
+	 * @param payLog
+	 * @param response
+	 * @return
+	 */
+	public static BaseResult<String> dealWithPayFailure(IOrderService orderService,PayLog payLog,PayLogService payLogService,RspOrderQueryEntity response) {
+		Integer loggerId = payLog.getLogId();
+		int currentTime = DateUtil.getCurrentTimeLong();
+		//更新order
+		UpdateOrderInfoParam param = new UpdateOrderInfoParam();
+		param.setPayStatus(0);//支付失败
+		param.setOrderStatus(8);//订单支付失败
+		param.setPayTime(currentTime);
+		param.setPaySn(payLog.getLogId()+"");
+		param.setPayName(payLog.getPayName());
+		param.setPayCode(payLog.getPayCode());
+		param.setOrderSn(payLog.getOrderSn());
+		BaseResult<String> updateOrderInfo = orderService.updateOrderInfo(param);
+		if(updateOrderInfo.getCode() != 0) {
+			logger.error(loggerId+" paylogid="+"ordersn=" + payLog.getOrderSn()+"更新订单成功状态失败");
+			return ResultGenerator.genFailResult("更新订单成功状态失败！", "");
+		}
+		
+		//更新paylog
+		try {
+			PayLog updatePayLog = new PayLog();
+			updatePayLog.setLogId(payLog.getLogId());
+			updatePayLog.setIsPaid(0);
+			updatePayLog.setPayMsg(response.getResult_msg());
+			payLogService.updatePayMsg(updatePayLog);
+		} catch (Exception e) {
+			logger.error(loggerId + " paylogid="+payLog.getLogId()+" , paymsg="+response.getResult_msg()+"，保存失败记录时出错", e);
+			return ResultGenerator.genFailResult(loggerId + " paylogid="+payLog.getLogId()+" , paymsg="+response.getResult_msg()+"，保存失败记录时出错", "");
+		}
+		
+		return ResultGenerator.genSuccessResult("更新订单成功状态成功！", "");
 	}
 }

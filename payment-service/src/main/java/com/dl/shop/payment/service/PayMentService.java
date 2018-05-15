@@ -134,26 +134,26 @@ public class PayMentService extends AbstractService<PayMent> {
     	updatepayLog.setOrderSn(or.getOrderSn());
     	payLogService.updatePayLogByOrderSn(updatepayLog);
     	
-    	SurplusPayParam surplusPayParam = new SurplusPayParam();
-    	surplusPayParam.setOrderSn(or.getOrderSn());
-    	BaseResult<SurplusPaymentCallbackDTO> rollRst = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
-    	if(rollRst.getCode() != 0) {
-    		log.error(rollRst.getMsg());
-    		return;
-    	}
-    	
-    	Integer userBonusId = or.getUserBonusId();
-    	if(null != userBonusId) {
-    		UserBonusParam userbonusParam = new UserBonusParam();
-    		userbonusParam.setUserBonusId(userBonusId);
-    		userbonusParam.setOrderSn(or.getOrderSn());
-    		userAccountService.rollbackChangeUserAccountByCreateOrder(userbonusParam);
-    	}
-    	if(rollRst.getCode() != 0) {
-    		log.error("-------------------支付超时订单回滚用户余额异常,code="+rollRst.getCode()+"  msg:"+rollRst.getMsg()+" 订单号："+or.getOrderSn());
-    	}else {
-    		log.info(JSON.toJSONString("用户"+or.getUserId()+"超时支付订单"+or.getOrderSn()+"已回滚账户余额"));
-    	}
+//    	SurplusPayParam surplusPayParam = new SurplusPayParam();
+//    	surplusPayParam.setOrderSn(or.getOrderSn());
+//    	BaseResult<SurplusPaymentCallbackDTO> rollRst = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
+//    	if(rollRst.getCode() != 0) {
+//    		log.error(rollRst.getMsg());
+//    		return;
+//    	}
+//    	
+//    	Integer userBonusId = or.getUserBonusId();
+//    	if(null != userBonusId) {
+//    		UserBonusParam userbonusParam = new UserBonusParam();
+//    		userbonusParam.setUserBonusId(userBonusId);
+//    		userbonusParam.setOrderSn(or.getOrderSn());
+//    		userAccountService.rollbackChangeUserAccountByCreateOrder(userbonusParam);
+//    	}
+//    	if(rollRst.getCode() != 0) {
+//    		log.error("-------------------支付超时订单回滚用户余额异常,code="+rollRst.getCode()+"  msg:"+rollRst.getMsg()+" 订单号："+or.getOrderSn());
+//    	}else {
+//    		log.info(JSON.toJSONString("用户"+or.getUserId()+"超时支付订单"+or.getOrderSn()+"已回滚账户余额"));
+//    	}
 
     }
     
