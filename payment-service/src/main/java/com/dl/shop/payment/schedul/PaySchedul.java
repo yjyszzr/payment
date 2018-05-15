@@ -22,12 +22,8 @@ import com.dl.order.dto.OrderDTO;
 import com.dl.order.param.OrderCondtionParam;
 import com.dl.order.param.OrderSnParam;
 import com.dl.order.param.UpdateOrderInfoParam;
-<<<<<<< HEAD
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.model.PayLog;
-=======
-import com.dl.shop.payment.dao.PayLogMapper;
->>>>>>> refs/remotes/origin/master
 import com.dl.shop.payment.pay.common.PayManager;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.common.PayManager.QueueItemEntity;
