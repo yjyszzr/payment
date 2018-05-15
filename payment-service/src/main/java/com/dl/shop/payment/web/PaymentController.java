@@ -68,6 +68,7 @@ import com.dl.shop.payment.param.RechargeParam;
 import com.dl.shop.payment.param.ReqOrderQueryParam;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
 import com.dl.shop.payment.param.WithdrawParam;
+import com.dl.shop.payment.pay.common.PayManager;
 import com.dl.shop.payment.pay.common.RspHttpEntity;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
@@ -444,8 +445,9 @@ public class PaymentController extends AbstractBaseController{
 		}else {
 			logger.info("paylog save succ:" + " payLogId:" + payLog.getPayIp() + " paycode:" + payLog.getPayCode() + " payname:" + payLog.getPayName());
 		}
+		//url下发后，服务器开始主动轮序订单状态
+		PayManager.getInstance().addReqQueue(orderSn,savePayLog.getPayOrderSn(),paymentDto.getPayCode());
 		BaseResult payBaseResult = null;
-//		PayManager.getInstance().addReqQueue(orderSn,savePayLog.getPayOrderSn(),paymentDto.getPayCode());
 		if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)) {
 			logger.info("生成微信支付url:" + "inWechat:" + (param.getInnerWechat()==1) + " payCode:" + savePayLog.getPayCode());
 			payBaseResult = getWechatPayUrl(param.getInnerWechat()==1,savePayLog, payIp, orderId);
@@ -788,9 +790,9 @@ public class PaymentController extends AbstractBaseController{
 			response.getResult_msg() +" payType:" +payType + " isSucc:" + response.isSucc() + 
 			"resultCode:"+response.getResult_code());
 			if(0 == payType) {
-				return orderOptions(loggerId, payLog, response);
+				return orderOptions(orderService,payLogService,userAccountService,loggerId, payLog, response);
 			}else if(1 == payType){
-				return rechargeOptions(loggerId, payLog, response);
+				return rechargeOptions(userRechargeService,userAccountService,payLogService,loggerId, payLog, response);
 			}
 		}else {
 			return ResultGenerator.genFailResult("未获取到订单信息，开发中...", null);
@@ -805,7 +807,8 @@ public class PaymentController extends AbstractBaseController{
 	 * @param response
 	 * @return
 	 */
-	private BaseResult<RspOrderQueryDTO> rechargeOptions(String loggerId, PayLog payLog, RspOrderQueryEntity response) {
+	public static BaseResult<RspOrderQueryDTO> rechargeOptions(UserRechargeService userRechargeService,
+			IUserAccountService userAccountService,PayLogService payLogService,String loggerId, PayLog payLog, RspOrderQueryEntity response) {
 //		Integer tradeState = response.getTradeState();
 		RspOrderQueryDTO rspEntity = new RspOrderQueryDTO();
 		if(response.isSucc()) {
@@ -888,7 +891,7 @@ public class PaymentController extends AbstractBaseController{
 	 * @param response
 	 * @return
 	 */
-	private BaseResult<RspOrderQueryDTO> orderOptions(String loggerId, PayLog payLog, RspOrderQueryEntity response) {
+	public static BaseResult<RspOrderQueryDTO> orderOptions(IOrderService orderService, PayLogService payLogService,IUserAccountService userAccountService,String loggerId, PayLog payLog, RspOrderQueryEntity response) {
 		if(response.isSucc()) {
 			int currentTime = DateUtil.getCurrentTimeLong();
 			//更新order

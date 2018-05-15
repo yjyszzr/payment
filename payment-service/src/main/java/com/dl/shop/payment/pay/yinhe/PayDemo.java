@@ -1,11 +1,14 @@
 package com.dl.shop.payment.pay.yinhe;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.shop.payment.pay.common.HttpUtil;
@@ -31,10 +34,43 @@ public class PayDemo {
 //		testPay();
 //		testQRBarPay();
 //		testUtil();
-		testRefund();
+//		testRefund();
 //		testPayManager();
+		testListRemove();
 	}
 
+	private void testListRemove() {
+		List<Integer> mList = new ArrayList<Integer>();
+		mList.add(1);
+		mList.add(2);
+		mList.add(6);
+		mList.add(5);
+		mList.add(6);
+		mList.add(7);
+		int size = mList.size();
+		System.out.println("size:" + size);
+		showList(mList);
+		for(int i = 0;i < mList.size();i++) {
+			int data = mList.get(i);
+			if(data == 6 || data == 7) {
+				int rData = mList.remove(i);
+				System.out.println("remove data:" + rData);
+				showList(mList);
+			}
+		}
+		size = mList.size();
+		showList(mList);
+		System.out.println("size:" + size);
+		
+	}
+	
+	private void showList(List<Integer> mList) {
+		for(int i = 0;i < mList.size();i++) {
+			System.out.print(mList.get(i) + "\t");
+		}
+		System.out.println();
+	}
+	
 	private void testPayManager() {
 		PayManager.getInstance().addReqQueue("123456",null,"app_weixin");
 	}

@@ -22,12 +22,17 @@ import com.dl.order.dto.OrderDTO;
 import com.dl.order.param.OrderCondtionParam;
 import com.dl.order.param.OrderSnParam;
 import com.dl.order.param.UpdateOrderInfoParam;
+import com.dl.shop.payment.dto.RspOrderQueryDTO;
+import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.pay.common.PayManager;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.common.PayManager.QueueItemEntity;
+import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
 import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
+import com.dl.shop.payment.service.UserRechargeService;
+import com.dl.shop.payment.web.PaymentController;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,9 +48,10 @@ public class PaySchedul {
 	private IOrderService orderService;
 	@Resource
 	private PayLogService payLogService;
-	
 	@Resource
 	private PayMentService payMentService;
+	@Resource
+	private UserRechargeService userRechargeService;
 	
 	@Scheduled(cron = "0 0/5 * * * ?")
     public void dealBeyondPayTimeOrder() {
@@ -72,51 +78,70 @@ public class PaySchedul {
 	/**
 	 * 处理订单支付超时的定时任务
 	 */
-//	@Scheduled(cron = "0 0/1 * * * ?")
-//	@Scheduled(fixedRate = 1000*20)
-//    public void dealWithNotPayAndBeyondTimeOrder() {
-//		logger.info("查询第三方订单信息定时器...");
-////		log.info("结束执行处理订单支付超时的定时任务");
-//		List<QueueItemEntity> mVector = PayManager.getInstance().getList();
-//		if(mVector.size() > 0) {
-//			for(int i = 0;i < mVector.size();i++) {
-//				QueueItemEntity entity = mVector.get(i);
-//				int cnt = entity.cnt;
-//				if(cnt >= QueueItemEntity.MAX_CNT) {
-//					mVector.remove(entity);
-//				}
-//				entity.cnt++;
-//				task(entity);
-//			}	
-//		}
-//	}
-
-	private void task(QueueItemEntity entity) {
-		//http request
-		String payCode = entity.payCode;
-		String payOrderSn = entity.payOrderSn;
-		if("app_weixin".equals(payCode)) {
-			YinHeUtil yinHeUtil = new YinHeUtil();
-			BaseResult<RspOrderQueryEntity> baseResult = yinHeUtil.orderQuery(false,payOrderSn);
-			if(baseResult != null && baseResult.getCode() == 0) {
-				RspOrderQueryEntity dataEntity = baseResult.getData();
-				if(dataEntity != null && dataEntity.isSucc()) {//内部timer query
-					entity.cnt = QueueItemEntity.MAX_CNT;
-					logger.info("内部timer查詢支付成功... orderNo:" + entity.orderSn);
-					BaseResult<String> bResult = optionMoney(entity);
-					if(bResult != null && bResult.getCode() == 0) {
-						logger.info("混合支付扣除余额成功...");
-					}else {
-						logger.info("混合支付扣除余额失败...");
-					}
-				}else {
-					logger.info("内部timer查詢支付失敗...");
+	@Scheduled(cron = "0 0/1 * * * ?")
+	@Scheduled(fixedRate = 1000*10)
+    public void timerOrderQueryScheduled() {
+		String loggerId = "timer_orderquery_" + System.currentTimeMillis();
+//		log.info("结束执行处理订单支付超时的定时任务");
+		List<QueueItemEntity> mVector = PayManager.getInstance().getList();
+		if(mVector.size() > 0) {
+			for(int i = 0;i < mVector.size();i++) {
+				QueueItemEntity entity = mVector.get(i);
+				int cnt = entity.cnt;
+				if(cnt >= QueueItemEntity.MAX_CNT) {
+					mVector.remove(entity);
 				}
-			}else {
-				logger.info("内部timer查詢支付失敗...");
+				entity.cnt++;
+				boolean succ = task(loggerId,entity);
+				if(succ) {
+					entity.cnt = QueueItemEntity.MAX_CNT;
+				}
 			}
 		}
 	}
+
+	private boolean task(String loggerId,QueueItemEntity entity) {
+		boolean succ = false;
+		BaseResult<RspOrderQueryEntity> baseResult = null;
+		//http request
+		String payCode = entity.payCode;
+		String payOrderSn = entity.payOrderSn;
+		PayLog payLog = payLogService.findPayLogByOrderSign(payOrderSn);
+		if(payLog == null) {
+			return succ;
+		}
+		int isPaid = payLog.getIsPaid();
+		if(isPaid == 1) {
+			logger.info("[task]" + "payLogId:" + payLog.getPayIp() + " 已支付...");
+			succ = true;
+			return succ;
+		}
+		if("app_rongbao".equals(payCode)) {
+			baseResult = RongUtil.queryOrderInfo(payOrderSn);
+		}else if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)) {
+			YinHeUtil yinHeUtil = new YinHeUtil();
+			boolean isInWeChat = "app_weixin_h5".equals(payCode);
+			baseResult = yinHeUtil.orderQuery(isInWeChat,payOrderSn);
+		}
+		if(baseResult == null || baseResult.getCode() != 0) {
+			logger.info("订单支付状态轮询第三方[" + baseResult.getMsg()+"]");
+			return succ;
+		}
+		RspOrderQueryEntity rspEntity = baseResult.getData();
+		succ = rspEntity.isSucc();
+		if(rspEntity != null && rspEntity.isSucc()) {
+			logger.info("第三方定时器查询订单 payordersn:" + rspEntity.getOrder_no() + " succ..");
+			Integer payType = payLog.getPayType();
+			BaseResult<RspOrderQueryDTO> bResult = null;
+			if(payType == 0) {
+				bResult = PaymentController.orderOptions(orderService, payLogService, userAccountService, loggerId, payLog,rspEntity);
+			}else if(payType == 1) {
+				bResult = PaymentController.rechargeOptions(userRechargeService,userAccountService, payLogService, loggerId, payLog, rspEntity);
+			}
+		}
+		return succ;
+	}
+	
 	
 	//第三方返回成功，扣除钱包余额
 	private BaseResult<String> optionMoney(QueueItemEntity entity) {

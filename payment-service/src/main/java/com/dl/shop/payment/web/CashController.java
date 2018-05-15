@@ -213,7 +213,7 @@ public class CashController {
 		WithDrawParam withdrawParam = new WithDrawParam();
 		withdrawParam.setAmount(new BigDecimal(totalAmount));
 		withdrawParam.setPayId(widthDrawSn);
-		withdrawParam.setThirdPartName("融宝");
+		withdrawParam.setThirdPartName("银行卡");
 		withdrawParam.setThirdPartPaid(new BigDecimal(totalAmount));
 		withdrawParam.setUserId(SessionUtil.getUserId());
 		BaseResult<String> withdrawRst = userAccountService.withdrawUserMoney(withdrawParam);
@@ -245,7 +245,7 @@ public class CashController {
 				updateParams.setStatus(ProjectConstant.STATUS_SUCC);
 				updateParams.setPayTime(DateUtil.getCurrentTimeLong());
 				updateParams.setPaymentId(widthDrawSn);
-				updateParams.setPaymentName("融宝提现");
+				updateParams.setPaymentName("银行卡提现");
 				userWithdrawService.updateWithdraw(updateParams);
 				
 				//保存提现中状态记录 dl_user_withdraw_log
