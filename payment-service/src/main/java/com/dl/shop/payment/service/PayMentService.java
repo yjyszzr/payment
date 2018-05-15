@@ -8,6 +8,7 @@ import javax.annotation.Resource;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.dl.base.result.BaseResult;
@@ -94,6 +95,7 @@ public class PayMentService extends AbstractService<PayMent> {
     /**
      * 处理支付超时订单
      */
+    @Transactional
     public void dealBeyondPayTimeOrder(OrderDTO or) {
     	UpdateOrderInfoParam updateOrderInfoParam = new UpdateOrderInfoParam();
     	updateOrderInfoParam.setOrderSn(or.getOrderSn());
@@ -135,6 +137,10 @@ public class PayMentService extends AbstractService<PayMent> {
     	SurplusPayParam surplusPayParam = new SurplusPayParam();
     	surplusPayParam.setOrderSn(or.getOrderSn());
     	BaseResult<SurplusPaymentCallbackDTO> rollRst = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
+    	if(rollRst.getCode() != 0) {
+    		log.error(rollRst.getMsg());
+    		return;
+    	}
     	
     	Integer userBonusId = or.getUserBonusId();
     	if(null != userBonusId) {
