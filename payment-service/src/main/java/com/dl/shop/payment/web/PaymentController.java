@@ -925,12 +925,12 @@ public class PaymentController extends AbstractBaseController{
 			}
 			return ResultGenerator.genSuccessResult("订单已支付成功！", null);
 		}else {
-			
-			String payCode = response.getPayCode();
-			String code = response.getResult_code();
-			if(StringUtils.isBlank(code) || "3015".equals(code) || response.isYinHeWeChatNotPay()) {//融宝和银河返回值  为 订单不存在和未支付
-				dealWithPayFailure(orderService, payLog,payLogService, response);
-			}
+			//预扣款 的方案 这里什么也不做
+//			String payCode = response.getPayCode();
+//			String code = response.getResult_code();
+//			if(StringUtils.isBlank(code) || "3015".equals(code) || response.isYinHeWeChatNotPay()) {//融宝和银河返回值  为 订单不存在和未支付
+//				dealWithPayFailure(orderService, payLog,payLogService, response);
+//			}
 //			//融宝处理
 //			if(RspOrderQueryEntity.PAY_CODE_RONGBAO.equals(payCode)) {
 //				String code = response.getResult_code();
@@ -964,20 +964,20 @@ public class PaymentController extends AbstractBaseController{
 	public static BaseResult<String> dealWithPayFailure(IOrderService orderService,PayLog payLog,PayLogService payLogService,RspOrderQueryEntity response) {
 		Integer loggerId = payLog.getLogId();
 		int currentTime = DateUtil.getCurrentTimeLong();
-		//更新order
-		UpdateOrderInfoParam param = new UpdateOrderInfoParam();
-		param.setPayStatus(0);//支付失败
-		param.setOrderStatus(8);//订单支付失败
-		param.setPayTime(currentTime);
-		param.setPaySn(payLog.getLogId()+"");
-		param.setPayName(payLog.getPayName());
-		param.setPayCode(payLog.getPayCode());
-		param.setOrderSn(payLog.getOrderSn());
-		BaseResult<String> updateOrderInfo = orderService.updateOrderInfo(param);
-		if(updateOrderInfo.getCode() != 0) {
-			logger.error(loggerId+" paylogid="+"ordersn=" + payLog.getOrderSn()+"更新订单成功状态失败");
-			return ResultGenerator.genFailResult("更新订单成功状态失败！", "");
-		}
+//		//更新order
+//		UpdateOrderInfoParam param = new UpdateOrderInfoParam();
+//		param.setPayStatus(0);//支付失败
+//		param.setOrderStatus(8);//订单支付失败
+//		param.setPayTime(currentTime);
+//		param.setPaySn(payLog.getLogId()+"");
+//		param.setPayName(payLog.getPayName());
+//		param.setPayCode(payLog.getPayCode());
+//		param.setOrderSn(payLog.getOrderSn());
+//		BaseResult<String> updateOrderInfo = orderService.updateOrderInfo(param);
+//		if(updateOrderInfo.getCode() != 0) {
+//			logger.error(loggerId+" paylogid="+"ordersn=" + payLog.getOrderSn()+"更新订单成功状态失败");
+//			return ResultGenerator.genFailResult("更新订单成功状态失败！", "");
+//		}
 		
 		//更新paylog
 		try {
