@@ -3,8 +3,6 @@ package com.dl.shop.payment.pay.common;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.dl.base.result.BaseResult;
-import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
 
 public class PayManager {
 	private final static Logger logger = LoggerFactory.getLogger(PayManager.class);
@@ -35,27 +33,27 @@ public class PayManager {
 		mVector.add(entity);
 	}
 	
-	private void task(QueueItemEntity entity) {
-		//http request
-		String payCode = entity.payCode;
-		String orderSn = entity.orderSn;
-		if("app_weixin".equals(payCode)) {
-			YinHeUtil yinHeUtil = new YinHeUtil();
-			BaseResult<RspOrderQueryEntity> baseResult = yinHeUtil.orderQuery(false,orderSn);
-			if(baseResult != null && baseResult.getCode() == 0) {
-				RspOrderQueryEntity dataEntity = baseResult.getData();
-				if(dataEntity != null && dataEntity.isSucc()) {//内部timer query
-					entity.cnt = QueueItemEntity.MAX_CNT;
-					logger.info("内部timer查詢支付成功... orderNo:" + dataEntity.getOrder_no());
-					optionMoney(entity);
-				}else {
-					logger.info("内部timer查詢支付失敗...");
-				}
-			}else {
-				logger.info("内部timer查詢支付失敗...");
-			}
-		}
-	}
+//	private void task(QueueItemEntity entity) {
+//		//http request
+//		String payCode = entity.payCode;
+//		String orderSn = entity.orderSn;
+//		if("app_weixin".equals(payCode)) {
+//			YinHeUtil yinHeUtil = new YinHeUtil();
+//			BaseResult<RspOrderQueryEntity> baseResult = yinHeUtil.orderQuery(false,orderSn);
+//			if(baseResult != null && baseResult.getCode() == 0) {
+//				RspOrderQueryEntity dataEntity = baseResult.getData();
+//				if(dataEntity != null && dataEntity.isSucc()) {//内部timer query
+//					entity.cnt = QueueItemEntity.MAX_CNT;
+//					logger.info("内部timer查詢支付成功... orderNo:" + dataEntity.getOrder_no());
+//					optionMoney(entity);
+//				}else {
+//					logger.info("内部timer查詢支付失敗...");
+//				}
+//			}else {
+//				logger.info("内部timer查詢支付失敗...");
+//			}
+//		}
+//	}
 	
 	private void optionMoney(QueueItemEntity entity) {
 //		String payCode = entity.payCode;
