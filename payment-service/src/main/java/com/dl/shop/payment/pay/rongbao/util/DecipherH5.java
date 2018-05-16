@@ -18,6 +18,7 @@ import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
 @Component
 public class DecipherH5 {
 
+	@Resource
 	private ReapalH5Config rongCfg;
 	
 	/**
@@ -37,7 +38,7 @@ public class DecipherH5 {
       	String data = map.get("data");
 
       	//获取自己私钥解密
-	      PrivateKey pvkformPfx = RSA.getPvkformPfx(rongCfg.getPrivateKey(),"123456");
+	      PrivateKey pvkformPfx = RSA.getPvkformPfx(rongCfg.getPrivateKey(),rongCfg.getPassword());
 	      String decryptData = RSA.decrypt(encryptkey, pvkformPfx);
 	
 	      post = AES.decryptFromBase64(data, decryptData);
@@ -104,7 +105,7 @@ public class DecipherH5 {
 	 */
 	public String decryptData(String encryptkey,String data) throws Exception {
       //获取自己私钥解密
-      PrivateKey pvkformPfx = RSA.getPvkformPfx(rongCfg.getPrivateKey(), "123456");
+      PrivateKey pvkformPfx = RSA.getPvkformPfx(rongCfg.getPrivateKey(),rongCfg.getPassword());
       String decryptData = RSA.decrypt(encryptkey, pvkformPfx);
       return AES.decryptFromBase64(data, decryptData);
 	}
