@@ -12,4 +12,6 @@ public class GoPayParam {
 	private String payCode;
 	@ApiModelProperty("是否在微信内部打开支付？0不是微信内部 1微信内部")
 	private int innerWechat; 
+	@ApiModelProperty("是否H5打开该页")
+	private boolean isH5;
 }

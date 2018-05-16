@@ -11,8 +11,11 @@ import lombok.Data;
 @Configuration
 public class ConfigerPay {
 	
-	@Value("${yinhe.app_wechat_jump}")
-	private String URL_PAY_WECHAT;
+	@Value("${yinhe.app_wechat_jump_h5}")
+	private String URL_PAY_WECHAT_H5;
+	
+	@Value("${yinhe.app_wechat_jump_app}")
+	private String URL_PAY_WECHAT_APP;
 	
 	@Value("${yinhe.app_org_no}")
 	private String ORG_NO = "2188";
