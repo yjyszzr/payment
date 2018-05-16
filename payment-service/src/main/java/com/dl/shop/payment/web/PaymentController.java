@@ -454,7 +454,7 @@ public class PaymentController extends AbstractBaseController{
 		BaseResult payBaseResult = null;
 		if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)) {
 			logger.info("生成微信支付url:" + "inWechat:" + (param.getInnerWechat()==1) + " payCode:" + savePayLog.getPayCode());
-			payBaseResult = getWechatPayUrl(param.getInnerWechat()==1,savePayLog, payIp, orderId);
+			payBaseResult = getWechatPayUrl(param.getInnerWechat()==1,0,savePayLog, payIp, orderId);
 			if(payBaseResult != null &&payBaseResult.getData() != null) {
 				String str = payBaseResult.getData()+"";
 				logger.info("生成支付url成功:" + str);
@@ -491,9 +491,10 @@ public class PaymentController extends AbstractBaseController{
 	 * @param savePayLog
 	 * @param payIp
 	 * @param orderId
+	 * @param payType 0->支付   1->充值  
 	 * @return
 	 */
-	private BaseResult<?> getWechatPayUrl(boolean isInnerWeChat,PayLog savePayLog,String payIp,String orderId) {
+	private BaseResult<?> getWechatPayUrl(boolean isInnerWeChat,int payType,PayLog savePayLog,String payIp,String orderId) {
 		BaseResult<?> payBaseResult = null;
 		String strAmt = savePayLog.getOrderAmount().doubleValue()+"";
 		BigDecimal bigD = new BigDecimal(strAmt);
@@ -534,8 +535,7 @@ public class PaymentController extends AbstractBaseController{
 						logger.error(e.getMessage());
 					}
 					if(!TextUtils.isEmpty(encodeUrl)) {
-						url = ReapalH5Config.URL_PAY_WECHAT+"?data="+encodeUrl+"&redirect_uri=" + redirectUri;
-//						url = ReapalH5Config.URL_PAY_WECHAT+"?data="+encodeUrl;
+						url = cfgPay.getURL_PAY_WECHAT()+"?data="+encodeUrl+"&payLogId=" + payLogId +"&orderId=" + orderId+"&payType="+payType;
 					}else {
 						logger.info("encodeUrl失败~");
 					}
@@ -611,7 +611,7 @@ public class PaymentController extends AbstractBaseController{
 		BaseResult payBaseResult = null;
 		if("app_weixin".equals(payCode)) {
 			logger.info("微信支付url开始生成...isWechat:" + (param.getInnerWechat()==1) + " payOrderSn:" + savePayLog.getPayOrderSn());
-			payBaseResult = getWechatPayUrl(param.getInnerWechat()==1,savePayLog, payIp, orderSn);
+			payBaseResult = getWechatPayUrl(param.getInnerWechat()==1,1,savePayLog, payIp, orderSn);
 			logger.info("微信支付url生成成功 code" + payBaseResult.getCode() +" data:" +payBaseResult.getData());
 		}else if("app_rongbao".equals(payCode)) {
 			//生成支付链接信息
