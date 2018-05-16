@@ -540,7 +540,7 @@ public class PaymentController extends AbstractBaseController{
 					}
 					if(!TextUtils.isEmpty(encodeUrl)) {
 //						url = cfgPay.getURL_PAY_WECHAT()+"?data="+encodeUrl+"&payLogId=" + payLogId +"&orderId=" + orderId+"&payType="+payType;
-						url = encodeUrl;
+						url = rYinHeEntity.qrCode;
 					}else {
 						logger.info("encodeUrl失败~");
 					}
