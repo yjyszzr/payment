@@ -10,7 +10,6 @@ import lombok.Data;
 @Data
 @Configuration
 public class ConfigerPay {
-	
 	@Value("${yinhe.app_wechat_jump}")
 	private String URL_PAY_WECHAT;
 	
