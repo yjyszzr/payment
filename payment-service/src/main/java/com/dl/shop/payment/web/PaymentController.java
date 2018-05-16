@@ -122,6 +122,10 @@ public class PaymentController extends AbstractBaseController{
 	private PayUtil payUtil;
 	@Resource
 	private ConfigerPay cfgPay;
+	@Resource
+	private ReapalH5Config rongCfg;
+	@Resource
+	private RongUtil rongUtil;
 	
 	@ApiOperation(value="系统可用第三方支付方式", notes="系统可用第三方支付方式")
 	@PostMapping("/allPayment")
@@ -175,7 +179,7 @@ public class PaymentController extends AbstractBaseController{
 						reqEntity.setNote("出票失败退款操作");
 						reqEntity.setOrig_order_no(payLog.getPayOrderSn());
 						try {
-							RspRefundEntity rEntity = RongUtil.refundOrderInfo(reqEntity);
+							RspRefundEntity rEntity = rongUtil.refundOrderInfo(reqEntity);
 							logger.info("rEntity:" + rEntity.toString());
 							if(rEntity != null && rEntity.isSucc()) {
 								succThird = true;
@@ -472,7 +476,7 @@ public class PaymentController extends AbstractBaseController{
 			String data = JSON.toJSONString(reqEntity);
 			try {
 				data = URLEncoder.encode(data,"UTF-8");
-				String url = ReapalH5Config.URL_PAY + "?data="+data;
+				String url = rongCfg.getURL_PAY() + "?data="+data;
 				PayReturnDTO rEntity = new PayReturnDTO();
 				rEntity.setPayUrl(url);
 				rEntity.setPayLogId(savePayLog.getLogId()+"");
@@ -626,7 +630,7 @@ public class PaymentController extends AbstractBaseController{
 			String data = JSON.toJSONString(reqEntity);
 			try {
 				data = URLEncoder.encode(data,"UTF-8");
-				String url = ReapalH5Config.URL_PAY + "?data="+data;
+				String url = rongCfg.getURL_PAY() + "?data="+data;
 				PayReturnDTO rEntity = new PayReturnDTO();
 				rEntity.setPayUrl(url);
 				rEntity.setPayLogId(savePayLog.getLogId()+"");
@@ -778,7 +782,7 @@ public class PaymentController extends AbstractBaseController{
 		logger.info("调用第三方订单查询接口 payCode:" + payCode + " payOrderSn:" + payLog.getPayOrderSn());
 		
 		if("app_rongbao".equals(payCode)) {
-			baseResult = RongUtil.queryOrderInfo(payLog.getPayOrderSn());
+			baseResult = rongUtil.queryOrderInfo(payLog.getPayOrderSn());
 		}else if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)) {
 			boolean isInWeixin = "app_wexin_h5".equals(payCode);
 //			baseResult = wxpayUtil.orderQuery(payLog.getPayOrderSn());

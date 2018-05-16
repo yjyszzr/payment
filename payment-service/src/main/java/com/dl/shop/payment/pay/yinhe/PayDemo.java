@@ -1,28 +1,21 @@
 package com.dl.shop.payment.pay.yinhe;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.dl.base.util.MD5Utils;
 import com.dl.shop.payment.pay.common.HttpUtil;
-import com.dl.shop.payment.pay.common.PayManager;
 import com.dl.shop.payment.pay.common.RspHttpEntity;
 import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
 import com.dl.shop.payment.pay.yinhe.entity.ReqPayEntity;
-import com.dl.shop.payment.pay.yinhe.entity.ReqQRPayEntity;
-import com.dl.shop.payment.pay.yinhe.entity.ReqQueryEntity;
-import com.dl.shop.payment.pay.yinhe.entity.ReqRefundOrderEntity;
 import com.dl.shop.payment.pay.yinhe.entity.ReqSignEntity;
 import com.dl.shop.payment.pay.yinhe.entity.RspYinHeEntity;
 import com.dl.shop.payment.pay.yinhe.util.PayKeyComparator;
-import com.dl.shop.payment.pay.yinhe.util.PayUtil;
 
 /***
  * 支付代码
@@ -31,7 +24,7 @@ public class PayDemo {
 
 	public PayDemo() {
 //		testQuery();
-//		testPay();
+		testPay();
 //		testQRBarPay();
 //		testUtil();
 //		testRefund();
@@ -185,60 +178,117 @@ public class PayDemo {
 //		new PayDemo();
 //	}
 //	
-//	private static void showTreeMap(Map<String,Object> treeMap) {
-//		System.out.println("==========================================");
-//		Iterator<?> iterator = treeMap.entrySet().iterator();  
-//		while(iterator.hasNext()) {
-//			Entry<String, String> entry = (Entry<String, String>) iterator.next();
-//			String key = entry.getKey();
-//			Object val = entry.getValue();
-//			System.out.print(key + "=" +val + "\t");
-//		}
-//		System.out.println();
-//	}
+	private static void showTreeMap(Map<String,Object> treeMap) {
+		System.out.println("==========================================");
+		Iterator<?> iterator = treeMap.entrySet().iterator();  
+		while(iterator.hasNext()) {
+			Entry<String, String> entry = (Entry<String, String>) iterator.next();
+			String key = entry.getKey();
+			Object val = entry.getValue();
+			System.out.print(key + "=" +val + "\t");
+		}
+		System.out.println();
+	}
 //	
-//	
-//	private void testPay() {
-//		String amt = "10.0";
-//		BigDecimal bigD = new BigDecimal(amt);
-//		amt = bigD.movePointRight(2).toString();
-//		System.out.println(amt);
-//		ReqPayEntity reqEntity = ReqPayEntity.buildReqEntity("127.0.0.1",amt, ""+System.currentTimeMillis());
-//		ReqSignEntity signEntity = reqEntity.buildSignEntity();
-//		String str = JSON.toJSONString(signEntity);
-//		JSONObject jsonObj = JSON.parseObject(str,JSONObject.class);
-//		Set<java.util.Map.Entry<String, Object>> mSet = jsonObj.entrySet();
-//		Iterator<java.util.Map.Entry<String, Object>> iterator = mSet.iterator();
-//		//sort key
-//		TreeMap<String,Object> treeMap = new TreeMap<>(new PayKeyComparator());
-//		while(iterator.hasNext()) {
-//			java.util.Map.Entry<String, Object> entry = iterator.next();
-//			String key = entry.getKey();
-//			String val = jsonObj.get(key).toString();
-//			treeMap.put(key,val);
-//		}
-//		//展示treemap
-//		showTreeMap(treeMap);
-//		//获取sign code 参数
-//		String paraStr = PayUtil.getPayParams(treeMap);
-//		System.out.println("sign code params:" + paraStr + " secret:" +ConfigerPay.SECRET);
-//		//生成signCode
-//		String signCode = PayUtil.getSignCode(paraStr,ConfigerPay.SECRET);
-//		signCode = signCode.toUpperCase();
-//		System.out.println("sign code:" + signCode);
-//		//赋值signCode
-//		reqEntity.signValue = signCode;
-//		//signCode添加到请求参数中
-//		String reqStr = JSON.toJSONString(reqEntity);
-//		System.out.println(reqStr);
-//		//发送  yinHePay.action  -> yinHePayH5.action
-//		RspHttpEntity rspEntity = HttpUtil.sendMsg(reqStr,ConfigerPay.URL_PAY+"/yinHePayH5.action",true);
-//		System.out.println(rspEntity);
-//		if(rspEntity.isSucc) {
-//			RspYinHeEntity rEntity = JSON.parseObject(rspEntity.msg,RspYinHeEntity.class);
-//			System.out.println("isSucc:" +rEntity.isSucc());
-//		}else {
-//			System.out.println(rspEntity);
-//		}
-//	}
+	/**
+	 * yinhe.app.app_id=wx50d353a8b7b77225
+	   yinhe.app_secret=b4df7b2d0cb5a90659afcb165b701d5e
+	   yinhe.app_mch_id=1503174711
+	   yinhe.app_org_no=2188
+	   yinhe.app_charset=UTF-8
+	   yinhe.app_sign=MD5
+	   yinhe.app_url_pay=http://zfyun.com.cn:8080/YinHeLoan/yinHe
+	   yinhe.app_notify=http://api.caixiaomi.net/api/payment/payment/wxpay/notify
+	   yinhe.app_redirect=http://m.caixiaomi.net/static/payCallBack/payCallBack.html
+	   yinhe.app_device=kdt1070605
+	   yinhe_app_screct=b4df7b2d0cb5a90659afcb165b701d5e
+	   yinhe.app_wechat_jump=http://zf.caixiaomi.net/reapal-h5-api/wechat/payMatched.html
+	 */
+	private void testPay() {
+		String URL_PAY = "http://zfyun.com.cn:8080/YinHeLoan/yinHe";
+		String amt = "1";
+		String SECRET = "b4df7b2d0cb5a90659afcb165b701d5e";
+		BigDecimal bigD = new BigDecimal(amt);
+		amt = bigD.movePointRight(2).toString();
+		System.out.println(amt);
+		ReqPayEntity reqEntity = new ReqPayEntity();
+		reqEntity.setOrgNo("2188");
+		reqEntity.setAmt(amt);
+		reqEntity.setBackUrl("http://api.caixiaomi.net/api/payment/payment/wxpay/notify");
+		reqEntity.setCharset("UTF-8");
+		reqEntity.setTermType("RQ");
+		reqEntity.setTxtTime(ConfigerPay.getPayTime());
+		reqEntity.setSignType("MD5");
+		reqEntity.setTransNo("201805160000000001");
+		reqEntity.setMerId("1503174711");
+		reqEntity.setPayType("1");
+		reqEntity.setInWechat("0");
+		
+		ReqSignEntity signEntity = reqEntity.buildSignEntity();
+		String str = JSON.toJSONString(signEntity);
+		JSONObject jsonObj = JSON.parseObject(str,JSONObject.class);
+		Set<java.util.Map.Entry<String, Object>> mSet = jsonObj.entrySet();
+		Iterator<java.util.Map.Entry<String, Object>> iterator = mSet.iterator();
+		//sort key
+		TreeMap<String,Object> treeMap = new TreeMap<>(new PayKeyComparator());
+		while(iterator.hasNext()) {
+			java.util.Map.Entry<String, Object> entry = iterator.next();
+			String key = entry.getKey();
+			String val = jsonObj.get(key).toString();
+			treeMap.put(key,val);
+		}
+		//展示treemap
+		showTreeMap(treeMap);
+		//获取sign code 参数
+		String paraStr = getPayParams(treeMap);
+		System.out.println("sign code params:" + paraStr + " secret:" + SECRET);
+		//生成signCode
+		String signCode = getSignCode(paraStr,SECRET);
+		signCode = signCode.toUpperCase();
+		System.out.println("sign code:" + signCode);
+		//赋值signCode
+		reqEntity.setSignValue(signCode);
+		//signCode添加到请求参数中
+		String reqStr = JSON.toJSONString(reqEntity);
+		System.out.println(reqStr);
+		//发送  yinHePay.action  -> yinHePayH5.action
+		RspHttpEntity rspEntity = HttpUtil.sendMsg(reqStr,URL_PAY+"/yinHePayH5.action",true);
+		System.out.println(rspEntity);
+		if(rspEntity.isSucc) {
+			RspYinHeEntity rEntity = JSON.parseObject(rspEntity.msg,RspYinHeEntity.class);
+			System.out.println("isSucc:" +rEntity.isSucc());
+		}else {
+			System.out.println(rspEntity);
+		}
+	}
+	
+	/*
+	 * 获取signcode
+	 * @param paraUrl
+	 * @param s
+	 * @return
+	 */
+	public final String getSignCode(String paraUrl,String s) {
+		String str = paraUrl + s;
+		String strMD5 = MD5Utils.MD5(str);
+		return strMD5;
+	}
+	 
+	public final String getPayParams(TreeMap<String, Object> treeMap) {
+		StringBuilder builder = new StringBuilder();
+		Iterator<?> iterator = treeMap.entrySet().iterator();  
+		while(iterator.hasNext()) {
+			Entry<String, String> entry = (Entry<String, String>) iterator.next();
+			String key = entry.getKey();
+			String val = (String) entry.getValue();
+			builder.append(key + "=" + val + "&");
+		}
+		System.out.println("原串:" +builder.toString());
+		//remove the last item &
+		if(builder.length() > 0) {
+			builder.delete(builder.length()-1,builder.length());
+		}
+		System.out.println("结果:" + builder.toString());
+		return builder.toString();
+	}
 }

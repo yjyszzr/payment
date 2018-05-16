@@ -54,6 +54,8 @@ public class PaySchedul {
 	private UserRechargeService userRechargeService;
 	@Resource
 	private YinHeUtil yinHeUtil;
+	@Resource
+	private RongUtil rongUtil;
 	
 	@Scheduled(cron = "0 0/2 * * * ?")
     public void dealBeyondPayTimeOrder() {
@@ -124,7 +126,7 @@ public class PaySchedul {
 			return succ;
 		}
 		if("app_rongbao".equals(payCode)) {
-			baseResult = RongUtil.queryOrderInfo(payOrderSn);
+			baseResult = rongUtil.queryOrderInfo(payOrderSn);
 		}else if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)) {
 			boolean isInWeChat = "app_weixin_h5".equals(payCode);
 			baseResult = yinHeUtil.orderQuery(isInWeChat,payOrderSn);

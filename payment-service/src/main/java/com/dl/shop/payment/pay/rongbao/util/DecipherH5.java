@@ -6,11 +6,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
 
+@Component
 public class DecipherH5 {
+
+	private ReapalH5Config rongCfg;
 	
 	/**
 	 * 解密
@@ -20,11 +28,8 @@ public class DecipherH5 {
 	 * @return
 	 * @throws com.reapal.common.exception.ServiceException
 	 */
-	public static String decryptData(String post) throws Exception {
-
-
+	public String decryptData(String post) throws Exception {
 		// 将返回的json串转换为map
-
 		TreeMap<String, String> map = JSON.parseObject(post,
               new TypeReference<TreeMap<String, String>>() {
               });
@@ -32,7 +37,7 @@ public class DecipherH5 {
       	String data = map.get("data");
 
       	//获取自己私钥解密
-	      PrivateKey pvkformPfx = RSA.getPvkformPfx(ReapalH5Config.privateKey, "123456");
+	      PrivateKey pvkformPfx = RSA.getPvkformPfx(rongCfg.getPrivateKey(),"123456");
 	      String decryptData = RSA.decrypt(encryptkey, pvkformPfx);
 	
 	      post = AES.decryptFromBase64(data, decryptData);
@@ -49,11 +54,11 @@ public class DecipherH5 {
 	 * @return
 	 * @throws com.reapal.common.exception.ServiceException
 	 */
-	public static Map<String, String> encryptData(String json) throws Exception {
+	public Map<String, String> encryptData(String json) throws Exception {
 		System.out.println("json数据=============>" + json);
 
         //商户获取融宝公钥
-        PublicKey pubKeyFromCrt = RSA.getPubKeyFromCRT(ReapalH5Config.pubKeyUrl);
+        PublicKey pubKeyFromCrt = RSA.getPubKeyFromCRT(rongCfg.getPubKeyUrl());
         //随机生成16数字
         String key = getRandom(16);
 
@@ -97,15 +102,11 @@ public class DecipherH5 {
 	 * @return
 	 * @throws com.reapal.common.exception.ServiceException
 	 */
-	public static String decryptData(String encryptkey,String data) throws Exception {
-
-     
-      	//获取自己私钥解密
-	      PrivateKey pvkformPfx = RSA.getPvkformPfx(ReapalH5Config.privateKey, "123456");
-	      String decryptData = RSA.decrypt(encryptkey, pvkformPfx);
-	
-	      return AES.decryptFromBase64(data, decryptData);
-	
+	public String decryptData(String encryptkey,String data) throws Exception {
+      //获取自己私钥解密
+      PrivateKey pvkformPfx = RSA.getPvkformPfx(rongCfg.getPrivateKey(), "123456");
+      String decryptData = RSA.decrypt(encryptkey, pvkformPfx);
+      return AES.decryptFromBase64(data, decryptData);
 	}
 
 }

@@ -48,11 +48,15 @@ public class RongbaoPayController extends AbstractBaseController{
 	private IUserAccountService userAccountService;
 	@Autowired
 	private IOrderService orderService;
+	@Resource
+	private ReapalH5Config rongCfg;
+	@Resource
+	private DecipherH5 decipherH5;
 	
 	@ApiOperation(value="融宝支付回调")
 	@PostMapping("callback")
 	public void payCallBack(HttpServletRequest request, HttpServletResponse response) {
-		String key = ReapalH5Config.key;
+		String key = rongCfg.getKey();
 		String merchantId = request.getParameter("merchant_id");
 		String data = request.getParameter("data");
 		String encryptkey = request.getParameter("encryptkey");
@@ -239,7 +243,7 @@ public class RongbaoPayController extends AbstractBaseController{
 		//解析密文数据
 		String decryData = null;
 		try {
-			decryData = DecipherH5.decryptData(encryptkey,data);
+			decryData = decipherH5.decryptData(encryptkey,data);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
