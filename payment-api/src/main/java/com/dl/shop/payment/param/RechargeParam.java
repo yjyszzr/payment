@@ -12,6 +12,6 @@ public class RechargeParam {
 	private String payCode;
 	@ApiModelProperty("是否在微信内部打开支付？0不是微信内部 1微信内部")
 	private int innerWechat;
-	@ApiModelProperty("是否H5打开该页")
-	private boolean isH5;
+	@ApiModelProperty("是否H5打开该页 1->h5请求，0||null->app端请求")
+	private String isH5;
 }
