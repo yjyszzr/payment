@@ -3,8 +3,11 @@ package com.dl.shop.payment.web;
 import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Enumeration;
 
 import javax.servlet.http.HttpServletRequest;
+
+import org.apache.log4j.Logger;
 
 import com.dl.base.enums.SNBusinessCodeEnum;
 import com.dl.base.util.DateUtil;
@@ -14,6 +17,7 @@ import com.dl.shop.payment.model.PayLog;
 
 public abstract class AbstractBaseController {
 
+	private final static Logger logger = Logger.getLogger(AbstractBaseController.class);
 	/**
 	 * 
 	 * @param orderSn 订单编码
@@ -48,8 +52,11 @@ public abstract class AbstractBaseController {
 	 * @param request
 	 * @return
 	 */
-	protected String getIpAddr(HttpServletRequest request) {   
-		String ip = request.getHeader("x-forwarded-for");   
+	protected String getIpAddr(HttpServletRequest request) { 
+		String ip = request.getHeader("X-Real-IP");
+		if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {   
+			ip = request.getHeader("X-Forwarded-For");   
+		}  
 		if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {   
 			ip = request.getHeader("Proxy-Client-IP");   
 		}   
@@ -64,17 +71,17 @@ public abstract class AbstractBaseController {
 		}
 		if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {   
 			ip = request.getRemoteAddr(); 
-			if(ip.equals("127.0.0.1")){     
-				//根据网卡取本机配置的IP     
-				InetAddress inet=null;     
-				try {     
-					inet = InetAddress.getLocalHost();     
-				} catch (UnknownHostException e) {     
-					e.printStackTrace();     
-				}     
-				ip= inet.getHostAddress();     
-			}  
 		}
+		if(ip != null && ip.equals("127.0.0.1")){     
+			//根据网卡取本机配置的IP     
+			InetAddress inet=null;     
+			try {     
+				inet = InetAddress.getLocalHost();     
+			} catch (UnknownHostException e) {     
+				e.printStackTrace();     
+			}     
+			ip= inet.getHostAddress();     
+		}  
 		// 对于通过多个代理的情况，第一个IP为客户端真实IP,多个IP按照','分割  
 		if(ip != null && ip.length() > 15){    
 			if(ip.indexOf(",")>0){     
