@@ -138,7 +138,7 @@ public class PaySchedul {
 		RspOrderQueryEntity rspEntity = baseResult.getData();
 		succ = rspEntity.isSucc();
 		if(rspEntity != null && rspEntity.isSucc()) {
-			logger.info("payType:" + payLog.getPayType() +"payCode:" + payCode + "第三方定时器查询订单 payordersn:" + rspEntity.getOrder_no() + " succ..");
+			logger.info("payType:" + payLog.getPayType() +" payCode:" + payCode + "第三方定时器查询订单 payordersn:" + payOrderSn +"succ..");
 			Integer payType = payLog.getPayType();
 			BaseResult<RspOrderQueryDTO> bResult = null;
 			if(payType == 0) {

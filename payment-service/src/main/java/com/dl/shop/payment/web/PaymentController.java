@@ -166,12 +166,14 @@ public class PaymentController extends AbstractBaseController{
 			payType = 3;
 		}
 		boolean succThird = false;
+		logger.info("出票失败含有第三方支付:" + hasThird);
 		if(hasThird) {
 			String payLogId = order.getPaySn();
 			if(payLogId != null) {
 				Integer intPayLogId = Integer.valueOf(payLogId);
 				PayLog payLog = payLogService.findById(intPayLogId);
 				String payCode = payLog.getPayCode();
+				logger.info("回滚查询PayLog信息:" + " payCode:" + payCode + " payOrderSn:" + payLog.getPayOrderSn());
 				if(payLog != null) {
 					if(payCode.equals("app_rongbao")) {
 						ReqRefundEntity reqEntity = new ReqRefundEntity();
@@ -192,10 +194,14 @@ public class PaymentController extends AbstractBaseController{
 						String amt = thirdPartyPaid.toString();
 						BigDecimal bigDec = new BigDecimal(amt);
 						String amtFen = bigDec.movePointRight(2).intValue()+"";
+						logger.info("=========================");
+						logger.info("进入到了微信订单回滚 isInWeChat：" + isInWeChat + " amtFen" + amtFen + "payOrderSn:" + payLog.getPayOrderSn());
 						RspHttpEntity rspEntity = yinHeUtil.orderRefund(isInWeChat,payLog.getPayOrderSn(),amtFen);
 						if(rspEntity.isSucc) {
 							succThird = true;
 						}
+						logger.info("微信订单回滚 isSucc:" + rspEntity.isSucc);
+						logger.info("=========================");
 					}
 					//第三方资金退回
 					if(succThird) {
