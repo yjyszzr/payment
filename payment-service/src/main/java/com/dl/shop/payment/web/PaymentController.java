@@ -450,12 +450,10 @@ public class PaymentController extends AbstractBaseController{
 						String qrCode = rYinHeEntity.qrCode;
 						encodeUrl = URLEncoder.encode(qrCode,"UTF-8");
 						if("1".equals(isH5)) {
-							redirectUri = URLEncoder.encode(cfgPay.getURL_REDIRECT()+"?payLogId="+payLogId,"UTF-8");
+							redirectUri = URLEncoder.encode(cfgPay.getURL_REDIRECT_H5()+"?payLogId="+payLogId,"UTF-8");
 						}else {
 							redirectUri = URLEncoder.encode(cfgPay.getURL_REDIRECT_APP()+"?payLogId="+payLogId,"UTF-8");
 						}
-						redirectUri = URLEncoder.encode(cfgPay.getURL_REDIRECT()+"?payLogId="+payLogId,"UTF-8");
-//						redirectUri = URLEncoder.encode(ConfigerPay.URL_REDIRECT,"UTF-8");
 					} catch (UnsupportedEncodingException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -463,7 +461,7 @@ public class PaymentController extends AbstractBaseController{
 					}
 					if(!TextUtils.isEmpty(encodeUrl)) {
 						if("1".equals(isH5)) {
-							url = cfgPay.getURL_PAY_WECHAT_H5()+"?data="+encodeUrl+"&payLogId=" + payLogId +"&orderId=" + orderId+"&payType="+payType;
+							url = cfgPay.getURL_PAY_WECHAT_H5()+"?data="+encodeUrl+"&redirect_uri=" + redirectUri;
 						}else {
 							url = cfgPay.getURL_PAY_WECHAT_APP()+"?data="+encodeUrl+"&redirect_uri=" + redirectUri;	
 						}

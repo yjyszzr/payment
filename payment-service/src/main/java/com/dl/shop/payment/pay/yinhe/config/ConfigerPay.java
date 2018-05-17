@@ -37,8 +37,8 @@ public class ConfigerPay {
 	
 //	public static final String URL_REDIRECT = "http://caixiaomi.net";
 	
-	@Value("${yinhe.app_redirect}")
-	private String URL_REDIRECT;
+	@Value("${yinhe.app_redirect_h5}")
+	private String URL_REDIRECT_H5;
 	
 	@Value("${yinhe.app_redirect_app}")
 	private String URL_REDIRECT_APP;
