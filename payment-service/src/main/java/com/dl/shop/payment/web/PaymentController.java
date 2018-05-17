@@ -602,6 +602,13 @@ public class PaymentController extends AbstractBaseController{
 		//生成充值记录payLog
 		String payName = paymentResult.getData().getPayName();
 		String payIp = this.getIpAddr(request);
+		//payCode处理
+		if("app_weixin".equals(payCode)) {
+			boolean isWechat = (param.getInnerWechat()==1);
+			if(isWechat) {
+				payCode = "app_weixin" + "_h5";
+			}
+		}
 		PayLog payLog = super.newPayLog(orderSn, BigDecimal.valueOf(totalAmount), 1, payCode, payName, payIp);
 		PayLog savePayLog = payLogService.savePayLog(payLog);
 		if(null == savePayLog) {
@@ -617,8 +624,10 @@ public class PaymentController extends AbstractBaseController{
 		unifiedOrderParam.setTotalAmount(totalAmount);
 		unifiedOrderParam.setIp(payIp);
 		unifiedOrderParam.setOrderNo(savePayLog.getLogId());
+		//url下发后，服务器开始主动轮序订单状态
+		PayManager.getInstance().addReqQueue(orderSn,savePayLog.getPayOrderSn(),payCode);
 		BaseResult payBaseResult = null;
-		if("app_weixin".equals(payCode)) {
+		if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)){
 			logger.info("微信支付url开始生成...isWechat:" + (param.getInnerWechat()==1) + " payOrderSn:" + savePayLog.getPayOrderSn());
 			payBaseResult = getWechatPayUrl(param.getInnerWechat()==1,param.getIsH5(),1,savePayLog, payIp, orderSn);
 			logger.info("微信支付url生成成功 code" + payBaseResult.getCode() +" data:" +payBaseResult.getData());
