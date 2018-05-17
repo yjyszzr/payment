@@ -37,8 +37,22 @@ public class PayLogService extends AbstractService<PayLog> {
 		return payLogMapper.updatePayMsg(payLog);
 	}
 	
+	/***
+	 * 根据payOrderSn查找PayLog
+	 * @param orderSign
+	 * @return
+	 */
 	public PayLog findPayLogByOrderSign(String orderSign) {
 		return payLogMapper.findPayLogByOrderSign(orderSign);
+	}
+
+	/***
+	 * 根据OrderSn查找PayLog
+	 * @param orderSn
+	 * @return
+	 */
+	public PayLog findPayLogByOrderSn(String orderSn) {
+		return payLogMapper.findPayLogByOrderSn(orderSn);
 	}
 	
 	public int updatePayLog(PayLog payLog) {

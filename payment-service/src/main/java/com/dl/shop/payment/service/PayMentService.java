@@ -198,7 +198,10 @@ public class PayMentService extends AbstractService<PayMent> {
 			orderSn = order.getOrderSn();
 			log.info("出票失败含有第三方支付 订单orderSn:" + orderSn);
 			if(!TextUtils.isEmpty(orderSn)) {
-				PayLog payLog = payLogService.findPayLogByOrderSign(orderSn);
+				PayLog payLog = payLogService.findPayLogByOrderSn(orderSn);
+				if(payLog == null) {
+					return ResultGenerator.genFailResult("回滚订单不存在 orderSn:" + orderSn);
+				}
 				String payCode = payLog.getPayCode();
 				log.info("回滚查询PayLog信息:" + " payCode:" + payCode + " payOrderSn:" + payLog.getPayOrderSn());
 				if(payLog != null) {
