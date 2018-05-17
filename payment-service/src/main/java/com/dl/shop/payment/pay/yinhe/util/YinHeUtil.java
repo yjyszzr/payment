@@ -3,9 +3,7 @@ package com.dl.shop.payment.pay.yinhe.util;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
-
 import javax.annotation.Resource;
-
 import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -42,6 +40,9 @@ public class YinHeUtil {
 	 * @return
 	 */
 	public RspHttpEntity orderRefund(boolean isInWeChat,String orderNo,String amt){
+		if("true".equals(cfgPay.getDEBUG())) {
+			amt = "1";
+		}
 		ReqRefundOrderEntity reqEntity = reqRefundOrderEntity.buildReqQueryEntity(isInWeChat,orderNo,amt);
 		ReqSignEntity signEntity = reqEntity.buildSignEntity();
 		String str = JSON.toJSONString(signEntity);
