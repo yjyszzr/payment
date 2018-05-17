@@ -6,9 +6,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.http.util.TextUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
+import com.ctc.wstx.util.StringUtil;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.base.service.AbstractService;
@@ -194,10 +196,10 @@ public class PayMentService extends AbstractService<PayMent> {
 		boolean succThird = false;
 		log.info("出票失败含有第三方支付:" + hasThird);
 		if(hasThird) {
-			String payLogId = order.getPaySn();
-			if(payLogId != null) {
-				Integer intPayLogId = Integer.valueOf(payLogId);
-				PayLog payLog = payLogService.findById(intPayLogId);
+			int payLogId = order.getPayId();
+			log.info("出票失败含有第三方支付 订单ID:" + payLogId);
+			if(payLogId > 0) {
+				PayLog payLog = payLogService.findById(payLogId);
 				String payCode = payLog.getPayCode();
 				log.info("回滚查询PayLog信息:" + " payCode:" + payCode + " payOrderSn:" + payLog.getPayOrderSn());
 				if(payLog != null) {
