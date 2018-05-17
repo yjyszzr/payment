@@ -121,7 +121,7 @@ public class PaySchedul {
 		}
 		int isPaid = payLog.getIsPaid();
 		if(isPaid == 1) {
-			logger.info("[task]" + "payLogId:" + payLog.getPayIp() + " 已支付...");
+			logger.info("[task]" + "payLogId:" + payLog.getLogId() + " orderSn:"+ payLog.getOrderSn() +" 已支付...");
 			succ = true;
 			return succ;
 		}
