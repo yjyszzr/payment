@@ -48,6 +48,7 @@ import com.dl.member.param.RecharegeParam;
 import com.dl.member.param.StrParam;
 import com.dl.member.param.SurplusPayParam;
 import com.dl.member.param.UpdateUserRechargeParam;
+import com.dl.member.param.UserAccountParamByType;
 import com.dl.member.param.UserWithdrawParam;
 import com.dl.order.api.IOrderService;
 import com.dl.order.dto.OrderDTO;
@@ -55,6 +56,8 @@ import com.dl.order.param.OrderSnParam;
 import com.dl.order.param.SubmitOrderParam;
 import com.dl.order.param.SubmitOrderParam.TicketDetail;
 import com.dl.order.param.UpdateOrderInfoParam;
+import com.dl.shop.payment.api.IpaymentService;
+import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dto.PayReturnDTO;
 import com.dl.shop.payment.dto.PaymentDTO;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
@@ -138,101 +141,9 @@ public class PaymentController extends AbstractBaseController{
 	@PostMapping("/rollbackOrderAmount")
 	@ResponseBody
 	public BaseResult<?> rollbackOrderAmount(@RequestBody RollbackOrderAmountParam param) {
-		logger.info("in rollbackOrderAmount ordersn=" + param.getOrderSn());
-		String orderSn = param.getOrderSn();
-		OrderSnParam snParam = new OrderSnParam();
-		snParam.setOrderSn(orderSn);
-		BaseResult<OrderDTO> orderRst = orderService.getOrderInfoByOrderSn(snParam);
-		if(orderRst.getCode() != 0) {
-			logger.info("orderService.getOrderInfoByOrderSn rst code="+orderRst.getCode()+" msg="+orderRst.getMsg());
-			return ResultGenerator.genFailResult();
-		}
-		OrderDTO order = orderRst.getData();
-		BigDecimal surplus = order.getSurplus();
-		BigDecimal bonusAmount = order.getBonus();
-		BigDecimal moneyPaid = order.getMoneyPaid();
-		String payName = order.getPayName();
-		BigDecimal thirdPartyPaid = order.getThirdPartyPaid();
-		//第三方支付
-		int payType = 1;//默认微信
-		if(surplus != null && surplus.doubleValue() > 0) {
-			payType = 2;
-		}
-		boolean hasThird = false;
-		if(thirdPartyPaid != null && thirdPartyPaid.doubleValue() > 0) {
-			hasThird = true;
-		}
-		if(hasThird && payType == 2) {
-			payType = 3;
-		}
-		boolean succThird = false;
-		logger.info("出票失败含有第三方支付:" + hasThird);
-		if(hasThird) {
-			String payLogId = order.getPaySn();
-			if(payLogId != null) {
-				Integer intPayLogId = Integer.valueOf(payLogId);
-				PayLog payLog = payLogService.findById(intPayLogId);
-				String payCode = payLog.getPayCode();
-				logger.info("回滚查询PayLog信息:" + " payCode:" + payCode + " payOrderSn:" + payLog.getPayOrderSn());
-				if(payLog != null) {
-					if(payCode.equals("app_rongbao")) {
-						ReqRefundEntity reqEntity = new ReqRefundEntity();
-						reqEntity.setAmount(thirdPartyPaid.toString());
-						reqEntity.setNote("出票失败退款操作");
-						reqEntity.setOrig_order_no(payLog.getPayOrderSn());
-						try {
-							RspRefundEntity rEntity = rongUtil.refundOrderInfo(reqEntity);
-							logger.info("rEntity:" + rEntity.toString());
-							if(rEntity != null && rEntity.isSucc()) {
-								succThird = true;
-							}
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}else if(payCode.equals("app_weixin") || "app_weixin_h5".equals(payCode)){
-						boolean isInWeChat = "app_weixin_h5".equals(payCode);
-						String amt = thirdPartyPaid.toString();
-						BigDecimal bigDec = new BigDecimal(amt);
-						String amtFen = bigDec.movePointRight(2).intValue()+"";
-						logger.info("=========================");
-						logger.info("进入到了微信订单回滚 isInWeChat：" + isInWeChat + " amtFen" + amtFen + "payOrderSn:" + payLog.getPayOrderSn());
-						RspHttpEntity rspEntity = yinHeUtil.orderRefund(isInWeChat,payLog.getPayOrderSn(),amtFen);
-						if(rspEntity.isSucc) {
-							succThird = true;
-						}
-						logger.info("微信订单回滚 isSucc:" + rspEntity.isSucc);
-						logger.info("=========================");
-					}
-					//第三方资金退回
-					if(succThird) {
-						logger.info("第三方资金退回成功 payCode：" + payCode + " amt:" + thirdPartyPaid.toString());
-					}else {
-						payLog.setPayMsg("第三方资金退回失败");
-						payLogService.update(payLog);
-						logger.info("第三方资金退回失败 payCode：" + payCode + " amt:" + thirdPartyPaid.toString());
-					}
-				}
-			}
-		}else {	//无第三方支付，默认第三支付成功
-			succThird = true;
-		}
-		if(succThird && (payType ==2 || payType == 3)) {
-			SurplusPayParam surplusPayParam = new SurplusPayParam();
-			surplusPayParam.setOrderSn(orderSn);
-			surplusPayParam.setSurplus(surplus);
-			surplusPayParam.setBonusMoney(bonusAmount);
-			surplusPayParam.setPayType(payType);
-			surplusPayParam.setMoneyPaid(moneyPaid);
-			surplusPayParam.setThirdPartName(payName);
-			surplusPayParam.setThirdPartPaid(thirdPartyPaid);
-			BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
-			logger.info(" orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" rollbackOrderAmount回滚用户余额结束！ 订单回调返回结果：status=" + rollbackUserAccountChangeByPay.getCode()+" , message="+rollbackUserAccountChangeByPay.getMsg());
-			if(rollbackUserAccountChangeByPay.getCode() != 0) {
-				logger.info(" orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" rollbackOrderAmount回滚用户余额时出错！");
-			}
-		}
-		return ResultGenerator.genSuccessResult();
+		return paymentService.rollbackOrderAmount(param);
 	}
+	
 	@ApiOperation(value="app支付调用", notes="payToken:商品中心购买信息保存后的返回值 ，payCode：支付编码，app端微信支付为app_weixin")
 	@PostMapping("/app")
 	@ResponseBody
@@ -821,7 +732,7 @@ public class PaymentController extends AbstractBaseController{
 			response.getResult_msg() +" payType:" +payType + " isSucc:" + response.isSucc() + 
 			"resultCode:"+response.getResult_code());
 			if(0 == payType) {
-				return orderOptions(orderService,payLogService,userAccountService,loggerId, payLog, response);
+				return orderOptions(paymentService,lotteryPrintService,orderService,payLogService,userAccountService,loggerId, payLog, response);
 			}else if(1 == payType){
 				return rechargeOptions(userRechargeService,userAccountService,payLogService,loggerId, payLog, response);
 			}
@@ -922,13 +833,29 @@ public class PaymentController extends AbstractBaseController{
 	 * @param response
 	 * @return
 	 */
-	public static BaseResult<RspOrderQueryDTO> orderOptions(IOrderService orderService, PayLogService payLogService,IUserAccountService userAccountService,String loggerId, PayLog payLog, RspOrderQueryEntity response) {
+	public static BaseResult<RspOrderQueryDTO> orderOptions(PayMentService paymentService,ILotteryPrintService lotteryPrintService,IOrderService orderService, PayLogService payLogService,IUserAccountService userAccountService,String loggerId, PayLog payLog, RspOrderQueryEntity response) {
 		if(response.isSucc()) {
+			//预出票操作
+			String orderSn = payLog.getOrderSn();
 			int currentTime = DateUtil.getCurrentTimeLong();
+			SaveLotteryPrintInfoParam saveLotteryPrintParam = new SaveLotteryPrintInfoParam();
+			saveLotteryPrintParam.setOrderSn(orderSn);
+			BaseResult<String> saveLotteryPrintInfo = lotteryPrintService.saveLotteryPrintInfo(saveLotteryPrintParam);
+			boolean isLotteryPrintSucc = false;
+			if(saveLotteryPrintInfo.getCode() != 0) {
+				isLotteryPrintSucc = false;
+			}else {
+				isLotteryPrintSucc = true;
+			}
+			logger.info("查询已经支付成功，进行预出票操作...isLotteryPrintSucc:" + isLotteryPrintSucc);
 			//更新order
 			UpdateOrderInfoParam param = new UpdateOrderInfoParam();
+			if(isLotteryPrintSucc) {
+				param.setOrderStatus(1);	
+			}else {
+				param.setOrderStatus(2);//2->出票失败   1->待出票
+			}
 			param.setPayStatus(1);
-			param.setOrderStatus(1);
 			param.setPayTime(currentTime);
 			param.setPaySn(payLog.getLogId()+"");
 			param.setPayName(payLog.getPayName());
@@ -950,6 +877,39 @@ public class PaymentController extends AbstractBaseController{
 				payLogService.update(updatePayLog);
 			} catch (Exception e) {
 				logger.error(loggerId+" paylogid="+payLog.getLogId()+" , paymsg=支付成功，保存成功记录时出错", e);
+			}
+			//订单支付付款成功就要生成流水
+			logger.info("订单支付付款成功就要生成流水...");
+			UserAccountParamByType userAccountParamByType = new UserAccountParamByType();
+			Integer accountType = ProjectConstant.BUY;
+			logger.info("===========更新用户流水表=======:" + accountType);
+			userAccountParamByType.setAccountType(accountType);
+			userAccountParamByType.setAmount(new BigDecimal(payLog.getOrderAmount().doubleValue()));
+			userAccountParamByType.setBonusPrice(BigDecimal.ZERO);//暂无红包金额
+			userAccountParamByType.setOrderSn(payLog.getOrderSn());
+			userAccountParamByType.setPayId(payLog.getLogId());
+			String payCode = payLog.getPayCode();
+			String payName;
+			if(payCode.equals("app_weixin") || payCode.equals("app_weixin_h5")) {
+				payName = "微信";
+			}else {
+				payName = "银行卡";
+			}
+			userAccountParamByType.setPaymentName(payName);
+			userAccountParamByType.setThirdPartName(payName);
+			userAccountParamByType.setThirdPartPaid(new BigDecimal(payLog.getOrderAmount().doubleValue()));
+			userAccountParamByType.setUserId(payLog.getUserId());
+			BaseResult<String> accountRst = userAccountService.insertUserAccount(userAccountParamByType);
+			if(accountRst.getCode() != 0) {
+				logger.info(loggerId + "生成账户流水异常");
+			}else {
+				logger.info("生成账户流水成功");
+			}
+			if(!isLotteryPrintSucc) {
+				//资金回滚
+				RollbackOrderAmountParam p = new RollbackOrderAmountParam();
+				p.setOrderSn(orderSn);
+				paymentService.rollbackOrderAmount(p);
 			}
 			return ResultGenerator.genSuccessResult("订单已支付成功！", null);
 		}else {

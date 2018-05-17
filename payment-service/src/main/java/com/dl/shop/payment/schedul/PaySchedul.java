@@ -14,6 +14,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
+import com.dl.lottery.api.ILotteryPrintService;
 import com.dl.member.api.IUserAccountService;
 import com.dl.member.dto.SurplusPaymentCallbackDTO;
 import com.dl.member.param.SurplusPayParam;
@@ -56,6 +57,10 @@ public class PaySchedul {
 	private YinHeUtil yinHeUtil;
 	@Resource
 	private RongUtil rongUtil;
+	@Resource
+	private PayMentService paymentService;
+	@Resource
+	private ILotteryPrintService lotteryPrintService;
 	
 	@Scheduled(cron = "0 0/2 * * * ?")
     public void dealBeyondPayTimeOrder() {
@@ -142,7 +147,7 @@ public class PaySchedul {
 			Integer payType = payLog.getPayType();
 			BaseResult<RspOrderQueryDTO> bResult = null;
 			if(payType == 0) {
-				bResult = PaymentController.orderOptions(orderService, payLogService, userAccountService, loggerId, payLog,rspEntity);
+				bResult = PaymentController.orderOptions(paymentService,lotteryPrintService,orderService, payLogService, userAccountService, loggerId, payLog,rspEntity);
 			}else if(payType == 1) {
 				bResult = PaymentController.rechargeOptions(userRechargeService,userAccountService, payLogService, loggerId, payLog, rspEntity);
 			}

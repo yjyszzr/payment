@@ -1,15 +1,13 @@
 package com.dl.shop.payment.service;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import javax.annotation.Resource;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.alibaba.fastjson.JSON;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -21,20 +19,20 @@ import com.dl.member.param.SurplusPayParam;
 import com.dl.member.param.UserBonusParam;
 import com.dl.order.api.IOrderService;
 import com.dl.order.dto.OrderDTO;
-import com.dl.order.param.OrderCondtionParam;
-import com.dl.order.param.OrderQueryParam;
+import com.dl.order.param.OrderSnParam;
 import com.dl.order.param.UpdateOrderInfoParam;
 import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dao.PayLogMapper;
 import com.dl.shop.payment.dao.PayMentMapper;
 import com.dl.shop.payment.dto.PaymentDTO;
-import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.PayMent;
-import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
+import com.dl.shop.payment.param.RollbackOrderAmountParam;
+import com.dl.shop.payment.pay.common.RspHttpEntity;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
+import com.dl.shop.payment.pay.rongbao.entity.ReqRefundEntity;
+import com.dl.shop.payment.pay.rongbao.entity.RspRefundEntity;
 import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -58,6 +56,9 @@ public class PayMentService extends AbstractService<PayMent> {
 	@Resource
 	private YinHeUtil yinHeUtil;
 
+	@Resource
+	private RongUtil rongUtil;
+	
     /**
      * 查询所有可用的支付方式
      * @return
@@ -157,5 +158,105 @@ public class PayMentService extends AbstractService<PayMent> {
 
     }
     
-	
+    /**
+     * 资金回滚
+     * @param param
+     * @return
+     */
+	public BaseResult<?> rollbackOrderAmount(RollbackOrderAmountParam param) {
+		log.info("in rollbackOrderAmount ordersn=" + param.getOrderSn());
+		String orderSn = param.getOrderSn();
+		OrderSnParam snParam = new OrderSnParam();
+		snParam.setOrderSn(orderSn);
+		BaseResult<OrderDTO> orderRst = orderService.getOrderInfoByOrderSn(snParam);
+		if(orderRst.getCode() != 0) {
+			log.info("orderService.getOrderInfoByOrderSn rst code="+orderRst.getCode()+" msg="+orderRst.getMsg());
+			return ResultGenerator.genFailResult();
+		}
+		OrderDTO order = orderRst.getData();
+		BigDecimal surplus = order.getSurplus();
+		BigDecimal bonusAmount = order.getBonus();
+		BigDecimal moneyPaid = order.getMoneyPaid();
+		String payName = order.getPayName();
+		BigDecimal thirdPartyPaid = order.getThirdPartyPaid();
+		//第三方支付
+		int payType = 1;//默认微信
+		if(surplus != null && surplus.doubleValue() > 0) {
+			payType = 2;
+		}
+		boolean hasThird = false;
+		if(thirdPartyPaid != null && thirdPartyPaid.doubleValue() > 0) {
+			hasThird = true;
+		}
+		if(hasThird && payType == 2) {
+			payType = 3;
+		}
+		boolean succThird = false;
+		log.info("出票失败含有第三方支付:" + hasThird);
+		if(hasThird) {
+			String payLogId = order.getPaySn();
+			if(payLogId != null) {
+				Integer intPayLogId = Integer.valueOf(payLogId);
+				PayLog payLog = payLogService.findById(intPayLogId);
+				String payCode = payLog.getPayCode();
+				log.info("回滚查询PayLog信息:" + " payCode:" + payCode + " payOrderSn:" + payLog.getPayOrderSn());
+				if(payLog != null) {
+					if(payCode.equals("app_rongbao")) {
+						ReqRefundEntity reqEntity = new ReqRefundEntity();
+						reqEntity.setAmount(thirdPartyPaid.toString());
+						reqEntity.setNote("出票失败退款操作");
+						reqEntity.setOrig_order_no(payLog.getPayOrderSn());
+						try {
+							RspRefundEntity rEntity = rongUtil.refundOrderInfo(reqEntity);
+							log.info("rEntity:" + rEntity.toString());
+							if(rEntity != null && rEntity.isSucc()) {
+								succThird = true;
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}else if(payCode.equals("app_weixin") || "app_weixin_h5".equals(payCode)){
+						boolean isInWeChat = "app_weixin_h5".equals(payCode);
+						String amt = thirdPartyPaid.toString();
+						BigDecimal bigDec = new BigDecimal(amt);
+						String amtFen = bigDec.movePointRight(2).intValue()+"";
+						log.info("=========================");
+						log.info("进入到了微信订单回滚 isInWeChat：" + isInWeChat + " amtFen" + amtFen + "payOrderSn:" + payLog.getPayOrderSn());
+						RspHttpEntity rspEntity = yinHeUtil.orderRefund(isInWeChat,payLog.getPayOrderSn(),amtFen);
+						if(rspEntity.isSucc) {
+							succThird = true;
+						}
+						log.info("微信订单回滚 isSucc:" + rspEntity.isSucc);
+						log.info("=========================");
+					}
+					//第三方资金退回
+					if(succThird) {
+						log.info("第三方资金退回成功 payCode：" + payCode + " amt:" + thirdPartyPaid.toString());
+					}else {
+						payLog.setPayMsg("第三方资金退回失败");
+						payLogService.update(payLog);
+						log.info("第三方资金退回失败 payCode：" + payCode + " amt:" + thirdPartyPaid.toString());
+					}
+				}
+			}
+		}else {	//无第三方支付，默认第三支付成功
+			succThird = true;
+		}
+		if(succThird && (payType ==2 || payType == 3)) {
+			SurplusPayParam surplusPayParam = new SurplusPayParam();
+			surplusPayParam.setOrderSn(orderSn);
+			surplusPayParam.setSurplus(surplus);
+			surplusPayParam.setBonusMoney(bonusAmount);
+			surplusPayParam.setPayType(payType);
+			surplusPayParam.setMoneyPaid(moneyPaid);
+			surplusPayParam.setThirdPartName(payName);
+			surplusPayParam.setThirdPartPaid(thirdPartyPaid);
+			BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
+			log.info(" orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" rollbackOrderAmount回滚用户余额结束！ 订单回调返回结果：status=" + rollbackUserAccountChangeByPay.getCode()+" , message="+rollbackUserAccountChangeByPay.getMsg());
+			if(rollbackUserAccountChangeByPay.getCode() != 0) {
+				log.info(" orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" rollbackOrderAmount回滚用户余额时出错！");
+			}
+		}
+		return ResultGenerator.genSuccessResult();
+	}
 }

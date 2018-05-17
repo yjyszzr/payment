@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import com.dl.base.result.BaseResult;
 import com.dl.base.util.DateUtil;
+import com.dl.lottery.api.ILotteryPrintService;
 import com.dl.member.api.IUserAccountService;
 import com.dl.member.param.RecharegeParam;
 import com.dl.member.param.UpdateUserRechargeParam;
@@ -21,11 +22,14 @@ import com.dl.member.param.UserAccountParamByType;
 import com.dl.order.api.IOrderService;
 import com.dl.order.param.UpdateOrderInfoParam;
 import com.dl.shop.payment.core.ProjectConstant;
+import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.WxpayNotifyModel;
+import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
 import com.dl.shop.payment.pay.yinhe.entity.RspNotifyWeChatEntity;
 import com.dl.shop.payment.service.PayLogService;
+import com.dl.shop.payment.service.PayMentService;
 import com.dl.shop.payment.service.UserRechargeService;
 import com.dl.shop.payment.utils.XmlUtil;
 import io.swagger.annotations.ApiOperation;
@@ -45,6 +49,10 @@ public class WxpayNotifyController {
 	private UserRechargeService userRechargeService;
 	@Resource
 	private ConfigerPay cfgPay;
+	@Resource
+	private PayMentService paymentService;
+	@Resource
+	private ILotteryPrintService lotteryPrintService;
 	
 	@ApiOperation(value="微信支付回调")
 	@PostMapping("notify")
@@ -93,7 +101,10 @@ public class WxpayNotifyController {
 							return;
 						}
 						logger.info("处理订单相关信息...");
-						operation(payLog,loggerId,transNo,null);
+						RspOrderQueryEntity rspQueryEntity = new RspOrderQueryEntity();
+						rspQueryEntity.setResult_code("0000");
+						rspQueryEntity.setTrade_no(transNo);
+						operation(payLog,loggerId,transNo,null,rspQueryEntity);
 					}
 				}else {
 					logger.info("微信内部H5支付失败 订单查询payLog=空");
@@ -151,7 +162,11 @@ public class WxpayNotifyController {
 				logger.info("实际交易金额:" + amount +" 订单金额:" + orderAmount);
 				if (("true".equals(cfgPay.getDEBUG()) || amount == orderAmount) && ((appid.equals(cfgPay.getAPPID()) && mchId.equals(cfgPay.getMERCHANT_NO())))) {
 					logger.info(loggerId + " 订单金额或appid,mchId校验成功，前去回调订单服务！");
-					operation(payLog, loggerId, tradeNo,response);
+					RspOrderQueryEntity rspOrderQueryEntity = new RspOrderQueryEntity();
+					rspOrderQueryEntity.setResult_code("0000");
+					rspOrderQueryEntity.setTrade_no(payOrderSn);
+					rspOrderQueryEntity.setTotal_fee(amount+"");
+					operation(payLog, loggerId, tradeNo,response,rspOrderQueryEntity);
 				}else {
 					logger.info(loggerId + " 订单金额或appid,mchId校验失败！");
 				}
@@ -166,13 +181,14 @@ public class WxpayNotifyController {
 	 * @param tradeNo
 	 * @param response
 	 */
-	private void operation(PayLog payLog,String loggerId,String tradeNo,HttpServletResponse response) {
+	private void operation(PayLog payLog,String loggerId,String tradeNo,
+			HttpServletResponse response,RspOrderQueryEntity rspEntity) {
 		try {
 			int payType = payLog.getPayType();
 			int currentTime = DateUtil.getCurrentTimeLong();
 			boolean result = false;
 			if(0 == payType) {
-				result = orderOptionsSucc(tradeNo, payLog);
+				result = orderOptionsSucc(tradeNo, payLog,loggerId,rspEntity);
 			}else {
 				result = recharageOptionSucc(tradeNo, payLog);
 			}
@@ -191,28 +207,6 @@ public class WxpayNotifyController {
 					String xml = "<xml><return_code><![CDATA[SUCCESS]]></return_code> <return_msg><![CDATA[OK]]></return_msg></xml>";
 					response.getWriter().write(xml);
 				}
-				if(0 == payType) {
-					//订单支付付款成功就要生成流水
-					logger.info("订单支付付款成功就要生成流水...");
-					UserAccountParamByType userAccountParamByType = new UserAccountParamByType();
-					Integer accountType = ProjectConstant.BUY;
-					logger.info("===========更新用户流水表=======:" + accountType);
-					userAccountParamByType.setAccountType(accountType);
-					userAccountParamByType.setAmount(new BigDecimal(payLog.getOrderAmount().doubleValue()));
-					userAccountParamByType.setBonusPrice(BigDecimal.ZERO);//暂无红包金额
-					userAccountParamByType.setOrderSn(payLog.getOrderSn());
-					userAccountParamByType.setPayId(payLog.getLogId());
-					userAccountParamByType.setPaymentName("微信");
-					userAccountParamByType.setThirdPartName("微信");
-					userAccountParamByType.setThirdPartPaid(new BigDecimal(payLog.getOrderAmount().doubleValue()));
-					userAccountParamByType.setUserId(payLog.getUserId());
-					BaseResult<String> accountRst = userAccountService.insertUserAccount(userAccountParamByType);
-					if(accountRst.getCode() != 0) {
-						logger.info(loggerId + "生成账户流水异常");
-					}else {
-						logger.info("生成账户流水成功");
-					}
-				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -222,22 +216,10 @@ public class WxpayNotifyController {
 	/***
 	 * 订单支付，微信回调成功
 	 */
-	private boolean orderOptionsSucc(String tradeNo,PayLog payLog) {
+	private boolean orderOptionsSucc(String tradeNo,PayLog payLog,String loggerId,RspOrderQueryEntity rspEntity) {
 		boolean isSucc = true;
-		int currentTime = DateUtil.getCurrentTimeLong();
-		//更新order
-		UpdateOrderInfoParam param = new UpdateOrderInfoParam();
-		param.setPayStatus(1);
-		param.setOrderStatus(1);
-		param.setPayTime(currentTime);
-		param.setPaySn(payLog.getLogId()+"");
-		param.setPayName(payLog.getPayName());
-		param.setPayCode(payLog.getPayCode());
-		param.setOrderSn(payLog.getOrderSn());
-		BaseResult<String> updateOrderInfo = orderService.updateOrderInfo(param);
-		if(updateOrderInfo.getCode() != 0) {
-			logger.error("ordersn=" + payLog.getOrderSn()+"更新订单成功状态失败");
-		}else {
+		BaseResult<RspOrderQueryDTO> baseResult = PaymentController.orderOptions(paymentService, lotteryPrintService, orderService, payLogService, userAccountService, loggerId, payLog, rspEntity);
+		if(baseResult != null && baseResult.getCode() == 0) {
 			isSucc = true;
 		}
 		return isSucc;

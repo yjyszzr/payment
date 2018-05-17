@@ -25,8 +25,8 @@ public class PayDemo {
 
 	public PayDemo() {
 //		testQuery();
-//		testPay();
-		testQRBarPay();
+		testPay();
+//		testQRBarPay();
 //		testUtil();
 //		testRefund();
 //		testPayManager();
@@ -109,53 +109,53 @@ public class PayDemo {
 //		System.out.println("rspEntity:" + rspEntity);
 //	}
 //	
-	private void testQRBarPay() {
-		String orderNo = "123456";
-		String URL_PAY = "http://zfyun.com.cn:8080/YinHeLoan/yinHe";
-		String amt = "1";
-		String SECRET = "b4df7b2d0cb5a90659afcb165b701d5e";
-		ReqQRPayEntity reqEntity = new ReqQRPayEntity();
-		reqEntity.setOrgNo("2188");
-		reqEntity.setAmt(amt);
-		reqEntity.setBackUrl("http://api.caixiaomi.net/api/payment/payment/wxpay/notify");
-		reqEntity.setCharset("UTF-8");
-		reqEntity.setTermType("RQ");
-		reqEntity.setTxtTime(ConfigerPay.getPayTime());
-		reqEntity.setSignType("MD5");
-		reqEntity.setTransNo(orderNo);
-		reqEntity.setMerId("1503174711");
-		reqEntity.setPayType("1");
-		reqEntity.setInWechat("0");
-		
-		ReqSignEntity signEntity = reqEntity.buildSignEntity();
-		String str = JSON.toJSONString(signEntity);
-		JSONObject jsonObj = JSON.parseObject(str,JSONObject.class);
-		Set<java.util.Map.Entry<String, Object>> mSet = jsonObj.entrySet();
-		Iterator<java.util.Map.Entry<String, Object>> iterator = mSet.iterator();
-		//sort key
-		TreeMap<String,Object> treeMap = new TreeMap<>(new PayKeyComparator());
-		while(iterator.hasNext()) {
-			java.util.Map.Entry<String, Object> entry = iterator.next();
-			String key = entry.getKey();
-			String val = jsonObj.get(key).toString();
-			treeMap.put(key,val);
-		}
-		showTreeMap(treeMap);
-		//获取sign code 参数
-		String paraStr = getPayParams(treeMap);
-		System.out.println("sign code params:" + paraStr + " secret:" + SECRET);
-		//生成signCode
-		String signCode = getSignCode(paraStr,SECRET);
-		signCode = signCode.toUpperCase();
-		System.out.println("sign code:" + signCode);
-		//赋值signCode
-		reqEntity.setSignValue(signCode);;
-		//signCode添加到请求参数中
-		String reqStr = JSON.toJSONString(reqEntity);
-		System.out.println(reqStr);//查询queryPayInfo.action
-		RspHttpEntity rspEntity = HttpUtil.sendMsg(reqStr,URL_PAY+"/yinHePay.action",true);
-		System.out.println(rspEntity);
-	}
+//	private void testQRBarPay() {
+//		String orderNo = "123456";
+//		String URL_PAY = "http://zfyun.com.cn:8080/YinHeLoan/yinHe";
+//		String amt = "1";
+//		String SECRET = "b4df7b2d0cb5a90659afcb165b701d5e";
+//		ReqQRPayEntity reqEntity = new ReqQRPayEntity();
+//		reqEntity.setOrgNo("2188");
+//		reqEntity.setAmt(amt);
+//		reqEntity.setBackUrl("http://api.caixiaomi.net/api/payment/payment/wxpay/notify");
+//		reqEntity.setCharset("UTF-8");
+//		reqEntity.setTermType("RQ");
+//		reqEntity.setTxtTime(ConfigerPay.getPayTime());
+//		reqEntity.setSignType("MD5");
+//		reqEntity.setTransNo(orderNo);
+//		reqEntity.setMerId("1503174711");
+//		reqEntity.setPayType("1");
+//		reqEntity.setInWechat("0");
+//		
+//		ReqSignEntity signEntity = reqEntity.buildSignEntity();
+//		String str = JSON.toJSONString(signEntity);
+//		JSONObject jsonObj = JSON.parseObject(str,JSONObject.class);
+//		Set<java.util.Map.Entry<String, Object>> mSet = jsonObj.entrySet();
+//		Iterator<java.util.Map.Entry<String, Object>> iterator = mSet.iterator();
+//		//sort key
+//		TreeMap<String,Object> treeMap = new TreeMap<>(new PayKeyComparator());
+//		while(iterator.hasNext()) {
+//			java.util.Map.Entry<String, Object> entry = iterator.next();
+//			String key = entry.getKey();
+//			String val = jsonObj.get(key).toString();
+//			treeMap.put(key,val);
+//		}
+//		showTreeMap(treeMap);
+//		//获取sign code 参数
+//		String paraStr = getPayParams(treeMap);
+//		System.out.println("sign code params:" + paraStr + " secret:" + SECRET);
+//		//生成signCode
+//		String signCode = getSignCode(paraStr,SECRET);
+//		signCode = signCode.toUpperCase();
+//		System.out.println("sign code:" + signCode);
+//		//赋值signCode
+//		reqEntity.setSignValue(signCode);;
+//		//signCode添加到请求参数中
+//		String reqStr = JSON.toJSONString(reqEntity);
+//		System.out.println(reqStr);//查询queryPayInfo.action
+//		RspHttpEntity rspEntity = HttpUtil.sendMsg(reqStr,URL_PAY+"/yinHePay.action",true);
+//		System.out.println(rspEntity);
+//	}
 //	
 //	private void testQuery() {//20180514160177010290042
 //		String orderNo = "20180514170530910360015";
@@ -222,7 +222,8 @@ public class PayDemo {
 	 */
 	
 	private void testPay() {
-		String URL_PAY = "http://zfyun.com.cn:8080/YinHeLoan/yinHe";
+//		String URL_PAY = "http://zfyun.com.cn:8080/YinHeLoan/yinHe";
+		String URL_PAY = "http://yhyr.com.cn/YinHeLoan/yinHe";
 		String amt = "1";
 		String SECRET = "b4df7b2d0cb5a90659afcb165b701d5e";
 		BigDecimal bigD = new BigDecimal(amt);
@@ -240,6 +241,8 @@ public class PayDemo {
 		reqEntity.setMerId("1503174711");
 		reqEntity.setPayType("1");
 		reqEntity.setInWechat("0");
+		reqEntity.setIp("123.117.164.47");
+		reqEntity.setTermNo("kdt1070605");
 		
 		ReqSignEntity signEntity = reqEntity.buildSignEntity();
 		String str = JSON.toJSONString(signEntity);
