@@ -116,6 +116,7 @@ public class PaySchedul {
 		String payOrderSn = entity.payOrderSn;
 		PayLog payLog = payLogService.findPayLogByOrderSign(payOrderSn);
 		if(payLog == null) {
+			log.info("查询到该订单不存在...payOrderSn:" + payOrderSn);
 			return succ;
 		}
 		int isPaid = payLog.getIsPaid();
