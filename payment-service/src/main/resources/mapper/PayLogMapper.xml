@@ -53,7 +53,7 @@
 	  select 
 	  <include refid="queryFields" />
 	  from dl_pay_log
-	  where pay_order_sn = #{order_sn}
+	  where order_sn = #{order_sn}
 	</select>
 	
 	<update id="updatePayLog">
