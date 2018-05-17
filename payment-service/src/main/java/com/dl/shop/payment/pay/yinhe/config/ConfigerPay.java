@@ -40,6 +40,9 @@ public class ConfigerPay {
 	@Value("${yinhe.app_redirect}")
 	private String URL_REDIRECT;
 	
+	@Value("${yinhe.app_redirect_app}")
+	private String URL_REDIRECT_APP;
+	
 	@Value("${yinhe.app_mch_id}")
 	private String MERCHANT_NO;
 	
