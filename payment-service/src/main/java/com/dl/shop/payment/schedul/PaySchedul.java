@@ -87,7 +87,7 @@ public class PaySchedul {
 	/**
 	 * 处理订单支付超时的定时任务
 	 */
-	@Scheduled(fixedRate = 1000*10)
+	@Scheduled(fixedRate = 1000*5)
     public void timerOrderQueryScheduled() {
 		String loggerId = "timer_orderquery_" + System.currentTimeMillis();
 		log.info("订单支付Query任务...");
@@ -137,7 +137,7 @@ public class PaySchedul {
 		RspOrderQueryEntity rspEntity = baseResult.getData();
 		succ = rspEntity.isSucc();
 		if(rspEntity != null && rspEntity.isSucc()) {
-			logger.info("第三方定时器查询订单 payordersn:" + rspEntity.getOrder_no() + " succ..");
+			logger.info("payType:" + payLog.getPayType() +"payCode:" + payCode + "第三方定时器查询订单 payordersn:" + rspEntity.getOrder_no() + " succ..");
 			Integer payType = payLog.getPayType();
 			BaseResult<RspOrderQueryDTO> bResult = null;
 			if(payType == 0) {

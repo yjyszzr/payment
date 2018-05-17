@@ -105,7 +105,7 @@ public class PayManager {
 		public String payOrderSn;
 		public String payCode;
 		public int cnt;
-		public static final int MAX_CNT = 10;
+		public static final int MAX_CNT = 20;
 	}
 	
 	public static interface PayListener{
