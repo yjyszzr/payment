@@ -12,7 +12,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.util.MD5Utils;
 import com.dl.shop.payment.pay.common.HttpUtil;
-import com.dl.shop.payment.pay.common.PayConfig;
 import com.dl.shop.payment.pay.common.RspHttpEntity;
 import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
 import com.dl.shop.payment.pay.yinhe.entity.ReqPayEntity;
@@ -73,7 +72,7 @@ public class PayUtil {
 	 * @return
 	 */
 	public final RspYinHeEntity getWechatPayUrl(boolean isInnerWechat,String ip,String amount,String orderNo){
-		if(PayConfig.isDebug()) {
+		if("true".equals(cfgPay.getDEBUG())) {
 			amount = "1";
 		}
 		RspYinHeEntity rEntity = null;

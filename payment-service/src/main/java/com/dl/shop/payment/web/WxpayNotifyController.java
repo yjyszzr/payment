@@ -20,11 +20,10 @@ import com.dl.member.param.UpdateUserRechargeParam;
 import com.dl.member.param.UserAccountParamByType;
 import com.dl.order.api.IOrderService;
 import com.dl.order.param.UpdateOrderInfoParam;
-import com.dl.shop.payment.configurer.WxpayConfig;
 import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.WxpayNotifyModel;
-import com.dl.shop.payment.pay.common.PayConfig;
+import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
 import com.dl.shop.payment.pay.yinhe.entity.RspNotifyWeChatEntity;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.UserRechargeService;
@@ -37,8 +36,6 @@ public class WxpayNotifyController {
 	//url /payment/wxpay/notify
 	private final static Logger logger = LoggerFactory.getLogger(WxpayNotifyController.class);
 	@Resource
-	private WxpayConfig wxpayConfig;
-	@Resource
 	private PayLogService payLogService;
 	@Autowired
 	private IUserAccountService userAccountService;
@@ -46,6 +43,8 @@ public class WxpayNotifyController {
 	private IOrderService orderService;
 	@Autowired
 	private UserRechargeService userRechargeService;
+	@Resource
+	private ConfigerPay cfgPay;
 	
 	@ApiOperation(value="微信支付回调")
 	@PostMapping("notify")
@@ -150,7 +149,7 @@ public class WxpayNotifyController {
 				}
 				int orderAmount = (int)(payLog.getOrderAmount().doubleValue()*100);
 				logger.info("实际交易金额:" + amount +" 订单金额:" + orderAmount);
-				if ((PayConfig.isDebug() || amount == orderAmount) && ((appid.equals(wxpayConfig.getWxAppAppId()) && mchId.equals(wxpayConfig.getWxAppMchId())) || (appid.equals(wxpayConfig.getWxJsAppId()) && mchId.equals(wxpayConfig.getWxJsMchId())))) {
+				if (("true".equals(cfgPay.getDEBUG()) || amount == orderAmount) && ((appid.equals(cfgPay.getAPPID()) && mchId.equals(cfgPay.getMERCHANT_NO())))) {
 					logger.info(loggerId + " 订单金额或appid,mchId校验成功，前去回调订单服务！");
 					operation(payLog, loggerId, tradeNo,response);
 				}else {

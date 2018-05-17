@@ -87,7 +87,6 @@ public class PaySchedul {
 	/**
 	 * 处理订单支付超时的定时任务
 	 */
-	@Scheduled(cron = "0 0/1 * * * ?")
 	@Scheduled(fixedRate = 1000*10)
     public void timerOrderQueryScheduled() {
 		String loggerId = "timer_orderquery_" + System.currentTimeMillis();

@@ -11,6 +11,9 @@ import lombok.Data;
 @Configuration
 public class ConfigerPay {
 	
+	@Value("${yinhe.app.debug}")
+	private String DEBUG;
+	
 	@Value("${yinhe.app_wechat_jump_h5}")
 	private String URL_PAY_WECHAT_H5;
 	
@@ -48,6 +51,10 @@ public class ConfigerPay {
 	
 	@Value("${yinhe_app_screct}")
 	private String SECRET;
+	
+	@Value("${yinhe.app.app_id}")
+	private String APPID;
+	
 	
 	public static final String PAY_TYPE_WECHAT = "1";
 	public static final String PAY_TYPE_ZHIFUBAO = "2";
