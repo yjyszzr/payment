@@ -17,6 +17,7 @@ import com.dl.base.util.DateUtil;
 import com.dl.member.api.IUserAccountService;
 import com.dl.member.dto.SurplusPaymentCallbackDTO;
 import com.dl.member.param.SurplusPayParam;
+import com.dl.member.param.UserAccountParamByType;
 import com.dl.member.param.UserBonusParam;
 import com.dl.order.api.IOrderService;
 import com.dl.order.dto.OrderDTO;
@@ -29,7 +30,6 @@ import com.dl.shop.payment.dto.PaymentDTO;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.PayMent;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
-import com.dl.shop.payment.pay.common.RspHttpEntity;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
 import com.dl.shop.payment.pay.rongbao.entity.ReqRefundEntity;
 import com.dl.shop.payment.pay.rongbao.entity.RspRefundEntity;
@@ -204,6 +204,7 @@ public class PayMentService extends AbstractService<PayMent> {
 				}
 				String payCode = payLog.getPayCode();
 				log.info("回滚查询PayLog信息:" + " payCode:" + payCode + " payOrderSn:" + payLog.getPayOrderSn());
+				RspRefundEntity rspRefundEntity = null;
 				if(payLog != null) {
 					if(payCode.equals("app_rongbao")) {
 						ReqRefundEntity reqEntity = new ReqRefundEntity();
@@ -211,9 +212,9 @@ public class PayMentService extends AbstractService<PayMent> {
 						reqEntity.setNote("出票失败退款操作");
 						reqEntity.setOrig_order_no(payLog.getPayOrderSn());
 						try {
-							RspRefundEntity rEntity = rongUtil.refundOrderInfo(reqEntity);
-							log.info("rEntity:" + rEntity.toString());
-							if(rEntity != null && rEntity.isSucc()) {
+							rspRefundEntity = rongUtil.refundOrderInfo(reqEntity);
+							log.info("rEntity:" + rspRefundEntity.toString());
+							if(rspRefundEntity != null && rspRefundEntity.isSucc()) {
 								succThird = true;
 							}
 						} catch (Exception e) {
@@ -226,16 +227,38 @@ public class PayMentService extends AbstractService<PayMent> {
 						String amtFen = bigDec.movePointRight(2).intValue()+"";
 						log.info("=========================");
 						log.info("进入到了微信订单回滚 isInWeChat：" + isInWeChat + " amtFen" + amtFen + "payOrderSn:" + payLog.getPayOrderSn());
-						RspHttpEntity rspEntity = yinHeUtil.orderRefund(isInWeChat,payLog.getPayOrderSn(),amtFen);
-						if(rspEntity.isSucc) {
+						rspRefundEntity = yinHeUtil.orderRefund(isInWeChat,payLog.getPayOrderSn(),amtFen);
+						if(rspRefundEntity.isSucc()) {
 							succThird = true;
 						}
-						log.info("微信订单回滚 isSucc:" + rspEntity.isSucc);
+						log.info("微信订单回滚 isSucc:" + rspRefundEntity.isSucc() + " msg:" + rspRefundEntity.toString());
 						log.info("=========================");
 					}
 					//第三方资金退回
 					if(succThird) {
 						log.info("第三方资金退回成功 payCode：" + payCode + " amt:" + thirdPartyPaid.toString());
+						//===========记录退款流水==========
+						UserAccountParamByType userAccountParamByType = new UserAccountParamByType();
+						Integer accountType = ProjectConstant.BUY;
+						log.info("===========更新用户流水表=======:" + accountType);
+						userAccountParamByType.setAccountType(accountType);
+						userAccountParamByType.setAmount(new BigDecimal(payLog.getOrderAmount().doubleValue()));
+						userAccountParamByType.setBonusPrice(BigDecimal.ZERO);//暂无红包金额
+						userAccountParamByType.setOrderSn(payLog.getOrderSn());
+						userAccountParamByType.setPayId(payLog.getLogId());
+						if(payCode.equals("app_weixin") || payCode.equals("app_weixin_h5")) {
+							payName = "微信";
+						}else {
+							payName = "银行卡";
+						}
+						userAccountParamByType.setPaymentName(payName);
+						userAccountParamByType.setThirdPartName(payName);
+						userAccountParamByType.setThirdPartPaid(new BigDecimal(payLog.getOrderAmount().doubleValue()));
+						userAccountParamByType.setUserId(payLog.getUserId());
+						BaseResult<String> accountRst = userAccountService.insertUserAccount(userAccountParamByType);
+						if(accountRst.getCode() == 0) {
+							log.info("退款成功记录流水成功...");
+						}
 					}else {
 						payLog.setPayMsg("第三方资金退回失败");
 						payLogService.update(payLog);

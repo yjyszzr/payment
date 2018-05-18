@@ -12,6 +12,7 @@ import com.dl.base.result.ResultGenerator;
 import com.dl.shop.payment.pay.common.HttpUtil;
 import com.dl.shop.payment.pay.common.RspHttpEntity;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
+import com.dl.shop.payment.pay.rongbao.entity.RspRefundEntity;
 import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
 import com.dl.shop.payment.pay.yinhe.entity.ReqQueryEntity;
 import com.dl.shop.payment.pay.yinhe.entity.ReqRefundOrderEntity;
@@ -19,7 +20,7 @@ import com.dl.shop.payment.pay.yinhe.entity.ReqSignEntity;
 import com.dl.shop.payment.pay.yinhe.entity.RspQueryEntity;
 
 /****
- * 银河支付订单查询
+ * 银河支付订单操作
  */
 @Component
 public class YinHeUtil {
@@ -39,7 +40,8 @@ public class YinHeUtil {
 	 * @param amt
 	 * @return
 	 */
-	public RspHttpEntity orderRefund(boolean isInWeChat,String orderNo,String amt){
+	public RspRefundEntity orderRefund(boolean isInWeChat,String orderNo,String amt){
+		RspRefundEntity rEntity = new RspRefundEntity();
 		if("true".equals(cfgPay.getDEBUG())) {
 			amt = "1";
 		}
@@ -68,9 +70,16 @@ public class YinHeUtil {
 		reqEntity.setSignValue(signCode);
 		//signCode添加到请求参数中
 		String reqStr = JSON.toJSONString(reqEntity);
-		System.out.println(reqStr);//查询queryPayInfo.action
+		System.out.println(reqStr);//退款refundOrder.action
 		RspHttpEntity rspEntity = HttpUtil.sendMsg(reqStr,cfgPay.getURL_PAY()+"/refundOrder.action",true);
-		return rspEntity;
+		if(rspEntity != null && rspEntity.isSucc) {
+			String msg = rspEntity.msg;
+			rEntity.setResult_msg(msg);
+			rEntity.setResult_code("0000");
+		}else {
+			rEntity.setResult_msg(rspEntity.msg);
+		}
+		return rEntity;
 	}
 	
 	/**
@@ -95,11 +104,11 @@ public class YinHeUtil {
 		}
 		//获取sign code 参数
 		String paraStr = payUtil.getPayParams(treeMap);
-		System.out.println("sign code params:" + paraStr + " secret:" +cfgPay.getSECRET());
+//		System.out.println("sign code params:" + paraStr + " secret:" +cfgPay.getSECRET());
 		//生成signCode
 		String signCode = payUtil.getSignCode(paraStr,cfgPay.getSECRET());
 		signCode = signCode.toUpperCase();
-		System.out.println("sign code:" + signCode);
+//		System.out.println("sign code:" + signCode);
 		//赋值signCode
 		reqEntity.setSignValue(signCode);
 		//signCode添加到请求参数中
