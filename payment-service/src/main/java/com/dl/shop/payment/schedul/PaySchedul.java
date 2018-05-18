@@ -95,7 +95,7 @@ public class PaySchedul {
 	@Scheduled(fixedRate = 1000*5)
     public void timerOrderQueryScheduled() {
 		String loggerId = "timer_orderquery_" + System.currentTimeMillis();
-		log.info("订单支付Query任务...");
+//		log.info("订单支付Query任务...");
 		List<QueueItemEntity> mVector = PayManager.getInstance().getList();
 		if(mVector.size() > 0) {
 			for(int i = 0;i < mVector.size();i++) {

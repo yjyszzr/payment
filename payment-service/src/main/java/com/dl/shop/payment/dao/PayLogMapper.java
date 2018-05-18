@@ -35,11 +35,19 @@ public interface PayLogMapper extends Mapper<PayLog> {
 	int updatePayMsg(PayLog payLog);
 
 	/***
-	 * 根据orderSign查找该数据
+	 * 根据PayOrderSign查找该数据
 	 * @param orderSign
 	 * @return
 	 */
 	PayLog findPayLogByOrderSign(String orderSign);
+	
+	
+	/***
+	 * 根据orderSign查找该数据
+	 * @param orderSign
+	 * @return
+	 */
+	PayLog findPayLogByOrderSn(String orderSign);
 	
 	
 	/**
