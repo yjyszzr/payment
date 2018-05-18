@@ -197,8 +197,13 @@ public class PaymentController extends AbstractBaseController{
 		}).collect(Collectors.toList());
 		//余额支付
 		boolean hasSurplus = false;
-		if((surplus != null && surplus.doubleValue() >= 0)) {
+		if((surplus != null && surplus.doubleValue() > 0) || (bonusAmount != null && bonusAmount.doubleValue() > 0)) {
 			hasSurplus = true;
+		}
+		//临时添加
+		boolean isSurplus = false;
+		if(surplus != null && surplus.doubleValue() > 0) {
+			isSurplus = true;
 		}
 		//第三方支付
 		boolean hasThird = false;
@@ -271,18 +276,18 @@ public class PaymentController extends AbstractBaseController{
 			int payType1 = 2;
 			if(hasThird) {
 				payType1 = 3;
-
+				
 			}
 			surplusPayParam.setPayType(payType1);
 			surplusPayParam.setMoneyPaid(surplus);
 			surplusPayParam.setThirdPartName("");
 			surplusPayParam.setThirdPartPaid(BigDecimal.ZERO);
-			BaseResult<SurplusPaymentCallbackDTO> changeUserAccountByPay = userAccountService.changeUserAccountByPay(surplusPayParam);
-			if(changeUserAccountByPay.getCode() != 0) {
-				logger.info(loggerId + "用户余额扣减失败！");
-				return ResultGenerator.genFailResult("支付失败！");
-			}
-			if(surplus != null && surplus.doubleValue() > 0) {
+			if(isSurplus) {
+				BaseResult<SurplusPaymentCallbackDTO> changeUserAccountByPay = userAccountService.changeUserAccountByPay(surplusPayParam);
+				if(changeUserAccountByPay.getCode() != 0) {
+					logger.info(loggerId + "用户余额扣减失败！");
+					return ResultGenerator.genFailResult("支付失败！");
+				}
 				//更新余额支付信息到订单
 				BigDecimal userSurplus = changeUserAccountByPay.getData().getUserSurplus();
 				BigDecimal userSurplusLimit = changeUserAccountByPay.getData().getUserSurplusLimit();
@@ -311,7 +316,7 @@ public class PaymentController extends AbstractBaseController{
 				param1.setOrderSn(orderSn);
 				BaseResult<String> baseResult = orderService.updateOrderInfo(param1);
 				logger.info(loggerId + " 订单成功状态更新回调返回结果：status=" + baseResult.getCode()+" , message="+baseResult.getMsg());
-				if(baseResult.getCode() != 0) {
+				if(baseResult.getCode() != 0 && isSurplus) {
 					BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
 					logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在订单成功状态更新回滚用户余额结束！ 订单回调返回结果：status=" + rollbackUserAccountChangeByPay.getCode()+" , message="+rollbackUserAccountChangeByPay.getMsg());
 					if(rollbackUserAccountChangeByPay.getCode() != 0) {
@@ -330,10 +335,12 @@ public class PaymentController extends AbstractBaseController{
 					if(baseResult1.getCode() != 0) {
 						logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在预出票失败后，更改订单状态为出票失败时出错！订单回调返回结果：status=" + baseResult1.getCode()+" , message="+baseResult1.getMsg());
 					}
-					BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
-					logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在预出票失败更新回滚用户余额结束！ 订单回调返回结果：status=" + rollbackUserAccountChangeByPay.getCode()+" , message="+rollbackUserAccountChangeByPay.getMsg());
-					if(rollbackUserAccountChangeByPay.getCode() != 0) {
-						logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在预出票失败更新回滚用户余额时出错！");
+					if(isSurplus) {
+						BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
+						logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在预出票失败更新回滚用户余额结束！ 订单回调返回结果：status=" + rollbackUserAccountChangeByPay.getCode()+" , message="+rollbackUserAccountChangeByPay.getMsg());
+						if(rollbackUserAccountChangeByPay.getCode() != 0) {
+							logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在预出票失败更新回滚用户余额时出错！");
+						}
 					}
 					return ResultGenerator.genFailResult("支付失败！");
 				}
