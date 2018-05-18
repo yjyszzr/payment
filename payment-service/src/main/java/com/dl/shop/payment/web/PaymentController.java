@@ -148,14 +148,17 @@ public class PaymentController extends AbstractBaseController{
 		String payToken = param.getPayToken();
 		if(StringUtils.isBlank(payToken)) {
 			logger.info(loggerId + "payToken值为空！");
-			return ResultGenerator.genFailResult("商品信息有误，支付失败！");
+			return ResultGenerator.genResult(PayEnums.PAY_TOKEN_EMPTY.getcode(),PayEnums.PAY_TOKEN_EMPTY.getMsg());
 		}
 		//校验payToken的有效性
 		String jsonData = stringRedisTemplate.opsForValue().get(payToken);
 		if(StringUtils.isBlank(jsonData)) {
 			logger.info(loggerId + "支付信息获取为空！");
-			return ResultGenerator.genFailResult("支付信息不存在或已失效，支付失败！");
+			return ResultGenerator.genResult(PayEnums.PAY_TOKEN_EXPRIED.getcode(),PayEnums.PAY_TOKEN_EXPRIED.getMsg());
 		}
+		//清除payToken
+		stringRedisTemplate.delete(payToken);
+		
 		DIZQUserBetInfoDTO dto = null;
 		try {
 			dto = JSONHelper.getSingleBean(jsonData, DIZQUserBetInfoDTO.class);
