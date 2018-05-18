@@ -282,22 +282,24 @@ public class PaymentController extends AbstractBaseController{
 				logger.info(loggerId + "用户余额扣减失败！");
 				return ResultGenerator.genFailResult("支付失败！");
 			}
-			//更新余额支付信息到订单
-			BigDecimal userSurplus = changeUserAccountByPay.getData().getUserSurplus();
-			BigDecimal userSurplusLimit = changeUserAccountByPay.getData().getUserSurplusLimit();
-			UpdateOrderInfoParam updateOrderInfoParam = new UpdateOrderInfoParam();
-			updateOrderInfoParam.setOrderSn(orderSn);
-			updateOrderInfoParam.setUserSurplus(userSurplus);
-			updateOrderInfoParam.setUserSurplusLimit(userSurplusLimit);
-			BaseResult<String> updateOrderInfo = orderService.updateOrderInfo(updateOrderInfoParam);
-			if(updateOrderInfo.getCode() != 0) {
-				logger.info(loggerId + "订单回写用户余额扣减详情失败！");
-				BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
-				logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在回滚用户余额结束！ 订单回调返回结果：status=" + rollbackUserAccountChangeByPay.getCode()+" , message="+rollbackUserAccountChangeByPay.getMsg());
-				if(rollbackUserAccountChangeByPay.getCode() != 0) {
-					logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在回滚用户余额时出错！");
+			if(surplus != null && surplus.doubleValue() > 0) {
+				//更新余额支付信息到订单
+				BigDecimal userSurplus = changeUserAccountByPay.getData().getUserSurplus();
+				BigDecimal userSurplusLimit = changeUserAccountByPay.getData().getUserSurplusLimit();
+				UpdateOrderInfoParam updateOrderInfoParam = new UpdateOrderInfoParam();
+				updateOrderInfoParam.setOrderSn(orderSn);
+				updateOrderInfoParam.setUserSurplus(userSurplus);
+				updateOrderInfoParam.setUserSurplusLimit(userSurplusLimit);
+				BaseResult<String> updateOrderInfo = orderService.updateOrderInfo(updateOrderInfoParam);
+				if(updateOrderInfo.getCode() != 0) {
+					logger.info(loggerId + "订单回写用户余额扣减详情失败！");
+					BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
+					logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在回滚用户余额结束！ 订单回调返回结果：status=" + rollbackUserAccountChangeByPay.getCode()+" , message="+rollbackUserAccountChangeByPay.getMsg());
+					if(rollbackUserAccountChangeByPay.getCode() != 0) {
+						logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在回滚用户余额时出错！");
+					}
+					return ResultGenerator.genFailResult("支付失败！");
 				}
-				return ResultGenerator.genFailResult("支付失败！");
 			}
 			if(!hasThird) {
 				//回调order,更新支付状态,余额支付成功
