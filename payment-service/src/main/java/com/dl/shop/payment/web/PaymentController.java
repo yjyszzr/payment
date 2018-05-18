@@ -197,7 +197,7 @@ public class PaymentController extends AbstractBaseController{
 		}).collect(Collectors.toList());
 		//余额支付
 		boolean hasSurplus = false;
-		if((surplus != null && surplus.doubleValue() > 0) || (bonusAmount != null && bonusAmount.doubleValue() > 0)) {
+		if((surplus != null && surplus.doubleValue() >= 0)) {
 			hasSurplus = true;
 		}
 		//第三方支付
