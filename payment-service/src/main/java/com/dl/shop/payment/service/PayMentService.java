@@ -180,6 +180,20 @@ public class PayMentService extends AbstractService<PayMent> {
 		BigDecimal moneyPaid = order.getMoneyPaid();
 		String payName = order.getPayName();
 		BigDecimal thirdPartyPaid = order.getThirdPartyPaid();
+		Integer userBonusId = order.getUserBonusId();
+		//退回优惠券
+		log.info("优惠券退回操作 userBonusId:" + userBonusId);
+		if(userBonusId != null && userBonusId > 0) {
+			UserBonusParam userBP = new UserBonusParam();
+			userBP.setUserBonusId(userBonusId);
+			userBP.setOrderSn(orderSn);
+			BaseResult<String> baseResult = userAccountService.rollbackChangeUserAccountByCreateOrder(userBP);
+			if(baseResult.getCode() == 0) {
+				log.info("优惠券退回成功...");
+			}else {
+				log.info("优惠券退回失败...");
+			}
+		}
 		//第三方支付
 		int payType = 1;//默认微信
 		if(surplus != null && surplus.doubleValue() > 0) {
