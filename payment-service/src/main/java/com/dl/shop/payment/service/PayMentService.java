@@ -239,7 +239,7 @@ public class PayMentService extends AbstractService<PayMent> {
 						log.info("第三方资金退回成功 payCode：" + payCode + " amt:" + thirdPartyPaid.toString());
 						//===========记录退款流水==========
 						UserAccountParamByType userAccountParamByType = new UserAccountParamByType();
-						Integer accountType = ProjectConstant.BUY;
+						Integer accountType = ProjectConstant.ACCOUNT_ROLLBACK;
 						log.info("===========更新用户流水表=======:" + accountType);
 						userAccountParamByType.setAccountType(accountType);
 						userAccountParamByType.setAmount(new BigDecimal(payLog.getOrderAmount().doubleValue()));

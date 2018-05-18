@@ -74,8 +74,7 @@ public class YinHeUtil {
 		RspHttpEntity rspEntity = HttpUtil.sendMsg(reqStr,cfgPay.getURL_PAY()+"/refundOrder.action",true);
 		if(rspEntity != null && rspEntity.isSucc) {
 			String msg = rspEntity.msg;
-			rEntity.setResult_msg(msg);
-			rEntity.setResult_code("0000");
+			rEntity = JSON.parseObject(msg,RspRefundEntity.class);
 		}else {
 			rEntity.setResult_msg(rspEntity.msg);
 		}
