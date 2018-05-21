@@ -260,6 +260,7 @@ public class PayMentService extends AbstractService<PayMent> {
 						userAccountParamByType.setBonusPrice(BigDecimal.ZERO);//暂无红包金额
 						userAccountParamByType.setOrderSn(payLog.getOrderSn());
 						userAccountParamByType.setPayId(payLog.getLogId());
+						userAccountParamByType.setThirdPartPaid(thirdPartyPaid);
 						if(payCode.equals("app_weixin") || payCode.equals("app_weixin_h5")) {
 							payName = "微信";
 						}else {
@@ -291,7 +292,7 @@ public class PayMentService extends AbstractService<PayMent> {
 			surplusPayParam.setPayType(payType);
 			surplusPayParam.setMoneyPaid(moneyPaid);
 			surplusPayParam.setThirdPartName(payName);
-			surplusPayParam.setThirdPartPaid(thirdPartyPaid);
+			surplusPayParam.setThirdPartPaid(new BigDecimal(0));
 			BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
 			log.info(" orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" rollbackOrderAmount回滚用户余额结束！ 订单回调返回结果：status=" + rollbackUserAccountChangeByPay.getCode()+" , message="+rollbackUserAccountChangeByPay.getMsg());
 			if(rollbackUserAccountChangeByPay.getCode() != 0) {
