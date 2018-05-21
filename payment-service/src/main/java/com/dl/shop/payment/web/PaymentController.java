@@ -507,6 +507,11 @@ public class PaymentController extends AbstractBaseController{
 			logger.info(loggerId + "充值金额有误！totalAmount="+totalAmount);
 			return ResultGenerator.genResult(PayEnums.RECHARGE_AMT_ERROR.getcode(),PayEnums.RECHARGE_AMT_ERROR.getMsg());
 		}
+		//当前支付方式限额10万/笔
+		if(totalAmount > 100000) {
+			logger.info(loggerId + "每笔限额10w");
+			return ResultGenerator.genResult(PayEnums.PAY_RECHARGE_MAX.getcode(),PayEnums.PAY_RECHARGE_MAX.getMsg());
+		}
 		//支付方式
 		String payCode = param.getPayCode();
 		if(StringUtils.isBlank(payCode)) {

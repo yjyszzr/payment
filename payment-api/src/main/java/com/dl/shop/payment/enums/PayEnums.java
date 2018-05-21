@@ -21,7 +21,8 @@ public enum PayEnums {
 	CASH_USER_MOENY_REDUC_ERROR(304051,"用户余额预扣除失败"),
 	PAY_RONGBAO_LOW_LIMIT(304052,"最低提现金额为3元"),
 	PAY_TOKEN_EXPRIED(304053,"支付信息已失效，请返回重新支付"),
-	PAY_TOKEN_EMPTY(304054,"支付信息有误,请重新返回支付");
+	PAY_TOKEN_EMPTY(304054,"支付信息有误,请重新返回支付"),
+	PAY_RECHARGE_MAX(304055,"当前支付方式限额10万/笔");
 	
 	private Integer code;
     private String msg;
