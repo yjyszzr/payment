@@ -899,7 +899,7 @@ public class PaymentController extends AbstractBaseController{
 			Integer accountType = ProjectConstant.BUY;
 			logger.info("===========更新用户流水表=======:" + accountType);
 			userAccountParamByType.setAccountType(accountType);
-			userAccountParamByType.setAmount(new BigDecimal(payLog.getOrderAmount().doubleValue()));
+			userAccountParamByType.setAmount(payLog.getOrderAmount());
 			userAccountParamByType.setBonusPrice(BigDecimal.ZERO);//暂无红包金额
 			userAccountParamByType.setOrderSn(payLog.getOrderSn());
 			userAccountParamByType.setPayId(payLog.getLogId());
@@ -912,7 +912,7 @@ public class PaymentController extends AbstractBaseController{
 			}
 			userAccountParamByType.setPaymentName(payName);
 			userAccountParamByType.setThirdPartName(payName);
-			userAccountParamByType.setThirdPartPaid(new BigDecimal(payLog.getOrderAmount().doubleValue()));
+			userAccountParamByType.setThirdPartPaid(payLog.getOrderAmount());
 			userAccountParamByType.setUserId(payLog.getUserId());
 			BaseResult<String> accountRst = userAccountService.insertUserAccount(userAccountParamByType);
 			if(accountRst.getCode() != 0) {

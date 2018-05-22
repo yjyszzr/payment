@@ -171,10 +171,10 @@ public class RongbaoPayController extends AbstractBaseController{
 			
 			//给用户不可提现余额充值
 			RecharegeParam recharegeParam = new RecharegeParam();
-			recharegeParam.setAmount(new BigDecimal(payLog.getOrderAmount().doubleValue()));
+			recharegeParam.setAmount(payLog.getOrderAmount());
 			recharegeParam.setPayId(payLog.getPayOrderSn());
 			recharegeParam.setThirdPartName(payLog.getPayName());
-			recharegeParam.setThirdPartPaid(new BigDecimal(payLog.getOrderAmount().doubleValue()));
+			recharegeParam.setThirdPartPaid(payLog.getOrderAmount());
 			recharegeParam.setUserId(payLog.getUserId());
 			BaseResult<String> rechargeRst = userAccountService.rechargeUserMoneyLimit(recharegeParam);
 			if(rechargeRst.getCode() != 0) {
@@ -199,12 +199,12 @@ public class RongbaoPayController extends AbstractBaseController{
 				accountType = ProjectConstant.RECHARGE;
 			}
 			userAccountParamByType.setAccountType(accountType);
-			userAccountParamByType.setAmount(new BigDecimal(payLog.getOrderAmount().doubleValue()));
+			userAccountParamByType.setAmount(payLog.getOrderAmount());
 			userAccountParamByType.setBonusPrice(BigDecimal.ZERO);//暂无红包金额
 			userAccountParamByType.setOrderSn(payLog.getOrderSn());
 			userAccountParamByType.setPayId(payLog.getLogId());
 			userAccountParamByType.setPaymentName("银行卡");
-			userAccountParamByType.setThirdPartPaid(new BigDecimal(payLog.getOrderAmount().doubleValue()));
+			userAccountParamByType.setThirdPartPaid(payLog.getOrderAmount());
 			userAccountParamByType.setUserId(payLog.getUserId());
 			BaseResult<String> accountRst = userAccountService.insertUserAccount(userAccountParamByType);
 			if(accountRst.getCode() != 0) {
