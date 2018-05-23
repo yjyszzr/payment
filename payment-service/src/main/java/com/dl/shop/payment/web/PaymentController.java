@@ -719,11 +719,15 @@ public class PaymentController extends AbstractBaseController{
 		}
 		logger.info("查询订单:" + loggerId + " payCode:"  +payLog.getPayCode());
 		int isPaid = payLog.getIsPaid();
+		String payCode = payLog.getPayCode();
+		Integer payType = payLog.getPayType();
 		if(1 == isPaid) {
 			logger.info(loggerId+" 订单已支付成功");
-			return ResultGenerator.genSuccessResult("订单已支付成功！",null);
+			RspOrderQueryDTO payRQDTO = new RspOrderQueryDTO();
+			payRQDTO.setPayCode(payCode);
+			payRQDTO.setPayType(payType);
+			return ResultGenerator.genSuccessResult("订单已支付成功！",payRQDTO);
 		}
-		String payCode = payLog.getPayCode();
 		BaseResult<RspOrderQueryEntity> baseResult = null;
 		logger.info("调用第三方订单查询接口 payCode:" + payCode + " payOrderSn:" + payLog.getPayOrderSn());
 		
@@ -734,27 +738,31 @@ public class PaymentController extends AbstractBaseController{
 //			baseResult = wxpayUtil.orderQuery(payLog.getPayOrderSn());
 			baseResult = yinHeUtil.orderQuery(isInWeixin,payLog.getPayOrderSn());
 		}
-		
 		if(baseResult != null) {
 			if(baseResult.getCode() != 0) {
 				logger.info(loggerId+" 订单查询请求异常"+baseResult.getMsg());
 				return ResultGenerator.genFailResult("请求异常！",null);
 			}
-			
-			Integer payType = payLog.getPayType();
+			payType = payLog.getPayType();
 			RspOrderQueryEntity response = baseResult.getData();
 			logger.info("调用第三方订单查询接口 返回成功" + 
 			response.getResult_msg() +" payType:" +payType + " isSucc:" + response.isSucc() + 
 			"resultCode:"+response.getResult_code());
+			BaseResult<RspOrderQueryDTO> bResult = null;
 			if(0 == payType) {
-				return orderOptions(paymentService,lotteryPrintService,orderService,payLogService,userAccountService,loggerId, payLog, response);
+				bResult = orderOptions(paymentService,lotteryPrintService,orderService,payLogService,userAccountService,loggerId, payLog, response);
 			}else if(1 == payType){
-				return rechargeOptions(userRechargeService,userAccountService,payLogService,loggerId, payLog, response);
+				bResult = rechargeOptions(userRechargeService,userAccountService,payLogService,loggerId, payLog, response);
 			}
+			RspOrderQueryDTO rspOrderQuery = bResult.getData();
+			if(rspOrderQuery != null) {
+				rspOrderQuery.setPayCode(payCode);
+				rspOrderQuery.setPayType(payType);
+			}
+			return bResult;
 		}else {
 			return ResultGenerator.genFailResult("未获取到订单信息，开发中...", null);
 		}
-		return ResultGenerator.genFailResult("请求失败！", null);
 	}
 
 	/**
