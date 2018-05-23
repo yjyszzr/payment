@@ -359,7 +359,10 @@ public class CashService {
 			logger.info("后台管理审核通过...");
 			BigDecimal amt = userEntity.getAmount();
 			logger.info("进入到第三方提现流程，金额:" + amt.doubleValue() +" 用户名:" +userEntity.getUserId() +" sn:" + sn);
-			CashResultEntity cashREntity = callThirdGetCash(sn,amt.doubleValue());
+//			CashResultEntity cashREntity = callThirdGetCash(sn,amt.doubleValue());
+			//跳过第三方待支付，直接更改成功
+			CashResultEntity cashREntity = new CashResultEntity();
+			cashREntity.isSucc = true;
 			if(cashREntity.isSucc) {
 				//更改提现单状态
 				logger.info("更改提现单流程为成功...");
