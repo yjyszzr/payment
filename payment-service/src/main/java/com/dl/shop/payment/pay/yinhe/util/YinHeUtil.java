@@ -42,9 +42,9 @@ public class YinHeUtil {
 	 */
 	public RspRefundEntity orderRefund(boolean isInWeChat,String orderNo,String amt){
 		RspRefundEntity rEntity = new RspRefundEntity();
-		if("true".equals(cfgPay.getDEBUG())) {
+		/*if("true".equals(cfgPay.getDEBUG())) {
 			amt = "1";
-		}
+		}*/
 		ReqRefundOrderEntity reqEntity = reqRefundOrderEntity.buildReqQueryEntity(isInWeChat,orderNo,amt);
 		ReqSignEntity signEntity = reqEntity.buildSignEntity();
 		String str = JSON.toJSONString(signEntity);
