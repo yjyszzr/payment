@@ -457,7 +457,7 @@ public class CashService {
         while (paiter.hasNext()) {
             String key = paiter.next().toString();
             String[] values = (String[])parameters.get(key);                        
-            System.out.println(key+"-------------"+values[0]);
+            logger.info(key+"-------------"+values[0]);
             if("sign".equals(key)){
             	signValue = values[0];
             }
