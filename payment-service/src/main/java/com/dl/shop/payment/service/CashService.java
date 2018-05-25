@@ -248,8 +248,8 @@ public class CashService {
 			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_APPLY_SUC.getcode(),PayEnums.PAY_WITHDRAW_APPLY_SUC.getMsg());
 		}else {
 			//先减少用户钱包余额
-			logger.info("进入第三方提现流程...系统阈值:" + limit);
-			RspSingleCashEntity rEntity = callThirdGetCash(widthDrawSn,totalAmount,cardNo,realName,mobile,"");
+			logger.info("进入第三方提现流程...系统阈值:" + limit + " widthDrawSn:" + widthDrawSn);
+			RspSingleCashEntity rEntity = callThirdGetCash(widthDrawSn,totalAmount,cardNo,realName,mobile,"CMB");
 			return operation(rEntity,widthDrawSn,false);
 		}
 	}
