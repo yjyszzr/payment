@@ -56,6 +56,7 @@ import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.util.XianFengUtil;
 import com.ucf.sdk.CoderException;
 import com.ucf.sdk.UcfForOnline;
+import com.ucf.sdk.util.AESCoder;
 import com.ucf.sdk.util.RsaCoder;
 
 import lombok.extern.slf4j.Slf4j;
@@ -461,12 +462,13 @@ public class CashService {
             if(key.equals("data")) {
             	dataValue = values[0];
             	logger.info("=========================");
-            	try {
-					String dataJson= RsaCoder.decryptByPublicKeyWithSplit(dataValue,Constants.MER_RSAKEY);
+            	try {//String dataValue = AESCoder.decrypt(signVal, Constants.MER_RSAKEY);
+					String dataJson= AESCoder.decrypt(dataValue, Constants.MER_RSAKEY);
 					JSONObject jsonObject = JSONObject.parseObject(dataJson);
 					logger.info("[withdrawNotify]" + " jsonObject:" + jsonObject);
             	} catch (Exception e) {
 					e.printStackTrace();
+					logger.info("[withdrawNotify]" + "msg:" + e.getMessage());
 				}
             }
         }
