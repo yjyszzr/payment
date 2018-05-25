@@ -1,20 +1,17 @@
 package com.dl.shop.payment.service;
 import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dao.UserWithdrawMapper;
+import com.dl.shop.payment.dto.UserWithdrawDTO;
+import com.dl.shop.payment.dto.WithdrawalSnDTO;
 import com.dl.shop.payment.model.UserWithdraw;
 import com.dl.shop.payment.param.UpdateUserWithdrawParam;
 import com.dl.shop.payment.param.UserWithdrawParam;
-
 import lombok.extern.slf4j.Slf4j;
-
 import com.dl.member.api.IUserAccountService;
 import com.dl.member.api.IUserBankService;
 import com.dl.member.dto.UserBankDTO;
-import com.dl.member.dto.UserWithdrawDTO;
-import com.dl.member.dto.WithdrawalSnDTO;
 import com.dl.member.enums.MemberEnums;
 import com.dl.member.param.UserBankQueryParam;
-import com.dl.member.param.WithDrawParam;
 import com.alibaba.fastjson.JSON;
 import com.dl.base.enums.SNBusinessCodeEnum;
 import com.dl.base.exception.ServiceException;
@@ -25,10 +22,11 @@ import com.dl.base.util.DateUtil;
 import com.dl.base.util.SNGenerator;
 import com.dl.base.util.SessionUtil;
 import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.math.BigDecimal;
 import java.util.List;
 import javax.annotation.Resource;
 
@@ -36,6 +34,8 @@ import javax.annotation.Resource;
 @Transactional
 @Slf4j
 public class UserWithdrawService extends AbstractService<UserWithdraw> {
+	private final static Logger logger = LoggerFactory.getLogger(UserWithdrawService.class);
+	
     @Resource
     private UserWithdrawMapper userWithdrawMapper;
     
@@ -107,14 +107,15 @@ public class UserWithdrawService extends AbstractService<UserWithdraw> {
      * 根据提现单号和userId查询提现单
      */
     public BaseResult<UserWithdrawDTO> queryUserWithdrawBySnAndUserId(String withDrawSn,Integer userId){
+    	withDrawSn = withDrawSn.trim();
     	UserWithdraw userWithdraw = new UserWithdraw();
     	userWithdraw.setWithdrawalSn(withDrawSn);
     	userWithdraw.setUserId(userId);
-    	List<UserWithdraw> userWithdrawList = userWithdrawMapper.queryUserWithdrawBySelective(userWithdraw);
+    	List<UserWithdraw> userWithdrawList = userWithdrawMapper.queryUserWithdrawByWithDrawSnAndUserId(userWithdraw);
+    	logger.info("[queryUserWithdrawBySnAndUserId]" +" sn:" + userWithdraw.getWithdrawalSn() + " len:" +userWithdraw.getWithdrawalSn().length()+ " userId:" +userId + " list:" + userWithdrawList);
     	if(CollectionUtils.isEmpty(userWithdrawList)) {
     		return ResultGenerator.genResult(MemberEnums.DBDATA_IS_NULL.getcode(), "提现单不存在");
     	}
-    	
     	UserWithdraw queryUserWithDraw = userWithdrawList.get(0);
     	UserWithdrawDTO userWithdrawDTO = new UserWithdrawDTO();
     	userWithdrawDTO.setStatus(queryUserWithDraw.getStatus());

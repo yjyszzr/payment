@@ -1,11 +1,11 @@
 package com.dl.shop.payment.web;
+import com.dl.shop.payment.dto.UserWithdrawDTO;
 import com.dl.shop.payment.model.UserWithdraw;
 import com.dl.shop.payment.param.WithDrawSnAndUserIdParam;
 import com.dl.shop.payment.param.WithDrawSnParam;
 import com.dl.shop.payment.service.UserWithdrawService;
 import com.dl.base.result.BaseResult;
 import com.dl.base.service.AbstractService;
-import com.dl.member.dto.UserWithdrawDTO;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

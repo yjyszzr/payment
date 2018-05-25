@@ -102,6 +102,7 @@ public class ReqSingleCashEntity {
 		reqEntity.accountType = accountType;
 		reqEntity.mobileNo = mobileNo;
 		reqEntity.bankNo = bankNo;
+		reqEntity.noticeUrl = noticeUrl;
 		return reqEntity;
 	}
 	

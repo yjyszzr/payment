@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
+
 import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.exception.ServiceException;
@@ -34,7 +35,6 @@ import com.dl.member.dto.SurplusPaymentCallbackDTO;
 import com.dl.member.dto.SysConfigDTO;
 import com.dl.member.dto.UserBankDTO;
 import com.dl.member.dto.UserDTO;
-import com.dl.member.dto.WithdrawalSnDTO;
 import com.dl.member.param.IDParam;
 import com.dl.member.param.MemWithDrawSnParam;
 import com.dl.member.param.StrParam;
@@ -42,6 +42,7 @@ import com.dl.member.param.SysConfigParam;
 import com.dl.member.param.UserIdParam;
 import com.dl.member.param.WithDrawParam;
 import com.dl.shop.payment.core.ProjectConstant;
+import com.dl.shop.payment.dto.WithdrawalSnDTO;
 import com.dl.shop.payment.enums.CashEnums;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.UserWithdraw;
@@ -50,19 +51,13 @@ import com.dl.shop.payment.param.CashGetParam;
 import com.dl.shop.payment.param.UpdateUserWithdrawParam;
 import com.dl.shop.payment.param.UserWithdrawParam;
 import com.dl.shop.payment.param.WithdrawParam;
-import com.dl.shop.payment.pay.rongbao.cash.CashUtil;
-import com.dl.shop.payment.pay.rongbao.cash.entity.CashResultEntity;
-import com.dl.shop.payment.pay.rongbao.cash.entity.ReqCashContentEntity;
-import com.dl.shop.payment.pay.rongbao.cash.entity.ReqCashEntity;
-import com.dl.shop.payment.pay.rongbao.cash.entity.RspCashEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.config.Constants;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.util.XianFengUtil;
-import com.dl.shop.payment.service.UserWithdrawLogService;
-import com.dl.shop.payment.service.UserWithdrawService;
 import com.ucf.sdk.CoderException;
 import com.ucf.sdk.UcfForOnline;
 import com.ucf.sdk.util.RsaCoder;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -92,7 +87,7 @@ public class CashService {
 	public BaseResult<Object> withdrawForApp(@RequestBody WithdrawParam param, HttpServletRequest request){
 		String loggerId = "withdrawForApp_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/withdraw, userId="+SessionUtil.getUserId()+", totalAmount="+param.getTotalAmount()+",userBankId="+param.getUserBankId());
-		BaseResult<UserDTO> userInfoExceptPass = userService.userInfoExceptPass(new StrParam());
+		BaseResult<UserDTO> userInfoExceptPass = userService.userInfoExceptPassReal(new StrParam());
 		if(userInfoExceptPass == null) {
 			return ResultGenerator.genFailResult("对不起，用户信息有误！", null);
 		}
@@ -102,6 +97,7 @@ public class CashService {
 		}
 		String mobile = userDTO.getMobile();
 		String strTotalAmount = param.getTotalAmount();
+		Integer userId = SessionUtil.getUserId();
 		//长度超过1000000 -> 7位数
 		if(StringUtils.isEmpty(strTotalAmount) || strTotalAmount.length() > 10) {
 			logger.info(loggerId+"输入金额超出有效范围~");
@@ -157,6 +153,7 @@ public class CashService {
 			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_BANK_QUERY_ERROR.getcode(),PayEnums.PAY_RONGBAO_BANK_QUERY_ERROR.getMsg());
 		}
 		UserBankDTO userBankDTO = queryUserBank.getData();
+		String bankCode = userBankDTO.getAbbreviation();
 		String realName = userBankDTO.getRealName();
 		String cardNo = userBankDTO.getCardNo();
 		SysConfigParam cfg = new SysConfigParam();
@@ -248,9 +245,9 @@ public class CashService {
 			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_APPLY_SUC.getcode(),PayEnums.PAY_WITHDRAW_APPLY_SUC.getMsg());
 		}else {
 			//先减少用户钱包余额
-			logger.info("进入第三方提现流程...系统阈值:" + limit);
-			RspSingleCashEntity rEntity = callThirdGetCash(widthDrawSn,totalAmount,cardNo,realName,mobile,"");
-			return operation(rEntity,widthDrawSn,false);
+			logger.info("进入第三方提现流程...系统阈值:" + limit + " widthDrawSn:" + widthDrawSn);
+			RspSingleCashEntity rEntity = callThirdGetCash(widthDrawSn,totalAmount,cardNo,realName,mobile,bankCode);
+			return operation(rEntity,widthDrawSn,userId,false);
 		}
 	}
 	
@@ -263,15 +260,20 @@ public class CashService {
 	private RspSingleCashEntity callThirdGetCash(String orderSn,double totalAmount,String accNo,String accName,String phone,String bankNo) {
 		logger.info("=====callThirdGetCash======");
 		logger.info("orderSn:" + orderSn + " total:" + totalAmount + " accNo:" + accNo + " accName:" + accName + " phone:" + phone + " bankNo:" + bankNo);
+		//test code
+		//========================
+		accNo = "6222021001115704287";
+		accName = "王泽武";
+		phone = "18100000000";
+		bankNo = "CCB";
+		//======================
+		BigDecimal bigDec = BigDecimal.valueOf(totalAmount);
+		bigDec.movePointRight(2);
 		RspSingleCashEntity rEntity = new RspSingleCashEntity();
-		boolean isSucc = false;
 		String tips = null;
 		try {
-			rEntity = XianFengUtil.reqCash(orderSn,totalAmount+"", accNo, accName, phone, bankNo);
+			rEntity = XianFengUtil.reqCash(orderSn,bigDec.intValue()+"", accNo, accName, phone, bankNo);
 			logger.info("RspCashEntity->"+rEntity);
-			if(rEntity != null && rEntity.isSucc()) {
-				isSucc = true;
-			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			tips = e.getMessage();
@@ -280,7 +282,7 @@ public class CashService {
 		return rEntity;
 	}
 
-	private BaseResult<Object> operation(RspSingleCashEntity rEntity,String widthDrawSn,boolean isManagerBack) {
+	private BaseResult<Object> operation(RspSingleCashEntity rEntity,String widthDrawSn,Integer userId,boolean isManagerBack) {
 		if(rEntity.isSucc()) {
 			logger.info("单号:"+widthDrawSn+"第三方提现成功，扣除用户余额");
 			//更新提现单
@@ -352,6 +354,7 @@ public class CashService {
 			logger.info("进入第三方提现失败，资金回滚...isManagerBack:" + isManagerBack);
 			MemWithDrawSnParam snParams = new MemWithDrawSnParam();
 			snParams.setWithDrawSn(widthDrawSn);
+			snParams.setUserId(userId);
 			BaseResult<SurplusPaymentCallbackDTO> baseR = userAccountService.rollbackUserMoneyWithDrawFailure(snParams);
 			if(baseR != null && baseR.getCode() == 0) {
 				logger.info("进入第三方提现失败，资金回滚成功...");
@@ -374,7 +377,7 @@ public class CashService {
 		UserWithdraw userEntity = baseResult.getData();
 		int userId = userEntity.getUserId();
 		String realName = userEntity.getRealName();
-		String accNo = userEntity.getAccountId()+"";
+		Integer accNo = userEntity.getAccountId();
 		UserIdParam params = new UserIdParam();
 		params.setUserId(userId);
 		BaseResult<UserDTO> bR = userService.queryUserInfo(params);
@@ -388,12 +391,22 @@ public class CashService {
 			logger.info("查询提现单失败");
 			return ResultGenerator.genFailResult("提现单号不能为空",null);
 		}
+		//银行信息
+		String bankCode = "";
+		IDParam idParams = new IDParam();
+		idParams.setId(accNo);
+		BaseResult<UserBankDTO> base = userBankService.queryUserBank(idParams);
+		if(base.getCode() != 0 || base.getData() == null) {
+			return ResultGenerator.genFailResult("查询银行信息失败",null);
+		}
+		UserBankDTO userBankDTO = base.getData();
+		bankCode = userBankDTO.getAbbreviation();
 		if(param.isPass()) {
 			logger.info("后台管理审核通过...");
 			BigDecimal amt = userEntity.getAmount();
 			logger.info("进入到第三方提现流程，金额:" + amt.doubleValue() +" 用户名:" +userEntity.getUserId() +" sn:" + sn);
-			RspSingleCashEntity rspSCashEntity = callThirdGetCash(sn,amt.doubleValue(),accNo,realName,phone,"");
-			return operation(rspSCashEntity,sn,true);
+			RspSingleCashEntity rspSCashEntity = callThirdGetCash(sn,amt.doubleValue(),accNo+"",realName,phone,bankCode);
+			return operation(rspSCashEntity,sn,userId,true);
 		}else {
 			logger.info("后台管理审核拒绝，提现单状态为失败...");
 			//更新提现单失败状态
@@ -444,7 +457,7 @@ public class CashService {
         while (paiter.hasNext()) {
             String key = paiter.next().toString();
             String[] values = (String[])parameters.get(key);                        
-            System.out.println(key+"-------------"+values[0]);
+            logger.info(key+"-------------"+values[0]);
             if("sign".equals(key)){
             	signValue = values[0];
             }
@@ -463,6 +476,7 @@ public class CashService {
  	                     String key1 = paiter1.next().toString();
  	                     signParameters.put(key1, jsonObject.getString(key1));
  	            	 }          
+ 	            	logger.info("jsonObject:" + jsonObject);
  				} catch (Exception e) {
  					// TODO Auto-generated catch block
  					e.printStackTrace();
