@@ -1,6 +1,8 @@
 package com.dl.shop.payment.service;
 import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dao.UserWithdrawMapper;
+import com.dl.shop.payment.dto.UserWithdrawDTO;
+import com.dl.shop.payment.dto.WithdrawalSnDTO;
 import com.dl.shop.payment.model.UserWithdraw;
 import com.dl.shop.payment.param.UpdateUserWithdrawParam;
 import com.dl.shop.payment.param.UserWithdrawParam;
@@ -8,8 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import com.dl.member.api.IUserAccountService;
 import com.dl.member.api.IUserBankService;
 import com.dl.member.dto.UserBankDTO;
-import com.dl.member.dto.UserWithdrawDTO;
-import com.dl.member.dto.WithdrawalSnDTO;
 import com.dl.member.enums.MemberEnums;
 import com.dl.member.param.UserBankQueryParam;
 import com.alibaba.fastjson.JSON;
