@@ -39,6 +39,7 @@ import com.dl.member.param.IDParam;
 import com.dl.member.param.MemWithDrawSnParam;
 import com.dl.member.param.StrParam;
 import com.dl.member.param.SysConfigParam;
+import com.dl.member.param.UserIdParam;
 import com.dl.member.param.WithDrawParam;
 import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.enums.CashEnums;
@@ -374,7 +375,9 @@ public class CashService {
 		int userId = userEntity.getUserId();
 		String realName = userEntity.getRealName();
 		String accNo = userEntity.getAccountId()+"";
-		BaseResult<UserDTO> bR = userService.queryUserInfo(userId);
+		UserIdParam params = new UserIdParam();
+		params.setUserId(userId);
+		BaseResult<UserDTO> bR = userService.queryUserInfo(params);
 		UserDTO userDTO = null;
 		String phone = "";
 		if(bR != null) {
