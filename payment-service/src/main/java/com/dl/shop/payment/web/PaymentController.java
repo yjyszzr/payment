@@ -681,24 +681,6 @@ public class PaymentController extends AbstractBaseController{
 			logger.info(loggerId + " payLog对象保存失败！"); 
 			return ResultGenerator.genFailResult("请求失败！", null);
 		}*/
-		//消息
-		MessageAddParam messageAddParam = new MessageAddParam();
-		messageAddParam.setTitle("申请提现");
-		messageAddParam.setContent("提现"+totalAmount+"元");
-		messageAddParam.setContentDesc("提交申请");
-		messageAddParam.setMsgType(1);
-		messageAddParam.setReceiver(SessionUtil.getUserId());
-		messageAddParam.setReceiveMobile(mobile);
-		messageAddParam.setObjectType(2);
-		messageAddParam.setSendTime(DateUtil.getCurrentTimeLong());
-		Integer addTime = createUserWithdraw.getData().getAddTime();
-		LocalDateTime loclaTime = LocalDateTime.ofEpochSecond(addTime, 0, ZoneOffset.UTC);
-		StringBuilder msgDesc = new StringBuilder();
-		msgDesc.append("申请时间：").append(loclaTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:dd"))).append("\n")
-		.append("审核时间：").append("\n")
-		.append("提现成功时间：");
-		messageAddParam.setMsgDesc(msgDesc.toString());
-		userMessageService.add(messageAddParam);
 		return ResultGenerator.genSuccessResult("请求成功！");
 	}
 	
