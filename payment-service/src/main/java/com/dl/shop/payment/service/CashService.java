@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
+
 import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.exception.ServiceException;
@@ -50,19 +51,13 @@ import com.dl.shop.payment.param.CashGetParam;
 import com.dl.shop.payment.param.UpdateUserWithdrawParam;
 import com.dl.shop.payment.param.UserWithdrawParam;
 import com.dl.shop.payment.param.WithdrawParam;
-import com.dl.shop.payment.pay.rongbao.cash.CashUtil;
-import com.dl.shop.payment.pay.rongbao.cash.entity.CashResultEntity;
-import com.dl.shop.payment.pay.rongbao.cash.entity.ReqCashContentEntity;
-import com.dl.shop.payment.pay.rongbao.cash.entity.ReqCashEntity;
-import com.dl.shop.payment.pay.rongbao.cash.entity.RspCashEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.config.Constants;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.util.XianFengUtil;
-import com.dl.shop.payment.service.UserWithdrawLogService;
-import com.dl.shop.payment.service.UserWithdrawService;
 import com.ucf.sdk.CoderException;
 import com.ucf.sdk.UcfForOnline;
 import com.ucf.sdk.util.RsaCoder;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -102,6 +97,7 @@ public class CashService {
 		}
 		String mobile = userDTO.getMobile();
 		String strTotalAmount = param.getTotalAmount();
+		Integer userId = SessionUtil.getUserId();
 		//长度超过1000000 -> 7位数
 		if(StringUtils.isEmpty(strTotalAmount) || strTotalAmount.length() > 10) {
 			logger.info(loggerId+"输入金额超出有效范围~");
@@ -250,7 +246,7 @@ public class CashService {
 			//先减少用户钱包余额
 			logger.info("进入第三方提现流程...系统阈值:" + limit + " widthDrawSn:" + widthDrawSn);
 			RspSingleCashEntity rEntity = callThirdGetCash(widthDrawSn,totalAmount,cardNo,realName,mobile,"CMB");
-			return operation(rEntity,widthDrawSn,false);
+			return operation(rEntity,widthDrawSn,userId,false);
 		}
 	}
 	
@@ -263,15 +259,13 @@ public class CashService {
 	private RspSingleCashEntity callThirdGetCash(String orderSn,double totalAmount,String accNo,String accName,String phone,String bankNo) {
 		logger.info("=====callThirdGetCash======");
 		logger.info("orderSn:" + orderSn + " total:" + totalAmount + " accNo:" + accNo + " accName:" + accName + " phone:" + phone + " bankNo:" + bankNo);
+		BigDecimal bigDec = BigDecimal.valueOf(totalAmount);
+		bigDec.movePointRight(2);
 		RspSingleCashEntity rEntity = new RspSingleCashEntity();
-		boolean isSucc = false;
 		String tips = null;
 		try {
-			rEntity = XianFengUtil.reqCash(orderSn,totalAmount+"", accNo, accName, phone, bankNo);
+			rEntity = XianFengUtil.reqCash(orderSn,bigDec.doubleValue()+"", accNo, accName, phone, bankNo);
 			logger.info("RspCashEntity->"+rEntity);
-			if(rEntity != null && rEntity.isSucc()) {
-				isSucc = true;
-			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			tips = e.getMessage();
@@ -280,7 +274,7 @@ public class CashService {
 		return rEntity;
 	}
 
-	private BaseResult<Object> operation(RspSingleCashEntity rEntity,String widthDrawSn,boolean isManagerBack) {
+	private BaseResult<Object> operation(RspSingleCashEntity rEntity,String widthDrawSn,Integer userId,boolean isManagerBack) {
 		if(rEntity.isSucc()) {
 			logger.info("单号:"+widthDrawSn+"第三方提现成功，扣除用户余额");
 			//更新提现单
@@ -352,6 +346,7 @@ public class CashService {
 			logger.info("进入第三方提现失败，资金回滚...isManagerBack:" + isManagerBack);
 			MemWithDrawSnParam snParams = new MemWithDrawSnParam();
 			snParams.setWithDrawSn(widthDrawSn);
+			snParams.setUserId(userId);
 			BaseResult<SurplusPaymentCallbackDTO> baseR = userAccountService.rollbackUserMoneyWithDrawFailure(snParams);
 			if(baseR != null && baseR.getCode() == 0) {
 				logger.info("进入第三方提现失败，资金回滚成功...");
@@ -393,7 +388,7 @@ public class CashService {
 			BigDecimal amt = userEntity.getAmount();
 			logger.info("进入到第三方提现流程，金额:" + amt.doubleValue() +" 用户名:" +userEntity.getUserId() +" sn:" + sn);
 			RspSingleCashEntity rspSCashEntity = callThirdGetCash(sn,amt.doubleValue(),accNo,realName,phone,"CMB");
-			return operation(rspSCashEntity,sn,true);
+			return operation(rspSCashEntity,sn,userId,true);
 		}else {
 			logger.info("后台管理审核拒绝，提现单状态为失败...");
 			//更新提现单失败状态
