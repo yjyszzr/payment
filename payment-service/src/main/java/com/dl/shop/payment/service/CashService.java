@@ -311,11 +311,13 @@ public class CashService {
 			
 			//保存提现中状态记录 dl_user_withdraw_log
 			UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
-			userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
-			userWithdrawLog.setLogName(CashEnums.CASH_REVIEWING.getMsg());
-			userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
-			userWithdrawLog.setWithdrawSn(widthDrawSn);
-			userWithdrawLogService.save(userWithdrawLog);
+			if(!isNotify) {
+				userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
+				userWithdrawLog.setLogName(CashEnums.CASH_REVIEWING.getMsg());
+				userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
+				userWithdrawLog.setWithdrawSn(widthDrawSn);
+				userWithdrawLogService.save(userWithdrawLog);
+			}
 			
 			//提现中，提现成功两条记录到 withdraw_log中
 			userWithdrawLog = new UserWithdrawLog();
