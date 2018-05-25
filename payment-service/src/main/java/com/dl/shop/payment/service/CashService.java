@@ -486,7 +486,7 @@ public class CashService {
             else{            	
                 signParameters.put(key, values[0]);
             }
-        }
+        }//while
         boolean verifyResult = false;
 		try {
 			//调用先锋支付类库中验签方法
