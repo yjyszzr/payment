@@ -33,11 +33,12 @@ public class HttpUtil {
 	            conn.setRequestProperty("Connection", "Keep-Alive");
 	            conn.setUseCaches(false);
 	            conn.setDoOutput(true);
-	            conn.setRequestProperty("Content-Length", "" + postData.length());
-	            out = new OutputStreamWriter(conn.getOutputStream(), "UTF-8");
-	            out.write(postData);
-	            out.flush();
-	           
+	            if(postData != null && postData.length() > 0) {
+	            	conn.setRequestProperty("Content-Length", "" + postData.length());
+		            out = new OutputStreamWriter(conn.getOutputStream(), "UTF-8");
+		            out.write(postData);
+		            out.flush();
+	            }
 	            int code = conn.getResponseCode();
 	            //获取响应状态
 	            if (code != HttpURLConnection.HTTP_OK) {
