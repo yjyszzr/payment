@@ -1,6 +1,7 @@
 package com.dl.shop.payment.service;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
@@ -26,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.alibaba.druid.util.StringUtils;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.constant.CommonConstants;
 import com.dl.base.exception.ServiceException;
@@ -472,8 +474,24 @@ public class CashService {
             	logger.info("=========================");
             	try {//String dataValue = AESCoder.decrypt(signVal, Constants.MER_RSAKEY);
 					String dataJson= AESCoder.decrypt(dataValue, Constants.MER_RSAKEY);
-					JSONObject jsonObject = JSONObject.parseObject(dataJson);
-					logger.info("[withdrawNotify]" + " jsonObject:" + jsonObject);
+					RspSingleCashEntity rspSingleCashEntity = JSON.parseObject(dataJson,RspSingleCashEntity.class);
+					String withDrawSn = rspSingleCashEntity.merchantNo;
+					if(!StringUtils.isEmpty(withDrawSn)) {
+						BaseResult<UserWithdraw> baseResult = userWithdrawService.queryUserWithdraw(withDrawSn);
+						logger.info("[withdrawNotify]" + " data:" + baseResult.getData() + " code:" + baseResult.getCode());
+						if(baseResult.getCode() == 0) {
+							UserWithdraw userWithDraw = baseResult.getData();
+							if(userWithDraw != null) {
+								int userId = userWithDraw.getUserId();
+								logger.info("[withdrawNotify]" + " userId:" + userId +  " withDrawSn:" + withDrawSn);
+								operation(rspSingleCashEntity,rspSingleCashEntity.merchantNo, userId,false);
+								//订单最终态
+								PrintWriter writer = response.getWriter();
+					        	writer.write("SUCCESS");
+							}
+						}
+					}
+					logger.info("[withdrawNotify]" + " jsonObject:" + dataJson);
             	} catch (Exception e) {
 					e.printStackTrace();
 					logger.info("[withdrawNotify]" + "msg:" + e.getMessage());

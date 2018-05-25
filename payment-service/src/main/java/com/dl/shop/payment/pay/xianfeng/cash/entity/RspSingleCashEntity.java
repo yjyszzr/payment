@@ -10,6 +10,11 @@ public class RspSingleCashEntity {
 	public String merchantId;
 	public String merchantNo;
 	
+	//notify专用
+	public String tradeTime;
+	public String sign;
+	public String memo;
+	
 	public boolean isSucc() {
 		return "00000".equals(resCode);
 	}
