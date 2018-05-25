@@ -458,52 +458,64 @@ public class CashService {
             String key = paiter.next().toString();
             String[] values = (String[])parameters.get(key);                        
             logger.info(key+"-------------"+values[0]);
-            if("sign".equals(key)){
-            	signValue = values[0];
+            if(key.equals("data")) {
+            	dataValue = values[0];
+            	logger.info("=========================");
+            	try {
+					String dataJson= RsaCoder.decryptByPublicKeyWithSplit(dataValue,Constants.MER_RSAKEY);
+					JSONObject jsonObject = JSONObject.parseObject(dataJson);
+					logger.info("[withdrawNotify]" + " jsonObject:" + jsonObject);
+            	} catch (Exception e) {
+					e.printStackTrace();
+				}
             }
-            /*******hanxp add start**********/
-            else if("data".equals(key)){
-            	 try {
-                 	//获取到data后对该字段进行解密，解密后的格式为json格式           	
-                 	dataValue=values[0];           	
-                 	// 公钥解密
- 					String dataJson=RsaCoder.decryptByPublicKeyWithSplit(dataValue, Constants.MER_RSAKEY);
- 					//String dateStr="{\"merchantNo\":\"20160125020529905\",\"amount\":\"10\",\"transCur\":\"156\"}";
- 	            	JSONObject jsonObject = JSONObject.parseObject(dataJson);
- 	            	jsonData = jsonObject;
- 	            	Iterator paiter1 = jsonObject.keySet().iterator();
- 	            	while (paiter1.hasNext()) {
- 	                     String key1 = paiter1.next().toString();
- 	                     signParameters.put(key1, jsonObject.getString(key1));
- 	            	 }          
- 	            	logger.info("jsonObject:" + jsonObject);
- 				} catch (Exception e) {
- 					// TODO Auto-generated catch block
- 					e.printStackTrace();
- 				}  
-            }
-            /*******hanxp add end**********/
-            else{            	
-                signParameters.put(key, values[0]);
-            }
-        }//while
-        boolean verifyResult = false;
-		try {
-			//调用先锋支付类库中验签方法
-			verifyResult = UcfForOnline.verify(Constants.MER_RSAKEY, "sign", signValue, signParameters,"RSA");
-		} catch (GeneralSecurityException e) {
-			e.printStackTrace();
-		} catch (CoderException e) {
-			e.printStackTrace();
-		}
-        if(verifyResult){
-        	logger.info("sign verify SUCCESS:验签通过");
-        	logger.info("jsonData:" + jsonData);
-        	PrintWriter writer = response.getWriter();
-        	//验签成功需返回先锋支付“SUCCESS”
-        	writer.write("SUCCESS");
-        }else{
-        	logger.info("sign verify FAIL:验签失败");
         }
+//            if("sign".equals(key)){
+//            	signValue = values[0];
+//            }
+//            /*******hanxp add start**********/
+//            else if("data".equals(key)){
+//            	 try {
+//                 	//获取到data后对该字段进行解密，解密后的格式为json格式           	
+//                 	dataValue=values[0];           	
+//                 	// 公钥解密
+// 					String dataJson=RsaCoder.decryptByPublicKeyWithSplit(dataValue, Constants.MER_RSAKEY);
+// 					//String dateStr="{\"merchantNo\":\"20160125020529905\",\"amount\":\"10\",\"transCur\":\"156\"}";
+// 	            	JSONObject jsonObject = JSONObject.parseObject(dataJson);
+// 	            	jsonData = jsonObject;
+// 	            	Iterator paiter1 = jsonObject.keySet().iterator();
+// 	            	while (paiter1.hasNext()) {
+// 	                     String key1 = paiter1.next().toString();
+// 	                     signParameters.put(key1, jsonObject.getString(key1));
+// 	            	 }          
+// 	            	logger.info("jsonObject:" + jsonObject);
+// 				} catch (Exception e) {
+// 					// TODO Auto-generated catch block
+// 					e.printStackTrace();
+// 				}  
+//            }
+//            /*******hanxp add end**********/
+//            else{            	
+//                signParameters.put(key, values[0]);
+//            }
+//        }//while
+//        boolean verifyResult = false;
+//		try {
+//			//调用先锋支付类库中验签方法
+//			verifyResult = UcfForOnline.verify(Constants.MER_RSAKEY, "sign", signValue, signParameters,"RSA");
+//		} catch (GeneralSecurityException e) {
+//			e.printStackTrace();
+//		} catch (CoderException e) {
+//			e.printStackTrace();
+//		}
+//        if(verifyResult){
+//        	logger.info("sign verify SUCCESS:验签通过");
+//        	logger.info("jsonData:" + jsonData);
+//        	PrintWriter writer = response.getWriter();
+//        	//验签成功需返回先锋支付“SUCCESS”
+//        	writer.write("SUCCESS");
+//        }else{
+//        	logger.info("sign verify FAIL:验签失败");
+//        }
 	}
 }
