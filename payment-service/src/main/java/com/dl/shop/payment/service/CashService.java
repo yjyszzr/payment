@@ -92,7 +92,7 @@ public class CashService {
 	public BaseResult<Object> withdrawForApp(@RequestBody WithdrawParam param, HttpServletRequest request){
 		String loggerId = "withdrawForApp_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/withdraw, userId="+SessionUtil.getUserId()+", totalAmount="+param.getTotalAmount()+",userBankId="+param.getUserBankId());
-		BaseResult<UserDTO> userInfoExceptPass = userService.userInfoExceptPass(new StrParam());
+		BaseResult<UserDTO> userInfoExceptPass = userService.userInfoExceptPassReal(new StrParam());
 		if(userInfoExceptPass == null) {
 			return ResultGenerator.genFailResult("对不起，用户信息有误！", null);
 		}
@@ -392,7 +392,7 @@ public class CashService {
 			logger.info("后台管理审核通过...");
 			BigDecimal amt = userEntity.getAmount();
 			logger.info("进入到第三方提现流程，金额:" + amt.doubleValue() +" 用户名:" +userEntity.getUserId() +" sn:" + sn);
-			RspSingleCashEntity rspSCashEntity = callThirdGetCash(sn,amt.doubleValue(),accNo,realName,phone,"");
+			RspSingleCashEntity rspSCashEntity = callThirdGetCash(sn,amt.doubleValue(),accNo,realName,phone,"CMB");
 			return operation(rspSCashEntity,sn,true);
 		}else {
 			logger.info("后台管理审核拒绝，提现单状态为失败...");
