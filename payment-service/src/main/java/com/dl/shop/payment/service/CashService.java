@@ -476,6 +476,7 @@ public class CashService {
  	                     String key1 = paiter1.next().toString();
  	                     signParameters.put(key1, jsonObject.getString(key1));
  	            	 }          
+ 	            	logger.info("jsonObject:" + jsonObject);
  				} catch (Exception e) {
  					// TODO Auto-generated catch block
  					e.printStackTrace();
