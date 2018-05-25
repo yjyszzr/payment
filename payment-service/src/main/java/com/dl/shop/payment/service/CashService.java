@@ -266,14 +266,13 @@ public class CashService {
 		accName = "王泽武";
 		phone = "18100000000";
 		bankNo = "CCB";
-		totalAmount = 1;
 		//======================
 		BigDecimal bigDec = BigDecimal.valueOf(totalAmount);
 		bigDec.movePointRight(2);
 		RspSingleCashEntity rEntity = new RspSingleCashEntity();
 		String tips = null;
 		try {
-			rEntity = XianFengUtil.reqCash(orderSn,"1", accNo, accName, phone, bankNo);
+			rEntity = XianFengUtil.reqCash(orderSn,bigDec.intValue()+"", accNo, accName, phone, bankNo);
 			logger.info("RspCashEntity->"+rEntity);
 		} catch (Exception e) {
 			e.printStackTrace();
