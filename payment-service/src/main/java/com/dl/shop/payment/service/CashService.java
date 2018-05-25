@@ -1,11 +1,15 @@
 package com.dl.shop.payment.service;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.math.BigDecimal;
-import java.security.GeneralSecurityException;
+import java.text.MessageFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -16,12 +20,14 @@ import org.apache.http.util.TextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSONObject;
+import com.dl.base.constant.CommonConstants;
 import com.dl.base.exception.ServiceException;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -35,8 +41,10 @@ import com.dl.member.dto.SurplusPaymentCallbackDTO;
 import com.dl.member.dto.SysConfigDTO;
 import com.dl.member.dto.UserBankDTO;
 import com.dl.member.dto.UserDTO;
+import com.dl.member.param.AddMessageParam;
 import com.dl.member.param.IDParam;
 import com.dl.member.param.MemWithDrawSnParam;
+import com.dl.member.param.MessageAddParam;
 import com.dl.member.param.StrParam;
 import com.dl.member.param.SysConfigParam;
 import com.dl.member.param.UserIdParam;
@@ -54,10 +62,7 @@ import com.dl.shop.payment.param.WithdrawParam;
 import com.dl.shop.payment.pay.xianfeng.cash.config.Constants;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.util.XianFengUtil;
-import com.ucf.sdk.CoderException;
-import com.ucf.sdk.UcfForOnline;
 import com.ucf.sdk.util.AESCoder;
-import com.ucf.sdk.util.RsaCoder;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -300,6 +305,7 @@ public class CashService {
 				updateParams.setPaymentName("银行卡提现");
 			}
 			userWithdrawService.updateWithdraw(updateParams);
+			this.goWithdrawMessage(widthDrawSn);
 			
 			//保存提现中状态记录 dl_user_withdraw_log
 			UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
@@ -350,6 +356,7 @@ public class CashService {
 			updateParams.setPaymentId(widthDrawSn);
 			updateParams.setPaymentName("用户发起提现");
 			userWithdrawService.updateWithdraw(updateParams);
+			this.goWithdrawMessage(widthDrawSn);
 			
 			//三方返回失败，用户资金回滚
 			logger.info("进入第三方提现失败，资金回滚...isManagerBack:" + isManagerBack);
@@ -417,6 +424,7 @@ public class CashService {
 			updateParams.setPayTime(DateUtil.getCurrentTimeLong());
 			updateParams.setPaymentName("审核被拒绝，提现失败~");
 			userWithdrawService.updateWithdraw(updateParams);
+			this.goWithdrawMessage(param.getWithdrawSn());
 			
 			//增加提现流水为失敗
 			logger.info("后台管理审核拒绝，增加提现单log日志...");
@@ -519,5 +527,55 @@ public class CashService {
 //        }else{
 //        	logger.info("sign verify FAIL:验签失败");
 //        }
+	}
+	
+	@Async
+	private void goWithdrawMessage(String withDrawSn) {
+		UserWithdraw userWithdraw = userWithdrawService.queryUserWithdraw(withDrawSn).getData();
+		if(userWithdraw == null) {
+			return;
+		}
+		AddMessageParam addParam = new AddMessageParam();
+		List<MessageAddParam> params = new ArrayList<MessageAddParam>(1);
+		//消息
+		String status = userWithdraw.getStatus();
+		MessageAddParam messageAddParam = new MessageAddParam();
+		if(ProjectConstant.STATUS_FAILURE.equals(status)) {
+			messageAddParam.setTitle(CommonConstants.FORMAT_WITHDRAW_FAIL_TITLE);
+			messageAddParam.setContentDesc(CommonConstants.FORMAT_WITHDRAW_FAIL_CONTENT_DESC);
+		} else if(ProjectConstant.STATUS_SUCC.equals(status)) {
+			messageAddParam.setTitle(CommonConstants.FORMAT_WITHDRAW_SUC_TITLE);
+			messageAddParam.setContentDesc(CommonConstants.FORMAT_WITHDRAW_SUC_CONTENT_DESC);
+		}else {
+			return;
+		}
+		BigDecimal amount = userWithdraw.getAmount();
+		messageAddParam.setContent(MessageFormat.format(CommonConstants.FORMAT_WITHDRAW_CONTENT, amount.toString()));
+		messageAddParam.setSender(-1);
+		messageAddParam.setMsgType(1);
+		messageAddParam.setReceiver(userWithdraw.getUserId());
+		messageAddParam.setReceiveMobile("");
+		messageAddParam.setObjectType(2);
+		messageAddParam.setMsgUrl("");
+		messageAddParam.setSendTime(DateUtil.getCurrentTimeLong());
+		Integer addTime =userWithdraw.getAddTime();
+		String addTimeStr = this.getTimeStr(addTime);
+		Integer checkTime = 0;
+		String checkTimeStr = this.getTimeStr(checkTime);
+		Integer payTime = userWithdraw.getPayTime();
+		String payTimeStr = this.getTimeStr(payTime);
+		messageAddParam.setMsgDesc(MessageFormat.format(CommonConstants.FORMAT_WITHDRAW_MSG_DESC, addTimeStr, checkTimeStr, payTimeStr));
+		params.add(messageAddParam);
+		addParam.setParams(params);
+		userMessageService.add(addParam);
+	}
+
+	private String getTimeStr(Integer addTime) {
+		if(addTime <= 0) {
+			return "";
+		}
+		LocalDateTime loclaTime = LocalDateTime.ofEpochSecond(addTime, 0, ZoneOffset.UTC);
+		String addTimeStr = loclaTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:dd"));
+		return addTimeStr;
 	}
 }
