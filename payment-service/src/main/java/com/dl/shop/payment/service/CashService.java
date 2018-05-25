@@ -153,6 +153,7 @@ public class CashService {
 			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_BANK_QUERY_ERROR.getcode(),PayEnums.PAY_RONGBAO_BANK_QUERY_ERROR.getMsg());
 		}
 		UserBankDTO userBankDTO = queryUserBank.getData();
+		String bankCode = userBankDTO.getAbbreviation();
 		String realName = userBankDTO.getRealName();
 		String cardNo = userBankDTO.getCardNo();
 		SysConfigParam cfg = new SysConfigParam();
@@ -245,7 +246,7 @@ public class CashService {
 		}else {
 			//先减少用户钱包余额
 			logger.info("进入第三方提现流程...系统阈值:" + limit + " widthDrawSn:" + widthDrawSn);
-			RspSingleCashEntity rEntity = callThirdGetCash(widthDrawSn,totalAmount,cardNo,realName,mobile,"CMB");
+			RspSingleCashEntity rEntity = callThirdGetCash(widthDrawSn,totalAmount,cardNo,realName,mobile,bankCode);
 			return operation(rEntity,widthDrawSn,userId,false);
 		}
 	}
@@ -369,7 +370,7 @@ public class CashService {
 		UserWithdraw userEntity = baseResult.getData();
 		int userId = userEntity.getUserId();
 		String realName = userEntity.getRealName();
-		String accNo = userEntity.getAccountId()+"";
+		Integer accNo = userEntity.getAccountId();
 		UserIdParam params = new UserIdParam();
 		params.setUserId(userId);
 		BaseResult<UserDTO> bR = userService.queryUserInfo(params);
@@ -383,11 +384,21 @@ public class CashService {
 			logger.info("查询提现单失败");
 			return ResultGenerator.genFailResult("提现单号不能为空",null);
 		}
+		//银行信息
+		String bankCode = "";
+		IDParam idParams = new IDParam();
+		idParams.setId(accNo);
+		BaseResult<UserBankDTO> base = userBankService.queryUserBank(idParams);
+		if(base.getCode() != 0 || base.getData() == null) {
+			return ResultGenerator.genFailResult("查询银行信息失败",null);
+		}
+		UserBankDTO userBankDTO = base.getData();
+		bankCode = userBankDTO.getAbbreviation();
 		if(param.isPass()) {
 			logger.info("后台管理审核通过...");
 			BigDecimal amt = userEntity.getAmount();
 			logger.info("进入到第三方提现流程，金额:" + amt.doubleValue() +" 用户名:" +userEntity.getUserId() +" sn:" + sn);
-			RspSingleCashEntity rspSCashEntity = callThirdGetCash(sn,amt.doubleValue(),accNo,realName,phone,"CMB");
+			RspSingleCashEntity rspSCashEntity = callThirdGetCash(sn,amt.doubleValue(),accNo+"",realName,phone,bankCode);
 			return operation(rspSCashEntity,sn,userId,true);
 		}else {
 			logger.info("后台管理审核拒绝，提现单状态为失败...");
