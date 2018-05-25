@@ -34,13 +34,14 @@ public class ReqSingleCashEntity {
 	public String accountType;	//账户类型
 	public String mobileNo;		//手机号码
 	public String bankNo;		//银行编码
+	public String noticeUrl;	//结果通知地址
 	
 	public static ReqSingleCashEntity buildReqSingleCashEntity(String orderNo,String amt,
 			String accNo,String accName,String phone,String bankNo) throws Exception {
 		ReqSingleCashEntity reqEntity = new ReqSingleCashEntity();
 		reqEntity.service = "REQ_WITHDRAW";
 		reqEntity.secId = Constants.SEC_ID;
-		reqEntity.version = "4.0.0";
+		reqEntity.version = Constants.VERSION;
 		reqEntity.merchantId = Constants.MER_ID;
 		String reqSn = UnRepeatCodeGenerator.createUnRepeatCode(reqEntity.merchantId, reqEntity.service, new SimpleDateFormat("yyyyMMddhhmmssSSS").format(new Date()));
 		reqEntity.reqSn = reqSn;
@@ -54,17 +55,17 @@ public class ReqSingleCashEntity {
 		reqEntity.accountType = "1";
 		reqEntity.mobileNo = phone;
 		reqEntity.bankNo = bankNo;
-		
+		reqEntity.noticeUrl = Constants.NOTICE_URL;
 		//data
 		ReqEncodeCashEntity reqCodeEntity = reqEntity.buildEncodeCashEntity();
 		String jsonStr = JSON.toJSONString(reqCodeEntity);
-		System.out.println("参与data加密原串:" + jsonStr);
+//		System.out.println("参与data加密原串:" + jsonStr);
 		//AESCoder.encrypt
 		String val = AESCoder.encrypt(jsonStr,Constants.MER_RSAKEY);
 		reqEntity.data = val;
-		System.out.println("加密后data:" + val);
+//		System.out.println("加密后data:" + val);
 		String tempStr = AESCoder.decrypt(val, Constants.MER_RSAKEY);
-		System.out.println("解密data后:" + tempStr);
+//		System.out.println("解密data后:" + tempStr);
 		
 		//sign value
 		ReqSnCashEntity reqSnEntity = reqEntity.buildSnCashEntity();
@@ -83,8 +84,8 @@ public class ReqSingleCashEntity {
 		//UcfForOnline.createSign
 		String signValue = UcfForOnline.createSign(Constants.MER_RSAKEY, "sign", mMap, "RSA");
 		reqEntity.sign = signValue;
-		System.out.println("签名原串:" + jsonStr);
-		System.out.println("签名结果:" + reqEntity.sign);
+//		System.out.println("签名原串:" + jsonStr);
+//		System.out.println("签名结果:" + reqEntity.sign);
 		return reqEntity;
 	}
 

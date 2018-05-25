@@ -1,7 +1,9 @@
 package com.dl.shop.payment.web;
 
+import java.io.IOException;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +19,6 @@ import com.dl.member.api.IUserMessageService;
 import com.dl.member.api.IUserService;
 import com.dl.shop.payment.param.CashGetParam;
 import com.dl.shop.payment.param.WithdrawParam;
-import com.dl.shop.payment.pay.rongbao.cash.CashUtil;
-import com.dl.shop.payment.pay.rongbao.cash.entity.CashResultEntity;
-import com.dl.shop.payment.pay.rongbao.cash.entity.ReqCashContentEntity;
-import com.dl.shop.payment.pay.rongbao.cash.entity.ReqCashEntity;
-import com.dl.shop.payment.pay.rongbao.cash.entity.RspCashEntity;
 import com.dl.shop.payment.service.CashService;
 import com.dl.shop.payment.service.UserWithdrawLogService;
 import com.dl.shop.payment.service.UserWithdrawService;
@@ -53,6 +50,19 @@ public class CashController {
 	@Resource
 	private CashService cashService;
 	
+	
+	@ApiOperation(value="先锋提现notify", notes="")
+	@PostMapping("/notify")
+	@ResponseBody
+	public void withdrawNotify(HttpServletRequest request, HttpServletResponse response){
+		try {
+			cashService.withdrawNotify(request,response);
+		} catch (IOException e) {
+			e.printStackTrace();
+			logger.error(e.getMessage());
+		}
+	}
+	
 	@ApiOperation(value="app提现调用", notes="")
 	@PostMapping("/withdraw")
 	@ResponseBody
@@ -60,44 +70,6 @@ public class CashController {
 		return cashService.withdrawForApp(param, request);
 	}
 	
-	/**
-	 * 调用第三方扣款流程
-	 * @param orderSn
-	 * @param totalAmount
-	 * @return
-	 */
-	private CashResultEntity callThirdGetCash(String orderSn,double totalAmount) {
-		CashResultEntity rEntity = new CashResultEntity();
-		//第三方提现接口
-		ReqCashEntity reqCashEntity = new ReqCashEntity();
-		//提现序号
-		reqCashEntity.setBatch_no(orderSn);
-		reqCashEntity.setBatch_count("1");
-		reqCashEntity.setBatch_amount(totalAmount+"");
-		reqCashEntity.setPay_type("1");
-		ReqCashContentEntity reqCashContentEntity = ReqCashContentEntity.buildTestReqCashEntity("1",""+totalAmount,"18910116131");
-		reqCashEntity.setContent(reqCashContentEntity.buildContent());
-		logger.info(reqCashContentEntity.buildContent());
-		boolean isSucc = false;
-		String tips = null;
-		try {
-			RspCashEntity rspEntity = CashUtil.sendGetCashInfo(reqCashEntity);
-			logger.info("RspCashEntity->"+rspEntity);
-			if(rspEntity != null && rspEntity.isSucc()) {
-				isSucc = true;
-				rEntity.isSucc = true;
-			}else {
-				if(rspEntity != null) {
-					tips = rspEntity.result_msg;
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			tips = e.getMessage();
-			rEntity.msg = tips;
-		}
-		return rEntity;
-	}
 	
 	@ApiOperation(value="后台管理提现调用", notes="")
 	@PostMapping("/getcash")

@@ -1,5 +1,7 @@
 package com.dl.shop.payment.pay.xianfeng.cash.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSON;
 import com.dl.shop.payment.pay.common.HttpUtil;
 import com.dl.shop.payment.pay.common.RspHttpEntity;
@@ -10,16 +12,17 @@ import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
 import com.ucf.sdk.util.AESCoder;
 
 public class XianFengUtil {
-
+	private final static Logger logger = LoggerFactory.getLogger(XianFengUtil.class);
+	
 	public static RspSingleCashEntity reqCash(String orderNo,String amt,String accNo,String accName,String phone,String bankNo) throws Exception {
 		RspSingleCashEntity rEntity;
 		ReqSingleCashEntity reqEntity = null;
 		reqEntity = ReqSingleCashEntity.buildReqSingleCashEntity(orderNo, amt, accNo, accName, phone, bankNo);
 		ReqRealCashEntity reqRCEntity = reqEntity.buildRealReqCashEntity();
 		String url = Constants.UCF_GATEWAY_URL + "?" + reqRCEntity.buildReqStr();
-		System.out.println("请求参数:" + url);
+		logger.info("请求参数:" + url);
 		RspHttpEntity rspEntity = HttpUtil.sendMsg(null,url,false);
-		System.out.println(rspEntity);
+		logger.info(rspEntity.toString());
 		if(rspEntity.isSucc) {
 			String signVal = rspEntity.msg;
 			//AESCoder.decrypt

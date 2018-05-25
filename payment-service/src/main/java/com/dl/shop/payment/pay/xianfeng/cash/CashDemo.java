@@ -6,7 +6,7 @@ import com.dl.shop.payment.pay.xianfeng.cash.util.XianFengUtil;
 public class CashDemo {
 
 	public CashDemo() throws Exception {
-		String orderNo = "2018052400003";
+		String orderNo = "2018052400006";
 		String amt = "1";
 		String accNo = "6222021001115704287";
 		String accName = "王泽武";
