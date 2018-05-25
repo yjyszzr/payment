@@ -255,7 +255,7 @@ public class CashService {
 			//先减少用户钱包余额
 			logger.info("进入第三方提现流程...系统阈值:" + limit + " widthDrawSn:" + widthDrawSn);
 			RspSingleCashEntity rEntity = callThirdGetCash(widthDrawSn,totalAmount,cardNo,realName,mobile,bankCode);
-			return operation(rEntity,widthDrawSn,userId,false);
+			return operation(rEntity,widthDrawSn,userId,false,false);
 		}
 	}
 	
@@ -290,7 +290,7 @@ public class CashService {
 		return rEntity;
 	}
 
-	private BaseResult<Object> operation(RspSingleCashEntity rEntity,String widthDrawSn,Integer userId,boolean isManagerBack) {
+	private BaseResult<Object> operation(RspSingleCashEntity rEntity,String widthDrawSn,Integer userId,boolean isManagerBack,boolean isNotify) {
 		if(rEntity.isSucc()) {
 			logger.info("单号:"+widthDrawSn+"第三方提现成功，扣除用户余额");
 			//更新提现单
@@ -337,12 +337,13 @@ public class CashService {
 		}else{
 			//保存提现中状态记录 dl_user_withdraw_log
 			UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
-			userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
-			userWithdrawLog.setLogName(CashEnums.CASH_REVIEWING.getMsg());
-			userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
-			userWithdrawLog.setWithdrawSn(widthDrawSn);
-			userWithdrawLogService.save(userWithdrawLog);
-			
+			if(!isNotify) {
+				userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
+				userWithdrawLog.setLogName(CashEnums.CASH_REVIEWING.getMsg());
+				userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
+				userWithdrawLog.setWithdrawSn(widthDrawSn);
+				userWithdrawLogService.save(userWithdrawLog);
+			}
 			//保存提现中状态记录位失败到数据库中...
 			userWithdrawLog = new UserWithdrawLog();
 			userWithdrawLog.setLogCode(CashEnums.CASH_FAILURE.getcode());
@@ -416,7 +417,7 @@ public class CashService {
 			BigDecimal amt = userEntity.getAmount();
 			logger.info("进入到第三方提现流程，金额:" + amt.doubleValue() +" 用户名:" +userEntity.getUserId() +" sn:" + sn);
 			RspSingleCashEntity rspSCashEntity = callThirdGetCash(sn,amt.doubleValue(),accNo+"",realName,phone,bankCode);
-			return operation(rspSCashEntity,sn,userId,true);
+			return operation(rspSCashEntity,sn,userId,true,false);
 		}else {
 			logger.info("后台管理审核拒绝，提现单状态为失败...");
 			//更新提现单失败状态
@@ -484,7 +485,7 @@ public class CashService {
 							if(userWithDraw != null) {
 								int userId = userWithDraw.getUserId();
 								logger.info("[withdrawNotify]" + " userId:" + userId +  " withDrawSn:" + withDrawSn);
-								operation(rspSingleCashEntity,rspSingleCashEntity.merchantNo, userId,false);
+								operation(rspSingleCashEntity,rspSingleCashEntity.merchantNo, userId,false,true);
 								//订单最终态
 								PrintWriter writer = response.getWriter();
 					        	writer.write("SUCCESS");
