@@ -111,7 +111,7 @@ public class UserWithdrawService extends AbstractService<UserWithdraw> {
     	UserWithdraw userWithdraw = new UserWithdraw();
     	userWithdraw.setWithdrawalSn(withDrawSn);
     	userWithdraw.setUserId(userId);
-    	List<UserWithdraw> userWithdrawList = userWithdrawMapper.queryUserWithdrawBySelective(userWithdraw);
+    	List<UserWithdraw> userWithdrawList = userWithdrawMapper.queryUserWithdrawByWithDrawSnAndUserId(userWithdraw);
     	logger.info("[queryUserWithdrawBySnAndUserId]" +" sn:" + userWithdraw.getWithdrawalSn() + " len:" +userWithdraw.getWithdrawalSn().length()+ " userId:" +userId + " list:" + userWithdrawList);
     	if(CollectionUtils.isEmpty(userWithdrawList)) {
     		return ResultGenerator.genResult(MemberEnums.DBDATA_IS_NULL.getcode(), "提现单不存在");
