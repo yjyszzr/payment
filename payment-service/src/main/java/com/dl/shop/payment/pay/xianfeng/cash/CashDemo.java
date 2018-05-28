@@ -1,6 +1,6 @@
 package com.dl.shop.payment.pay.xianfeng.cash;
 
-import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
+import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleQueryEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.util.XianFengUtil;
 
 public class CashDemo {
@@ -12,8 +12,11 @@ public class CashDemo {
 		String accName = "王泽武";
 		String phone = "18100000000";
 		String bankNo = "CCB";
-		RspSingleCashEntity rEntity = XianFengUtil.reqCash(orderNo,amt,accNo,accName,phone,bankNo);
-		System.out.println("========"+rEntity+"========");
+//		RspSingleCashEntity rEntity = XianFengUtil.reqCash(orderNo,amt,accNo,accName,phone,bankNo);
+//		System.out.println("========"+rEntity+"========");
+		
+//		RspSingleQueryEntity rspEntity = XianFengUtil.queryCash(orderNo);
+//		System.out.println("======="+rspEntity+"=======");
 	}
 	
 	public static void main(String[] args) {

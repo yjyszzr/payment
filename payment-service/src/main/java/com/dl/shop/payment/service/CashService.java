@@ -12,11 +12,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.http.util.TextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +23,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
-
 import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -61,11 +58,11 @@ import com.dl.shop.payment.param.CashGetParam;
 import com.dl.shop.payment.param.UpdateUserWithdrawParam;
 import com.dl.shop.payment.param.UserWithdrawParam;
 import com.dl.shop.payment.param.WithdrawParam;
+import com.dl.shop.payment.pay.common.PayManager;
 import com.dl.shop.payment.pay.xianfeng.cash.config.Constants;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.util.XianFengUtil;
 import com.ucf.sdk.util.AESCoder;
-
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -258,7 +255,10 @@ public class CashService {
 			//先减少用户钱包余额
 			logger.info("进入第三方提现流程...系统阈值:" + limit + " widthDrawSn:" + widthDrawSn);
 			RspSingleCashEntity rEntity = callThirdGetCash(widthDrawSn,totalAmount,cardNo,realName,mobile,bankCode);
-			return operation(rEntity,widthDrawSn,userId,false,false);
+			if(rEntity != null && rEntity.isHandleing()) {
+				PayManager.getInstance().addReq2CashQueue(widthDrawSn);
+			}
+			return operation(rEntity,widthDrawSn,userId,false,false,false);
 		}
 	}
 	
@@ -293,7 +293,7 @@ public class CashService {
 		return rEntity;
 	}
 
-	private BaseResult<Object> operation(RspSingleCashEntity rEntity,String widthDrawSn,Integer userId,boolean isManagerBack,boolean isNotify) {
+	public BaseResult<Object> operation(RspSingleCashEntity rEntity,String widthDrawSn,Integer userId,boolean isManagerBack,boolean isNotify,boolean isQuery) {
 		if(rEntity.isSucc()) {
 			logger.info("单号:"+widthDrawSn+"第三方提现成功，扣除用户余额");
 			//更新提现单
@@ -331,6 +331,9 @@ public class CashService {
 			userWithdrawLogService.save(userWithdrawLog);
 			return ResultGenerator.genSuccessResult("提现成功");
 		}else if(rEntity.isHandleing()){
+			if(isQuery) {
+				return null;
+			}
 			//保存提现中状态记录 dl_user_withdraw_log
 			UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
 			userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
@@ -340,6 +343,9 @@ public class CashService {
 			userWithdrawLogService.save(userWithdrawLog);
 			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_APPLY_SUC.getcode(),PayEnums.PAY_WITHDRAW_APPLY_SUC.getMsg());
 		}else{
+			if(isQuery) {
+				return null;
+			}
 			//保存提现中状态记录 dl_user_withdraw_log
 			UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
 			if(!isNotify) {
@@ -426,7 +432,7 @@ public class CashService {
 			BigDecimal amt = userEntity.getAmount();
 			logger.info("进入到第三方提现流程，金额:" + amt.doubleValue() +" 用户名:" +userEntity.getUserId() +" sn:" + sn);
 			RspSingleCashEntity rspSCashEntity = callThirdGetCash(sn,amt.doubleValue(),accNo+"",realName,phone,bankCode);
-			return operation(rspSCashEntity,sn,userId,true,false);
+			return operation(rspSCashEntity,sn,userId,true,false,false);
 		}else {
 			logger.info("后台管理审核拒绝，提现单状态为失败...");
 			//更新提现单失败状态
@@ -491,10 +497,12 @@ public class CashService {
 						logger.info("[withdrawNotify]" + " data:" + baseResult.getData() + " code:" + baseResult.getCode());
 						if(baseResult.getCode() == 0) {
 							UserWithdraw userWithDraw = baseResult.getData();
-							if(userWithDraw != null) {
+							if(userWithDraw != null 
+							   && ProjectConstant.STATUS_FAILURE.equals(userWithDraw.getStatus())
+							   && ProjectConstant.STATUS_SUCC.equals(userWithDraw.getStatus())) {
 								int userId = userWithDraw.getUserId();
 								logger.info("[withdrawNotify]" + " userId:" + userId +  " withDrawSn:" + withDrawSn);
-								operation(rspSingleCashEntity,rspSingleCashEntity.merchantNo, userId,false,true);
+								operation(rspSingleCashEntity,rspSingleCashEntity.merchantNo, userId,false,true,false);
 								//订单最终态
 								PrintWriter writer = response.getWriter();
 					        	writer.write("SUCCESS");
