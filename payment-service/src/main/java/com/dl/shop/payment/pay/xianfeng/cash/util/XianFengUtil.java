@@ -11,8 +11,6 @@ import com.dl.shop.payment.pay.xianfeng.cash.entity.ReqRealCashEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.ReqSingleCashEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleQueryEntity;
-import com.dl.shop.payment.pay.yinhe.entity.RspYinHeEntity;
-import com.ucf.sdk.CoderException;
 import com.ucf.sdk.util.AESCoder;
 
 public class XianFengUtil {
