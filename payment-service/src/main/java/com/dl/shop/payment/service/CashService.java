@@ -355,6 +355,7 @@ public class CashService {
 			userWithdrawLog.setLogName(CashEnums.CASH_FAILURE.getMsg()+"[" +rEntity.resMessage+"]");
 			userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
 			userWithdrawLog.setWithdrawSn(widthDrawSn);
+			userWithdrawLogService.save(userWithdrawLog);
 			
 			//更新提现单失败状态
 			UpdateUserWithdrawParam updateParams = new UpdateUserWithdrawParam();
