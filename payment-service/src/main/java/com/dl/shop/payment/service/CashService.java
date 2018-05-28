@@ -268,13 +268,13 @@ public class CashService {
 	private RspSingleCashEntity callThirdGetCash(String orderSn,double totalAmount,String accNo,String accName,String phone,String bankNo) {
 		logger.info("=====callThirdGetCash======");
 		logger.info("orderSn:" + orderSn + " total:" + totalAmount + " accNo:" + accNo + " accName:" + accName + " phone:" + phone + " bankNo:" + bankNo);
-		//test code
-		//========================
-		accNo = "6222021001115704287";
-		accName = "王泽武";
-		phone = "18100000000";
-		bankNo = "CCB";
-		//======================
+//		//test code
+//		//========================
+//		accNo = "6222021001115704287";
+//		accName = "王泽武";
+//		phone = "18100000000";
+//		bankNo = "CCB";
+//		//======================
 		BigDecimal bigDec = BigDecimal.valueOf(totalAmount);
 		bigDec.movePointRight(2);
 		RspSingleCashEntity rEntity = new RspSingleCashEntity();
