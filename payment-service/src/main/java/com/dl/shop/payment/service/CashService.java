@@ -176,6 +176,9 @@ public class CashService {
 	    if(totalAmount > limit) {
 	    	inReview = true;
 	    }
+	    if(StringUtils.isEmpty(bankCode)) {
+			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_BIND_CARD_RETRY.getcode(),PayEnums.PAY_WITHDRAW_BIND_CARD_RETRY.getMsg());
+		}
 		//生成提现单
 		UserWithdrawParam userWithdrawParam = new UserWithdrawParam();
 		userWithdrawParam.setAmount(BigDecimal.valueOf(totalAmount));
@@ -252,9 +255,6 @@ public class CashService {
 			userWithdrawLogService.save(userWithdrawLog);
 			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_APPLY_SUC.getcode(),PayEnums.PAY_WITHDRAW_APPLY_SUC.getMsg());
 		}else {
-			if(StringUtils.isEmpty(bankCode)) {
-				return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_BIND_CARD_RETRY.getcode(),PayEnums.PAY_WITHDRAW_BIND_CARD_RETRY.getMsg());
-			}
 			//先减少用户钱包余额
 			logger.info("进入第三方提现流程...系统阈值:" + limit + " widthDrawSn:" + widthDrawSn);
 			RspSingleCashEntity rEntity = callThirdGetCash(widthDrawSn,totalAmount,cardNo,realName,mobile,bankCode);
@@ -415,11 +415,11 @@ public class CashService {
 		if(base.getCode() != 0 || base.getData() == null) {
 			return ResultGenerator.genFailResult("查询银行信息失败",null);
 		}
-		UserBankDTO userBankDTO = base.getData();
-		bankCode = userBankDTO.getAbbreviation();
 		if(StringUtils.isEmpty(bankCode)) {
 			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_BIND_CARD_RETRY.getcode(),PayEnums.PAY_WITHDRAW_BIND_CARD_RETRY.getMsg());
 		}
+		UserBankDTO userBankDTO = base.getData();
+		bankCode = userBankDTO.getAbbreviation();
 		if(param.isPass()) {
 			logger.info("后台管理审核通过...");
 			BigDecimal amt = userEntity.getAmount();
