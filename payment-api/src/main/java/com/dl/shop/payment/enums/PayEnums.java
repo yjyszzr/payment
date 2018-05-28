@@ -23,7 +23,8 @@ public enum PayEnums {
 	PAY_TOKEN_EXPRIED(304053,"支付信息已失效，请返回重新支付"),
 	PAY_TOKEN_EMPTY(304054,"支付信息有误,请重新返回支付"),
 	PAY_RECHARGE_MAX(304055,"当前支付方式限额10万/笔"),
-	PAY_WITHDRAW_APPLY_SUC(304056,"提现申请已提交");
+	PAY_WITHDRAW_APPLY_SUC(304056,"提现申请已提交"),
+	PAY_WITHDRAW_BIND_CARD_RETRY(304057,"获取BankCode失败，请重新绑卡");
 	
 	private Integer code;
     private String msg;

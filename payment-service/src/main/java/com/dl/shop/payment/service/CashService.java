@@ -252,6 +252,9 @@ public class CashService {
 			userWithdrawLogService.save(userWithdrawLog);
 			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_APPLY_SUC.getcode(),PayEnums.PAY_WITHDRAW_APPLY_SUC.getMsg());
 		}else {
+			if(StringUtils.isEmpty(bankCode)) {
+				return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_BIND_CARD_RETRY.getcode(),PayEnums.PAY_WITHDRAW_BIND_CARD_RETRY.getMsg());
+			}
 			//先减少用户钱包余额
 			logger.info("进入第三方提现流程...系统阈值:" + limit + " widthDrawSn:" + widthDrawSn);
 			RspSingleCashEntity rEntity = callThirdGetCash(widthDrawSn,totalAmount,cardNo,realName,mobile,bankCode);
@@ -414,6 +417,9 @@ public class CashService {
 		}
 		UserBankDTO userBankDTO = base.getData();
 		bankCode = userBankDTO.getAbbreviation();
+		if(StringUtils.isEmpty(bankCode)) {
+			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_BIND_CARD_RETRY.getcode(),PayEnums.PAY_WITHDRAW_BIND_CARD_RETRY.getMsg());
+		}
 		if(param.isPass()) {
 			logger.info("后台管理审核通过...");
 			BigDecimal amt = userEntity.getAmount();
