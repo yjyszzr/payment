@@ -88,7 +88,7 @@ public class CashService {
 	@Resource
 	private IUserMessageService userMessageService;
 	
-	@Transactional
+//	@Transactional
 	public BaseResult<Object> withdrawForApp(@RequestBody WithdrawParam param, HttpServletRequest request){
 		String loggerId = "withdrawForApp_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/withdraw, userId="+SessionUtil.getUserId()+", totalAmount="+param.getTotalAmount()+",userBankId="+param.getUserBankId());
