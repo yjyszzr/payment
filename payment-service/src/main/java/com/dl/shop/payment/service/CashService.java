@@ -571,6 +571,13 @@ public class CashService {
 		if(userWithdraw == null) {
 			return;
 		}
+		Integer userId = userWithdraw.getUserId();
+		UserIdParam userIdParam = new UserIdParam();
+		userIdParam.setUserId(userId);
+		UserDTO userDto = userService.queryUserInfo(userIdParam).getData();
+		if(userDto == null) {
+			return;
+		}
 		AddMessageParam addParam = new AddMessageParam();
 		List<MessageAddParam> params = new ArrayList<MessageAddParam>(1);
 		//消息
@@ -590,7 +597,7 @@ public class CashService {
 		messageAddParam.setSender(-1);
 		messageAddParam.setMsgType(1);
 		messageAddParam.setReceiver(userWithdraw.getUserId());
-		messageAddParam.setReceiveMobile("");
+		messageAddParam.setReceiveMobile(userDto.getMobile());
 		messageAddParam.setObjectType(2);
 		messageAddParam.setMsgUrl("");
 		messageAddParam.setSendTime(DateUtil.getCurrentTimeLong());
