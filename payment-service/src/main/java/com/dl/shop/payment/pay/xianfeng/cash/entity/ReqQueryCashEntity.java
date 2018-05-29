@@ -6,11 +6,7 @@ import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-
 import org.springframework.stereotype.Component;
-import org.springframework.test.annotation.Commit;
-
-import com.dl.shop.payment.pay.xianfeng.cash.config.Constants;
 import com.ucf.sdk.CoderException;
 import com.ucf.sdk.UcfForOnline;
 import com.ucf.sdk.util.UnRepeatCodeGenerator;
