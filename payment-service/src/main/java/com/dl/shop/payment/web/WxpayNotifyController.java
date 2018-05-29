@@ -160,7 +160,7 @@ public class WxpayNotifyController {
 				}
 				int orderAmount = (int)(payLog.getOrderAmount().doubleValue()*100);
 				logger.info("实际交易金额:" + amount +" 订单金额:" + orderAmount);
-				if ((amount == orderAmount || "true".equals(cfgPay.getDEBUG())) && ((appid.equals(cfgPay.getAPPID()) && mchId.equals(cfgPay.getMERCHANT_NO())))) {
+				if ((amount == orderAmount) && ((appid.equals(cfgPay.getAPPID()) && mchId.equals(cfgPay.getMERCHANT_NO())))) {
 					logger.info(loggerId + " 订单金额或appid,mchId校验成功，前去回调订单服务！");
 					RspOrderQueryEntity rspOrderQueryEntity = new RspOrderQueryEntity();
 					rspOrderQueryEntity.setResult_code("0000");
