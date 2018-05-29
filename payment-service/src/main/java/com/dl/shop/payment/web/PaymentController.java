@@ -772,7 +772,7 @@ public class PaymentController extends AbstractBaseController{
 			
 			RecharegeParam recharegeParam = new RecharegeParam();
 			recharegeParam.setAmount(payLog.getOrderAmount());
-			recharegeParam.setPayId(response.getOrder_no());
+			recharegeParam.setPayId(payLog.getPayOrderSn());//解决充值两次问题
 			String payCode = response.getPayCode();
 			if(payCode.equals("app_weixin")) {
 				recharegeParam.setThirdPartName("微信");
