@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-
 import com.dl.base.result.BaseResult;
 import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.model.UserWithdraw;
@@ -31,6 +30,9 @@ public class CashSchedul {
 	
 	@Autowired
 	private CashService cashService;
+	
+	@Autowired
+	private XianFengUtil xianFengUtil;
 	
 	/**
 	 * 提现状态轮询
@@ -74,7 +76,7 @@ public class CashSchedul {
 			  &&!ProjectConstant.STATUS_FAILURE.equals(userWithDraw.getStatus()) 
 			  &&!ProjectConstant.STATUS_SUCC.equals(userWithDraw.getStatus())){
 				//query订单状态
-				RspSingleQueryEntity rspEntity = XianFengUtil.queryCash(withDrawSn);
+				RspSingleQueryEntity rspEntity = xianFengUtil.queryCash(withDrawSn);
 				if(rspEntity != null && rspEntity.isSucc()) {
 					cashService.operation(convert2RspSingleCashEntity(rspEntity),withDrawSn, userId,false,true,true);
 				}

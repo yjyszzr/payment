@@ -6,26 +6,34 @@ import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+
+import org.springframework.stereotype.Component;
+import org.springframework.test.annotation.Commit;
+
 import com.dl.shop.payment.pay.xianfeng.cash.config.Constants;
 import com.ucf.sdk.CoderException;
 import com.ucf.sdk.UcfForOnline;
 import com.ucf.sdk.util.UnRepeatCodeGenerator;
 
+import lombok.Data;
+
+@Component
+@Data
 public class ReqQueryCashEntity {
-	public String service;
-	public String secId;
-	public String version;
-	public String reqSn;
-	public String merchantId;//merchantId
-	public String merchantNo;
-	public String sign;
+	private String service;
+	private String secId;
+	private String version;
+	private String reqSn;
+	private String merchantId;//merchantId
+	private String merchantNo;
+	private String sign;
 	
-	public static final ReqQueryCashEntity buildReqQueryEntity(String orderNo) throws CoderException, GeneralSecurityException {
+	public final ReqQueryCashEntity buildReqQueryEntity(String orderNo,String secId,String version,String merchantID,String MER_RSAKEY) throws CoderException, GeneralSecurityException {
 		ReqQueryCashEntity reqEntity = new ReqQueryCashEntity();
 		reqEntity.service = "REQ_WITHDRAW_QUERY_BY_ID";
-		reqEntity.secId = Constants.SEC_ID;
-		reqEntity.version = Constants.VERSION;		
-		reqEntity.merchantId = Constants.MER_ID;
+		reqEntity.secId = secId;
+		reqEntity.version = version;		
+		reqEntity.merchantId = merchantID;
 		reqEntity.merchantNo = orderNo;
 		reqEntity.reqSn = UnRepeatCodeGenerator.createUnRepeatCode(reqEntity.merchantId, reqEntity.service, new SimpleDateFormat("yyyyMMddhhmmssSSS").format(new Date()));;
 		HashMap<String,String> mMap = new HashMap<>();
@@ -35,7 +43,7 @@ public class ReqQueryCashEntity {
 		mMap.put("reqSn",reqEntity.reqSn);
 		mMap.put("merchantId",reqEntity.merchantId);
 		mMap.put("merchantNo",reqEntity.merchantNo);
-		String signValue = UcfForOnline.createSign(Constants.MER_RSAKEY, "sign", mMap, "RSA");
+		String signValue = UcfForOnline.createSign(MER_RSAKEY, "sign", mMap, "RSA");
 		reqEntity.sign = signValue;
 		return reqEntity;
 	}

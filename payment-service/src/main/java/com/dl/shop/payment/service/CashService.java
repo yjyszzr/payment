@@ -87,6 +87,10 @@ public class CashService {
 	private UserWithdrawLogService userWithdrawLogService;
 	@Resource
 	private IUserMessageService userMessageService;
+	@Resource
+	private XianFengUtil xianfengUtil;
+	@Resource
+	private Constants xFConstants;
 	
 //	@Transactional
 	public BaseResult<Object> withdrawForApp(@RequestBody WithdrawParam param, HttpServletRequest request){
@@ -283,7 +287,7 @@ public class CashService {
 		RspSingleCashEntity rEntity = new RspSingleCashEntity();
 		String tips = null;
 		try {
-			rEntity = XianFengUtil.reqCash(orderSn,bigDec.intValue()+"", accNo, accName, phone, bankNo);
+			rEntity = xianfengUtil.reqCash(orderSn,bigDec.intValue()+"", accNo, accName, phone, bankNo);
 			logger.info("RspCashEntity->"+rEntity);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -489,7 +493,7 @@ public class CashService {
             	dataValue = values[0];
             	logger.info("=========================");
             	try {//String dataValue = AESCoder.decrypt(signVal, Constants.MER_RSAKEY);
-					String dataJson= AESCoder.decrypt(dataValue, Constants.MER_RSAKEY);
+					String dataJson= AESCoder.decrypt(dataValue, xFConstants.getMER_RSAKEY());
 					RspSingleCashEntity rspSingleCashEntity = JSON.parseObject(dataJson,RspSingleCashEntity.class);
 					String withDrawSn = rspSingleCashEntity.merchantNo;
 					if(!StringUtils.isEmpty(withDrawSn)) {

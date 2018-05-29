@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.dl.shop.payment.pay.xianfeng.cash.config.Constants;
 import com.dl.shop.payment.pay.yinhe.util.PayKeyComparator;
 import com.ucf.sdk.UcfForOnline;
 import com.ucf.sdk.util.AESCoder;
@@ -37,12 +36,13 @@ public class ReqSingleCashEntity {
 	public String noticeUrl;	//结果通知地址
 	
 	public static ReqSingleCashEntity buildReqSingleCashEntity(String orderNo,String amt,
-			String accNo,String accName,String phone,String bankNo) throws Exception {
+			String accNo,String accName,String phone,String bankNo,
+			String secID,String version,String merID,String notifyURL,String mer_rsakey) throws Exception {
 		ReqSingleCashEntity reqEntity = new ReqSingleCashEntity();
 		reqEntity.service = "REQ_WITHDRAW";
-		reqEntity.secId = Constants.SEC_ID;
-		reqEntity.version = Constants.VERSION;
-		reqEntity.merchantId = Constants.MER_ID;
+		reqEntity.secId = secID;
+		reqEntity.version = version;
+		reqEntity.merchantId = merID;
 		String reqSn = UnRepeatCodeGenerator.createUnRepeatCode(reqEntity.merchantId, reqEntity.service, new SimpleDateFormat("yyyyMMddhhmmssSSS").format(new Date()));
 		reqEntity.reqSn = reqSn;
 		reqEntity.merchantNo = orderNo;
@@ -55,16 +55,16 @@ public class ReqSingleCashEntity {
 		reqEntity.accountType = "1";
 		reqEntity.mobileNo = phone;
 		reqEntity.bankNo = bankNo;
-		reqEntity.noticeUrl = Constants.NOTICE_URL;
+		reqEntity.noticeUrl = notifyURL;
 		//data
 		ReqEncodeCashEntity reqCodeEntity = reqEntity.buildEncodeCashEntity();
 		String jsonStr = JSON.toJSONString(reqCodeEntity);
 //		System.out.println("参与data加密原串:" + jsonStr);
 		//AESCoder.encrypt
-		String val = AESCoder.encrypt(jsonStr,Constants.MER_RSAKEY);
+		String val = AESCoder.encrypt(jsonStr,mer_rsakey);
 		reqEntity.data = val;
 //		System.out.println("加密后data:" + val);
-		String tempStr = AESCoder.decrypt(val, Constants.MER_RSAKEY);
+//		String tempStr = AESCoder.decrypt(val,mer_rsakey);
 //		System.out.println("解密data后:" + tempStr);
 		
 		//sign value
@@ -82,7 +82,7 @@ public class ReqSingleCashEntity {
 			mMap.put(key,val);
 		}
 		//UcfForOnline.createSign
-		String signValue = UcfForOnline.createSign(Constants.MER_RSAKEY, "sign", mMap, "RSA");
+		String signValue = UcfForOnline.createSign(mer_rsakey,"sign", mMap, "RSA");
 		reqEntity.sign = signValue;
 //		System.out.println("签名原串:" + jsonStr);
 //		System.out.println("签名结果:" + reqEntity.sign);
