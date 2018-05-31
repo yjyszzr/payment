@@ -402,6 +402,10 @@ public class CashService {
 		//查询该用户的提现金额
 		BaseResult<UserWithdraw> baseResult = userWithdrawService.queryUserWithdraw(sn);
 		UserWithdraw userEntity = baseResult.getData();
+		if(baseResult.getCode() != 0 || userEntity == null) {
+			logger.info("查询提现单失败");
+			return ResultGenerator.genFailResult("提现单号不能为空",null);
+		}
 		int userId = userEntity.getUserId();
 		String realName = userEntity.getRealName();
 		Integer accNo = userEntity.getAccountId();
@@ -413,10 +417,6 @@ public class CashService {
 		if(bR != null) {
 			userDTO = bR.getData();
 			phone = userDTO.getMobile();
-		}
-		if(baseResult.getCode() != 0 || userEntity == null) {
-			logger.info("查询提现单失败");
-			return ResultGenerator.genFailResult("提现单号不能为空",null);
 		}
 		//银行信息
 		String bankCode = "";
