@@ -247,17 +247,21 @@ public class PaymentController extends AbstractBaseController{
 		submitOrderParam.setUserBonusId(userBonusId);
 		submitOrderParam.setBonusAmount(bonusAmount);
 		submitOrderParam.setOrderFrom(dto.getRequestFrom());
-		submitOrderParam.setLotteryClassifyId(dto.getLotteryClassifyId());
-		submitOrderParam.setLotteryPlayClassifyId(dto.getLotteryPlayClassifyId());
+		int lotteryClassifyId = dto.getLotteryClassifyId();
+		submitOrderParam.setLotteryClassifyId(lotteryClassifyId);
+		int lotteryPlayClassifyId = dto.getLotteryPlayClassifyId();
+		submitOrderParam.setLotteryPlayClassifyId(lotteryPlayClassifyId);
 		submitOrderParam.setPassType(dto.getBetType());
 		submitOrderParam.setPlayType("0"+dto.getPlayType());
 		submitOrderParam.setBetNum(dto.getBetNum());
 		submitOrderParam.setCathectic(dto.getTimes());
-		if(ticketDetails.size() > 1) {
-			Optional<TicketDetail> max = ticketDetails.stream().max((detail1, detail2)->detail1.getMatchTime().compareTo(detail2.getMatchTime()));
-			submitOrderParam.setMatchTime(max.get().getMatchTime());
-		}else {
-			submitOrderParam.setMatchTime(ticketDetails.get(0).getMatchTime());
+		if(lotteryPlayClassifyId != 8 && lotteryClassifyId != 1) {
+			if(ticketDetails.size() > 1) {
+				Optional<TicketDetail> max = ticketDetails.stream().max((detail1, detail2)->detail1.getMatchTime().compareTo(detail2.getMatchTime()));
+				submitOrderParam.setMatchTime(max.get().getMatchTime());
+			}else {
+				submitOrderParam.setMatchTime(ticketDetails.get(0).getMatchTime());
+			}
 		}
 		submitOrderParam.setForecastMoney(dto.getForecastMoney());
 		
