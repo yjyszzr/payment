@@ -23,6 +23,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSON;
 import com.dl.base.result.BaseResult;
@@ -56,6 +57,7 @@ import com.dl.order.param.SubmitOrderParam;
 import com.dl.order.param.SubmitOrderParam.TicketDetail;
 import com.dl.order.param.UpdateOrderInfoParam;
 import com.dl.shop.payment.core.ProjectConstant;
+import com.dl.shop.payment.dto.PayLogDTO;
 import com.dl.shop.payment.dto.PayReturnDTO;
 import com.dl.shop.payment.dto.PaymentDTO;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
@@ -65,6 +67,7 @@ import com.dl.shop.payment.model.UnifiedOrderParam;
 import com.dl.shop.payment.model.UserWithdrawLog;
 import com.dl.shop.payment.param.AllPaymentInfoParam;
 import com.dl.shop.payment.param.GoPayParam;
+import com.dl.shop.payment.param.PayLogIdParam;
 import com.dl.shop.payment.param.RechargeParam;
 import com.dl.shop.payment.param.ReqOrderQueryParam;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
@@ -992,4 +995,13 @@ public class PaymentController extends AbstractBaseController{
 		
 		return ResultGenerator.genSuccessResult("更新订单成功状态成功！", "");
 	}
+	
+	/**
+     * 	根据payLogId查询支付信息
+     */
+	@ApiOperation(value="根据payLogId查询支付信息", notes="根据payLogId查询支付信息")
+	@PostMapping("/queryPayLogByPayLogId")
+    public BaseResult<PayLogDTO> queryPayLogByPayLogId(@RequestBody PayLogIdParam payLogIdParam){
+		return payLogService.queryPayLogByPayLogId(Integer.valueOf(payLogIdParam.getPayLogId()));
+ 	}	
 }

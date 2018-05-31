@@ -12,4 +12,6 @@ public interface UserRechargeMapper extends Mapper<UserRecharge> {
 	int updateUserRechargeBySelective(UserRecharge userRecharge);
 	
 	List<UserRecharge> queryUserChargeBySelective(UserRecharge userRecharge);
+	
+	int countUserCharge(Integer userId);
 }

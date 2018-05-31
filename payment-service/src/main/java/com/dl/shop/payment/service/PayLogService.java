@@ -1,8 +1,15 @@
 package com.dl.shop.payment.service;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.dao.PayLogMapper;
+import com.dl.shop.payment.dto.PayLogDTO;
+import com.dl.shop.payment.enums.PayEnums;
+import com.dl.base.result.BaseResult;
+import com.dl.base.result.ResultGenerator;
 import com.dl.base.service.AbstractService;
 import com.dl.base.util.DateUtil;
+import com.dl.base.util.SessionUtil;
+
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,5 +68,16 @@ public class PayLogService extends AbstractService<PayLog> {
 	
 	public int updatePayLogByOrderSn(PayLog payLog) {
 		return payLogMapper.updatePayLogByOrderSn(payLog);
+	}
+	
+	public BaseResult<PayLogDTO> queryPayLogByPayLogId(Integer payLogId) {
+		Integer userId = SessionUtil.getUserId();
+		PayLog payLog = payLogMapper.findPayLogByPayLogId(payLogId,userId);
+		if(null == payLog) {
+			return ResultGenerator.genResult(PayEnums.PAY_DBDATA_IS_NOT_IN.getcode(),PayEnums.PAY_DBDATA_IS_NOT_IN.getMsg());
+		}
+		PayLogDTO payLogDTO = new PayLogDTO();
+		BeanUtils.copyProperties(payLog, payLogDTO);
+		return ResultGenerator.genSuccessResult("success", payLogDTO);
 	}
 }
