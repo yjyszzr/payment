@@ -283,11 +283,11 @@ public class CashService {
 //		bankNo = "CCB";
 //		//======================
 		BigDecimal bigDec = BigDecimal.valueOf(totalAmount);
-		bigDec.movePointRight(2);
+		BigDecimal bigFen = bigDec.multiply(new BigDecimal(100));
 		RspSingleCashEntity rEntity = new RspSingleCashEntity();
 		String tips = null;
 		try {
-			rEntity = xianfengUtil.reqCash(orderSn,bigDec.intValue()+"", accNo, accName, phone, bankNo);
+			rEntity = xianfengUtil.reqCash(orderSn,bigFen.intValue()+"", accNo, accName, phone, bankNo);
 			logger.info("RspCashEntity->"+rEntity);
 		} catch (Exception e) {
 			e.printStackTrace();
