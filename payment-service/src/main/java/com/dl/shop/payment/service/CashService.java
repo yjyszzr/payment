@@ -439,7 +439,7 @@ public class CashService {
 			if(rspSCashEntity.isHandleing()) {
 				PayManager.getInstance().addReq2CashQueue(sn);
 			}
-			return operation(rspSCashEntity,sn,userId,true,false,false);
+			return operation(rspSCashEntity,sn,userId,true,false,true);
 		}else {
 			logger.info("后台管理审核拒绝，提现单状态为失败...");
 			//更新提现单失败状态
