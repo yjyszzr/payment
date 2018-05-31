@@ -64,10 +64,10 @@
 	  update dl_pay_log set is_paid=#{isPaid}, last_time=#{lastTime} where order_sn=#{orderSn} 
 	</update>
 	
-	<select id="findPayLogByayLogId" resultMap="BaseResultMap">
+	<select id="findPayLogByPayLogId" resultMap="BaseResultMap">
 	  select 
 	  <include refid="queryFields" />
 	  from dl_pay_log
-	  where log_id = #{logId}
+	  where log_id = #{logId} and user_id = #{userId}
 	</select>
 </mapper>

@@ -7,6 +7,7 @@ import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.base.service.AbstractService;
 import com.dl.base.util.DateUtil;
+import com.dl.base.util.SessionUtil;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -70,7 +71,8 @@ public class PayLogService extends AbstractService<PayLog> {
 	}
 	
 	public BaseResult<PayLogDTO> queryPayLogByPayLogId(Integer payLogId) {
-		PayLog payLog = payLogMapper.findPayLogByayLogId(payLogId);
+		Integer userId = SessionUtil.getUserId();
+		PayLog payLog = payLogMapper.findPayLogByPayLogId(payLogId,userId);
 		if(null == payLog) {
 			return ResultGenerator.genResult(PayEnums.PAY_DBDATA_IS_NOT_IN.getcode(),PayEnums.PAY_DBDATA_IS_NOT_IN.getMsg());
 		}

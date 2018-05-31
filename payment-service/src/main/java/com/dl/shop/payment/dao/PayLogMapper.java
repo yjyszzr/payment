@@ -69,6 +69,6 @@ public interface PayLogMapper extends Mapper<PayLog> {
 	 * @param payLogId
 	 * @return
 	 */
-	PayLog findPayLogByayLogId(Integer logId);
+	PayLog findPayLogByPayLogId(Integer logId,Integer userId);
 	
 }
