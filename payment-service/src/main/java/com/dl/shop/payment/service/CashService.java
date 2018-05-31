@@ -510,6 +510,7 @@ public class CashService {
 								//订单最终态
 								PrintWriter writer = response.getWriter();
 					        	writer.write("SUCCESS");
+					        	writer.flush();
 							}
 						}
 					}
