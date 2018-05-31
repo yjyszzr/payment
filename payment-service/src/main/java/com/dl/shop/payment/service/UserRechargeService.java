@@ -4,6 +4,7 @@ import com.dl.member.param.UpdateUserRechargeParam;
 import com.dl.member.param.UserAccountParam;
 import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dao.UserRechargeMapper;
+import com.dl.shop.payment.dto.YesOrNoDTO;
 import com.dl.shop.payment.model.UserRecharge;
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,6 +37,24 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
     
     @Resource
     private IUserAccountService userAccountService;
+ 
+    /**
+     * 查询是否充值过：0-未充值过 1-充值过
+     * @return
+     */
+    public BaseResult<YesOrNoDTO> countUserRecharge(){
+    	Integer userId = SessionUtil.getUserId();
+    	Integer count = userRechargeMapper.countUserCharge(userId);
+    	YesOrNoDTO yesOrNoDTO = new YesOrNoDTO();
+    	if(count == 0 ) {
+    		yesOrNoDTO.setYesOrNo("0");
+    	}else {
+    		yesOrNoDTO.setYesOrNo("1");
+    	}
+    	
+    	return ResultGenerator.genSuccessResult("查询是否充值成功",yesOrNoDTO);
+    }
+    
     
     /**
      * 创建充值单
