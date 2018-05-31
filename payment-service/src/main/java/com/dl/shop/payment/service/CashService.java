@@ -436,6 +436,9 @@ public class CashService {
 			BigDecimal amt = userEntity.getAmount();
 			logger.info("进入到第三方提现流程，金额:" + amt.doubleValue() +" 用户名:" +userEntity.getUserId() +" sn:" + sn);
 			RspSingleCashEntity rspSCashEntity = callThirdGetCash(sn,amt.doubleValue(),accNo+"",realName,phone,bankCode);
+			if(rspSCashEntity.isHandleing()) {
+				PayManager.getInstance().addReq2CashQueue(sn);
+			}
 			return operation(rspSCashEntity,sn,userId,true,false,false);
 		}else {
 			logger.info("后台管理审核拒绝，提现单状态为失败...");
