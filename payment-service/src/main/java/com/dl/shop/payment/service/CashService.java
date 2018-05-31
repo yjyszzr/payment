@@ -426,11 +426,11 @@ public class CashService {
 		if(base.getCode() != 0 || base.getData() == null) {
 			return ResultGenerator.genFailResult("查询银行信息失败",null);
 		}
+		UserBankDTO userBankDTO = base.getData();
+		bankCode = userBankDTO.getAbbreviation();
 		if(StringUtils.isEmpty(bankCode)) {
 			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_BIND_CARD_RETRY.getcode(),PayEnums.PAY_WITHDRAW_BIND_CARD_RETRY.getMsg());
 		}
-		UserBankDTO userBankDTO = base.getData();
-		bankCode = userBankDTO.getAbbreviation();
 		if(param.isPass()) {
 			logger.info("后台管理审核通过...");
 			BigDecimal amt = userEntity.getAmount();
