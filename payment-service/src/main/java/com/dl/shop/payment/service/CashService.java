@@ -410,6 +410,7 @@ public class CashService {
 		String realName = userEntity.getRealName();
 		Integer accNo = userEntity.getAccountId();
 		UserIdParam params = new UserIdParam();
+		params.setReal(true);
 		params.setUserId(userId);
 		BaseResult<UserDTO> bR = userService.queryUserInfo(params);
 		UserDTO userDTO = null;
