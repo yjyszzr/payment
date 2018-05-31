@@ -55,12 +55,13 @@ public class XianFengUtil {
 				xFConstants.getSEC_ID(),xFConstants.getVERSION(),xFConstants.getMER_ID(),xFConstants.getMER_RSAKEY());
 		String url = xFConstants.getUCF_GATEWAY_URL() + "?" + reqEntity.buildReqStr();
 		RspHttpEntity rspHttpEntity = HttpUtil.sendMsg(null,url,false);
-		logger.info(rspHttpEntity.toString());
+		logger.info("[queryCash]" + rspHttpEntity.toString());
 		if(rspHttpEntity.isSucc){
 			String signVal = rspHttpEntity.msg;
 			//AESCoder.decrypt
 			String dataValue = AESCoder.decrypt(signVal, xFConstants.getMER_RSAKEY());
 			rspEntity = JSON.parseObject(dataValue,RspSingleQueryEntity.class);
+			logger.info("[queryCash]" + dataValue);
 		}else {
 			rspEntity = new RspSingleQueryEntity();
 			rspEntity.resMessage = rspHttpEntity.msg;
