@@ -182,13 +182,15 @@ public class PaymentController extends AbstractBaseController{
 		BigDecimal moneyPaid = BigDecimal.valueOf(dto.getMoney() - dto.getBonusAmount());;//from paytoken
 		BigDecimal surplus = BigDecimal.valueOf(dto.getSurplus());//from paytoken
 		BigDecimal thirdPartyPaid = BigDecimal.valueOf(dto.getThirdPartyPaid());
-		Integer orderFrom = dto.getRequestFrom();//from paytoken
 		List<DIZQUserBetCellInfoDTO> userBetCellInfos = dto.getUserBetCellInfos();
 		List<TicketDetail> ticketDetails = userBetCellInfos.stream().map(betCell->{
 			TicketDetail ticketDetail = new TicketDetail();
 			ticketDetail.setMatch_id(betCell.getMatchId());
 			ticketDetail.setChangci(betCell.getChangci());
-			ticketDetail.setMatchTime(Date.from(Instant.ofEpochSecond(betCell.getMatchTime())));
+			int matchTime = betCell.getMatchTime();
+			if(matchTime > 0) {
+				ticketDetail.setMatchTime(Date.from(Instant.ofEpochSecond(matchTime)));
+			}
 			ticketDetail.setMatchTeam(betCell.getMatchTeam());
 			ticketDetail.setLotteryClassifyId(betCell.getLotteryClassifyId());
 			ticketDetail.setLotteryPlayClassifyId(betCell.getLotteryPlayClassifyId());
@@ -244,7 +246,7 @@ public class PaymentController extends AbstractBaseController{
 		submitOrderParam.setThirdPartyPaid(thirdPartyPaid);
 		submitOrderParam.setUserBonusId(userBonusId);
 		submitOrderParam.setBonusAmount(bonusAmount);
-		submitOrderParam.setOrderFrom(orderFrom);
+		submitOrderParam.setOrderFrom(dto.getRequestFrom());
 		submitOrderParam.setLotteryClassifyId(dto.getLotteryClassifyId());
 		submitOrderParam.setLotteryPlayClassifyId(dto.getLotteryPlayClassifyId());
 		submitOrderParam.setPassType(dto.getBetType());
