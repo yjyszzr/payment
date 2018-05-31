@@ -63,4 +63,12 @@ public interface PayLogMapper extends Mapper<PayLog> {
 	 * @return
 	 */
 	int updatePayLogByOrderSn(PayLog payLog);
+	
+	/***
+	 * 根据logId查找该数据
+	 * @param payLogId
+	 * @return
+	 */
+	PayLog findPayLogByayLogId(Integer logId);
+	
 }

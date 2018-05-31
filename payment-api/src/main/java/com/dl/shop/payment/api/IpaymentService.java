@@ -6,9 +6,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.dl.base.result.BaseResult;
+import com.dl.shop.payment.dto.PayLogDTO;
 import com.dl.shop.payment.dto.UserRechargeDTO;
 import com.dl.shop.payment.dto.UserWithdrawDTO;
 import com.dl.shop.payment.dto.UserWithdrawDetailDTO;
+import com.dl.shop.payment.param.PayLogIdParam;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
 import com.dl.shop.payment.param.StrParam;
 import com.dl.shop.payment.param.WithDrawSnAndUserIdParam;
@@ -37,4 +39,11 @@ public interface IpaymentService {
      */
  	@RequestMapping(path="/payment/recharge/queryUserRechargeListByUserId", method=RequestMethod.POST)
     public BaseResult<UserRechargeDTO> queryUserRechargeListByUserId(@RequestBody StrParam strParam);
+ 	
+	/**
+     * 	根据payLogId查询支付信息
+     */
+ 	@RequestMapping(path="/payment/queryPayLogByPayLogId", method=RequestMethod.POST)
+    public BaseResult<PayLogDTO> queryPayLogByPayLogId(@RequestBody PayLogIdParam payLogIdParam);
+
 }
