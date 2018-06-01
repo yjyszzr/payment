@@ -18,6 +18,7 @@ import com.dl.member.api.IUserBankService;
 import com.dl.member.api.IUserMessageService;
 import com.dl.member.api.IUserService;
 import com.dl.shop.payment.param.CashGetParam;
+import com.dl.shop.payment.param.CashReqParam;
 import com.dl.shop.payment.param.WithdrawParam;
 import com.dl.shop.payment.service.CashService;
 import com.dl.shop.payment.service.UserWithdrawLogService;
@@ -78,4 +79,13 @@ public class CashController {
 		logger.info("[getCash]" + " sn:" + param.getWithdrawSn());
 		return cashService.getCash(param, request);
 	}
+	
+	@ApiOperation(value="app提现调用", notes="")
+	@PostMapping("/querycash")
+	@ResponseBody
+	public BaseResult<Object> queryCash(@RequestBody CashReqParam param){
+		logger.info("[queryCash]" + " withDrawSn:" + param.getWithdrawSn());
+		return cashService.queryCash(param.getWithdrawSn());
+	}
+	
 }

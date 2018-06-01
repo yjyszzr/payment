@@ -63,6 +63,7 @@ import com.dl.shop.payment.param.WithdrawParam;
 import com.dl.shop.payment.pay.common.PayManager;
 import com.dl.shop.payment.pay.xianfeng.cash.config.Constants;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
+import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleQueryEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.util.XianFengUtil;
 import com.ucf.sdk.util.AESCoder;
 import lombok.extern.slf4j.Slf4j;
@@ -639,4 +640,59 @@ public class CashService {
 		String addTimeStr = loclaTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:dd"));
 		return addTimeStr;
 	}
+	
+	@Transactional
+	public BaseResult<Object> queryCash(String withDrawSn){
+		UserWithdraw userWithdraw = userWithdrawService.queryUserWithdraw(withDrawSn).getData();
+		if(userWithdraw == null) {
+			return ResultGenerator.genFailResult("该订单不存在...sn:" + withDrawSn);
+		}
+		int userId = userWithdraw.getUserId();
+		String cardNo = userWithdraw.getCardNo();
+		UserIdRealParam userIdPara = new UserIdRealParam();
+		userIdPara.setUserId(userId);
+		BaseResult<UserDTO> userInfoExceptPass = userService.queryUserInfoReal(userIdPara);
+		if(userInfoExceptPass.getCode() != 0 || userInfoExceptPass.getData() == null) {
+			return ResultGenerator.genFailResult("该用户不存在 userID:" + userId);
+		}
+		UserDTO userDTO = userInfoExceptPass.getData();
+		//银行信息
+		String bankCode = "";
+		UserBankQueryParam userBQP = new UserBankQueryParam();
+		userBQP.setUserId(userId);
+		userBQP.setBankCardCode(cardNo);
+		BaseResult<UserBankDTO> base = userBankService.queryUserBankByCondition(userBQP);
+		if(base.getCode() != 0 || base.getData() == null) {
+			return ResultGenerator.genFailResult("查询银行信息失败",null);
+		}
+		bankCode = base.getData().getAbbreviation();
+		//query订单状态
+		RspSingleQueryEntity rspEntity;
+		try {
+			rspEntity = xianfengUtil.queryCash(withDrawSn);
+			if(rspEntity != null && rspEntity.isSucc()) {
+				return operation(convert2RspSingleCashEntity(rspEntity),withDrawSn, userId,false,true,true);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return ResultGenerator.genFailResult("查询失败~",null);
+	}
+	
+	private RspSingleCashEntity convert2RspSingleCashEntity(RspSingleQueryEntity sEntity) {
+		RspSingleCashEntity rspSingleCashEntity = new RspSingleCashEntity();
+		if(sEntity != null) {
+			rspSingleCashEntity.resCode = sEntity.resCode;
+			rspSingleCashEntity.resMessage = sEntity.resMessage;
+			rspSingleCashEntity.tradeNo = sEntity.tradeNo;
+			rspSingleCashEntity.status = sEntity.status;
+			rspSingleCashEntity.amount = sEntity.amount;
+			rspSingleCashEntity.transCur = sEntity.transCur;
+			rspSingleCashEntity.merchantId = sEntity.merchantId;
+			rspSingleCashEntity.merchantNo = sEntity.merchantNo;
+		}
+		return rspSingleCashEntity;
+	}
+	
 }
