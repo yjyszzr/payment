@@ -398,7 +398,6 @@ public class CashService {
 		}
 	}
 	
-	@Transactional
 	public BaseResult<Object> getCash(@RequestBody CashGetParam param, HttpServletRequest request){
 		String sn = param.getWithdrawSn();
 		if(StringUtils.isEmpty(sn)) {
