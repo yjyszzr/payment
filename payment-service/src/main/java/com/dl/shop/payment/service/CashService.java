@@ -48,6 +48,7 @@ import com.dl.member.param.StrParam;
 import com.dl.member.param.SysConfigParam;
 import com.dl.member.param.UserBankQueryParam;
 import com.dl.member.param.UserIdParam;
+import com.dl.member.param.UserIdRealParam;
 import com.dl.member.param.WithDrawParam;
 import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dto.WithdrawalSnDTO;
@@ -405,16 +406,15 @@ public class CashService {
 		UserWithdraw userEntity = baseResult.getData();
 		if(baseResult.getCode() != 0 || userEntity == null) {
 			logger.info("查询提现单失败");
-			return ResultGenerator.genFailResult("提现单号不能为空",null);
+			return ResultGenerator.genFailResult("查询提现单失败",null);
 		}
 		int userId = userEntity.getUserId();
 		String realName = userEntity.getRealName();
 		String cardNo = userEntity.getCardNo();
-		UserIdParam params = new UserIdParam();
-		params.setReal(true);
+		UserIdRealParam params = new UserIdRealParam();
 		params.setUserId(userId);
 		//通过UserService查询到手机号码
-		BaseResult<UserDTO> bR = userService.queryUserInfo(params);
+		BaseResult<UserDTO> bR = userService.queryUserInfoReal(params);
 		UserDTO userDTO = null;
 		String phone = "";
 		if(bR.getCode() == 0 && bR.getData() != null) {
