@@ -75,6 +75,7 @@ public class CashController {
 	@PostMapping("/getcash")
 	@ResponseBody
 	public BaseResult<Object> getCash(@RequestBody CashGetParam param, HttpServletRequest request){
+		logger.info("[getCash]" + " sn:" + param.getWithdrawSn());
 		return cashService.getCash(param, request);
 	}
 }
