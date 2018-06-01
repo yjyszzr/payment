@@ -2,7 +2,6 @@ package com.dl.shop.payment.pay.yinhe.config;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import lombok.Data;
@@ -11,8 +10,8 @@ import lombok.Data;
 @Configuration
 public class ConfigerPay {
 	
-//	@Value("${yinhe.app.debug}")
-//	private String DEBUG;
+	@Value("${yinhe.app.debug}")
+	private String DEBUG;
 	
 	@Value("${yinhe.app_wechat_jump_h5}")
 	private String URL_PAY_WECHAT_H5;
