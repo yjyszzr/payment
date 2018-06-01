@@ -46,6 +46,7 @@ import com.dl.member.param.MemWithDrawSnParam;
 import com.dl.member.param.MessageAddParam;
 import com.dl.member.param.StrParam;
 import com.dl.member.param.SysConfigParam;
+import com.dl.member.param.UserBankQueryParam;
 import com.dl.member.param.UserIdParam;
 import com.dl.member.param.WithDrawParam;
 import com.dl.shop.payment.core.ProjectConstant;
@@ -408,35 +409,42 @@ public class CashService {
 		}
 		int userId = userEntity.getUserId();
 		String realName = userEntity.getRealName();
-		Integer accNo = userEntity.getAccountId();
+		String cardNo = userEntity.getCardNo();
 		UserIdParam params = new UserIdParam();
 		params.setReal(true);
 		params.setUserId(userId);
+		//通过UserService查询到手机号码
 		BaseResult<UserDTO> bR = userService.queryUserInfo(params);
 		UserDTO userDTO = null;
 		String phone = "";
-		if(bR != null) {
+		if(bR.getCode() == 0 && bR.getData() != null) {
 			userDTO = bR.getData();
 			phone = userDTO.getMobile();
 		}
+		if(StringUtils.isEmpty(phone)) {
+			return  ResultGenerator.genFailResult("手机号码查询失败",null);
+		}
 		//银行信息
 		String bankCode = "";
-		IDParam idParams = new IDParam();
-		idParams.setId(accNo);
-		BaseResult<UserBankDTO> base = userBankService.queryUserBank(idParams);
+		UserBankQueryParam userBQP = new UserBankQueryParam();
+		userBQP.setUserId(userId);
+		userBQP.setBankCardCode(cardNo);
+		BaseResult<UserBankDTO> base = userBankService.queryUserBankByCondition(userBQP);
 		if(base.getCode() != 0 || base.getData() == null) {
 			return ResultGenerator.genFailResult("查询银行信息失败",null);
 		}
 		UserBankDTO userBankDTO = base.getData();
 		bankCode = userBankDTO.getAbbreviation();
+		logger.info("[queryUserBankByCondition]" +" bankAcc:" + userBankDTO.getCardNo() +" bankName:" + userBankDTO.getBankName() +" bankCode:" + userBankDTO.getAbbreviation());
 		if(StringUtils.isEmpty(bankCode)) {
 			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_BIND_CARD_RETRY.getcode(),PayEnums.PAY_WITHDRAW_BIND_CARD_RETRY.getMsg());
 		}
 		if(param.isPass()) {
-			logger.info("后台管理审核通过...");
 			BigDecimal amt = userEntity.getAmount();
-			logger.info("进入到第三方提现流程，金额:" + amt.doubleValue() +" 用户名:" +userEntity.getUserId() +" sn:" + sn);
-			RspSingleCashEntity rspSCashEntity = callThirdGetCash(sn,amt.doubleValue(),accNo+"",realName,phone,bankCode);
+			logger.info("=================后台管理审核通过====================");
+			logger.info("进入到第三方提现流程，金额:" + amt.doubleValue() +" 用户名:" +userEntity.getUserId()  + " sn:" + sn + " realName:" + realName + " phone:" + phone + " amt:" + amt + " bankCode:" + bankCode);
+			logger.info("=================后台管理审核通过====================");
+			RspSingleCashEntity rspSCashEntity = callThirdGetCash(sn,amt.doubleValue(),cardNo,realName,phone,bankCode);
 			if(rspSCashEntity.isHandleing()) {
 				PayManager.getInstance().addReq2CashQueue(sn);
 			}
