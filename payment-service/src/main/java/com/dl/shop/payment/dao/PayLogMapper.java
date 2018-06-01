@@ -2,6 +2,7 @@ package com.dl.shop.payment.dao;
 
 import org.apache.ibatis.annotations.InsertProvider;
 import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.Param;
 
 import com.dl.base.mapper.Mapper;
 import com.dl.shop.payment.model.PayLog;
@@ -69,6 +70,6 @@ public interface PayLogMapper extends Mapper<PayLog> {
 	 * @param payLogId
 	 * @return
 	 */
-	PayLog findPayLogByPayLogId(Integer logId,Integer userId);
+	PayLog findPayLogByPayLogId(@Param("logId")Integer logId,@Param("userId")Integer userId);
 	
 }
