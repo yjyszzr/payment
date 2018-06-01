@@ -350,7 +350,7 @@ public class CashService {
 			userWithdrawLogService.save(userWithdrawLog);
 			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_APPLY_SUC.getcode(),PayEnums.PAY_WITHDRAW_APPLY_SUC.getMsg());
 		}else{
-			if(isQuery) {
+			if(isQuery && !isManagerBack) {
 				return null;
 			}
 			//保存提现中状态记录 dl_user_withdraw_log
@@ -449,7 +449,7 @@ public class CashService {
 			if(rspSCashEntity.isHandleing()) {
 				PayManager.getInstance().addReq2CashQueue(sn);
 			}
-			return operation(rspSCashEntity,sn,userId,true,false,true);
+			return operation(rspSCashEntity,sn,userId,true,false,false);
 		}else {
 			logger.info("后台管理审核拒绝，提现单状态为失败...");
 			//更新提现单失败状态
