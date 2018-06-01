@@ -1001,6 +1001,7 @@ public class PaymentController extends AbstractBaseController{
      */
 	@ApiOperation(value="根据payLogId查询支付信息", notes="根据payLogId查询支付信息")
 	@PostMapping("/queryPayLogByPayLogId")
+	@ResponseBody
     public BaseResult<PayLogDTO> queryPayLogByPayLogId(@RequestBody PayLogIdParam payLogIdParam){
 		return payLogService.queryPayLogByPayLogId(Integer.valueOf(payLogIdParam.getPayLogId()));
  	}	
