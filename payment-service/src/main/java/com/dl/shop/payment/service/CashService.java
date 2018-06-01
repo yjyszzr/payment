@@ -353,14 +353,17 @@ public class CashService {
 			if(isQuery && !isManagerBack) {
 				return null;
 			}
+			UserWithdrawLog userWithdrawLog = null;
 			//保存提现中状态记录 dl_user_withdraw_log
-			UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
-			if(!isNotify) {
-				userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
-				userWithdrawLog.setLogName(CashEnums.CASH_REVIEWING.getMsg());
-				userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
-				userWithdrawLog.setWithdrawSn(widthDrawSn);
-				userWithdrawLogService.save(userWithdrawLog);
+			if(!isManagerBack) {
+				userWithdrawLog = new UserWithdrawLog();
+				if(!isNotify) {
+					userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
+					userWithdrawLog.setLogName(CashEnums.CASH_REVIEWING.getMsg());
+					userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
+					userWithdrawLog.setWithdrawSn(widthDrawSn);
+					userWithdrawLogService.save(userWithdrawLog);
+				}
 			}
 			//保存提现中状态记录位失败到数据库中...
 			userWithdrawLog = new UserWithdrawLog();
