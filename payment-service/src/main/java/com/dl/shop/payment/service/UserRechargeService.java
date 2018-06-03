@@ -1,18 +1,14 @@
 package com.dl.shop.payment.service;
-import com.dl.member.param.RecharegeParam;
-import com.dl.member.param.UpdateUserRechargeParam;
-import com.dl.member.param.UserAccountParam;
-import com.dl.shop.payment.core.ProjectConstant;
-import com.dl.shop.payment.dao.UserRechargeMapper;
-import com.dl.shop.payment.dto.DonationPriceDTO;
-import com.dl.shop.payment.dto.RechargeUserDTO;
-import com.dl.shop.payment.dto.YesOrNoDTO;
-import com.dl.shop.payment.model.UserRecharge;
-import lombok.extern.slf4j.Slf4j;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.dl.member.api.IUserAccountService;
-import com.dl.member.dto.SurplusPaymentCallbackDTO;
-import com.dl.member.enums.MemberEnums;
+import javax.annotation.Resource;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.alibaba.fastjson.JSON;
 import com.dl.base.enums.SNBusinessCodeEnum;
 import com.dl.base.exception.ServiceException;
@@ -22,17 +18,17 @@ import com.dl.base.service.AbstractService;
 import com.dl.base.util.DateUtil;
 import com.dl.base.util.SNGenerator;
 import com.dl.base.util.SessionUtil;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.dl.member.api.IUserAccountService;
+import com.dl.member.enums.MemberEnums;
+import com.dl.member.param.UpdateUserRechargeParam;
+import com.dl.shop.payment.core.ProjectConstant;
+import com.dl.shop.payment.dao.UserRechargeMapper;
+import com.dl.shop.payment.dto.DonationPriceDTO;
+import com.dl.shop.payment.dto.RechargeUserDTO;
+import com.dl.shop.payment.dto.YesOrNoDTO;
+import com.dl.shop.payment.model.UserRecharge;
 
-import javax.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Transactional
@@ -132,16 +128,34 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
 			DonationPriceDTO donationPriceDTO = new DonationPriceDTO();
 			donationPriceDTO.setMinRechargeAmount(10);
 			donationPriceDTO.setDonationAmount(1);
+			
+			DonationPriceDTO donationPriceDTO1 = new DonationPriceDTO();
+			donationPriceDTO.setMinRechargeAmount(100);
+			donationPriceDTO.setDonationAmount(10);
+			
+			DonationPriceDTO donationPriceDTO2 = new DonationPriceDTO();
+			donationPriceDTO.setMinRechargeAmount(1000);
+			donationPriceDTO.setDonationAmount(100);
+			
+			DonationPriceDTO donationPriceDTO3 = new DonationPriceDTO();
+			donationPriceDTO.setMinRechargeAmount(6000);
+			donationPriceDTO.setDonationAmount(800);			
+			
 			donationPriceList.add(donationPriceDTO);
-//			donationPriceMap.put(100, 10);
-//			donationPriceMap.put(1000, 100);
-//			donationPriceMap.put(6000, 800);
+			donationPriceList.add(donationPriceDTO1);
+			donationPriceList.add(donationPriceDTO2);
+			donationPriceList.add(donationPriceDTO3);
 		}else {
 			DonationPriceDTO donationPriceDTO = new DonationPriceDTO();
 			donationPriceDTO.setMinRechargeAmount(10);
 			donationPriceDTO.setDonationAmount(10);
+
+			DonationPriceDTO donationPriceDTO1 = new DonationPriceDTO();
+			donationPriceDTO.setMinRechargeAmount(20);
+			donationPriceDTO.setDonationAmount(20);
+			
 			donationPriceList.add(donationPriceDTO);
-//			donationPriceMap.put(20, 20);
+			donationPriceList.add(donationPriceDTO1);
 		}
 		
 		rechargeUserDTO.setDonationPriceList(donationPriceList);

@@ -10,6 +10,7 @@ import com.dl.shop.payment.dto.PayLogDTO;
 import com.dl.shop.payment.dto.UserRechargeDTO;
 import com.dl.shop.payment.dto.UserWithdrawDTO;
 import com.dl.shop.payment.dto.UserWithdrawDetailDTO;
+import com.dl.shop.payment.dto.YesOrNoDTO;
 import com.dl.shop.payment.param.PayLogIdParam;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
 import com.dl.shop.payment.param.StrParam;
@@ -45,5 +46,11 @@ public interface IpaymentService {
      */
  	@RequestMapping(path="/payment/queryPayLogByPayLogId", method=RequestMethod.POST)
     public BaseResult<PayLogDTO> queryPayLogByPayLogId(@RequestBody PayLogIdParam payLogIdParam);
+ 	
+ 	/**
+ 	 * 查询用户是否充过值
+ 	 */
+ 	@RequestMapping(path="/payment/recharge/countUserRecharge", method=RequestMethod.POST)
+    public BaseResult<YesOrNoDTO> countUserRecharge(@RequestBody StrParam strParam); 	
 
 }

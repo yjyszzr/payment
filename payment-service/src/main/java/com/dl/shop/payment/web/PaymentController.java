@@ -4,17 +4,14 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.util.TextUtils;
 import org.slf4j.Logger;
@@ -25,8 +22,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.alibaba.fastjson.JSON;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -48,7 +45,6 @@ import com.dl.member.dto.UserBankDTO;
 import com.dl.member.dto.UserDTO;
 import com.dl.member.dto.UserWithdrawDTO;
 import com.dl.member.param.IDParam;
-import com.dl.member.param.MessageAddParam;
 import com.dl.member.param.RecharegeParam;
 import com.dl.member.param.StrParam;
 import com.dl.member.param.SurplusPayParam;
@@ -67,7 +63,6 @@ import com.dl.shop.payment.dto.PayWaysDTO;
 import com.dl.shop.payment.dto.PaymentDTO;
 import com.dl.shop.payment.dto.RechargeUserDTO;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
-import com.dl.shop.payment.dto.YesOrNoDTO;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.UnifiedOrderParam;
@@ -93,6 +88,7 @@ import com.dl.shop.payment.service.PayMentService;
 import com.dl.shop.payment.service.UserRechargeService;
 import com.dl.shop.payment.service.UserWithdrawLogService;
 import com.dl.shop.payment.utils.WxpayUtil;
+
 import io.swagger.annotations.ApiOperation;
 
 @Controller
