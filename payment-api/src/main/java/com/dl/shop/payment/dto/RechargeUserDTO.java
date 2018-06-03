@@ -1,6 +1,8 @@
 package com.dl.shop.payment.dto;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import io.swagger.annotations.Api;
@@ -15,6 +17,6 @@ public class RechargeUserDTO {
     private Integer oldUserBz;
 	
 	@ApiModelProperty(value="用户充值赠送金额")
-	Map<Integer,Integer> donationPriceMap;
+	private List<DonationPriceDTO> donationPriceList;
 
 }

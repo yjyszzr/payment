@@ -4,6 +4,7 @@ import com.dl.member.param.UpdateUserRechargeParam;
 import com.dl.member.param.UserAccountParam;
 import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dao.UserRechargeMapper;
+import com.dl.shop.payment.dto.DonationPriceDTO;
 import com.dl.shop.payment.dto.RechargeUserDTO;
 import com.dl.shop.payment.dto.YesOrNoDTO;
 import com.dl.shop.payment.model.UserRecharge;
@@ -26,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,19 +126,25 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
 	public RechargeUserDTO createRechargeUserDTO(){
 		RechargeUserDTO rechargeUserDTO = new RechargeUserDTO();
 		BaseResult<YesOrNoDTO> yesOrNotRst = this.countUserRecharge();
-		Map<Integer,Integer> donationPriceMap = new HashMap<Integer,Integer>();
 		YesOrNoDTO yesOrNoDTO = yesOrNotRst.getData();
-		if(yesOrNoDTO.getYesOrNo().equals("0")) {
-			donationPriceMap.put(10, 1);
-			donationPriceMap.put(100, 10);
-			donationPriceMap.put(1000, 100);
-			donationPriceMap.put(6000, 800);
+		List<DonationPriceDTO> donationPriceList = new ArrayList<DonationPriceDTO>();
+		if(yesOrNoDTO.getYesOrNo().equals("1")) {
+			DonationPriceDTO donationPriceDTO = new DonationPriceDTO();
+			donationPriceDTO.setMinRechargeAmount(10);
+			donationPriceDTO.setDonationAmount(1);
+			donationPriceList.add(donationPriceDTO);
+//			donationPriceMap.put(100, 10);
+//			donationPriceMap.put(1000, 100);
+//			donationPriceMap.put(6000, 800);
 		}else {
-			donationPriceMap.put(10, 10);
-			donationPriceMap.put(20, 20);
+			DonationPriceDTO donationPriceDTO = new DonationPriceDTO();
+			donationPriceDTO.setMinRechargeAmount(10);
+			donationPriceDTO.setDonationAmount(10);
+			donationPriceList.add(donationPriceDTO);
+//			donationPriceMap.put(20, 20);
 		}
 		
-		rechargeUserDTO.setDonationPriceMap(donationPriceMap);
+		rechargeUserDTO.setDonationPriceList(donationPriceList);
 		rechargeUserDTO.setOldUserBz(Integer.valueOf(yesOrNoDTO.getYesOrNo()));
 		return rechargeUserDTO;
 	}
