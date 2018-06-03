@@ -8,7 +8,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
@@ -35,10 +37,12 @@ import com.dl.lottery.api.ILotteryPrintService;
 import com.dl.lottery.dto.DIZQUserBetCellInfoDTO;
 import com.dl.lottery.dto.DIZQUserBetInfoDTO;
 import com.dl.lottery.param.SaveLotteryPrintInfoParam;
+import com.dl.member.api.IActivityService;
 import com.dl.member.api.IUserAccountService;
 import com.dl.member.api.IUserBankService;
 import com.dl.member.api.IUserMessageService;
 import com.dl.member.api.IUserService;
+import com.dl.member.dto.RechargeDataActivityDTO;
 import com.dl.member.dto.SurplusPaymentCallbackDTO;
 import com.dl.member.dto.UserBankDTO;
 import com.dl.member.dto.UserDTO;
@@ -59,8 +63,11 @@ import com.dl.order.param.UpdateOrderInfoParam;
 import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dto.PayLogDTO;
 import com.dl.shop.payment.dto.PayReturnDTO;
+import com.dl.shop.payment.dto.PayWaysDTO;
 import com.dl.shop.payment.dto.PaymentDTO;
+import com.dl.shop.payment.dto.RechargeUserDTO;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
+import com.dl.shop.payment.dto.YesOrNoDTO;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.UnifiedOrderParam;
@@ -127,14 +134,41 @@ public class PaymentController extends AbstractBaseController{
 	private ReapalH5Config rongCfg;
 	@Resource
 	private RongUtil rongUtil;
-	
+	@Resource
+	private IActivityService activityService;
+
 	@ApiOperation(value="系统可用第三方支付方式", notes="系统可用第三方支付方式")
 	@PostMapping("/allPayment")
 	@ResponseBody
 	public BaseResult<List<PaymentDTO>> allPaymentInfo(@RequestBody AllPaymentInfoParam param) {
-		BaseResult<List<PaymentDTO>> findAllDto = paymentService.findAllDto();
-		return findAllDto;
+		List<PaymentDTO> list = paymentService.findAllDto();
+		return ResultGenerator.genSuccessResult("success", list);
 	}
+	
+	@ApiOperation(value="系统可用第三方支付方式带有了充值活动信息", notes="系统可用第三方支付方式")
+	@PostMapping("/allPaymentWithRecharge")
+	@ResponseBody
+	public BaseResult<PayWaysDTO> allPaymentInfoWithRecharge(@RequestBody AllPaymentInfoParam param) {
+		PayWaysDTO payWaysDTO = new PayWaysDTO();
+		List<PaymentDTO> paymentDTOList = paymentService.findAllDto();
+		payWaysDTO.setPaymentDTOList(paymentDTOList);
+		
+		StrParam strParam = new StrParam();
+		BaseResult<RechargeDataActivityDTO> rechargeActRst = activityService.queryValidRechargeActivity(strParam);
+		if(rechargeActRst.getCode() != 0) {
+			payWaysDTO.setIsHaveRechargeAct(0);
+		}
+		
+		RechargeDataActivityDTO rechargeDataActivityDTO = rechargeActRst.getData();
+		payWaysDTO.setIsHaveRechargeAct(rechargeDataActivityDTO.getIsHaveRechargeAct());
+		
+		RechargeUserDTO rechargeUserDTO = userRechargeService.createRechargeUserDTO();
+		payWaysDTO.setRechargeUserDTO(rechargeUserDTO);
+		
+		return ResultGenerator.genSuccessResult("success", payWaysDTO);
+	}
+	
+	
 	@ApiOperation(value="用户支付回退接口", notes="")
 	@PostMapping("/rollbackOrderAmount")
 	@ResponseBody
@@ -1005,4 +1039,5 @@ public class PaymentController extends AbstractBaseController{
     public BaseResult<PayLogDTO> queryPayLogByPayLogId(@RequestBody PayLogIdParam payLogIdParam){
 		return payLogService.queryPayLogByPayLogId(Integer.valueOf(payLogIdParam.getPayLogId()));
  	}	
+	
 }

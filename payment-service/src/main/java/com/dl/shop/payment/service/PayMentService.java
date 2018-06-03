@@ -64,10 +64,10 @@ public class PayMentService extends AbstractService<PayMent> {
      * 查询所有可用的支付方式
      * @return
      */
-    public BaseResult<List<PaymentDTO>> findAllDto() {
+    public List<PaymentDTO> findAllDto() {
 		List<PayMent> payments = super.findAll();
 		if(CollectionUtils.isEmpty(payments)) {
-			return ResultGenerator.genSuccessResult("success", new ArrayList<PaymentDTO>(0));
+			return new ArrayList<PaymentDTO>();
 		}
 		List<PaymentDTO> list = payments.stream().filter(payment->payment.getIsEnable() == 1).map(payment->{
 			PaymentDTO paymentDTO = new PaymentDTO();
@@ -81,7 +81,7 @@ public class PayMentService extends AbstractService<PayMent> {
 			paymentDTO.setPayImg(payment.getPayImg());
 			return paymentDTO;
 		}).collect(Collectors.toList());
-		return ResultGenerator.genSuccessResult("success", list);
+		return list;
 	}
     /**
      * 通过payCode读取可用支付方式
@@ -89,7 +89,7 @@ public class PayMentService extends AbstractService<PayMent> {
      * @return
      */
     public BaseResult<PaymentDTO> queryByCode(String payCode) {
-		List<PaymentDTO> paymentDTOs = this.findAllDto().getData();
+		List<PaymentDTO> paymentDTOs = this.findAllDto();
 		Optional<PaymentDTO> optional = paymentDTOs.stream().filter(dto-> dto.getPayCode().equals(payCode)).findFirst();
 		return optional.isPresent()?ResultGenerator.genSuccessResult("success", optional.get()):ResultGenerator.genFailResult("没有匹配的记录！");
 	}

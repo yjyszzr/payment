@@ -4,6 +4,7 @@ import com.dl.member.param.UpdateUserRechargeParam;
 import com.dl.member.param.UserAccountParam;
 import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dao.UserRechargeMapper;
+import com.dl.shop.payment.dto.RechargeUserDTO;
 import com.dl.shop.payment.dto.YesOrNoDTO;
 import com.dl.shop.payment.model.UserRecharge;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import javax.annotation.Resource;
 
 @Service
@@ -112,5 +116,29 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
 		return ResultGenerator.genSuccessResult("更新数据库充值单成功");
     
     }
+    
+    /**
+     * 构造充值赠送信息
+     * @return
+     */
+	public RechargeUserDTO createRechargeUserDTO(){
+		RechargeUserDTO rechargeUserDTO = new RechargeUserDTO();
+		BaseResult<YesOrNoDTO> yesOrNotRst = this.countUserRecharge();
+		Map<Integer,Integer> donationPriceMap = new HashMap<Integer,Integer>();
+		YesOrNoDTO yesOrNoDTO = yesOrNotRst.getData();
+		if(yesOrNoDTO.getYesOrNo().equals("0")) {
+			donationPriceMap.put(10, 1);
+			donationPriceMap.put(100, 10);
+			donationPriceMap.put(1000, 100);
+			donationPriceMap.put(6000, 800);
+		}else {
+			donationPriceMap.put(10, 10);
+			donationPriceMap.put(20, 20);
+		}
+		
+		rechargeUserDTO.setDonationPriceMap(donationPriceMap);
+		rechargeUserDTO.setOldUserBz(Integer.valueOf(yesOrNoDTO.getYesOrNo()));
+		return rechargeUserDTO;
+	}
 
 }
