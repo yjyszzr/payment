@@ -130,16 +130,16 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
 			donationPriceDTO.setDonationAmount(1);
 			
 			DonationPriceDTO donationPriceDTO1 = new DonationPriceDTO();
-			donationPriceDTO.setMinRechargeAmount(100);
-			donationPriceDTO.setDonationAmount(10);
+			donationPriceDTO1.setMinRechargeAmount(100);
+			donationPriceDTO1.setDonationAmount(10);
 			
 			DonationPriceDTO donationPriceDTO2 = new DonationPriceDTO();
-			donationPriceDTO.setMinRechargeAmount(1000);
-			donationPriceDTO.setDonationAmount(100);
+			donationPriceDTO2.setMinRechargeAmount(1000);
+			donationPriceDTO2.setDonationAmount(100);
 			
 			DonationPriceDTO donationPriceDTO3 = new DonationPriceDTO();
-			donationPriceDTO.setMinRechargeAmount(6000);
-			donationPriceDTO.setDonationAmount(800);			
+			donationPriceDTO3.setMinRechargeAmount(6000);
+			donationPriceDTO3.setDonationAmount(800);			
 			
 			donationPriceList.add(donationPriceDTO);
 			donationPriceList.add(donationPriceDTO1);
@@ -151,8 +151,8 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
 			donationPriceDTO.setDonationAmount(10);
 
 			DonationPriceDTO donationPriceDTO1 = new DonationPriceDTO();
-			donationPriceDTO.setMinRechargeAmount(20);
-			donationPriceDTO.setDonationAmount(20);
+			donationPriceDTO1.setMinRechargeAmount(20);
+			donationPriceDTO1.setDonationAmount(20);
 			
 			donationPriceList.add(donationPriceDTO);
 			donationPriceList.add(donationPriceDTO1);
