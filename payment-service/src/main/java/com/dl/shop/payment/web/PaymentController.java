@@ -775,12 +775,16 @@ public class PaymentController extends AbstractBaseController{
 			}else if(1 == payType){
 				bResult = rechargeOptions(userRechargeService,userAccountService,payLogService,loggerId, payLog, response);
 			}
-			RspOrderQueryDTO rspOrderQuery = bResult.getData();
-			if(rspOrderQuery != null) {
-				rspOrderQuery.setPayCode(payCode);
-				rspOrderQuery.setPayType(payType);
+			if(bResult == null) {
+				return ResultGenerator.genFailResult("查询失败", null);
+			}else {
+				RspOrderQueryDTO rspOrderQuery = bResult.getData();
+				if(rspOrderQuery != null) {
+					rspOrderQuery.setPayCode(payCode);
+					rspOrderQuery.setPayType(payType);
+				}
+				return bResult;
 			}
-			return bResult;
 		}else {
 			return ResultGenerator.genFailResult("未获取到订单信息，开发中...", null);
 		}
@@ -958,31 +962,30 @@ public class PaymentController extends AbstractBaseController{
 			return ResultGenerator.genSuccessResult("订单已支付成功！", null);
 		}else {
 			//预扣款 的方案 这里什么也不做
-//			String payCode = response.getPayCode();
+			String payCode = response.getPayCode();
 //			String code = response.getResult_code();
 //			if(StringUtils.isBlank(code) || "3015".equals(code) || response.isYinHeWeChatNotPay()) {//融宝和银河返回值  为 订单不存在和未支付
 //				dealWithPayFailure(orderService, payLog,payLogService, response);
 //			}
-//			//融宝处理
-//			if(RspOrderQueryEntity.PAY_CODE_RONGBAO.equals(payCode)) {
-//				String code = response.getResult_code();
-//				if(StringUtils.isBlank(code) || "3015".equals(code)) {//订单不存在
-//					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
-//				}else {
-//					String tips = response.getResult_msg();
-//					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"融宝服务返回[" + tips +"]");
-//				}
-//			//微信处理	
-//			}else if(RspOrderQueryEntity.PAY_CODE_WECHAT.equals(payCode)){//wechat pay
-//				String code = response.getResult_code();
-//				String tips = response.getResult_msg();
-//				if(StringUtils.isBlank(code) || response.isYinHeWeChatNotPay()) {
-//					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
-//				}else {
-//					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"微信支付失败["+tips+"]");	
-//				}
-//			}
-//			return null;
+			//融宝处理
+			if(RspOrderQueryEntity.PAY_CODE_RONGBAO.equals(payCode)) {
+				String code = response.getResult_code();
+				if(StringUtils.isBlank(code) || "3015".equals(code)) {//订单不存在
+					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
+				}else {
+					String tips = response.getResult_msg();
+					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"融宝服务返回[" + tips +"]");
+				}
+			//微信处理	
+			}else if(RspOrderQueryEntity.PAY_CODE_WECHAT.startsWith(payCode)){//wechat pay
+				String code = response.getResult_code();
+				String tips = response.getResult_msg();
+				if(StringUtils.isBlank(code) || response.isYinHeWeChatNotPay()) {
+					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
+				}else {
+					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"微信支付失败["+tips+"]");	
+				}
+			}
 		}
 		return null;
 	}
