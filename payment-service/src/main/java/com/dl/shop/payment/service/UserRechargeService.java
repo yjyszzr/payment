@@ -154,8 +154,18 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
 			donationPriceDTO1.setMinRechargeAmount(20);
 			donationPriceDTO1.setDonationAmount(20);
 			
+			DonationPriceDTO donationPriceDTO2 = new DonationPriceDTO();
+			donationPriceDTO2.setMinRechargeAmount(1000);
+			donationPriceDTO2.setDonationAmount(100);
+			
+			DonationPriceDTO donationPriceDTO3 = new DonationPriceDTO();
+			donationPriceDTO3.setMinRechargeAmount(6000);
+			donationPriceDTO3.setDonationAmount(800);	
+			
 			donationPriceList.add(donationPriceDTO);
 			donationPriceList.add(donationPriceDTO1);
+			donationPriceList.add(donationPriceDTO2);
+			donationPriceList.add(donationPriceDTO3);
 		}
 		
 		rechargeUserDTO.setDonationPriceList(donationPriceList);
