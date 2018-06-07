@@ -14,7 +14,9 @@ import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.base.service.AbstractService;
 import com.dl.base.util.DateUtil;
+import com.dl.member.api.IActivityService;
 import com.dl.member.api.IUserAccountService;
+import com.dl.member.api.IUserBonusService;
 import com.dl.member.dto.SurplusPaymentCallbackDTO;
 import com.dl.member.param.SurplusPayParam;
 import com.dl.member.param.UserAccountParamByType;
@@ -59,6 +61,12 @@ public class PayMentService extends AbstractService<PayMent> {
 
 	@Resource
 	private RongUtil rongUtil;
+	
+	@Resource
+	private  IActivityService activityService;
+
+	@Resource
+	private IUserBonusService userBonusService;
 	
     /**
      * 查询所有可用的支付方式

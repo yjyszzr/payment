@@ -37,8 +37,10 @@ import com.dl.lottery.param.SaveLotteryPrintInfoParam;
 import com.dl.member.api.IActivityService;
 import com.dl.member.api.IUserAccountService;
 import com.dl.member.api.IUserBankService;
+import com.dl.member.api.IUserBonusService;
 import com.dl.member.api.IUserMessageService;
 import com.dl.member.api.IUserService;
+import com.dl.member.dto.DonationPriceDTO;
 import com.dl.member.dto.RechargeDataActivityDTO;
 import com.dl.member.dto.SurplusPaymentCallbackDTO;
 import com.dl.member.dto.UserBankDTO;
@@ -132,6 +134,8 @@ public class PaymentController extends AbstractBaseController{
 	private RongUtil rongUtil;
 	@Resource
 	private IActivityService activityService;
+	@Resource
+	private IUserBonusService userBonusService;
 
 	@ApiOperation(value="系统可用第三方支付方式", notes="系统可用第三方支付方式")
 	@PostMapping("/allPayment")
@@ -773,7 +777,7 @@ public class PaymentController extends AbstractBaseController{
 			if(0 == payType) {
 				bResult = orderOptions(paymentService,lotteryPrintService,orderService,payLogService,userAccountService,loggerId, payLog, response);
 			}else if(1 == payType){
-				bResult = rechargeOptions(userRechargeService,userAccountService,payLogService,loggerId, payLog, response);
+				bResult = rechargeOptions(userRechargeService,userAccountService,payLogService,activityService,userBonusService,loggerId, payLog, response);
 			}
 			if(bResult == null) {
 				return ResultGenerator.genFailResult("查询失败", null);
@@ -796,9 +800,10 @@ public class PaymentController extends AbstractBaseController{
 	 * @param payLog
 	 * @param response
 	 * @return
+	 * 
 	 */
 	public static BaseResult<RspOrderQueryDTO> rechargeOptions(UserRechargeService userRechargeService,
-			IUserAccountService userAccountService,PayLogService payLogService,String loggerId, PayLog payLog, RspOrderQueryEntity response) {
+			IUserAccountService userAccountService,PayLogService payLogService,IActivityService activityService,IUserBonusService userBonusService,String loggerId, PayLog payLog, RspOrderQueryEntity response) {
 //		Integer tradeState = response.getTradeState();
 		RspOrderQueryDTO rspEntity = new RspOrderQueryDTO();
 		if(response.isSucc()) {
@@ -841,7 +846,27 @@ public class PaymentController extends AbstractBaseController{
 			} catch (Exception e) {
 				logger.error(loggerId+" paylogid="+payLog.getLogId()+" , paymsg=支付成功，保存成功记录时出错", e);
 			}
-			return ResultGenerator.genSuccessResult("订单已支付成功");
+			
+			RspOrderQueryDTO rspOrderQueryDTO = new RspOrderQueryDTO();
+			rspOrderQueryDTO.setIsHaveRechargeAct(0);
+			rspOrderQueryDTO.setDonationPrice("0");
+			StrParam strParam = new StrParam();
+			strParam.setStr("");
+			BaseResult<RechargeDataActivityDTO> rechargeDataAct = activityService.queryValidRechargeActivity(strParam);
+			if(rechargeDataAct.getCode() == 0) {
+				RechargeDataActivityDTO  rechargeDataActivityDTO  = rechargeDataAct.getData();
+				rspOrderQueryDTO.setIsHaveRechargeAct(rechargeDataActivityDTO.getIsHaveRechargeAct());
+				if(1 == rechargeDataActivityDTO.getIsHaveRechargeAct()) {
+					com.dl.member.param.PayLogIdParam payLogIdParam = new com.dl.member.param.PayLogIdParam();
+					payLogIdParam.setPayLogId(String.valueOf(payLog.getLogId()));
+					BaseResult<DonationPriceDTO> donationPriceRst = userBonusService.rechargeSucReiceiveBonus(payLogIdParam);
+					if(donationPriceRst.getCode() == 0) {
+						rspOrderQueryDTO.setDonationPrice(donationPriceRst.getData().getDonationPrice());
+					}
+				}
+			}
+			logger.info("充值成功后返回的信息："+rspOrderQueryDTO.getIsHaveRechargeAct() +"-----"+rspOrderQueryDTO.getDonationPrice());
+			return ResultGenerator.genSuccessResult("订单已支付成功",rspOrderQueryDTO);
 		}else {
 			//更新paylog
 			try {
