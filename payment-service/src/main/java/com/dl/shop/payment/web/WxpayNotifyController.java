@@ -186,27 +186,27 @@ public class WxpayNotifyController {
 		try {
 			int payType = payLog.getPayType();
 			int currentTime = DateUtil.getCurrentTimeLong();
-			boolean result = false;
+			BaseResult<RspOrderQueryDTO> result = null;
 			if(0 == payType) {
-				result = orderOptionsSucc(tradeNo, payLog,loggerId,rspEntity);
+				result = paymentService.orderOptions(loggerId,payLog,rspEntity);
 			}else {
-				result = recharageOptionSucc(tradeNo, payLog);
+				result = paymentService.rechargeOptions(loggerId,payLog,rspEntity);
 			}
-			logger.info(loggerId + " 业务回调结果：result="+result);
-			if(result) {
-				//更新paylog状态为已支付
-				PayLog updatePayLog = new PayLog();
-				updatePayLog.setLogId(payLog.getLogId());
-				updatePayLog.setTradeNo(tradeNo);
-				updatePayLog.setIsPaid(1);
-				updatePayLog.setLastTime(currentTime);
-				updatePayLog.setPayTime(currentTime);
-				payLogService.update(updatePayLog);
-				logger.info(loggerId + " 业务回调成功，payLog.对象状态回写结束");
-				if(response != null) {
-					String xml = "<xml><return_code><![CDATA[SUCCESS]]></return_code> <return_msg><![CDATA[OK]]></return_msg></xml>";
-					response.getWriter().write(xml);
-				}
+			logger.info(loggerId + " 业务回调结果：result="+result + " code="+result.getCode());
+//			if(result != null && result.getCode() == 0) {
+//				//更新paylog状态为已支付
+//				PayLog updatePayLog = new PayLog();
+//				updatePayLog.setLogId(payLog.getLogId());
+//				updatePayLog.setTradeNo(tradeNo);
+//				updatePayLog.setIsPaid(1);
+//				updatePayLog.setLastTime(currentTime);
+//				updatePayLog.setPayTime(currentTime);
+//				payLogService.update(updatePayLog);
+//				logger.info(loggerId + " 业务回调成功，payLog.对象状态回写结束");
+//			}
+			if(response != null) {
+				String xml = "<xml><return_code><![CDATA[SUCCESS]]></return_code> <return_msg><![CDATA[OK]]></return_msg></xml>";
+				response.getWriter().write(xml);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
