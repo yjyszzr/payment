@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dl.base.result.BaseResult;
 import com.dl.shop.payment.dto.YesOrNoDTO;
 import com.dl.shop.payment.param.StrParam;
+import com.dl.shop.payment.param.UserIdParam;
 import com.dl.shop.payment.service.UserRechargeService;
 
 @RestController
@@ -21,8 +22,8 @@ public class UserRechargeController {
      * 	查询当前登录用户是否有充值单
      */
  	@RequestMapping(path="/countUserRecharge", method=RequestMethod.POST)
-    public BaseResult<YesOrNoDTO> countUserRecharge(@RequestBody StrParam strParam){
- 		return userRechargeService.countUserRecharge();
+    public BaseResult<YesOrNoDTO> countUserRecharge(@RequestBody UserIdParam userIdParam){
+ 		return userRechargeService.countUserRecharge(userIdParam.getUserId());
  	}
  	
 }

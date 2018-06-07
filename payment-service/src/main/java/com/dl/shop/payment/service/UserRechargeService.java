@@ -44,8 +44,7 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
      * 查询是否充值过：0-未充值过 1-充值过
      * @return
      */
-    public BaseResult<YesOrNoDTO> countUserRecharge(){
-    	Integer userId = SessionUtil.getUserId();
+    public BaseResult<YesOrNoDTO> countUserRecharge(Integer userId){
     	Integer count = userRechargeMapper.countUserCharge(userId);
     	YesOrNoDTO yesOrNoDTO = new YesOrNoDTO();
     	if(count == 0 ) {
@@ -119,9 +118,9 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
      * 构造充值赠送信息
      * @return
      */
-	public RechargeUserDTO createRechargeUserDTO(){
+	public RechargeUserDTO createRechargeUserDTO(Integer userId){
 		RechargeUserDTO rechargeUserDTO = new RechargeUserDTO();
-		BaseResult<YesOrNoDTO> yesOrNotRst = this.countUserRecharge();
+		BaseResult<YesOrNoDTO> yesOrNotRst = this.countUserRecharge(userId);
 		YesOrNoDTO yesOrNoDTO = yesOrNotRst.getData();
 		List<DonationPriceDTO> donationPriceList = new ArrayList<DonationPriceDTO>();
 		if(yesOrNoDTO.getYesOrNo().equals("1")) {

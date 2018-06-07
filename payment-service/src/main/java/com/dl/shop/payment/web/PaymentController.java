@@ -162,7 +162,8 @@ public class PaymentController extends AbstractBaseController{
 		RechargeDataActivityDTO rechargeDataActivityDTO = rechargeActRst.getData();
 		payWaysDTO.setIsHaveRechargeAct(rechargeDataActivityDTO.getIsHaveRechargeAct());
 		
-		RechargeUserDTO rechargeUserDTO = userRechargeService.createRechargeUserDTO();
+		Integer userId = SessionUtil.getUserId();
+		RechargeUserDTO rechargeUserDTO = userRechargeService.createRechargeUserDTO(userId);
 		payWaysDTO.setRechargeUserDTO(rechargeUserDTO);
 		
 		return ResultGenerator.genSuccessResult("success", payWaysDTO);
