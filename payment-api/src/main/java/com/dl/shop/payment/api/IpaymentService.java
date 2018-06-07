@@ -53,5 +53,11 @@ public interface IpaymentService {
  	 */
  	@RequestMapping(path="/payment/recharge/countUserRecharge", method=RequestMethod.POST)
     public BaseResult<YesOrNoDTO> countUserRecharge(@RequestBody UserIdParam userIdParam); 	
+ 	
+ 	/**
+ 	 * 查询用户是否成功充过值
+ 	 */
+ 	@RequestMapping(path="/payment/recharge/countUserSucRecharge", method=RequestMethod.POST)
+    public BaseResult<YesOrNoDTO> countUserSucRecharge(@RequestBody UserIdParam userIdParam); 	
 
 }

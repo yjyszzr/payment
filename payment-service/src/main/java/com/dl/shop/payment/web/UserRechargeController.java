@@ -26,4 +26,12 @@ public class UserRechargeController {
  		return userRechargeService.countUserRecharge(userIdParam.getUserId());
  	}
  	
+ 	/**
+     * 	查询当前登录用户是否有成功的充值单
+     */
+ 	@RequestMapping(path="/countUserSucRecharge", method=RequestMethod.POST)
+    public BaseResult<YesOrNoDTO> countUserSucRecharge(@RequestBody StrParam strParam){
+ 		return userRechargeService.countUserSucRecharge();
+ 	}
+ 	
 }

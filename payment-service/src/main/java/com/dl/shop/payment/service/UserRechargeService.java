@@ -61,6 +61,23 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
     	return ResultGenerator.genSuccessResult("查询是否充值成功",yesOrNoDTO);
     }
     
+    /**
+     * 查询是否充值过：0-未充值过 1-充值过
+     * @return
+     */
+    public BaseResult<YesOrNoDTO> countUserSucRecharge(){
+    	Integer sessionUserId = SessionUtil.getUserId();
+    	Integer count = userRechargeMapper.countUserSucCharge(sessionUserId);
+    	YesOrNoDTO yesOrNoDTO = new YesOrNoDTO();
+    	if(count == 0 ) {
+    		yesOrNoDTO.setYesOrNo("0");
+    	}else {
+    		yesOrNoDTO.setYesOrNo("1");
+    	}
+    	
+    	return ResultGenerator.genSuccessResult("查询是否充值成功",yesOrNoDTO);
+    }
+    
     
     /**
      * 创建充值单
