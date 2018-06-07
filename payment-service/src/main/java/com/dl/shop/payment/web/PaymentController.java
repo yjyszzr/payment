@@ -847,9 +847,10 @@ public class PaymentController extends AbstractBaseController{
 				logger.error(loggerId+" paylogid="+payLog.getLogId()+" , paymsg=支付成功，保存成功记录时出错", e);
 			}
 			
+			logger.info("开始执行充值赠送红包逻辑");
 			RspOrderQueryDTO rspOrderQueryDTO = new RspOrderQueryDTO();
 			rspOrderQueryDTO.setIsHaveRechargeAct(0);
-			rspOrderQueryDTO.setDonationPrice("0");
+			rspOrderQueryDTO.setDonationPrice("");
 			StrParam strParam = new StrParam();
 			strParam.setStr("");
 			BaseResult<RechargeDataActivityDTO> rechargeDataAct = activityService.queryValidRechargeActivity(strParam);
@@ -860,7 +861,9 @@ public class PaymentController extends AbstractBaseController{
 					com.dl.member.param.PayLogIdParam payLogIdParam = new com.dl.member.param.PayLogIdParam();
 					payLogIdParam.setPayLogId(String.valueOf(payLog.getLogId()));
 					BaseResult<DonationPriceDTO> donationPriceRst = userBonusService.rechargeSucReiceiveBonus(payLogIdParam);
+					logger.info("充值赠送红包结果："+ JSON.toJSONString(donationPriceRst.getData()));
 					if(donationPriceRst.getCode() == 0) {
+						logger.info("结束执行充值赠送红包逻辑");
 						rspOrderQueryDTO.setDonationPrice(donationPriceRst.getData().getDonationPrice());
 					}
 				}
