@@ -45,6 +45,11 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
      * @return
      */
     public BaseResult<YesOrNoDTO> countUserRecharge(Integer userId){
+    	Integer sessionUserId = SessionUtil.getUserId();
+    	if(null != sessionUserId) {
+    		userId = sessionUserId;
+    	}
+    	
     	Integer count = userRechargeMapper.countUserCharge(userId);
     	YesOrNoDTO yesOrNoDTO = new YesOrNoDTO();
     	if(count == 0 ) {
