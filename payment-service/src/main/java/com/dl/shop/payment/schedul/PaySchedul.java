@@ -153,9 +153,9 @@ public class PaySchedul {
 			Integer payType = payLog.getPayType();
 			BaseResult<RspOrderQueryDTO> bResult = null;
 			if(payType == 0) {
-				bResult = PaymentController.orderOptions(paymentService,lotteryPrintService,orderService, payLogService, userAccountService, loggerId, payLog,rspEntity);
+				bResult = paymentService.orderOptions(loggerId, payLog,rspEntity);
 			}else if(payType == 1) {
-				bResult = PaymentController.rechargeOptions(userRechargeService,userAccountService, payLogService,activityService,userBonusService, loggerId, payLog, rspEntity);
+				bResult = paymentService.rechargeOptions(loggerId, payLog, rspEntity);
 			}
 		}
 		return succ;

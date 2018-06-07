@@ -218,7 +218,7 @@ public class WxpayNotifyController {
 	 */
 	private boolean orderOptionsSucc(String tradeNo,PayLog payLog,String loggerId,RspOrderQueryEntity rspEntity) {
 		boolean isSucc = true;
-		BaseResult<RspOrderQueryDTO> baseResult = PaymentController.orderOptions(paymentService, lotteryPrintService, orderService, payLogService, userAccountService, loggerId, payLog, rspEntity);
+		BaseResult<RspOrderQueryDTO> baseResult = paymentService.orderOptions(loggerId, payLog, rspEntity);
 		if(baseResult != null && baseResult.getCode() == 0) {
 			isSucc = true;
 		}

@@ -6,7 +6,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.util.TextUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
@@ -14,11 +17,18 @@ import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.base.service.AbstractService;
 import com.dl.base.util.DateUtil;
+import com.dl.lottery.api.ILotteryPrintService;
+import com.dl.lottery.param.SaveLotteryPrintInfoParam;
 import com.dl.member.api.IActivityService;
 import com.dl.member.api.IUserAccountService;
 import com.dl.member.api.IUserBonusService;
+import com.dl.member.dto.DonationPriceDTO;
+import com.dl.member.dto.RechargeDataActivityDTO;
 import com.dl.member.dto.SurplusPaymentCallbackDTO;
+import com.dl.member.param.RecharegeParam;
+import com.dl.member.param.StrParam;
 import com.dl.member.param.SurplusPayParam;
+import com.dl.member.param.UpdateUserRechargeParam;
 import com.dl.member.param.UserAccountParamByType;
 import com.dl.member.param.UserBonusParam;
 import com.dl.order.api.IOrderService;
@@ -29,18 +39,25 @@ import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dao.PayLogMapper;
 import com.dl.shop.payment.dao.PayMentMapper;
 import com.dl.shop.payment.dto.PaymentDTO;
+import com.dl.shop.payment.dto.RspOrderQueryDTO;
+import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.PayMent;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
+import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
 import com.dl.shop.payment.pay.rongbao.entity.ReqRefundEntity;
 import com.dl.shop.payment.pay.rongbao.entity.RspRefundEntity;
 import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
+import com.dl.shop.payment.web.PaymentController;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
 public class PayMentService extends AbstractService<PayMent> {
+	private final static Logger logger = LoggerFactory.getLogger(PaymentController.class);
+	
     @Resource
     private PayMentMapper payMentMapper;
     
@@ -67,6 +84,12 @@ public class PayMentService extends AbstractService<PayMent> {
 
 	@Resource
 	private IUserBonusService userBonusService;
+	
+	@Resource
+	private UserRechargeService userRechargeService;
+	
+	@Resource
+	private ILotteryPrintService lotteryPrintService;
 	
     /**
      * 查询所有可用的支付方式
@@ -309,4 +332,232 @@ public class PayMentService extends AbstractService<PayMent> {
 		}
 		return ResultGenerator.genSuccessResult();
 	}
+	
+	
+	
+	/**
+	 * 对支付结果的一个回写处理
+	 * @param loggerId
+	 * @param payLog
+	 * @param response
+	 * @return
+	 * 
+	 */
+	public BaseResult<RspOrderQueryDTO> rechargeOptions(String loggerId, PayLog payLog, RspOrderQueryEntity response) {
+//		Integer tradeState = response.getTradeState();
+		RspOrderQueryDTO rspEntity = new RspOrderQueryDTO();
+		if(response.isSucc()) {
+			int currentTime = DateUtil.getCurrentTimeLong();
+			//更新order
+			UpdateUserRechargeParam updateUserRechargeParam = new UpdateUserRechargeParam();
+			updateUserRechargeParam.setPaymentCode(payLog.getPayCode());
+			updateUserRechargeParam.setPaymentId(payLog.getLogId()+"");
+			updateUserRechargeParam.setPaymentName(payLog.getPayName());
+			updateUserRechargeParam.setPayTime(currentTime);
+			updateUserRechargeParam.setStatus("1");
+			updateUserRechargeParam.setRechargeSn(payLog.getOrderSn());
+			userRechargeService.updateReCharege(updateUserRechargeParam);
+			
+			RecharegeParam recharegeParam = new RecharegeParam();
+			recharegeParam.setAmount(payLog.getOrderAmount());
+			recharegeParam.setPayId(payLog.getPayOrderSn());//解决充值两次问题
+			String payCode = response.getPayCode();
+			if(payCode.equals("app_weixin")) {
+				recharegeParam.setThirdPartName("微信");
+			}else if(payCode.equals("app_rongbao")){
+				recharegeParam.setThirdPartName("银行卡");
+			}
+			recharegeParam.setThirdPartPaid(payLog.getOrderAmount());
+			recharegeParam.setUserId(payLog.getUserId());
+			BaseResult<String>  rechargeRst = userAccountService.rechargeUserMoneyLimit(recharegeParam);
+			if(rechargeRst.getCode() != 0) {
+				logger.error(loggerId+" 给个人用户充值：code"+rechargeRst.getCode() +"message:"+rechargeRst.getMsg());
+			}
+			//更新paylog
+			try {
+				PayLog updatePayLog = new PayLog();
+				updatePayLog.setPayTime(currentTime);
+				payLog.setLastTime(currentTime);
+				updatePayLog.setTradeNo(response.getTrade_no());
+				updatePayLog.setLogId(payLog.getLogId());
+				updatePayLog.setIsPaid(1);
+				updatePayLog.setPayMsg("充值成功");
+				payLogService.update(updatePayLog);
+			} catch (Exception e) {
+				logger.error(loggerId+" paylogid="+payLog.getLogId()+" , paymsg=支付成功，保存成功记录时出错", e);
+			}
+			
+			logger.info("开始执行充值赠送红包逻辑");
+			RspOrderQueryDTO rspOrderQueryDTO = new RspOrderQueryDTO();
+			rspOrderQueryDTO.setIsHaveRechargeAct(0);
+			rspOrderQueryDTO.setDonationPrice("");
+			StrParam strParam = new StrParam();
+			strParam.setStr("");
+			BaseResult<RechargeDataActivityDTO> rechargeDataAct = activityService.queryValidRechargeActivity(strParam);
+			if(rechargeDataAct.getCode() == 0) {
+				RechargeDataActivityDTO  rechargeDataActivityDTO  = rechargeDataAct.getData();
+				rspOrderQueryDTO.setIsHaveRechargeAct(rechargeDataActivityDTO.getIsHaveRechargeAct());
+				if(1 == rechargeDataActivityDTO.getIsHaveRechargeAct()) {
+					com.dl.member.param.PayLogIdParam payLogIdParam = new com.dl.member.param.PayLogIdParam();
+					payLogIdParam.setPayLogId(String.valueOf(payLog.getLogId()));
+					BaseResult<DonationPriceDTO> donationPriceRst = userBonusService.rechargeSucReiceiveBonus(payLogIdParam);
+					logger.info("充值赠送红包结果："+ JSON.toJSONString(donationPriceRst));
+					if(donationPriceRst.getCode() == 0) {
+						logger.info("结束执行充值赠送红包逻辑");
+						rspOrderQueryDTO.setDonationPrice(donationPriceRst.getData().getDonationPrice());
+					}
+				}
+			}
+			logger.info("充值成功后返回的信息："+rspOrderQueryDTO.getIsHaveRechargeAct() +"-----"+rspOrderQueryDTO.getDonationPrice());
+			return ResultGenerator.genSuccessResult("订单已支付成功",rspOrderQueryDTO);
+		}else {
+			//更新paylog
+			try {
+				PayLog updatePayLog = new PayLog();
+				updatePayLog.setLogId(payLog.getLogId());
+				updatePayLog.setIsPaid(0);
+				updatePayLog.setPayMsg(response.getResult_msg());
+				payLogService.updatePayMsg(updatePayLog);
+			} catch (Exception e) {
+				logger.error(loggerId + " paylogid="+payLog.getLogId()+" , paymsg="+response.getResult_msg()+"，保存失败记录时出错", e);
+			}
+			String payCode = response.getPayCode();
+			if(RspOrderQueryEntity.PAY_CODE_RONGBAO.equals(payCode)) {
+				String code = response.getResult_code();
+				if(StringUtils.isBlank(code) || "3015".equals(code)) {//订单不存在
+					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
+				}else {
+					String tips = response.getResult_msg();
+					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"融宝服务返回[" + tips +"]");
+				}
+			}else {
+				String code = response.getResult_code(); //104 -> 未支付  404 -> 订单不存在
+				if(StringUtils.isBlank(code) || response.isYinHeWeChatNotPay()) {
+					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
+				}else {
+					String tips = response.getResult_msg();
+					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"微信支付失败["+tips+"]");	
+				}
+			}
+		}
+	}
+	
+	
+	/**
+	 * 对支付结果的一个回写处理
+	 * @param loggerId
+	 * @param payLog
+	 * @param response
+	 * @return
+	 */
+	public BaseResult<RspOrderQueryDTO> orderOptions(String loggerId, PayLog payLog, RspOrderQueryEntity response) {
+		if(response.isSucc()) {
+			//预出票操作
+			String orderSn = payLog.getOrderSn();
+			int currentTime = DateUtil.getCurrentTimeLong();
+			SaveLotteryPrintInfoParam saveLotteryPrintParam = new SaveLotteryPrintInfoParam();
+			saveLotteryPrintParam.setOrderSn(orderSn);
+			BaseResult<String> saveLotteryPrintInfo = lotteryPrintService.saveLotteryPrintInfo(saveLotteryPrintParam);
+			boolean isLotteryPrintSucc = false;
+			if(saveLotteryPrintInfo.getCode() != 0) {
+				isLotteryPrintSucc = false;
+			}else {
+				isLotteryPrintSucc = true;
+			}
+			logger.info("查询已经支付成功，进行预出票操作...isLotteryPrintSucc:" + isLotteryPrintSucc);
+			//更新order
+			UpdateOrderInfoParam param = new UpdateOrderInfoParam();
+			if(isLotteryPrintSucc) {
+				param.setOrderStatus(1);	
+			}else {
+				param.setOrderStatus(2);//2->出票失败   1->待出票
+			}
+			param.setPayStatus(1);
+			param.setPayTime(currentTime);
+			param.setPaySn(payLog.getLogId()+"");
+			param.setPayName(payLog.getPayName());
+			param.setPayCode(payLog.getPayCode());
+			param.setOrderSn(payLog.getOrderSn());
+			BaseResult<String> updateOrderInfo = orderService.updateOrderInfo(param);
+			if(updateOrderInfo.getCode() != 0) {
+				logger.error(loggerId+" paylogid="+"ordersn=" + payLog.getOrderSn()+"更新订单成功状态失败");
+			}
+			//更新paylog
+			try {
+				PayLog updatePayLog = new PayLog();
+				updatePayLog.setPayTime(currentTime);
+				payLog.setLastTime(currentTime);
+				updatePayLog.setTradeNo(response.getTrade_no());
+				updatePayLog.setLogId(payLog.getLogId());
+				updatePayLog.setIsPaid(1);
+				updatePayLog.setPayMsg("支付成功");
+				payLogService.update(updatePayLog);
+			} catch (Exception e) {
+				logger.error(loggerId+" paylogid="+payLog.getLogId()+" , paymsg=支付成功，保存成功记录时出错", e);
+			}
+			//订单支付付款成功就要生成流水
+			logger.info("订单支付付款成功就要生成流水...");
+			UserAccountParamByType userAccountParamByType = new UserAccountParamByType();
+			Integer accountType = ProjectConstant.BUY;
+			logger.info("===========更新用户流水表=======:" + accountType);
+			userAccountParamByType.setAccountType(accountType);
+			userAccountParamByType.setAmount(payLog.getOrderAmount());
+			userAccountParamByType.setBonusPrice(BigDecimal.ZERO);//暂无红包金额
+			userAccountParamByType.setOrderSn(payLog.getOrderSn());
+			userAccountParamByType.setPayId(payLog.getLogId());
+			String payCode = payLog.getPayCode();
+			String payName;
+			if(payCode.equals("app_weixin") || payCode.equals("app_weixin_h5")) {
+				payName = "微信";
+			}else {
+				payName = "银行卡";
+			}
+			userAccountParamByType.setPaymentName(payName);
+			userAccountParamByType.setThirdPartName(payName);
+			userAccountParamByType.setThirdPartPaid(payLog.getOrderAmount());
+			userAccountParamByType.setUserId(payLog.getUserId());
+			BaseResult<String> accountRst = userAccountService.insertUserAccount(userAccountParamByType);
+			if(accountRst.getCode() != 0) {
+				logger.info(loggerId + "生成账户流水异常");
+			}else {
+				logger.info("生成账户流水成功");
+			}
+			if(!isLotteryPrintSucc) {
+				//资金回滚
+				RollbackOrderAmountParam p = new RollbackOrderAmountParam();
+				p.setOrderSn(orderSn);
+				this.rollbackOrderAmount(p);
+			}
+			return ResultGenerator.genSuccessResult("订单已支付成功！", null);
+		}else {
+			//预扣款 的方案 这里什么也不做
+			String payCode = response.getPayCode();
+//			String code = response.getResult_code();
+//			if(StringUtils.isBlank(code) || "3015".equals(code) || response.isYinHeWeChatNotPay()) {//融宝和银河返回值  为 订单不存在和未支付
+//				dealWithPayFailure(orderService, payLog,payLogService, response);
+//			}
+			//融宝处理
+			if(RspOrderQueryEntity.PAY_CODE_RONGBAO.equals(payCode)) {
+				String code = response.getResult_code();
+				if(StringUtils.isBlank(code) || "3015".equals(code)) {//订单不存在
+					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
+				}else {
+					String tips = response.getResult_msg();
+					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"融宝服务返回[" + tips +"]");
+				}
+			//微信处理	
+			}else if(RspOrderQueryEntity.PAY_CODE_WECHAT.startsWith(payCode)){//wechat pay
+				String code = response.getResult_code();
+				String tips = response.getResult_msg();
+				if(StringUtils.isBlank(code) || response.isYinHeWeChatNotPay()) {
+					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
+				}else {
+					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"微信支付失败["+tips+"]");	
+				}
+			}
+		}
+		return null;
+	}
+	
+	
 }
