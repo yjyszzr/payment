@@ -15,7 +15,7 @@ public interface UserRechargeMapper extends Mapper<UserRecharge> {
 	
 	int countUserCharge(Integer userId);
 	
-	int countUserSucCharge(Integer userId);
+	int countChargeByUserId(Integer userId);
 	
 	
 }
