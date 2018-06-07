@@ -3,6 +3,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import org.apache.commons.collections.CollectionUtils;
@@ -10,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.util.TextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
@@ -90,6 +92,9 @@ public class PayMentService extends AbstractService<PayMent> {
 	
 	@Resource
 	private ILotteryPrintService lotteryPrintService;
+	
+	@Resource
+	private StringRedisTemplate stringRedisTemplate;
 	
     /**
      * 查询所有可用的支付方式
@@ -387,7 +392,7 @@ public class PayMentService extends AbstractService<PayMent> {
 				logger.error(loggerId+" paylogid="+payLog.getLogId()+" , paymsg=支付成功，保存成功记录时出错", e);
 			}
 			
-			logger.info("开始执行充值赠送红包逻辑");
+			
 			RspOrderQueryDTO rspOrderQueryDTO = new RspOrderQueryDTO();
 			rspOrderQueryDTO.setIsHaveRechargeAct(0);
 			rspOrderQueryDTO.setDonationPrice("");
@@ -398,6 +403,7 @@ public class PayMentService extends AbstractService<PayMent> {
 				RechargeDataActivityDTO  rechargeDataActivityDTO  = rechargeDataAct.getData();
 				rspOrderQueryDTO.setIsHaveRechargeAct(rechargeDataActivityDTO.getIsHaveRechargeAct());
 				if(1 == rechargeDataActivityDTO.getIsHaveRechargeAct()) {
+					logger.info("开始执行充值赠送红包逻辑");
 					com.dl.member.param.PayLogIdParam payLogIdParam = new com.dl.member.param.PayLogIdParam();
 					payLogIdParam.setPayLogId(String.valueOf(payLog.getLogId()));
 					BaseResult<DonationPriceDTO> donationPriceRst = userBonusService.reiceiveBonusAfterRecharge(payLogIdParam);
@@ -408,6 +414,8 @@ public class PayMentService extends AbstractService<PayMent> {
 					}
 				}
 			}
+			
+			stringRedisTemplate.opsForValue().set(String.valueOf(payLog.getLogId()),rspOrderQueryDTO.getDonationPrice());
 			logger.info("充值成功后返回的信息："+rspOrderQueryDTO.getIsHaveRechargeAct() +"-----"+rspOrderQueryDTO.getDonationPrice());
 			return ResultGenerator.genSuccessResult("订单已支付成功",rspOrderQueryDTO);
 		}else {
