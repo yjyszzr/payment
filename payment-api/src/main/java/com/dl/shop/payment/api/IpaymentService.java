@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.dl.base.result.BaseResult;
 import com.dl.shop.payment.dto.PayLogDTO;
+import com.dl.shop.payment.dto.PriceDTO;
 import com.dl.shop.payment.dto.UserRechargeDTO;
 import com.dl.shop.payment.dto.UserWithdrawDTO;
 import com.dl.shop.payment.dto.UserWithdrawDetailDTO;
@@ -58,6 +59,12 @@ public interface IpaymentService {
  	 * 查询用户是否充过值
  	 */
  	@RequestMapping(path="/payment/recharge/countChargeByUserId", method=RequestMethod.POST)
-    public BaseResult<YesOrNoDTO> countChargeByUserId(@RequestBody UserIdParam userIdParam); 	
+    public BaseResult<YesOrNoDTO> countChargeByUserId(@RequestBody UserIdParam userIdParam);
+
+ 	/**
+ 	 * queryPriceInRedis
+ 	 */
+ 	@RequestMapping(path="/payment/queryPriceInRedis", method=RequestMethod.POST)
+    public BaseResult<PriceDTO> queryMoneyInRedis(@RequestBody PayLogIdParam payLogIdParam);
 
 }

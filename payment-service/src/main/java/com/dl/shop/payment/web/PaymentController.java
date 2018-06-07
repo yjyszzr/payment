@@ -63,6 +63,7 @@ import com.dl.shop.payment.dto.PayLogDTO;
 import com.dl.shop.payment.dto.PayReturnDTO;
 import com.dl.shop.payment.dto.PayWaysDTO;
 import com.dl.shop.payment.dto.PaymentDTO;
+import com.dl.shop.payment.dto.PriceDTO;
 import com.dl.shop.payment.dto.RechargeUserDTO;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.enums.PayEnums;
@@ -843,5 +844,28 @@ public class PaymentController extends AbstractBaseController{
     public BaseResult<PayLogDTO> queryPayLogByPayLogId(@RequestBody PayLogIdParam payLogIdParam){
 		return payLogService.queryPayLogByPayLogId(Integer.valueOf(payLogIdParam.getPayLogId()));
  	}	
+	
+	
+	/**
+     * 	查询redis的值
+     */
+	@ApiOperation(value="查询redis的值", notes="查询redis的值")
+	@PostMapping("/queryPriceInRedis")
+	@ResponseBody
+    public BaseResult<PriceDTO> queryMoneyInRedis(@RequestBody PayLogIdParam payLogIdParam){
+		PriceDTO donationPriceDTO = new PriceDTO();
+		donationPriceDTO.setPrice("0.04");
+		logger.info("前端传入："+String.valueOf(payLogIdParam.getPayLogId()));
+		String donationPrice = stringRedisTemplate.opsForValue().get(String.valueOf(payLogIdParam.getPayLogId()));
+		logger.info("redis 取出1："+donationPrice);
+		if(!StringUtils.isEmpty(donationPrice)) {
+			donationPriceDTO.setPrice(donationPrice);
+		}
+		
+		stringRedisTemplate.delete(String.valueOf(payLogIdParam.getPayLogId()));
+
+		logger.info("redis 取出2："+donationPrice);
+		return ResultGenerator.genSuccessResult("success", donationPriceDTO);
+ 	}
 	
 }
