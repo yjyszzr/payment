@@ -861,7 +861,7 @@ public class PaymentController extends AbstractBaseController{
 					com.dl.member.param.PayLogIdParam payLogIdParam = new com.dl.member.param.PayLogIdParam();
 					payLogIdParam.setPayLogId(String.valueOf(payLog.getLogId()));
 					BaseResult<DonationPriceDTO> donationPriceRst = userBonusService.rechargeSucReiceiveBonus(payLogIdParam);
-					logger.info("充值赠送红包结果："+ JSON.toJSONString(donationPriceRst.getData()));
+					logger.info("充值赠送红包结果："+ JSON.toJSONString(donationPriceRst));
 					if(donationPriceRst.getCode() == 0) {
 						logger.info("结束执行充值赠送红包逻辑");
 						rspOrderQueryDTO.setDonationPrice(donationPriceRst.getData().getDonationPrice());
