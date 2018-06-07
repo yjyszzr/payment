@@ -415,6 +415,7 @@ public class PayMentService extends AbstractService<PayMent> {
 				}
 			}
 			
+			log.info("放入redis："+String.valueOf(payLog.getLogId())+"-----------"+rspOrderQueryDTO.getDonationPrice());
 			stringRedisTemplate.opsForValue().set(String.valueOf(payLog.getLogId()),rspOrderQueryDTO.getDonationPrice());
 			logger.info("充值成功后返回的信息："+rspOrderQueryDTO.getIsHaveRechargeAct() +"-----"+rspOrderQueryDTO.getDonationPrice());
 			return ResultGenerator.genSuccessResult("订单已支付成功",rspOrderQueryDTO);
