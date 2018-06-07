@@ -61,7 +61,11 @@
     order by add_time
   </select>
   
-   <select id="countUserCharge"  resultType="java.lang.Integer">
+  <select id="countUserCharge"  resultType="java.lang.Integer">
   	 select count(1) from dl_user_recharge where user_id = #{userId} and status = '1'
+  </select>
+  
+   <select id="countChargeByUserId"  resultType="java.lang.Integer">
+  	 select count(1) from dl_user_recharge where user_id = #{userId} 
   </select>
 </mapper>

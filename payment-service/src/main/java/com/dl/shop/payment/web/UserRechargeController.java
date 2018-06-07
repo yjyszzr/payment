@@ -19,11 +19,19 @@ public class UserRechargeController {
     private UserRechargeService userRechargeService;
  	
  	/**
-     * 	查询当前登录用户是否有充值单
+     * 	查询当前登录用户是否有成功的充值单
      */
  	@RequestMapping(path="/countUserRecharge", method=RequestMethod.POST)
     public BaseResult<YesOrNoDTO> countUserRecharge(@RequestBody UserIdParam userIdParam){
  		return userRechargeService.countUserRecharge(userIdParam.getUserId());
+ 	}
+ 	
+ 	/**
+     * 	查询当前登录用户是否有充值单 
+     */
+ 	@RequestMapping(path="/countChargeByUserId", method=RequestMethod.POST)
+    public BaseResult<YesOrNoDTO> countChargeByUserId(@RequestBody UserIdParam userIdParam){
+ 		return userRechargeService.countChargeByUserId(userIdParam.getUserId());
  	}
  	
 }

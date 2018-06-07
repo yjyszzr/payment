@@ -49,9 +49,15 @@ public interface IpaymentService {
     public BaseResult<PayLogDTO> queryPayLogByPayLogId(@RequestBody PayLogIdParam payLogIdParam);
  	
  	/**
- 	 * 查询用户是否充过值
+ 	 *  查询用户是否成功充过值
  	 */
  	@RequestMapping(path="/payment/recharge/countUserRecharge", method=RequestMethod.POST)
     public BaseResult<YesOrNoDTO> countUserRecharge(@RequestBody UserIdParam userIdParam); 	
+ 	
+ 	/**
+ 	 * 查询用户是否充过值
+ 	 */
+ 	@RequestMapping(path="/payment/recharge/countChargeByUserId", method=RequestMethod.POST)
+    public BaseResult<YesOrNoDTO> countChargeByUserId(@RequestBody UserIdParam userIdParam); 	
 
 }
