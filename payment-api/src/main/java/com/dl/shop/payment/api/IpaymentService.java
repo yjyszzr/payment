@@ -14,6 +14,7 @@ import com.dl.shop.payment.dto.YesOrNoDTO;
 import com.dl.shop.payment.param.PayLogIdParam;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
 import com.dl.shop.payment.param.StrParam;
+import com.dl.shop.payment.param.UserIdParam;
 import com.dl.shop.payment.param.WithDrawSnAndUserIdParam;
 import com.dl.shop.payment.param.WithDrawSnParam;
 
@@ -51,6 +52,6 @@ public interface IpaymentService {
  	 * 查询用户是否充过值
  	 */
  	@RequestMapping(path="/payment/recharge/countUserRecharge", method=RequestMethod.POST)
-    public BaseResult<YesOrNoDTO> countUserRecharge(@RequestBody StrParam strParam); 	
+    public BaseResult<YesOrNoDTO> countUserRecharge(@RequestBody UserIdParam userIdParam); 	
 
 }
