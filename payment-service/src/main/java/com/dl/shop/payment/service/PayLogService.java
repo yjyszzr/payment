@@ -71,8 +71,7 @@ public class PayLogService extends AbstractService<PayLog> {
 	}
 	
 	public BaseResult<PayLogDTO> queryPayLogByPayLogId(Integer payLogId) {
-		Integer userId = SessionUtil.getUserId();
-		PayLog payLog = payLogMapper.findPayLogByPayLogId(payLogId,userId);
+		PayLog payLog = payLogMapper.findPayLogByPayLogId(payLogId);
 		if(null == payLog) {
 			return ResultGenerator.genResult(PayEnums.PAY_DBDATA_IS_NOT_IN.getcode(),PayEnums.PAY_DBDATA_IS_NOT_IN.getMsg());
 		}

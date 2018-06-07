@@ -68,6 +68,6 @@
 	  select 
 	  <include refid="queryFields" />
 	  from dl_pay_log
-	  where log_id = #{logId} and user_id = #{userId} and is_paid = 1
+	  where log_id = #{logId}
 	</select>
 </mapper>

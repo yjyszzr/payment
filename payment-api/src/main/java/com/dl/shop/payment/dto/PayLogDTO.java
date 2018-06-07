@@ -13,6 +13,9 @@ public class PayLogDTO {
 	@ApiModelProperty(value=" 编号")
     private Integer  logId;
 	
+	@ApiModelProperty(value=" 用户id")
+    private Integer  userId;
+	
 	@ApiModelProperty(value="付款金额")
     private BigDecimal  orderAmount;
 	
