@@ -62,13 +62,13 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
     }
     
     /**
-     * 查询是否充值过：0-未充值过 1-充值过
+     * 给充值完后的调用查询是否充值过：0-未充值过 1-充值过
      * @return
      */
     public BaseResult<YesOrNoDTO> countChargeByUserId(Integer userId){
     	Integer count = userRechargeMapper.countChargeByUserId(userId);
     	YesOrNoDTO yesOrNoDTO = new YesOrNoDTO();
-    	if(count == 0 ) {
+    	if(count == 1 ) {
     		yesOrNoDTO.setYesOrNo("0");
     	}else {
     		yesOrNoDTO.setYesOrNo("1");
