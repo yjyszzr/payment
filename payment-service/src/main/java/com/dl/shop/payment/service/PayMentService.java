@@ -367,9 +367,9 @@ public class PayMentService extends AbstractService<PayMent> {
 			recharegeParam.setAmount(payLog.getOrderAmount());
 			recharegeParam.setPayId(payLog.getPayOrderSn());//解决充值两次问题
 			String payCode = response.getPayCode();
-			if(payCode.equals("app_weixin")) {
+			if("app_weixin".equals(payCode)) {
 				recharegeParam.setThirdPartName("微信");
-			}else if(payCode.equals("app_rongbao")){
+			}else if("app_rongbao".equals(payCode)){
 				recharegeParam.setThirdPartName("银行卡");
 			}
 			recharegeParam.setThirdPartPaid(payLog.getOrderAmount());

@@ -103,6 +103,7 @@ public class WxpayNotifyController {
 						logger.info("处理订单相关信息...");
 						RspOrderQueryEntity rspQueryEntity = new RspOrderQueryEntity();
 						rspQueryEntity.setResult_code("0000");
+						rspQueryEntity.setPayCode("app_weixin");
 						rspQueryEntity.setTrade_no(transNo);
 						operation(payLog,loggerId,transNo,null,rspQueryEntity);
 					}
@@ -164,6 +165,7 @@ public class WxpayNotifyController {
 					logger.info(loggerId + " 订单金额或appid,mchId校验成功，前去回调订单服务！");
 					RspOrderQueryEntity rspOrderQueryEntity = new RspOrderQueryEntity();
 					rspOrderQueryEntity.setResult_code("0000");
+					rspOrderQueryEntity.setPayCode("app_weixin");
 					rspOrderQueryEntity.setTrade_no(payOrderSn);
 					rspOrderQueryEntity.setTotal_fee(amount+"");
 					operation(payLog, loggerId, tradeNo,response,rspOrderQueryEntity);
