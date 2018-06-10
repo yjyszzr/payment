@@ -294,7 +294,7 @@ public class PaymentController extends AbstractBaseController{
 		submitOrderParam.setPlayType("0"+dto.getPlayType());
 		submitOrderParam.setBetNum(dto.getBetNum());
 		submitOrderParam.setCathectic(dto.getTimes());
-		if(lotteryPlayClassifyId != 8 && lotteryClassifyId != 1) {
+		if(lotteryPlayClassifyId != 8 && lotteryClassifyId == 1) {
 			if(ticketDetails.size() > 1) {
 				Optional<TicketDetail> max = ticketDetails.stream().max((detail1, detail2)->detail1.getMatchTime().compareTo(detail2.getMatchTime()));
 				submitOrderParam.setMatchTime(max.get().getMatchTime());
