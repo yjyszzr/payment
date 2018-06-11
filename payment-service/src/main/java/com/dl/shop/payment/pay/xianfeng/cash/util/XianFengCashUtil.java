@@ -16,8 +16,8 @@ import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleQueryEntity;
 import com.ucf.sdk.util.AESCoder;
 
 @Component
-public class XianFengUtil {
-	private final Logger logger = LoggerFactory.getLogger(XianFengUtil.class);
+public class XianFengCashUtil {
+	private final Logger logger = LoggerFactory.getLogger(XianFengCashUtil.class);
 	
 	@Resource
 	private Constants xFConstants;

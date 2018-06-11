@@ -64,7 +64,7 @@ import com.dl.shop.payment.pay.common.PayManager;
 import com.dl.shop.payment.pay.xianfeng.cash.config.Constants;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleQueryEntity;
-import com.dl.shop.payment.pay.xianfeng.cash.util.XianFengUtil;
+import com.dl.shop.payment.pay.xianfeng.cash.util.XianFengCashUtil;
 import com.ucf.sdk.util.AESCoder;
 import lombok.extern.slf4j.Slf4j;
 
@@ -91,7 +91,7 @@ public class CashService {
 	@Resource
 	private IUserMessageService userMessageService;
 	@Resource
-	private XianFengUtil xianfengUtil;
+	private XianFengCashUtil xianfengUtil;
 	@Resource
 	private Constants xFConstants;
 	

@@ -68,7 +68,7 @@ public class ReqSingleCashEntity {
 //		System.out.println("解密data后:" + tempStr);
 		
 		//sign value
-		ReqSnCashEntity reqSnEntity = reqEntity.buildSnCashEntity();
+		ReqSnEntity reqSnEntity = reqEntity.buildSnCashEntity();
 		jsonStr = JSON.toJSONString(reqSnEntity);
 		JSONObject jsonObj = JSONObject.parseObject(jsonStr);
 		Set<java.util.Map.Entry<String, Object>> mSet = jsonObj.entrySet();
@@ -106,8 +106,8 @@ public class ReqSingleCashEntity {
 		return reqEntity;
 	}
 	
-	public ReqSnCashEntity buildSnCashEntity() {
-		ReqSnCashEntity reqEntity = new ReqSnCashEntity();
+	public ReqSnEntity buildSnCashEntity() {
+		ReqSnEntity reqEntity = new ReqSnEntity();
 		reqEntity.service = this.service;
 		reqEntity.version = this.version;
 		reqEntity.merchantId = this.merchantId;

@@ -14,7 +14,7 @@ import com.dl.shop.payment.pay.common.PayManager;
 import com.dl.shop.payment.pay.common.PayManager.QueueCashItemEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleQueryEntity;
-import com.dl.shop.payment.pay.xianfeng.cash.util.XianFengUtil;
+import com.dl.shop.payment.pay.xianfeng.cash.util.XianFengCashUtil;
 import com.dl.shop.payment.service.CashService;
 import com.dl.shop.payment.service.UserWithdrawService;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +32,7 @@ public class CashSchedul {
 	private CashService cashService;
 	
 	@Autowired
-	private XianFengUtil xianFengUtil;
+	private XianFengCashUtil xianFengUtil;
 	
 	/**
 	 * 提现状态轮询

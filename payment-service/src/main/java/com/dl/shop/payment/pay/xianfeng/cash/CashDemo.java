@@ -1,7 +1,7 @@
 package com.dl.shop.payment.pay.xianfeng.cash;
 
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleQueryEntity;
-import com.dl.shop.payment.pay.xianfeng.cash.util.XianFengUtil;
+import com.dl.shop.payment.pay.xianfeng.cash.util.XianFengCashUtil;
 
 public class CashDemo {
 
