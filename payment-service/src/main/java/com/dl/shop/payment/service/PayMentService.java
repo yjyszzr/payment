@@ -135,12 +135,20 @@ public class PayMentService extends AbstractService<PayMent> {
      */
     @Transactional
     public void dealBeyondPayTimeOrder(OrderDTO or) {
-    	SurplusPayParam surplusPayParam = new SurplusPayParam();
-    	surplusPayParam.setOrderSn(or.getOrderSn());
-    	BaseResult<SurplusPaymentCallbackDTO> rollRst = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
-    	if(rollRst.getCode() != 0) {
-    		log.error(rollRst.getMsg());
-    		return;
+    	if(or.getSurplus().compareTo(BigDecimal.ZERO) > 0) {
+	    	SurplusPayParam surplusPayParam = new SurplusPayParam();
+	    	surplusPayParam.setOrderSn(or.getOrderSn());
+	    	BaseResult<SurplusPaymentCallbackDTO> rollRst = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
+	    	if(rollRst.getCode() != 0) {
+	    		log.error(rollRst.getMsg());
+	    		return;
+	    	}
+	    	
+	    	if(rollRst.getCode() != 0) {
+	    		log.error("-------------------支付超时订单回滚用户余额异常,code="+rollRst.getCode()+"  msg:"+rollRst.getMsg()+" 订单号："+or.getOrderSn());
+	    	}else {
+	    		log.info(JSON.toJSONString("用户"+or.getUserId()+"超时支付订单"+or.getOrderSn()+"已回滚账户余额"));
+	    	} 
     	}
     	
     	Integer userBonusId = or.getUserBonusId();
@@ -150,11 +158,7 @@ public class PayMentService extends AbstractService<PayMent> {
     		userbonusParam.setOrderSn(or.getOrderSn());
     		userAccountService.rollbackChangeUserAccountByCreateOrder(userbonusParam);
     	}
-    	if(rollRst.getCode() != 0) {
-    		log.error("-------------------支付超时订单回滚用户余额异常,code="+rollRst.getCode()+"  msg:"+rollRst.getMsg()+" 订单号："+or.getOrderSn());
-    	}else {
-    		log.info(JSON.toJSONString("用户"+or.getUserId()+"超时支付订单"+or.getOrderSn()+"已回滚账户余额"));
-    	}    	
+   	
     	
     	UpdateOrderInfoParam updateOrderInfoParam = new UpdateOrderInfoParam();
     	updateOrderInfoParam.setOrderSn(or.getOrderSn());
