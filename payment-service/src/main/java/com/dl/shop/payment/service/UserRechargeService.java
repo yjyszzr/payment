@@ -131,6 +131,8 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
     	UserRecharge userRecharge = new UserRecharge();
     	userRecharge.setStatus(updateUserRechargeParam.getStatus());
     	userRecharge.setRechargeSn(updateUserRechargeParam.getRechargeSn());
+    	userRecharge.setPaymentId(updateUserRechargeParam.getPaymentId());
+    	userRecharge.setPayTime(updateUserRechargeParam.getPayTime());
     	userRechargeMapper.updateUserRechargeBySelective(userRecharge);
   
 		return ResultGenerator.genSuccessResult("更新数据库充值单成功");
