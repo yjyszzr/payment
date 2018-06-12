@@ -487,6 +487,12 @@ public class PayMentService extends AbstractService<PayMent> {
 			param.setPayCode(payLog.getPayCode());
 			param.setOrderSn(payLog.getOrderSn());
 			BaseResult<String> updateOrderInfo = orderService.updateOrderInfo(param);
+			
+			logger.info("==============支付成功订单回调[orderService]==================");
+			logger.info("payLogId:" + payLog.getLogId() + " payName:" + payLog.getPayName() 
+			+ " payCode:" + payLog.getPayCode() + " payOrderSn:" + payLog.getPayOrderSn());
+			logger.info("==================================");
+			
 			if(updateOrderInfo.getCode() != 0) {
 				logger.error(loggerId+" paylogid="+"ordersn=" + payLog.getOrderSn()+"更新订单成功状态失败");
 			}
