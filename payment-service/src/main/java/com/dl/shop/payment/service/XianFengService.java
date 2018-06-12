@@ -26,7 +26,6 @@ public class XianFengService {
 	private IUserBankService userBankService;
 	
 	
-	@Resource
 	public BaseResult<Object> appPay(int payLogId){
 		PayLog payLog = payLogService.findById(payLogId);
 		if(payLog == null){

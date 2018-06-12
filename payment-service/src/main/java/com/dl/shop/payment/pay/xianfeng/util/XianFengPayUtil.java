@@ -65,7 +65,7 @@ public class XianFengPayUtil {
 //		System.out.println(dataResult);
 	}
 
-	private RspApplyBaseEntity queryPayByOrderNo(String orderNo) throws Exception {
+	public RspApplyBaseEntity queryPayByOrderNo(String orderNo) throws Exception {
 		ReqApplyQueryEntity reqQueryEntity = ReqApplyQueryEntity.buildReqApplyQueryEntity(orderNo);
 		//生成data
 		String url = XianFengPayCfg.NET_GATE + "?" + reqQueryEntity.buildReqStr();
@@ -84,7 +84,7 @@ public class XianFengPayUtil {
 		return rEntity;
 	}
 	
-	private RspApplyBaseEntity reqApplySms(String orderNo) throws Exception {
+	public RspApplyBaseEntity reqApplySms(String orderNo) throws Exception {
 		RspApplyBaseEntity rEntity = null;
 		ReqApplySmsEntity reqApplySmsEntity = ReqApplySmsEntity.buildApplySmsEntity(orderNo);
 		//生成data
@@ -102,7 +102,7 @@ public class XianFengPayUtil {
 		return rEntity;
 	}
 	
-	private RspApplyBaseEntity reqApplyCfg(String code,String orderNo) throws Exception {
+	public RspApplyBaseEntity reqApplyCfg(String code,String orderNo) throws Exception {
 		RspApplyBaseEntity rspEntity = null;
 		ReqApplyCfgDataEntity reqCfgEntity = new ReqApplyCfgDataEntity();
 		reqCfgEntity.checkCode = code;
