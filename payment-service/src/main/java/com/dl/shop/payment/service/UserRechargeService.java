@@ -84,7 +84,7 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
      * @return
      */
     @Transactional
-    public String saveReCharege(BigDecimal amount){
+    public String saveReCharege(BigDecimal amount,String payCode,String payName){
     	Integer userId = SessionUtil.getUserId();
     	UserRecharge userRecharge = new UserRecharge();
     	String rechargeSn = SNGenerator.nextSN(SNBusinessCodeEnum.RECHARGE_SN.getCode());
@@ -93,6 +93,8 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
     	userRecharge.setUserId(userId);
     	userRecharge.setAddTime(DateUtil.getCurrentTimeLong());
     	userRecharge.setStatus(ProjectConstant.NOT_FINISH);
+    	userRecharge.setPaymentCode(payCode);
+    	userRecharge.setPaymentName(payName);
     	int rst = userRechargeMapper.insertUserRecharge(userRecharge);
     	if(1 != rst) {
     		log.error("保存数据库充值单失败");

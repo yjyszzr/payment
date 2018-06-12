@@ -353,10 +353,9 @@ public class PayMentService extends AbstractService<PayMent> {
 		RspOrderQueryDTO rspEntity = new RspOrderQueryDTO();
 		if(response.isSucc()) {
 			int currentTime = DateUtil.getCurrentTimeLong();
-			//更新order
 			UpdateUserRechargeParam updateUserRechargeParam = new UpdateUserRechargeParam();
 			updateUserRechargeParam.setPaymentCode(payLog.getPayCode());
-			updateUserRechargeParam.setPaymentId(payLog.getLogId()+"");
+			updateUserRechargeParam.setPaymentId(payLog.getPayOrderSn());
 			updateUserRechargeParam.setPaymentName(payLog.getPayName());
 			updateUserRechargeParam.setPayTime(currentTime);
 			updateUserRechargeParam.setStatus("1");

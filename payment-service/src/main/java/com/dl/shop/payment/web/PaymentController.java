@@ -568,16 +568,15 @@ public class PaymentController extends AbstractBaseController{
 			logger.info(loggerId + "订单第三方支付提供paycode有误！");
 			return ResultGenerator.genResult(PayEnums.RECHARGE_PAY_STYLE_EMPTY.getcode(), PayEnums.RECHARGE_PAY_STYLE_EMPTY.getMsg());
 		}
+		//生成充值记录payLog
+		String payName = paymentResult.getData().getPayName();
 		//生成充值单
-		String rechargeSn = userRechargeService.saveReCharege(BigDecimal.valueOf(totalAmount));
-		
+		String rechargeSn = userRechargeService.saveReCharege(BigDecimal.valueOf(totalAmount),payCode,payName);
 		if(StringUtils.isEmpty(rechargeSn)) {
 			logger.info(loggerId + "生成充值单失败");
 			return ResultGenerator.genFailResult("充值失败！", null);
 		}
 		String orderSn = rechargeSn;
-		//生成充值记录payLog
-		String payName = paymentResult.getData().getPayName();
 		String payIp = this.getIpAddr(request);
 		//payCode处理
 		if("app_weixin".equals(payCode)) {
