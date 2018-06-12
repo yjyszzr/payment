@@ -21,7 +21,7 @@
   </resultMap>
   
   <insert id="insertUserRecharge"  parameterType="com.dl.shop.payment.model.UserRecharge">
-     INSERT INTO dl_user_recharge(recharge_sn,user_id,amount,add_time,status)
+     INSERT INTO dl_user_recharge(recharge_sn,user_id,amount,add_time,status,payment_code,payment_name)
      VALUES(#{rechargeSn},#{userId},#{amount},#{addTime},#{status},#{paymentCode},#{paymentName});
   </insert>
   
