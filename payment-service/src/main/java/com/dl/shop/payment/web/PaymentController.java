@@ -752,7 +752,11 @@ public class PaymentController extends AbstractBaseController{
 			RspOrderQueryDTO payRQDTO = new RspOrderQueryDTO();
 			payRQDTO.setPayCode(payCode);
 			payRQDTO.setPayType(payType);
-			return ResultGenerator.genSuccessResult("订单已支付成功！",payRQDTO);
+			if(payType == 0) {
+				return ResultGenerator.genSuccessResult("订单已支付成功",payRQDTO);
+			}else {
+				return ResultGenerator.genSuccessResult("充值成功",payRQDTO);
+			}
 		}
 		BaseResult<RspOrderQueryEntity> baseResult = null;
 		logger.info("调用第三方订单查询接口 payCode:" + payCode + " payOrderSn:" + payLog.getPayOrderSn());
