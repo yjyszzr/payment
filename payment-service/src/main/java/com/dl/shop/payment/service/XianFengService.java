@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.member.api.IUserBankService;
+import com.dl.member.dto.BankDTO;
+import com.dl.member.param.BankCardParam;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.PayLog;
@@ -20,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class XianFengService {
-	private final static Logger logger = LoggerFactory.getLogger(CashService.class);
+	private final static Logger logger = LoggerFactory.getLogger(XianFengService.class);
 	
 	@Resource
 	private PayLogService payLogService;
@@ -43,6 +45,17 @@ public class XianFengService {
 		//userId, amt, certNo, accNo, accName, mobileNo, bankId, pName, pInfo
 //		xFPayUtil.reqApply(payOrderSn,null,);
 		return null;
+	}
+	
+	/**
+	 * 根据银行卡号查询银行信息
+	 * @param bankCardNo
+	 * @return
+	 */
+	public BaseResult<BankDTO> queryBankType(String bankCardNo){
+		BankCardParam bankCardParams = new BankCardParam();
+		bankCardParams.setBankCardNo(bankCardNo);
+		return userBankService.queryUserBankType(bankCardParams);
 	}
 	
 	/**

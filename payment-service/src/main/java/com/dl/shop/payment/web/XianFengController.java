@@ -15,10 +15,12 @@ import com.alibaba.druid.util.StringUtils;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.base.util.SessionUtil;
+import com.dl.member.api.IUserBankService;
+import com.dl.member.dto.BankDTO;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.PayLog;
+import com.dl.shop.payment.param.XianFengBankTypeParam;
 import com.dl.shop.payment.param.XianFengPayParam;
-import com.dl.shop.payment.param.XianFengPaySmsParam;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.XianFengService;
 import io.swagger.annotations.ApiOperation;
@@ -36,6 +38,8 @@ public class XianFengController {
 	private PayLogService payLogService;
 	@Resource
 	private XianFengService xianFengService;
+	@Resource
+	private IUserBankService userBankService;
 	
 	@ApiOperation(value="先锋支付回调")
 	@PostMapping("/notify")
@@ -45,13 +49,24 @@ public class XianFengController {
 	
 	@ApiOperation(value="先锋支付请求")
 	@PostMapping("/app")
-	public BaseResult<Object> appPay(XianFengPayParam payParam) {
+	@ResponseBody
+	public BaseResult<Object> appPay(@RequestBody XianFengPayParam payParam) {
 		int userId = SessionUtil.getUserId();
 		if(userId <= 0) {
 			return ResultGenerator.genFailResult("请登录");
 		}
 		return xianFengService.appPay(payParam.getPayLogId());
 	}
+	
+	
+	@ApiOperation(value="根据银行账号获取卡类型")
+	@PostMapping("/getBankType")
+	@ResponseBody
+	public BaseResult<BankDTO> getBankType(@RequestBody XianFengBankTypeParam param){
+		String bankCardNo = param.getBankCardNo();
+		return xianFengService.queryBankType(bankCardNo);
+	}
+	
 	
 	@ApiOperation(value="先锋支付获取支付验证码")
 	@PostMapping("/sms")
