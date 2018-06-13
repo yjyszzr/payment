@@ -76,7 +76,7 @@ public class XianFengService {
 					return ResultGenerator.genFailResult("操作失败");
 				}
 			}else{
-				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_FAILURE.getcode(),PayEnums.PAY_XIANFENG_FAILURE.getMsg());
+				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_FAILURE.getcode(),PayEnums.PAY_XIANFENG_FAILURE.getMsg()+"[" + rEntity.resMessage+"]");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
