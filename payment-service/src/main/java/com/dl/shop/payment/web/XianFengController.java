@@ -8,7 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -61,7 +63,8 @@ public class XianFengController {
 	 */
 	@ApiOperation(value="先锋支付信息查询")
 	@PostMapping("/query")
-	public BaseResult<String> query(XianFengPayParam payParam) {
+	@ResponseBody
+	public BaseResult<String> query(@RequestBody XianFengPayParam payParam) {
 		logger.info("[query]" +" payParams:" + payParam.getPayLogId());
 		int payLogId = payParam.getPayLogId();
 		PayLog payLog = payLogService.findById(payLogId);
