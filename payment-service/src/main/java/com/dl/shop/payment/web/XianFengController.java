@@ -17,6 +17,7 @@ import com.dl.base.result.ResultGenerator;
 import com.dl.base.util.SessionUtil;
 import com.dl.member.api.IUserBankService;
 import com.dl.member.dto.BankDTO;
+import com.dl.shop.payment.dto.BankTypeDTO;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.param.XianFengBankTypeParam;
@@ -62,9 +63,26 @@ public class XianFengController {
 	@ApiOperation(value="根据银行账号获取卡类型")
 	@PostMapping("/getBankType")
 	@ResponseBody
-	public BaseResult<BankDTO> getBankType(@RequestBody XianFengBankTypeParam param){
+	public BaseResult<BankTypeDTO> getBankType(@RequestBody XianFengBankTypeParam param){
 		String bankCardNo = param.getBankCardNo();
-		return xianFengService.queryBankType(bankCardNo);
+		BaseResult<BankDTO> baseResult = xianFengService.queryBankType(bankCardNo);
+		if(baseResult.getCode() != 0) {
+			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_BANKTYPE_FAILURE.getcode(),PayEnums.PAY_XIANFENG_BANKTYPE_FAILURE.getMsg());
+		}
+		BankDTO bankDTO = baseResult.getData();
+		BankTypeDTO bankTypeDTO = null;
+		String cardtype = bankDTO.getCardtype();
+		if("借记卡".equals(cardtype)) {
+			bankTypeDTO = new BankTypeDTO();
+			bankTypeDTO.setBankType(1);
+		}else if("贷记卡".equals(cardtype)) {
+			bankTypeDTO = new BankTypeDTO();
+			bankTypeDTO.setBankType(2);
+		}
+		if(bankTypeDTO == null) {
+			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_BANKTYPE_UNKNOW.getcode(),PayEnums.PAY_XIANFENG_BANKTYPE_UNKNOW.getMsg());
+		}
+		return ResultGenerator.genSuccessResult("succ",bankTypeDTO);
 	}
 	
 	
