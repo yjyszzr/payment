@@ -18,4 +18,8 @@ public class RspApplyBaseEntity{
 		return "resCode:" + resCode + " resMessage:" + resMessage + " merchantId:" + merchantId + 
 				" merchantNo:" + merchantNo + " tradeNo:" + tradeNo + " status:" + status + " tradeTime:" + tradeTime;
 	}
+	
+	public boolean isSucc() {
+		return "00000".equals(resCode);
+	}
 }

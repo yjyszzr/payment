@@ -433,7 +433,7 @@ public class PayMentService extends AbstractService<PayMent> {
 			} catch (Exception e) {
 				logger.error(loggerId + " paylogid="+payLog.getLogId()+" , paymsg="+response.getResult_msg()+"，保存失败记录时出错", e);
 			}
-			String payCode = response.getPayCode();
+			String payCode = payLog.getPayCode();
 			if(RspOrderQueryEntity.PAY_CODE_RONGBAO.equals(payCode)) {
 				String code = response.getResult_code();
 				if(StringUtils.isBlank(code) || "3015".equals(code)) {//订单不存在
@@ -549,7 +549,7 @@ public class PayMentService extends AbstractService<PayMent> {
 			return ResultGenerator.genSuccessResult("订单已支付成功！", null);
 		}else {
 			//预扣款 的方案 这里什么也不做
-			String payCode = response.getPayCode();
+			String payCode = payLog.getPayCode();
 //			String code = response.getResult_code();
 //			if(StringUtils.isBlank(code) || "3015".equals(code) || response.isYinHeWeChatNotPay()) {//融宝和银河返回值  为 订单不存在和未支付
 //				dealWithPayFailure(orderService, payLog,payLogService, response);
