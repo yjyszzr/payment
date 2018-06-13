@@ -25,7 +25,8 @@ public enum PayEnums {
 	PAY_RECHARGE_MAX(304055,"当前支付方式限额10万/笔"),
 	PAY_WITHDRAW_APPLY_SUC(304056,"提现申请已提交"),
 	PAY_WITHDRAW_BIND_CARD_RETRY(304057,"获取BankCode失败，请重新绑卡"),
-	PAY_DBDATA_IS_NOT_IN(304058,"数据库不存在该数据");
+	PAY_DBDATA_IS_NOT_IN(304058,"数据库不存在该数据"),
+	PAY_XIANFENG_FAILURE(304059,"先锋支付错误");
 	
 	private Integer code;
     private String msg;
