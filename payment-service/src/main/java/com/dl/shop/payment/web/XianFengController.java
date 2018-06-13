@@ -56,12 +56,14 @@ public class XianFengController {
 	@ApiOperation(value="先锋支付获取支付验证码")
 	@PostMapping("/sms")
 	@ResponseBody
-	public BaseResult<Object> getPaySms(@RequestBody XianFengPaySmsParam payParam){
-		String payOrderSn = payParam.getPayOrderSn();
-		if(StringUtils.isEmpty(payOrderSn)) {
-			logger.info("[getPaySms]" + "请输入订单号");
-			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_ORDER_BLANK.getcode(),PayEnums.PAY_XIANFENG_ORDER_BLANK.getMsg());
+	public BaseResult<Object> getPaySms(@RequestBody XianFengPayParam payParam){
+		int payLogId = payParam.getPayLogId();
+		PayLog payLog = payLogService.findById(payLogId);
+		if(payLog == null) {
+			logger.info("[getPaySms]" + "订单号查询失败");
+			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_ORDER_BLANK.getcode(),PayEnums.PAY_XIANFENG_ORDER_BLANK.getMsg());	
 		}
+		String payOrderSn = payLog.getPayOrderSn();
 		BaseResult<Object> baseResult = xianFengService.getPaySms(payOrderSn);
 		if(baseResult == null) {
 			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_SMS_EXCEPTION.getcode(),PayEnums.PAY_XIANFENG_SMS_EXCEPTION.getMsg());
@@ -83,7 +85,8 @@ public class XianFengController {
 		int payLogId = payParam.getPayLogId();
 		PayLog payLog = payLogService.findById(payLogId);
 		if(payLog == null) {
-			return ResultGenerator.genFailResult("查询支付信息失败");
+			logger.info("[getPaySms]" + "订单号查询失败");
+			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_ORDER_BLANK.getcode(),PayEnums.PAY_XIANFENG_ORDER_BLANK.getMsg());	
 		}
 		int isPaid = payLog.getIsPaid();
 		int payType = payLog.getPayType();
