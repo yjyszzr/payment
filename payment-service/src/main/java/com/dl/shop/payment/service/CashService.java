@@ -616,7 +616,7 @@ public class CashService {
 		BigDecimal amount = userWithdraw.getAmount();
 		messageAddParam.setContent(MessageFormat.format(CommonConstants.FORMAT_WITHDRAW_CONTENT, amount.toString()));
 		messageAddParam.setSender(-1);
-		messageAddParam.setMsgType(1);
+		messageAddParam.setMsgType(0);
 		messageAddParam.setReceiver(userWithdraw.getUserId());
 		messageAddParam.setReceiveMobile(userDto.getMobile());
 		messageAddParam.setObjectType(2);
