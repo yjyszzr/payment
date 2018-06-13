@@ -3,7 +3,6 @@ package com.dl.shop.payment.web;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -12,17 +11,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.druid.util.StringUtils;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.base.util.SessionUtil;
-import com.dl.shop.payment.dto.PayLogDTO;
-import com.dl.shop.payment.dto.PayXianFengApplyDTO;
+import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.param.XianFengPayParam;
-import com.dl.shop.payment.pay.xianfeng.cash.util.XianFengCashUtil;
+import com.dl.shop.payment.param.XianFengPaySmsParam;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.XianFengService;
-
 import io.swagger.annotations.ApiOperation;
 
 /**
@@ -55,6 +53,22 @@ public class XianFengController {
 		return xianFengService.appPay(payParam.getPayLogId());
 	}
 	
+	@ApiOperation(value="先锋支付获取支付验证码")
+	@PostMapping("/sms")
+	@ResponseBody
+	public BaseResult<Object> getPaySms(@RequestBody XianFengPaySmsParam payParam){
+		String payOrderSn = payParam.getPayOrderSn();
+		if(StringUtils.isEmpty(payOrderSn)) {
+			logger.info("[getPaySms]" + "请输入订单号");
+			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_ORDER_BLANK.getcode(),PayEnums.PAY_XIANFENG_ORDER_BLANK.getMsg());
+		}
+		BaseResult<Object> baseResult = xianFengService.getPaySms(payOrderSn);
+		if(baseResult == null) {
+			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_SMS_EXCEPTION.getcode(),PayEnums.PAY_XIANFENG_SMS_EXCEPTION.getMsg());
+		}else {
+			return baseResult;
+		}
+	}
 	
 	/***
 	 * 先锋订单查询

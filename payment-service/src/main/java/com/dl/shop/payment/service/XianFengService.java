@@ -45,6 +45,25 @@ public class XianFengService {
 		return null;
 	}
 	
+	/**
+	 * 查询信息
+	 * @param payOrderSn
+	 * @return
+	 */
+	public BaseResult<Object> getPaySms(String payOrderSn){
+		try {
+			RspApplyBaseEntity rspEntity = xFPayUtil.reqApplySms(payOrderSn);
+			if(rspEntity.isSucc()) {
+				return ResultGenerator.genSuccessResult("查询成功");
+			}else {
+				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_SMS_ERROR.getcode(),PayEnums.PAY_XIANFENG_SMS_ERROR.getMsg() +"[" + rspEntity.resMessage + "]");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	/***
 	 * 订单查询
 	 * @param payLog
@@ -55,6 +74,7 @@ public class XianFengService {
 		try {
 			RspApplyBaseEntity rEntity = xFPayUtil.queryPayByOrderNo(payOrderSn);
 			if(rEntity.isSucc()) {
+				logger.info("[query]" + "先锋查询成功...");
 				int payType = payLog.getPayType();
 				RspOrderQueryEntity response = new RspOrderQueryEntity();
 				response.setResult_code("00000");
@@ -76,6 +96,7 @@ public class XianFengService {
 					return ResultGenerator.genFailResult("操作失败");
 				}
 			}else{
+				logger.info("[query]" + "先锋查询异常...");
 				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_FAILURE.getcode(),PayEnums.PAY_XIANFENG_FAILURE.getMsg()+"[" + rEntity.resMessage+"]");
 			}
 		} catch (Exception e) {
