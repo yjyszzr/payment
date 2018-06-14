@@ -74,19 +74,6 @@ public class XianFengService {
 	}
 	
 	/**
-    private String userBankId;
-    private String realName;
-    private String cardNo;
-    private String status;
-    private String bankLogo;
-    private String bankName;
-    private String cardType;
-    private String lastCardNo4;
-    private String abbreviation;
-	private Integer type;
-	private Integer purpose;
-	 */
-	/**
 	 * 根据银行卡号查询银行信息
 	 * @param bankCardNo
 	 * @return
@@ -99,7 +86,24 @@ public class XianFengService {
 			BankDTO bankDTO = baseResult.getData();
 			if(bankDTO != null) {
 				BankCardSaveParam param = new BankCardSaveParam();
-				userBankService.saveBankInfo(param);
+				param.setCardNo(bankDTO.getBankcard());
+				param.setBankLogo(bankDTO.getBanklogo());
+				param.setBankName(bankDTO.getBankname());
+				param.setCardType(bankDTO.getCardtype());
+				param.setAbbreviation(bankDTO.getAbbreviation());
+				int type = 0;
+				String cardType = bankDTO.getCardtype();
+				if("借记卡".equals(cardType)) {
+					type = 0;
+				}else if("贷记卡".equals(cardType)) {
+					type = 1;
+				}
+				param.setType(type);
+				param.setPurpose(1);
+				if(type == 0 || type == 1) {
+					logger.info("[queryBankType]" + " " + bankDTO.getBankcard() +" saveInfo...");
+					userBankService.saveBankInfo(param);
+				}
 			}
 		}
 		return baseResult;
