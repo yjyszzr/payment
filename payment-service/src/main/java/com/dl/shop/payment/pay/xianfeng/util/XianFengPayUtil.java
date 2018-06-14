@@ -31,18 +31,18 @@ public class XianFengPayUtil {
 	public XianFengPayUtil() throws Exception {
 		// TODO Auto-generated constructor stub
 		//支付申请
-//		String userId = null;
-//		String amt = "1";
-//		String certNo = "420621199012133824";
-//		String accNo = "6222021001115704287";
-//		String accName = "工商银行";
-//		String mobileNo = "18100000000";
-//		String bankId = "ICBC";
-//		String pName = "测试产品";
-//		String pInfo = "测试产品描述";
-//		String orderNo = System.currentTimeMillis()+"";
-//		RspApplyBaseEntity rspEntity = reqApply(orderNo,userId,amt,certNo,accNo,accName,mobileNo,bankId,pName,pInfo);
-//		System.out.println("========="+rspEntity);
+		String userId = null;
+		String amt = "1";
+		String certNo = "420621199012133824";
+		String accNo = "6222021001115704287";
+		String accName = "工商银行";
+		String mobileNo = "18100000000";
+		String bankId = "ICBC";
+		String pName = "测试产品";
+		String pInfo = "测试产品描述";
+		String orderNo = System.currentTimeMillis()+"";
+		RspApplyBaseEntity rspEntity = reqApply(orderNo,userId,amt,certNo,accNo,accName,mobileNo,bankId,pName,pInfo);
+		System.out.println("========="+rspEntity);
 		
 		//支付确认
 //		String code = "909090";

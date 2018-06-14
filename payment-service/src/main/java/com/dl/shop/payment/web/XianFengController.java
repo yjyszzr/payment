@@ -52,18 +52,14 @@ public class XianFengController {
 	@PostMapping("/app")
 	@ResponseBody
 	public BaseResult<Object> appPay(@RequestBody XianFengPayParam payParam) {
-		int userId = SessionUtil.getUserId();
-		if(userId <= 0) {
-			return ResultGenerator.genFailResult("请登录");
-		}
-		return xianFengService.appPay(payParam.getPayLogId());
+		return xianFengService.appPay(payParam);
 	}
 	
 	
-	@ApiOperation(value="根据银行账号获取卡类型")
+	@ApiOperation(value="根据银行账号获取卡类型 目前只识别借记卡和贷记卡")
 	@PostMapping("/getBankType")
 	@ResponseBody
-	public BaseResult<BankTypeDTO> getBankType(@RequestBody XianFengBankTypeParam param){
+	public BaseResult<BankDTO> getBankType(@RequestBody XianFengBankTypeParam param){
 		String bankCardNo = param.getBankCardNo();
 		BaseResult<BankDTO> baseResult = xianFengService.queryBankType(bankCardNo);
 		if(baseResult.getCode() != 0) {
@@ -82,7 +78,7 @@ public class XianFengController {
 		if(bankTypeDTO == null) {
 			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_BANKTYPE_UNKNOW.getcode(),PayEnums.PAY_XIANFENG_BANKTYPE_UNKNOW.getMsg());
 		}
-		return ResultGenerator.genSuccessResult("succ",bankTypeDTO);
+		return ResultGenerator.genSuccessResult("succ",bankDTO);
 	}
 	
 	

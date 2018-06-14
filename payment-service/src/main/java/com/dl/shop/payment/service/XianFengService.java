@@ -11,12 +11,16 @@ import com.dl.base.result.ResultGenerator;
 import com.dl.member.api.IUserBankService;
 import com.dl.member.dto.BankDTO;
 import com.dl.member.param.BankCardParam;
+import com.dl.member.param.BankCardSaveParam;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.PayLog;
+import com.dl.shop.payment.param.XianFengPayParam;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.xianfeng.entity.RspApplyBaseEntity;
 import com.dl.shop.payment.pay.xianfeng.util.XianFengPayUtil;
+
+import io.swagger.annotations.ApiModelProperty;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -33,20 +37,55 @@ public class XianFengService {
 	@Resource
 	private PayMentService paymentService;
 	
-	public BaseResult<Object> appPay(int payLogId){
+	public BaseResult<Object> appPay(XianFengPayParam param){
+		int payLogId = param.getPayLogId();
 		PayLog payLog = payLogService.findById(payLogId);
 		if(payLog == null){
 			logger.info("查询PayLog失败");
 			return ResultGenerator.genFailResult("查询支付信息失败");
 		}
+		int payType = payLog.getPayType();
 		int uid = payLog.getUserId();
 		BigDecimal bigDecimal = payLog.getOrderAmount();
 		String payOrderSn = payLog.getPayOrderSn();
+		BigDecimal bigDec = bigDecimal.multiply(BigDecimal.valueOf(100));
+		String amt = bigDec.intValue()+"";
+		String certNo = param.getCertNo();
+		String accNo = param.getAccNo();
+		String phone = param.getPhone();
+		String pName = null;
+		String pInfo = null;
+		if(payType == 0) {
+			pName = "足彩订单支付";
+			pInfo = "彩小秘支付服务";
+		}else {
+			pName = "充值支付";
+			pInfo = "彩小秘充值服务";
+		}
+		//三要素校验
+		
+		//获取bankId
+		
+		//请求第三方申请接口
+		
 		//userId, amt, certNo, accNo, accName, mobileNo, bankId, pName, pInfo
-//		xFPayUtil.reqApply(payOrderSn,null,);
+//		xFPayUtil.reqApply(payOrderSn,null,bigDec.intValue()+"",);
 		return null;
 	}
 	
+	/**
+    private String userBankId;
+    private String realName;
+    private String cardNo;
+    private String status;
+    private String bankLogo;
+    private String bankName;
+    private String cardType;
+    private String lastCardNo4;
+    private String abbreviation;
+	private Integer type;
+	private Integer purpose;
+	 */
 	/**
 	 * 根据银行卡号查询银行信息
 	 * @param bankCardNo
@@ -55,7 +94,15 @@ public class XianFengService {
 	public BaseResult<BankDTO> queryBankType(String bankCardNo){
 		BankCardParam bankCardParams = new BankCardParam();
 		bankCardParams.setBankCardNo(bankCardNo);
-		return userBankService.queryUserBankType(bankCardParams);
+		BaseResult<BankDTO> baseResult = userBankService.queryUserBankType(bankCardParams);
+		if(baseResult.getCode() == 0) {
+			BankDTO bankDTO = baseResult.getData();
+			if(bankDTO != null) {
+				BankCardSaveParam param = new BankCardSaveParam();
+				userBankService.saveBankInfo(param);
+			}
+		}
+		return baseResult;
 	}
 	
 	/**
