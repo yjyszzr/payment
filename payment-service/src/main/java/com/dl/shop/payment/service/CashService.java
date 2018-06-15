@@ -544,10 +544,10 @@ public class CashService {
 				        	writer.write("SUCCESS");
 				        	writer.flush();
 				        	logger.info("============SUCESS返回====================");
-				        	//订单最终态
+				        	//提现单没有达最终态
 							if(userWithDraw != null 
-							   && ProjectConstant.STATUS_FAILURE.equals(userWithDraw.getStatus())
-							   && ProjectConstant.STATUS_SUCC.equals(userWithDraw.getStatus())) {
+							   && !ProjectConstant.STATUS_FAILURE.equals(userWithDraw.getStatus())
+							   && !ProjectConstant.STATUS_SUCC.equals(userWithDraw.getStatus())) {
 								int userId = userWithDraw.getUserId();
 								logger.info("[withdrawNotify]" + " userId:" + userId +  " withDrawSn:" + withDrawSn);
 								operation(rspSingleCashEntity,rspSingleCashEntity.merchantNo, userId,false,true,false);
