@@ -300,6 +300,30 @@ public class CashService {
 		return rEntity;
 	}
 
+	public BaseResult<Object> operationSucc(RspSingleCashEntity rEntity,String withDrawSn){
+		logger.info("单号:"+withDrawSn+"第三方提现成功，扣除用户余额");
+		//更新提现单
+		logger.info("提现单号:"+withDrawSn+"更新提现单位成功状态");
+		UpdateUserWithdrawParam updateParams = new UpdateUserWithdrawParam();
+//		updateParams.setWithdrawalSn(withdrawalSnDTO.getWithdrawalSn());
+		updateParams.setWithdrawalSn(withDrawSn);
+		updateParams.setStatus(ProjectConstant.STATUS_SUCC);
+		updateParams.setPayTime(DateUtil.getCurrentTimeLong());
+		updateParams.setPaymentId(withDrawSn);
+		updateParams.setPaymentName("管理后台发起提现");
+		userWithdrawService.updateWithdraw(updateParams);
+		this.goWithdrawMessage(withDrawSn);
+		
+		//提现中，提现成功两条记录到 withdraw_log中
+		UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
+		userWithdrawLog.setLogCode(CashEnums.CASH_SUCC.getcode());
+		userWithdrawLog.setLogName(CashEnums.CASH_SUCC.getMsg());
+		userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
+		userWithdrawLog.setWithdrawSn(withDrawSn);
+		userWithdrawLogService.save(userWithdrawLog);
+		return ResultGenerator.genSuccessResult("提现成功");
+	}
+	
 	public BaseResult<Object> operation(RspSingleCashEntity rEntity,String widthDrawSn,Integer userId,boolean isManagerBack,boolean isNotify,boolean isQuery) {
 		if(rEntity.isSucc()) {
 			logger.info("单号:"+widthDrawSn+"第三方提现成功，扣除用户余额");
@@ -682,7 +706,7 @@ public class CashService {
 		return ResultGenerator.genFailResult("查询失败~",null);
 	}
 	
-	private RspSingleCashEntity convert2RspSingleCashEntity(RspSingleQueryEntity sEntity) {
+	public static RspSingleCashEntity convert2RspSingleCashEntity(RspSingleQueryEntity sEntity) {
 		RspSingleCashEntity rspSingleCashEntity = new RspSingleCashEntity();
 		if(sEntity != null) {
 			rspSingleCashEntity.resCode = sEntity.resCode;

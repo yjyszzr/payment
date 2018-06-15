@@ -25,7 +25,7 @@ public class PayDemo {
 
 	public PayDemo() {
 //		testQuery();
-		testPay();
+//		testPay();
 //		testQRBarPay();
 //		testUtil();
 //		testRefund();

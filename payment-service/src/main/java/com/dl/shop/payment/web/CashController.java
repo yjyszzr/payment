@@ -13,13 +13,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.dl.base.result.BaseResult;
+import com.dl.base.result.ResultGenerator;
 import com.dl.member.api.IUserAccountService;
 import com.dl.member.api.IUserBankService;
 import com.dl.member.api.IUserMessageService;
 import com.dl.member.api.IUserService;
+import com.dl.shop.payment.model.UserWithdraw;
 import com.dl.shop.payment.param.CashGetParam;
 import com.dl.shop.payment.param.CashReqParam;
 import com.dl.shop.payment.param.WithdrawParam;
+import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
+import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleQueryEntity;
+import com.dl.shop.payment.pay.xianfeng.cash.util.XianFengCashUtil;
 import com.dl.shop.payment.service.CashService;
 import com.dl.shop.payment.service.UserWithdrawLogService;
 import com.dl.shop.payment.service.UserWithdrawService;
@@ -40,17 +45,16 @@ public class CashController {
 	@Autowired
 	private IUserAccountService userAccountService;
 	
-	@Autowired
-	private UserWithdrawService userWithdrawService;
-	
 	@Resource
 	private UserWithdrawLogService userWithdrawLogService;
 	@Resource
 	private IUserMessageService userMessageService;
-	
 	@Resource
 	private CashService cashService;
-	
+	@Autowired
+	private UserWithdrawService userWithdrawService;
+	@Resource
+	private XianFengCashUtil xianfengUtil;
 	
 	@ApiOperation(value="先锋提现notify", notes="")
 	@PostMapping("/notify")
@@ -77,6 +81,38 @@ public class CashController {
 	@ResponseBody
 	public BaseResult<Object> getCash(@RequestBody CashGetParam param, HttpServletRequest request){
 		logger.info("[getCash]" + " sn:" + param.getWithdrawSn());
+		if(param.isPass()) {
+			//如果数据库提现单已经成功
+			String withDrawSn = param.getWithdrawSn();
+			BaseResult<UserWithdraw> baseResult = userWithdrawService.queryUserWithdraw(withDrawSn);
+			if(baseResult.getCode() != 0 || baseResult.getData() == null) {
+				return ResultGenerator.genFailResult("查询提现单失败",null);
+			}
+			//提现状态,2-失败,1-已完成，0-未完成
+			UserWithdraw userWithDraw = baseResult.getData();
+			logger.info("[getCash]" + " 提现单状态:" + userWithDraw.getStatus());
+			if("1".equals(userWithDraw.getStatus()) || "2".equals(userWithDraw.getStatus())) {
+				logger.info("[getCash]" + " 提现单状态已达终态");
+				return ResultGenerator.genSuccessResult("提现单已达终态");
+			}
+			//查询第三方是否提现成功
+			RspSingleCashEntity rspEntity = null;
+			try {
+				RspSingleQueryEntity sEntity = xianfengUtil.queryCash(withDrawSn);
+				rspEntity = CashService.convert2RspSingleCashEntity(sEntity);
+				logger.info("[getCash]" +" 提现单第三方查询结果:" + rspEntity);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			if(rspEntity != null) {
+				//查询第三方已提现成功
+				if(rspEntity.isSucc()) {
+					//更改订单成功状态,增加提现金日志
+					logger.info("[getCash]" +" 第三方提现成功，提现单状态修改为成功...");
+					return cashService.operationSucc(rspEntity,withDrawSn);
+				}
+			}
+		}
 		return cashService.getCash(param, request);
 	}
 	
