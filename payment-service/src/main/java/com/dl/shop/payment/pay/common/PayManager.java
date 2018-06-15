@@ -58,6 +58,6 @@ public class PayManager {
 	public class QueueCashItemEntity{
 		public String withDrawSn;
 		public int cnt;
-		public static final int MAX_CNT = 20;
+		public static final int MAX_CNT = 20;//20秒 *20 = 400秒 7分钟
 	}
 }

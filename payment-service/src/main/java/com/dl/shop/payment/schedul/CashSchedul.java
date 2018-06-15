@@ -37,7 +37,7 @@ public class CashSchedul {
 	/**
 	 * 提现状态轮询
 	 */
-	@Scheduled(fixedRate = 1000*10)
+	@Scheduled(fixedRate = 1000*20)
     public void timerCheckCashReq() {
 //		logger.info("[timerCheckCashReq]" +" call...");
 		List<QueueCashItemEntity> mVector = PayManager.getInstance().getCashList();
