@@ -1,7 +1,6 @@
 package com.dl.shop.payment.service;
 
 import java.math.BigDecimal;
-
 import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +18,6 @@ import com.dl.shop.payment.param.XianFengPayParam;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.xianfeng.entity.RspApplyBaseEntity;
 import com.dl.shop.payment.pay.xianfeng.util.XianFengPayUtil;
-
-import io.swagger.annotations.ApiModelProperty;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -65,7 +62,7 @@ public class XianFengService {
 		//三要素校验
 		
 		//获取bankId
-		
+//		userBankService.queryUserBank(idParam);
 		//请求第三方申请接口
 		
 		//userId, amt, certNo, accNo, accName, mobileNo, bankId, pName, pInfo
