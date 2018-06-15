@@ -58,6 +58,6 @@ public class PayManager {
 	public class QueueCashItemEntity{
 		public String withDrawSn;
 		public int cnt;
-		public static final int MAX_CNT = 6;
+		public static final int MAX_CNT = 20;
 	}
 }
