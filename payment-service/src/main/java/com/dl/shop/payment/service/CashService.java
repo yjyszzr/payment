@@ -624,7 +624,7 @@ public class CashService {
 		messageAddParam.setSendTime(DateUtil.getCurrentTimeLong());
 		Integer addTime =userWithdraw.getAddTime();
 		String addTimeStr = this.getTimeStr(addTime);
-		Integer checkTime = 0;
+		Integer checkTime = DateUtil.getCurrentTimeLong();
 		String checkTimeStr = this.getTimeStr(checkTime);
 		Integer payTime = userWithdraw.getPayTime();
 		String payTimeStr = this.getTimeStr(payTime);
