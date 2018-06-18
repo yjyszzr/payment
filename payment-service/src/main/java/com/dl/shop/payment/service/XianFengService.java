@@ -9,8 +9,10 @@ import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.member.api.IUserBankService;
 import com.dl.member.dto.BankDTO;
+import com.dl.member.dto.UserBankDTO;
 import com.dl.member.param.BankCardParam;
 import com.dl.member.param.BankCardSaveParam;
+import com.dl.member.param.UserBankPurposeQueryParam;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.PayLog;
@@ -42,16 +44,17 @@ public class XianFengService {
 			return ResultGenerator.genFailResult("查询支付信息失败");
 		}
 		int payType = payLog.getPayType();
-		int uid = payLog.getUserId();
+		int userId = payLog.getUserId();
 		BigDecimal bigDecimal = payLog.getOrderAmount();
 		String payOrderSn = payLog.getPayOrderSn();
 		BigDecimal bigDec = bigDecimal.multiply(BigDecimal.valueOf(100));
 		String amt = bigDec.intValue()+"";
 		String certNo = param.getCertNo();
 		String accNo = param.getAccNo();
-		String phone = param.getPhone();
+		String mobileNo = param.getPhone();
 		String pName = null;
 		String pInfo = null;
+		String accName = param.getName();
 		if(payType == 0) {
 			pName = "足彩订单支付";
 			pInfo = "彩小秘支付服务";
@@ -59,15 +62,35 @@ public class XianFengService {
 			pName = "充值支付";
 			pInfo = "彩小秘充值服务";
 		}
-		//三要素校验
-		
 		//获取bankId
-//		userBankService.queryUserBank(idParam);
+		UserBankPurposeQueryParam queryParams = new UserBankPurposeQueryParam();
+		queryParams.setUserId(userId);
+		queryParams.setPurpose(1);
+		queryParams.setBankCardCode(accNo);
+		BaseResult<UserBankDTO> baseResult = userBankService.queryBankByPurpose(queryParams);
+		if(baseResult.getCode() != 0 || baseResult.getData() == null) {
+			log.info("[appPay]" + "查询银行卡为空...");
+			return ResultGenerator.genFailResult("查询银行卡为空");
+		}
+		UserBankDTO userBankDTO = baseResult.getData();
+		String bankId = userBankDTO.getAbbreviation();
+		RspApplyBaseEntity rspEntity = null;
 		//请求第三方申请接口
-		
 		//userId, amt, certNo, accNo, accName, mobileNo, bankId, pName, pInfo
-//		xFPayUtil.reqApply(payOrderSn,null,bigDec.intValue()+"",);
-		return null;
+		try {
+			rspEntity = xFPayUtil.reqApply(payOrderSn,null,amt+"",certNo,accNo,accName,mobileNo,bankId,pName,pInfo);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(rspEntity != null) {
+			if(rspEntity.isSucc()) {
+				return ResultGenerator.genSuccessResult("succ",rspEntity);	
+			}else {
+				return ResultGenerator.genFailResult(rspEntity.resMessage);
+			}
+		}
+		return ResultGenerator.genFailResult("请求失败");
 	}
 	
 	/**
