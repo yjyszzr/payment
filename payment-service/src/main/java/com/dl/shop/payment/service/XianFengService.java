@@ -5,6 +5,8 @@ import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import com.alibaba.druid.util.StringUtils;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.member.api.IUserBankService;
@@ -16,6 +18,7 @@ import com.dl.member.param.UserBankPurposeQueryParam;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.PayLog;
+import com.dl.shop.payment.param.XianFengPayConfirmParam;
 import com.dl.shop.payment.param.XianFengPayParam;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.xianfeng.entity.RspApplyBaseEntity;
@@ -35,6 +38,35 @@ public class XianFengService {
 	private IUserBankService userBankService;
 	@Resource
 	private PayMentService paymentService;
+	
+	public BaseResult<Object> appPayCfm(XianFengPayConfirmParam param){
+		int payLogId = param.getPayLogId();
+		String code = param.getCode();
+		PayLog payLog = payLogService.findById(payLogId);
+		if(payLog == null) {
+			logger.info("[appPayCfm]" + "查询PayLog失败");
+			return ResultGenerator.genFailResult("查询支付信息失败");
+		}
+		if(StringUtils.isEmpty(code)) {
+			logger.info("[appPayCfm]" + " code:" + code);
+			return ResultGenerator.genFailResult("请输入验证码");
+		}
+		String payOrderSn = payLog.getPayOrderSn();
+		RspApplyBaseEntity rspEntity = null;
+		try {
+			rspEntity = xFPayUtil.reqApplyCfg(code,payOrderSn);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if(rspEntity != null) {
+			if(rspEntity.isSucc()) {
+				return ResultGenerator.genSuccessResult("succ");
+			}else {
+				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_PAY_ERROR.getcode(),PayEnums.PAY_XIANFENG_PAY_ERROR.getMsg());
+			}
+		}
+		return ResultGenerator.genFailResult("请求失败");
+	}
 	
 	public BaseResult<Object> appPay(XianFengPayParam param){
 		int payLogId = param.getPayLogId();

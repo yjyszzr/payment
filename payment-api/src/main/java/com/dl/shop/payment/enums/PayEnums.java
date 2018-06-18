@@ -31,7 +31,9 @@ public enum PayEnums {
 	PAY_XIANFENG_SMS_ERROR(304061,"验证码获取失败"),
 	PAY_XIANFENG_SMS_EXCEPTION(304062,"获取验证码信息异常"),
 	PAY_XIANFENG_BANKTYPE_FAILURE(304063,"银行卡查询失败"),
-	PAY_XIANFENG_BANKTYPE_UNKNOW(304064,"银行卡类型未知");
+	PAY_XIANFENG_BANKTYPE_UNKNOW(304064,"银行卡类型未知"),
+	PAY_XIANFENG_PAY_ERROR(304065,"请求先锋支付失败");
+	
 	
 	private Integer code;
     private String msg;

@@ -21,6 +21,7 @@ import com.dl.shop.payment.dto.BankTypeDTO;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.param.XianFengBankTypeParam;
+import com.dl.shop.payment.param.XianFengPayConfirmParam;
 import com.dl.shop.payment.param.XianFengPayParam;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.XianFengService;
@@ -55,6 +56,12 @@ public class XianFengController {
 		return xianFengService.appPay(payParam);
 	}
 	
+	@ApiOperation(value="先锋支付确认")
+	@PostMapping("/appConfirm")
+	@ResponseBody
+	public BaseResult<Object> appPayCfm(@RequestBody XianFengPayConfirmParam payParam) {
+		return xianFengService.appPayCfm(payParam);
+	}
 	
 	@ApiOperation(value="根据银行账号获取卡类型 目前只识别借记卡和贷记卡")
 	@PostMapping("/getBankType")
