@@ -62,7 +62,7 @@ public class XianFengService {
 			if(rspEntity.isSucc()) {
 				return ResultGenerator.genSuccessResult("succ");
 			}else {
-				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_PAY_ERROR.getcode(),PayEnums.PAY_XIANFENG_PAY_ERROR.getMsg());
+				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_PAY_ERROR.getcode(),PayEnums.PAY_XIANFENG_PAY_ERROR.getMsg() + "[" + rspEntity.resMessage +"]");
 			}
 		}
 		return ResultGenerator.genFailResult("请求失败");
