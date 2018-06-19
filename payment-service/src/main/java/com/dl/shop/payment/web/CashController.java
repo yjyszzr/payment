@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.dl.base.constant.EmptyParam;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.member.api.IUserAccountService;
@@ -122,6 +124,14 @@ public class CashController {
 	public BaseResult<Object> queryCash(@RequestBody CashReqParam param){
 		logger.info("[queryCash]" + " withDrawSn:" + param.getWithdrawSn());
 		return cashService.queryCash(param.getWithdrawSn());
+	}
+	
+	@ApiOperation(value="提现状态轮询", notes="提现状态轮询")
+	@PostMapping("/timerCheckCashReq")
+	@ResponseBody
+	public BaseResult<String> timerCheckCashReq(@RequestBody EmptyParam emptyParam){
+		cashService.timerCheckCashReq();
+		return ResultGenerator.genSuccessResult("success");
 	}
 	
 }
