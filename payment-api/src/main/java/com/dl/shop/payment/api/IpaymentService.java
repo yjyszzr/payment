@@ -5,9 +5,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.dl.base.constant.EmptyParam;
+import com.dl.base.param.EmptyParam;
 import com.dl.base.result.BaseResult;
 import com.dl.shop.payment.dto.PayLogDTO;
 import com.dl.shop.payment.dto.PriceDTO;
@@ -22,8 +21,6 @@ import com.dl.shop.payment.param.StrParam;
 import com.dl.shop.payment.param.UserIdParam;
 import com.dl.shop.payment.param.WithDrawSnAndUserIdParam;
 import com.dl.shop.payment.param.WithDrawSnParam;
-
-import io.swagger.annotations.ApiOperation;
 
 @FeignClient(value="payment-service")
 public interface IpaymentService {

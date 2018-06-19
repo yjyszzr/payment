@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.dl.base.constant.EmptyParam;
+import com.dl.base.param.EmptyParam;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.member.api.IUserAccountService;

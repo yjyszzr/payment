@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
-import com.dl.base.constant.EmptyParam;
+import com.dl.base.param.EmptyParam;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.base.util.DateUtil;
