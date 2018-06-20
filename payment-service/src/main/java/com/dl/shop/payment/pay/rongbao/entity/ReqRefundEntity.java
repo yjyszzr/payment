@@ -7,4 +7,10 @@ public class ReqRefundEntity {
 	private String orig_order_no;
 	private String amount;
 	private String note;
+
+	
+	@Override
+	public String toString(){
+		return "orig_order_no:" + orig_order_no +" amount:" + amount +" note:" + note;
+	}
 }
