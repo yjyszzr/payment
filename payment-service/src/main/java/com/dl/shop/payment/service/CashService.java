@@ -666,7 +666,7 @@ public class CashService {
 		if(addTime <= 0) {
 			return "";
 		}
-		String addTimeStr = DateUtil.getCurrentTimeString(Long.valueOf(addTime), DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:dd"));
+		String addTimeStr = DateUtil.getCurrentTimeString(Long.valueOf(addTime), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:dd"));
 //		LocalDateTime loclaTime = LocalDateTime.ofEpochSecond(addTime, 0, ZoneOffset.UTC);
 //		String addTimeStr = loclaTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:dd"));
 		return addTimeStr;
