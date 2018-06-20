@@ -224,7 +224,7 @@ public class PayMentService extends AbstractService<PayMent> {
 		if(payCode.equals("app_weixin_h5")) {
 			isInWeChat = true;
 		}
-		log.info("[rollbackAmountThird]" + " str:" + reqEntity.toString());
+		log.info("[rollbackAmountThird]" + " str:" + reqEntity.toString() + " isInWeChat:" + isInWeChat);
 		try {
 			RspRefundEntity rspRefundEntity = yinHeUtil.orderRefund(isInWeChat,reqEntity.getOrig_order_no(),reqEntity.getAmount());
 			log.info("rEntity:" + rspRefundEntity.toString());
