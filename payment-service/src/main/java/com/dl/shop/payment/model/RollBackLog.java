@@ -7,7 +7,7 @@ import javax.persistence.Table;
 @Table(name = "dl_rollback_log")
 public class RollBackLog {
 	 @Id
-	 @Column(name = "log_id")
+	 @Column(name = "id")
 	 private Integer id;
 	 
 	 @Column(name = "pay_log_sn")
