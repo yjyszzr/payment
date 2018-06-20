@@ -10,8 +10,8 @@ import lombok.Data;
 @Configuration
 public class ConfigerPay {
 	
-	@Value("${yinhe.app.debug}")
-	private String DEBUG;
+//	@Value("${yinhe.app.debug}")
+//	private String DEBUG;
 	
 	@Value("${yinhe.app_wechat_jump_h5}")
 	private String URL_PAY_WECHAT_H5;
