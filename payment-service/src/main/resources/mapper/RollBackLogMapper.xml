@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dl.shop.payment.dao.RollBackLogMapper">
+  <resultMap id="BaseResultMap" type="com.dl.shop.payment.model.RollBackLog">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="pay_log_sn" jdbcType="VARCHAR" property="PayLogSn" />
+    <result column="amt" jdbcType="VARCHAR" property="amt" />
+    <result column="req" jdbcType="VARCHAR" property="req" />
+    <result column="rsp" jdbcType="VARCHAR" property="rsp" />
+    <result column="time" jdbcType="VARCHAR" property="time" />
+  </resultMap>
+  
+  <sql id="queryFields">id, pay_log_sn, amt, req, rsp, time</sql>
+
+
+</mapper>

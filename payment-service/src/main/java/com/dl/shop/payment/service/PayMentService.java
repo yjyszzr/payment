@@ -43,11 +43,13 @@ import com.dl.order.param.UpdateOrderInfoParam;
 import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dao.PayLogMapper;
 import com.dl.shop.payment.dao.PayMentMapper;
+import com.dl.shop.payment.dao.RollBackLogMapper;
 import com.dl.shop.payment.dto.PaymentDTO;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.PayMent;
+import com.dl.shop.payment.model.RollBackLog;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
 import com.dl.shop.payment.param.RollbackThirdOrderAmountParam;
 import com.dl.shop.payment.pay.common.PayManager;
@@ -68,6 +70,8 @@ public class PayMentService extends AbstractService<PayMent> {
 	
     @Resource
     private PayMentMapper payMentMapper;
+    @Resource
+    private RollBackLogMapper rollBackLogMapper;
     
     @Resource
     private IOrderService orderService;
@@ -228,6 +232,14 @@ public class PayMentService extends AbstractService<PayMent> {
 		try {
 			RspRefundEntity rspRefundEntity = yinHeUtil.orderRefund(isInWeChat,reqEntity.getOrig_order_no(),reqEntity.getAmount());
 			log.info("rEntity:" + rspRefundEntity.toString());
+			RollBackLog rBackLog = new RollBackLog();
+			rBackLog.setAmt(amt);
+			rBackLog.setPayLogSn(param.getOrderSn());
+			rBackLog.setReq(reqEntity.toString());
+			rBackLog.setRsp(rspRefundEntity.toString());
+			String strTime = DateUtil.getCurrentDateTime();
+			rBackLog.setTime(strTime);
+			rollBackLogMapper.insert(rBackLog);
 			return ResultGenerator.genSuccessResult("succ",rspRefundEntity);
 		}catch(Exception ee) {
 			logger.info("[rollbackAmountThird]" +"msg:" + ee.getMessage());

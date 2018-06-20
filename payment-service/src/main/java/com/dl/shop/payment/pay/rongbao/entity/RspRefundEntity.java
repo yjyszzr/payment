@@ -17,6 +17,6 @@ public class RspRefundEntity {
 	}
 
 	public String toString() {
-		return "result_code:" + result_code +" result_msg:" +result_msg;
+		return "result_code:" + result_code +" result_msg:" +result_msg +" returnCode:" + returnCode + " returnMsg:" +returnMsg;
 	}
 }
