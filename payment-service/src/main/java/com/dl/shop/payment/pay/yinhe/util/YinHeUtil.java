@@ -4,6 +4,9 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
 import javax.annotation.Resource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -18,12 +21,14 @@ import com.dl.shop.payment.pay.yinhe.entity.ReqQueryEntity;
 import com.dl.shop.payment.pay.yinhe.entity.ReqRefundOrderEntity;
 import com.dl.shop.payment.pay.yinhe.entity.ReqSignEntity;
 import com.dl.shop.payment.pay.yinhe.entity.RspQueryEntity;
+import com.dl.shop.payment.web.PaymentController;
 
 /****
  * 银河支付订单操作
  */
 @Component
 public class YinHeUtil {
+	private final static Logger logger = LoggerFactory.getLogger(YinHeUtil.class);
 	
 	@Resource
 	private ConfigerPay cfgPay;
@@ -71,6 +76,10 @@ public class YinHeUtil {
 		//signCode添加到请求参数中
 		String reqStr = JSON.toJSONString(reqEntity);
 		System.out.println(reqStr);//退款refundOrder.action
+		logger.info("==================================================");
+		logger.info("[orderRefund]" +" url:" + cfgPay.getURL_PAY() + "/refundOrder.action");
+		logger.info("[orderRefund]" +" req:" + reqStr);
+		logger.info("==================================================");
 		RspHttpEntity rspEntity = HttpUtil.sendMsg(reqStr,cfgPay.getURL_PAY()+"/refundOrder.action",true);
 		if(rspEntity != null && rspEntity.isSucc) {
 			String msg = rspEntity.msg;
