@@ -175,6 +175,14 @@ public class PaymentController extends AbstractBaseController{
 		return paymentService.rollbackOrderAmount(param);
 	}
 	
+	@ApiOperation(value="用户支付回退接口第三方调用测试", notes="")
+	@PostMapping("/rollbackAmountThird")
+	@ResponseBody
+	public BaseResult<?> rollbackAmomtThird(@RequestBody RollbackOrderAmountParam param) {
+		logger.info("[rollbackAmomtThird]" +" 手工退款操作:" + param.getOrderSn());
+		return paymentService.rollbackAmountThird(param);
+	}
+	
 	@ApiOperation(value="app支付调用", notes="payToken:商品中心购买信息保存后的返回值 ，payCode：支付编码，app端微信支付为app_weixin")
 	@PostMapping("/app")
 	@ResponseBody

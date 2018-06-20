@@ -212,6 +212,27 @@ public class PayMentService extends AbstractService<PayMent> {
 
     }
     
+    public BaseResult<?> rollbackAmountThird(RollbackOrderAmountParam param) {
+    	PayLog payLog = payLogService.findPayLogByOrderSn(param.getOrderSn());
+    	if(payLog == null) {
+    		return ResultGenerator.genFailResult("未查询到订单信息");
+    	}
+    	BigDecimal bigDec = payLog.getOrderAmount();
+    	BigDecimal b = bigDec.multiply(BigDecimal.valueOf(100));
+    	ReqRefundEntity reqEntity = new ReqRefundEntity();
+		reqEntity.setAmount(b.intValue()+"");
+		reqEntity.setNote("手动退款操作");
+		reqEntity.setOrig_order_no(payLog.getPayOrderSn());
+		try {
+			RspRefundEntity rspRefundEntity = rongUtil.refundOrderInfo(reqEntity);
+			log.info("rEntity:" + rspRefundEntity.toString());
+			return ResultGenerator.genSuccessResult("succ",rspRefundEntity);
+		}catch(Exception ee) {
+			logger.info("[rollbackAmountThird]" +"msg:" + ee.getMessage());
+		}
+    	return ResultGenerator.genFailResult("查询到第三方失败...");
+    }
+    
     /**
      * 资金回滚
      * @param param
