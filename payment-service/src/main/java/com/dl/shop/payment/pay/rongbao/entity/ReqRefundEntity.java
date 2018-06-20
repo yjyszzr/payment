@@ -11,6 +11,6 @@ public class ReqRefundEntity {
 	
 	@Override
 	public String toString(){
-		return "orig_order_no:" + orig_order_no +" amount:" + amount +" note:" + note;
+		return "orig_order_no:" + orig_order_no +" amount:" + amount;
 	}
 }
