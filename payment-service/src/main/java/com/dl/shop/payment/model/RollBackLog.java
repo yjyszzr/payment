@@ -25,6 +25,9 @@ public class RollBackLog {
 	 @Column(name = "time")
 	 private String time;
 
+	 @Column(name = "status")	//0未成功，1成功
+	 private Integer status;
+	 
 	public Integer getId() {
 		return id;
 	}
@@ -71,5 +74,13 @@ public class RollBackLog {
 
 	public void setTime(String time) {
 		this.time = time;
+	}
+
+	public Integer getStatus() {
+		return status;
+	}
+
+	public void setStatus(Integer status) {
+		this.status = status;
 	}
 }

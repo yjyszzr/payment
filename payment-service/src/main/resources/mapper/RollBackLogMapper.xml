@@ -11,9 +11,10 @@
     <result column="req" jdbcType="VARCHAR" property="req" />
     <result column="rsp" jdbcType="VARCHAR" property="rsp" />
     <result column="time" jdbcType="VARCHAR" property="time" />
+    <result column="status" jdbcType="INTEGER" property="status" />
   </resultMap>
   
-  <sql id="queryFields">id, pay_log_sn, amt, req, rsp, time</sql>
+  <sql id="queryFields">id, pay_log_sn, amt, req, rsp, time,status</sql>
 
 
 </mapper>

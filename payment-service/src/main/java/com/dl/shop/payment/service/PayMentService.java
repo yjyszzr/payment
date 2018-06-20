@@ -239,6 +239,11 @@ public class PayMentService extends AbstractService<PayMent> {
 			rBackLog.setRsp(rspRefundEntity.toString());
 			String strTime = DateUtil.getCurrentDateTime();
 			rBackLog.setTime(strTime);
+			int status = 0;
+			if(rspRefundEntity.isSucc()) {
+				status = 1;
+			}
+			rBackLog.setStatus(status);
 			rollBackLogMapper.insert(rBackLog);
 			return ResultGenerator.genSuccessResult("succ",rspRefundEntity);
 		}catch(Exception ee) {
