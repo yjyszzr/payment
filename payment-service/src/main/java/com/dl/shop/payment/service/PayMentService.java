@@ -213,7 +213,7 @@ public class PayMentService extends AbstractService<PayMent> {
     }
     
     public BaseResult<?> rollbackAmountThird(RollbackOrderAmountParam param) {
-    	PayLog payLog = payLogService.findPayLogByOrderSn(param.getOrderSn());
+    	PayLog payLog = payLogService.findPayLogByOrderSign(param.getOrderSn());
     	if(payLog == null) {
     		return ResultGenerator.genFailResult("未查询到订单信息");
     	}
