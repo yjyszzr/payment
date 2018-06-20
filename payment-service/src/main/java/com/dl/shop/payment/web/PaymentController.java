@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.dl.base.param.EmptyParam;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.base.util.DateUtil;
@@ -40,25 +41,21 @@ import com.dl.member.api.IUserBankService;
 import com.dl.member.api.IUserBonusService;
 import com.dl.member.api.IUserMessageService;
 import com.dl.member.api.IUserService;
-import com.dl.member.dto.DonationPriceDTO;
 import com.dl.member.dto.RechargeDataActivityDTO;
 import com.dl.member.dto.SurplusPaymentCallbackDTO;
 import com.dl.member.dto.UserBankDTO;
 import com.dl.member.dto.UserDTO;
 import com.dl.member.dto.UserWithdrawDTO;
 import com.dl.member.param.IDParam;
-import com.dl.member.param.RecharegeParam;
 import com.dl.member.param.StrParam;
 import com.dl.member.param.SurplusPayParam;
 import com.dl.member.param.UpdateUserRechargeParam;
-import com.dl.member.param.UserAccountParamByType;
 import com.dl.member.param.UserWithdrawParam;
 import com.dl.order.api.IOrderService;
 import com.dl.order.dto.OrderDTO;
 import com.dl.order.param.SubmitOrderParam;
 import com.dl.order.param.SubmitOrderParam.TicketDetail;
 import com.dl.order.param.UpdateOrderInfoParam;
-import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dto.PayLogDTO;
 import com.dl.shop.payment.dto.PayReturnDTO;
 import com.dl.shop.payment.dto.PayWaysDTO;
@@ -870,5 +867,37 @@ public class PaymentController extends AbstractBaseController{
 		logger.info("redis 取出2："+donationPrice);
 		return ResultGenerator.genSuccessResult("success", donationPriceDTO);
  	}
+	
+	/**
+     * 	校验用户是否支付过
+     */
+//	@ApiOperation(value="校验用户是否有过钱的交易", notes="校验用户是否有过钱的交易")
+//	@PostMapping("/validUserPay")
+//	@ResponseBody
+//    public BaseResult<ValidPayDTO> validUserPay(@RequestBody UserIdParam userIdParam){
+//		return payLogService.validUserPay(userIdParam.getUserId());
+// 	}
+	
+    /**
+     * 处理支付超时订单
+     */
+	@ApiOperation(value="处理支付超时订单", notes="处理支付超时订单")
+	@PostMapping("/dealBeyondPayTimeOrderOut")
+	@ResponseBody
+    public BaseResult<String> dealBeyondPayTimeOrderOut(@RequestBody EmptyParam emptyParam){
+		paymentService.dealBeyondPayTimeOrderOut();
+		return ResultGenerator.genSuccessResult("success");
+    }
+	
+	/**
+	 * 第三方支付的query后的更新支付状态
+	 */
+	@ApiOperation(value="第三方支付的query后的更新支付状态", notes="第三方支付的query后的更新支付状态")
+	@PostMapping("/timerOrderQueryScheduled")
+	@ResponseBody
+    public BaseResult<String> timerOrderQueryScheduled(@RequestBody EmptyParam emptyParam) {
+		paymentService.dealBeyondPayTimeOrderOut();
+		return ResultGenerator.genSuccessResult("success");
+	}
 	
 }

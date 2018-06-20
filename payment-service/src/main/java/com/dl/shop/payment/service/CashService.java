@@ -12,9 +12,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.http.util.TextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +25,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
+
 import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -61,11 +64,13 @@ import com.dl.shop.payment.param.UpdateUserWithdrawParam;
 import com.dl.shop.payment.param.UserWithdrawParam;
 import com.dl.shop.payment.param.WithdrawParam;
 import com.dl.shop.payment.pay.common.PayManager;
+import com.dl.shop.payment.pay.common.PayManager.QueueCashItemEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.config.Constants;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleQueryEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.util.XianFengCashUtil;
 import com.ucf.sdk.util.AESCoder;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -581,7 +586,6 @@ public class CashService {
 // 	            	 }          
 // 	            	logger.info("jsonObject:" + jsonObject);
 // 				} catch (Exception e) {
-// 					// TODO Auto-generated catch block
 // 					e.printStackTrace();
 // 				}  
 //            }
@@ -700,7 +704,6 @@ public class CashService {
 				return operation(convert2RspSingleCashEntity(rspEntity),withDrawSn, userId,false,true,true);
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return ResultGenerator.genFailResult("查询失败~",null);
@@ -719,6 +722,56 @@ public class CashService {
 			rspSingleCashEntity.merchantNo = sEntity.merchantNo;
 		}
 		return rspSingleCashEntity;
+	}
+	
+	/**
+	 * 提现状态轮询
+	 */
+    public void timerCheckCashReq() {
+//		logger.info("[timerCheckCashReq]" +" call...");
+		List<QueueCashItemEntity> mVector = PayManager.getInstance().getCashList();
+		if(mVector.size() > 0) {
+			for(int i = 0;i < mVector.size();i++) {
+				QueueCashItemEntity itemEntity = mVector.get(i);
+				if(itemEntity != null) {
+					if(itemEntity.cnt >= QueueCashItemEntity.MAX_CNT) {
+						mVector.remove(itemEntity);
+					}else {
+						itemEntity.cnt++;
+						boolean isSucc;
+						try {
+							isSucc = task(itemEntity);
+							if(isSucc) {
+								itemEntity.cnt = QueueCashItemEntity.MAX_CNT;
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	
+	private boolean task(QueueCashItemEntity itemEntity) throws Exception {
+		boolean isSucc = false;
+		String withDrawSn = itemEntity.withDrawSn;
+		BaseResult<UserWithdraw> baseResult = userWithdrawService.queryUserWithdraw(withDrawSn);
+		if(baseResult.getCode() == 0 && baseResult.getData() != null) {
+			UserWithdraw userWithDraw = baseResult.getData();
+			int userId = userWithDraw.getUserId();
+			if(userWithDraw != null 
+			  &&!ProjectConstant.STATUS_FAILURE.equals(userWithDraw.getStatus()) 
+			  &&!ProjectConstant.STATUS_SUCC.equals(userWithDraw.getStatus())){
+				//query订单状态
+				RspSingleQueryEntity rspEntity = xianfengUtil.queryCash(withDrawSn);
+				if(rspEntity != null && rspEntity.isSucc()) {
+					this.operation(convert2RspSingleCashEntity(rspEntity),withDrawSn, userId,false,true,true);
+				}
+			}
+		}
+		return isSucc;
 	}
 	
 }

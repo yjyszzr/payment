@@ -1,4 +1,4 @@
-package com.dl.shop.payment.schedul;
+/*package com.dl.shop.payment.schedul;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -69,7 +69,7 @@ public class PaySchedul {
 	private IUserBonusService userBonusService;
 	
 	@Scheduled(cron = "0 0/2 * * * ?")
-    public void dealBeyondPayTimeOrder() {
+    public void dealBeyondPayTimeOrderOut() {
 		logger.info("开始执行混合支付超时订单任务");
 		OrderCondtionParam orderQueryParam = new OrderCondtionParam();
     	orderQueryParam.setOrderStatus(0);
@@ -95,9 +95,9 @@ public class PaySchedul {
 	}
 	
 	
-	/**
+	*//**
 	 * 处理订单支付超时的定时任务
-	 */
+	 *//*
 	@Scheduled(fixedRate = 1000*5)
     public void timerOrderQueryScheduled() {
 		String loggerId = "timer_orderquery_" + System.currentTimeMillis();
@@ -208,3 +208,4 @@ public class PaySchedul {
 		return ResultGenerator.genSuccessResult();
 	}
 }
+*/

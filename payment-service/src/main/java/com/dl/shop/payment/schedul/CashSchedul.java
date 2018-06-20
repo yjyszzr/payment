@@ -1,4 +1,4 @@
-package com.dl.shop.payment.schedul;
+/*package com.dl.shop.payment.schedul;
 
 import java.util.List;
 import org.slf4j.Logger;
@@ -34,9 +34,9 @@ public class CashSchedul {
 	@Autowired
 	private XianFengCashUtil xianFengUtil;
 	
-	/**
+	*//**
 	 * 提现状态轮询
-	 */
+	 *//*
 	@Scheduled(fixedRate = 1000*20)
     public void timerCheckCashReq() {
 //		logger.info("[timerCheckCashReq]" +" call...");
@@ -100,3 +100,4 @@ public class CashSchedul {
 		return rspSingleCashEntity;
 	}
 }
+*/
