@@ -223,6 +223,7 @@ public class PayMentService extends AbstractService<PayMent> {
 		reqEntity.setAmount(b.intValue()+"");
 		reqEntity.setNote("手动退款操作");
 		reqEntity.setOrig_order_no(payLog.getPayOrderSn());
+		log.info("[rollbackAmountThird]" + " str:" + reqEntity.toString());
 		try {
 			RspRefundEntity rspRefundEntity = rongUtil.refundOrderInfo(reqEntity);
 			log.info("rEntity:" + rspRefundEntity.toString());
