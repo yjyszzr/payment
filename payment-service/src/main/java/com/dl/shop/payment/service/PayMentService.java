@@ -49,6 +49,7 @@ import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.PayMent;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
+import com.dl.shop.payment.param.RollbackThirdOrderAmountParam;
 import com.dl.shop.payment.pay.common.PayManager;
 import com.dl.shop.payment.pay.common.PayManager.QueueItemEntity;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
@@ -212,18 +213,13 @@ public class PayMentService extends AbstractService<PayMent> {
 
     }
     
-    public BaseResult<?> rollbackAmountThird(RollbackOrderAmountParam param) {
-    	PayLog payLog = payLogService.findPayLogByOrderSign(param.getOrderSn());
-    	if(payLog == null) {
-    		return ResultGenerator.genFailResult("未查询到订单信息");
-    	}
-    	BigDecimal bigDec = payLog.getOrderAmount();
-    	BigDecimal b = bigDec.multiply(BigDecimal.valueOf(100));
+    public BaseResult<?> rollbackAmountThird(RollbackThirdOrderAmountParam param) {
+    	String amt = param.getAmt();
     	ReqRefundEntity reqEntity = new ReqRefundEntity();
-		reqEntity.setAmount(b.intValue()+"");
+		reqEntity.setAmount(amt);
 		reqEntity.setNote("手动退款操作");
-		reqEntity.setOrig_order_no(payLog.getPayOrderSn());
-		String payCode = payLog.getPayCode();
+		reqEntity.setOrig_order_no(param.getOrderSn());
+		String payCode = param.getPayCode();
 		boolean isInWeChat = false;
 		if(payCode.equals("app_weixin_h5")) {
 			isInWeChat = true;

@@ -73,6 +73,7 @@ import com.dl.shop.payment.param.PayLogIdParam;
 import com.dl.shop.payment.param.RechargeParam;
 import com.dl.shop.payment.param.ReqOrderQueryParam;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
+import com.dl.shop.payment.param.RollbackThirdOrderAmountParam;
 import com.dl.shop.payment.param.WithdrawParam;
 import com.dl.shop.payment.pay.common.PayManager;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
@@ -178,7 +179,7 @@ public class PaymentController extends AbstractBaseController{
 	@ApiOperation(value="用户支付回退接口第三方调用测试", notes="")
 	@PostMapping("/rollbackAmountThird")
 	@ResponseBody
-	public BaseResult<?> rollbackAmomtThird(@RequestBody RollbackOrderAmountParam param) {
+	public BaseResult<?> rollbackAmomtThird(@RequestBody RollbackThirdOrderAmountParam param) {
 		logger.info("[rollbackAmomtThird]" +" 手工退款操作:" + param.getOrderSn());
 		return paymentService.rollbackAmountThird(param);
 	}
