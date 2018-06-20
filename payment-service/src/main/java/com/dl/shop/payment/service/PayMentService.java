@@ -223,9 +223,14 @@ public class PayMentService extends AbstractService<PayMent> {
 		reqEntity.setAmount(b.intValue()+"");
 		reqEntity.setNote("手动退款操作");
 		reqEntity.setOrig_order_no(payLog.getPayOrderSn());
+		String payCode = payLog.getPayCode();
+		boolean isInWeChat = false;
+		if(payCode.equals("app_weixin_h5")) {
+			isInWeChat = true;
+		}
 		log.info("[rollbackAmountThird]" + " str:" + reqEntity.toString());
 		try {
-			RspRefundEntity rspRefundEntity = rongUtil.refundOrderInfo(reqEntity);
+			RspRefundEntity rspRefundEntity = yinHeUtil.orderRefund(isInWeChat,reqEntity.getOrig_order_no(),reqEntity.getAmount());
 			log.info("rEntity:" + rspRefundEntity.toString());
 			return ResultGenerator.genSuccessResult("succ",rspRefundEntity);
 		}catch(Exception ee) {
