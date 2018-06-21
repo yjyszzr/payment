@@ -1,13 +1,11 @@
 package com.dl.shop.payment.service;
-import java.awt.Paint;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import javax.annotation.Resource;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.util.TextUtils;
@@ -16,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.alibaba.fastjson.JSON;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -31,7 +28,6 @@ import com.dl.member.dto.DonationPriceDTO;
 import com.dl.member.dto.RechargeDataActivityDTO;
 import com.dl.member.dto.SurplusPaymentCallbackDTO;
 import com.dl.member.param.MemRollParam;
-import com.dl.member.param.MemWithDrawSnParam;
 import com.dl.member.param.RecharegeParam;
 import com.dl.member.param.StrParam;
 import com.dl.member.param.SurplusPayParam;
@@ -63,7 +59,6 @@ import com.dl.shop.payment.pay.rongbao.entity.ReqRefundEntity;
 import com.dl.shop.payment.pay.rongbao.entity.RspRefundEntity;
 import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
 import com.dl.shop.payment.web.PaymentController;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -278,6 +273,7 @@ public class PayMentService extends AbstractService<PayMent> {
 		String payName = order.getPayName();
 		BigDecimal thirdPartyPaid = order.getThirdPartyPaid();
 		Integer userBonusId = order.getUserBonusId();
+		Integer userId = order.getUserId();
 		//退回优惠券
 		log.info("优惠券退回操作 userBonusId:" + userBonusId);
 		if(userBonusId != null && userBonusId > 0) {
@@ -303,22 +299,18 @@ public class PayMentService extends AbstractService<PayMent> {
 		if(hasThird && payType == 2) {
 			payType = 3;//混合支付
 		}
-//		boolean succThird = false;
-		log.info("出票失败含有第三方支付:" + hasThird +" payType:" + payType);
 		orderSn = order.getOrderSn();
-		log.info("出票失败含有第三方支付 订单orderSn:" + orderSn);
+		log.info("出票失败含有第三方支付:" + hasThird +" payType:" + payType + " orderSn:" + orderSn);
 		if(!TextUtils.isEmpty(orderSn)) {
-			PayLog payLog = payLogService.findPayLogByOrderSn(orderSn);
-			if(payLog == null) {
-				return ResultGenerator.genFailResult("回滚订单不存在 orderSn:" + orderSn);
-			}
-			int isPaid = payLog.getIsPaid();
-			String payCode = payLog.getPayCode();
-			Integer userId = payLog.getUserId();
-			log.info("回滚查询PayLog信息:" + " payCode:" + payCode + " payOrderSn:" + payLog.getPayOrderSn() + "订单金额:" + thirdPartyPaid);
 			BigDecimal amtReal = null;
-			if(isPaid <= 0) {
-				return ResultGenerator.genFailResult("[rollbackOrderAmount] 回滚订单未支付 payOrderSn:" + payLog.getPayOrderSn());
+			PayLog payLog = payLogService.findPayLogByOrderSn(orderSn);
+			if(payLog != null) {
+				int isPaid = payLog.getIsPaid();
+				String payCode = payLog.getPayCode();
+				log.info("回滚查询PayLog信息:" + " payCode:" + payCode + " payOrderSn:" + payLog.getPayOrderSn() + "订单金额:" + thirdPartyPaid);
+				if(isPaid <= 0) {
+					return ResultGenerator.genFailResult("[rollbackOrderAmount] 回滚订单未支付 payOrderSn:" + payLog.getPayOrderSn());
+				}
 			}
 			if(amt == null) {	//该订单全额退款 退款金额为thirdPartyPaid
 				amtReal = thirdPartyPaid;
@@ -345,7 +337,7 @@ public class PayMentService extends AbstractService<PayMent> {
 			if(!isSucc) {
 				payLog.setPayMsg("第三方资金退回失败");
 				payLogService.update(payLog);
-				log.info("第三方资金退回失败 payCode：" + payCode + " amt:" + thirdPartyPaid.toString());
+				log.info("第三方资金退回失败 payCode：" + " amt:" + thirdPartyPaid.toString());
 			}
 		}
 		//处理余额
