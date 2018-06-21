@@ -57,6 +57,7 @@ import com.dl.order.param.SubmitOrderParam;
 import com.dl.order.param.SubmitOrderParam.TicketDetail;
 import com.dl.order.param.UpdateOrderInfoParam;
 import com.dl.shop.payment.dto.PayLogDTO;
+import com.dl.shop.payment.dto.PayLogDetailDTO;
 import com.dl.shop.payment.dto.PayReturnDTO;
 import com.dl.shop.payment.dto.PayWaysDTO;
 import com.dl.shop.payment.dto.PaymentDTO;
@@ -70,6 +71,7 @@ import com.dl.shop.payment.model.UserWithdrawLog;
 import com.dl.shop.payment.param.AllPaymentInfoParam;
 import com.dl.shop.payment.param.GoPayParam;
 import com.dl.shop.payment.param.PayLogIdParam;
+import com.dl.shop.payment.param.PayLogOrderSnParam;
 import com.dl.shop.payment.param.RechargeParam;
 import com.dl.shop.payment.param.ReqOrderQueryParam;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
@@ -854,6 +856,15 @@ public class PaymentController extends AbstractBaseController{
 		return payLogService.queryPayLogByPayLogId(Integer.valueOf(payLogIdParam.getPayLogId()));
  	}	
 	
+	/**
+     * 	根据OrderSn查询支付信息
+     */
+	@ApiOperation(value="根据orderSn查询支付信息", notes="根据orderSn查询支付信息")
+	@PostMapping("/queryPayLogByOrderSn")
+	@ResponseBody
+    public BaseResult<PayLogDetailDTO> queryPayLogByOrderSn(@RequestBody PayLogOrderSnParam payLogOrderSnParam){
+		return payLogService.queryPayLogByOrderSn(payLogOrderSnParam.getOrderSn());
+ 	}
 	
 	/**
      * 	查询redis的值

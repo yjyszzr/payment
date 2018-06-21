@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.dl.base.param.EmptyParam;
 import com.dl.base.result.BaseResult;
 import com.dl.shop.payment.dto.PayLogDTO;
+import com.dl.shop.payment.dto.PayLogDetailDTO;
 import com.dl.shop.payment.dto.PriceDTO;
 import com.dl.shop.payment.dto.UserRechargeDTO;
 import com.dl.shop.payment.dto.UserWithdrawDTO;
@@ -16,6 +17,7 @@ import com.dl.shop.payment.dto.UserWithdrawDetailDTO;
 import com.dl.shop.payment.dto.ValidPayDTO;
 import com.dl.shop.payment.dto.YesOrNoDTO;
 import com.dl.shop.payment.param.PayLogIdParam;
+import com.dl.shop.payment.param.PayLogOrderSnParam;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
 import com.dl.shop.payment.param.StrParam;
 import com.dl.shop.payment.param.UserIdParam;
@@ -51,6 +53,13 @@ public interface IpaymentService {
      */
  	@RequestMapping(path="/payment/queryPayLogByPayLogId", method=RequestMethod.POST)
     public BaseResult<PayLogDTO> queryPayLogByPayLogId(@RequestBody PayLogIdParam payLogIdParam);
+ 	
+ 	/**
+     * 	根据payLogId查询支付信息
+     */
+ 	@RequestMapping(path="/payment/queryPayLogByOrderSn", method=RequestMethod.POST)
+    public BaseResult<PayLogDetailDTO> queryPayLogByOrderSn(@RequestBody PayLogOrderSnParam payLogIdParam);
+ 	
  	
  	/**
  	 *  查询用户是否成功充过值

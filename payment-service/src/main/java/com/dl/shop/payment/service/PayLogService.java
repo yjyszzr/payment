@@ -2,6 +2,7 @@ package com.dl.shop.payment.service;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.dao.PayLogMapper;
 import com.dl.shop.payment.dto.PayLogDTO;
+import com.dl.shop.payment.dto.PayLogDetailDTO;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -79,4 +80,15 @@ public class PayLogService extends AbstractService<PayLog> {
 		BeanUtils.copyProperties(payLog, payLogDTO);
 		return ResultGenerator.genSuccessResult("success", payLogDTO);
 	}
+	
+	public BaseResult<PayLogDetailDTO> queryPayLogByOrderSn(String orderSn){
+		PayLog payLog = payLogMapper.findPayLogByOrderSn(orderSn);
+		if(null == payLog) {
+			return ResultGenerator.genResult(PayEnums.PAY_DBDATA_IS_NOT_IN.getcode(),PayEnums.PAY_DBDATA_IS_NOT_IN.getMsg());
+		}
+		PayLogDetailDTO payLogDTO = new PayLogDetailDTO();
+		BeanUtils.copyProperties(payLog, payLogDTO);
+		return ResultGenerator.genSuccessResult("success", payLogDTO);
+	}
 }
+
