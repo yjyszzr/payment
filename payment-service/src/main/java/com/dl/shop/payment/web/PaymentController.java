@@ -175,6 +175,12 @@ public class PaymentController extends AbstractBaseController{
 	@PostMapping("/rollbackOrderAmount")
 	@ResponseBody
 	public BaseResult<?> rollbackOrderAmount(@RequestBody RollbackOrderAmountParam param) {
+		if(param.getAmt() == null || param.getAmt().floatValue() <= 0) {
+			return ResultGenerator.genFailResult("请传入合法金额");
+		}
+		if(StringUtils.isEmpty(param.getOrderSn())) {
+			return ResultGenerator.genFailResult("请传入合法订单号");
+		}
 		return paymentService.rollbackOrderAmount(param);
 	}
 	

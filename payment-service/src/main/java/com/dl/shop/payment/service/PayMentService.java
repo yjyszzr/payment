@@ -511,12 +511,13 @@ public class PayMentService extends AbstractService<PayMent> {
 			}else {
 				logger.info("生成账户流水成功");
 			}
-			if(!isLotteryPrintSucc) {
-				//资金回滚
-				RollbackOrderAmountParam p = new RollbackOrderAmountParam();
-				p.setOrderSn(orderSn);
-				this.rollbackOrderAmount(p);
-			}
+//			if(!isLotteryPrintSucc) {
+//				//资金回滚
+//				RollbackOrderAmountParam p = new RollbackOrderAmountParam();
+//				p.setOrderSn(orderSn);
+//				p.setAmt(amt);
+//				this.rollbackOrderAmount(p);
+//			}
 			return ResultGenerator.genSuccessResult("订单已支付成功！", null);
 		}else {
 			//预扣款 的方案 这里什么也不做
