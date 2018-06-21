@@ -176,7 +176,7 @@ public class PaymentController extends AbstractBaseController{
 		return paymentService.rollbackOrderAmount(param);
 	}
 	
-	@ApiOperation(value="用户支付回退接口第三方调用测试", notes="")
+	@ApiOperation(value="手动操作第三方退款接口", notes="")
 	@PostMapping("/rollbackAmountThird")
 	@ResponseBody
 	public BaseResult<?> rollbackAmomtThird(@RequestBody RollbackThirdOrderAmountParam param) {
