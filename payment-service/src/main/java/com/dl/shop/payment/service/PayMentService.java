@@ -294,77 +294,76 @@ public class PayMentService extends AbstractService<PayMent> {
 		//第三方支付
 		int payType = 1;//默认微信
 		if(surplus != null && surplus.doubleValue() > 0) {
-			payType = 2;
+			payType = 2;//余额支付
 		}
 		boolean hasThird = false;
 		if(thirdPartyPaid != null && thirdPartyPaid.doubleValue() > 0) {
 			hasThird = true;
 		}
 		if(hasThird && payType == 2) {
-			payType = 3;
+			payType = 3;//混合支付
 		}
-		boolean succThird = false;
-		log.info("出票失败含有第三方支付:" + hasThird);
-		if(hasThird) {
-			orderSn = order.getOrderSn();
-			log.info("出票失败含有第三方支付 订单orderSn:" + orderSn);
-			if(!TextUtils.isEmpty(orderSn)) {
-				PayLog payLog = payLogService.findPayLogByOrderSn(orderSn);
-				if(payLog == null) {
-					return ResultGenerator.genFailResult("回滚订单不存在 orderSn:" + orderSn);
-				}
-				int isPaid = payLog.getIsPaid();
-				String payCode = payLog.getPayCode();
-				Integer userId = payLog.getUserId();
-				log.info("回滚查询PayLog信息:" + " payCode:" + payCode + " payOrderSn:" + payLog.getPayOrderSn() + "订单金额:" + thirdPartyPaid);
-				BigDecimal amtReal = null;
-				if(isPaid <= 0) {
-					return ResultGenerator.genFailResult("[rollbackOrderAmount] 回滚订单未支付 payOrderSn:" + payLog.getPayOrderSn());
-				}
-				if(amt == null) {	//该订单全额退款 退款金额为thirdPartyPaid
-					amtReal = thirdPartyPaid;
-				}else {				//该订单部分退款
-					if(amt.compareTo(thirdPartyPaid) > 0) {
-						return ResultGenerator.genFailResult("[rollbackOrderAmount] 回滚订单金额，超出该订单总金额");
-					}
-					amtReal = amt;
-				}
-				log.info("[rollbackOrderAmount]" + "真实回退金额:" + amtReal);
-				MemRollParam mRollParam = new MemRollParam();
-				mRollParam.setUserId(userId);
-				mRollParam.setOrderSn(orderSn);
-				mRollParam.setAmt(amtReal);
-				BaseResult<SurplusPaymentCallbackDTO> baseResult = userAccountService.rollbackUserMoneyFailure(mRollParam);
-				if(baseResult.getCode() != 0) {
-					succThird = false;
-				}else {
-					succThird = true;
-				}
-				//第三方资金退回
-				if(!succThird) {
-					payLog.setPayMsg("第三方资金退回失败");
-					payLogService.update(payLog);
-					log.info("第三方资金退回失败 payCode：" + payCode + " amt:" + thirdPartyPaid.toString());
-				}
+//		boolean succThird = false;
+		log.info("出票失败含有第三方支付:" + hasThird +" payType:" + payType);
+		orderSn = order.getOrderSn();
+		log.info("出票失败含有第三方支付 订单orderSn:" + orderSn);
+		if(!TextUtils.isEmpty(orderSn)) {
+			PayLog payLog = payLogService.findPayLogByOrderSn(orderSn);
+			if(payLog == null) {
+				return ResultGenerator.genFailResult("回滚订单不存在 orderSn:" + orderSn);
 			}
-		}else {	//无第三方支付，默认第三支付成功
-			succThird = true;
-		}
-		if(amt == null && succThird && (payType ==2 || payType == 3)) {
-			SurplusPayParam surplusPayParam = new SurplusPayParam();
-			surplusPayParam.setOrderSn(orderSn);
-			surplusPayParam.setSurplus(surplus);
-			surplusPayParam.setBonusMoney(bonusAmount);
-			surplusPayParam.setPayType(payType);
-			surplusPayParam.setMoneyPaid(moneyPaid);
-			surplusPayParam.setThirdPartName(payName);
-			surplusPayParam.setThirdPartPaid(new BigDecimal(0));
-			BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
-			log.info(" orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" rollbackOrderAmount回滚用户余额结束！ 订单回调返回结果：status=" + rollbackUserAccountChangeByPay.getCode()+" , message="+rollbackUserAccountChangeByPay.getMsg());
-			if(rollbackUserAccountChangeByPay.getCode() != 0) {
-				log.info(" orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" rollbackOrderAmount回滚用户余额时出错！");
+			int isPaid = payLog.getIsPaid();
+			String payCode = payLog.getPayCode();
+			Integer userId = payLog.getUserId();
+			log.info("回滚查询PayLog信息:" + " payCode:" + payCode + " payOrderSn:" + payLog.getPayOrderSn() + "订单金额:" + thirdPartyPaid);
+			BigDecimal amtReal = null;
+			if(isPaid <= 0) {
+				return ResultGenerator.genFailResult("[rollbackOrderAmount] 回滚订单未支付 payOrderSn:" + payLog.getPayOrderSn());
+			}
+			if(amt == null) {	//该订单全额退款 退款金额为thirdPartyPaid
+				amtReal = thirdPartyPaid;
+			}else {				//该订单部分退款
+				if(amt.compareTo(thirdPartyPaid) > 0) {
+					return ResultGenerator.genFailResult("[rollbackOrderAmount] 回滚订单金额，超出该订单总金额");
+				}
+				amtReal = amt;
+			}
+			log.info("[rollbackOrderAmount]" + "真实回退金额:" + amtReal);
+			MemRollParam mRollParam = new MemRollParam();
+			mRollParam.setUserId(userId);
+			mRollParam.setOrderSn(orderSn);
+			mRollParam.setAmt(amtReal);
+			BaseResult<SurplusPaymentCallbackDTO> baseResult = userAccountService.rollbackUserMoneyFailure(mRollParam);
+			boolean isSucc;
+			if(baseResult.getCode() != 0) {
+				isSucc = false;
+			}else {
+				isSucc = true;
+			}
+			log.info("[rollbackOrderAmount]" + " 回退用户可提现余额结果 succ:" + isSucc);
+			//第三方资金退回
+			if(!isSucc) {
+				payLog.setPayMsg("第三方资金退回失败");
+				payLogService.update(payLog);
+				log.info("第三方资金退回失败 payCode：" + payCode + " amt:" + thirdPartyPaid.toString());
 			}
 		}
+		//处理余额
+//		if(payType == 2 || payType == 3) {
+//			SurplusPayParam surplusPayParam = new SurplusPayParam();
+//			surplusPayParam.setOrderSn(orderSn);
+//			surplusPayParam.setSurplus(surplus);
+//			surplusPayParam.setBonusMoney(bonusAmount);
+//			surplusPayParam.setPayType(payType);
+//			surplusPayParam.setMoneyPaid(moneyPaid);
+//			surplusPayParam.setThirdPartName(payName);
+//			surplusPayParam.setThirdPartPaid(new BigDecimal(0));
+//			BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
+//			log.info(" orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" rollbackOrderAmount回滚用户余额结束！ 订单回调返回结果：status=" + rollbackUserAccountChangeByPay.getCode()+" , message="+rollbackUserAccountChangeByPay.getMsg());
+//			if(rollbackUserAccountChangeByPay.getCode() != 0) {
+//				log.info(" orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" rollbackOrderAmount回滚用户余额时出错！");
+//			}
+//		}
 		return ResultGenerator.genSuccessResult();
 	}
 	
