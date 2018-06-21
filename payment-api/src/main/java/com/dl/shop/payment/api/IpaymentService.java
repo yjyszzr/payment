@@ -73,24 +73,24 @@ public interface IpaymentService {
 	/**
      * 	校验用户是否有过钱上的成功的交易
      */
-	@PostMapping("/payment/validUserPay")
+ 	@RequestMapping(path="/payment/validUserPay", method=RequestMethod.POST)
     public BaseResult<ValidPayDTO> validUserPay(@RequestBody UserIdParam userIdParam);
 
 	/**
      * 	包含了第三方支付的超时处理
      */
-	@PostMapping("/payment/dealBeyondPayTimeOrderOut")
+	@RequestMapping(path="/payment/dealBeyondPayTimeOrderOut", method=RequestMethod.POST)
     public BaseResult<String> dealBeyondPayTimeOrderOut(@RequestBody EmptyParam emptyParam);
 	
 	/**
 	 * 提现状态轮询
 	 */
-	@PostMapping("/cash/timerCheckCashReq")
+	@RequestMapping(path="/cash/timerCheckCashReq", method=RequestMethod.POST)
 	public BaseResult<String> timerCheckCashReq(@RequestBody EmptyParam emptyParam);
 	
 	/**
 	 * 第三方支付的query后的更新支付状态
 	 */
-	@PostMapping("/payment/timerOrderQueryScheduled")
+	@RequestMapping(path="/payment/timerOrderQueryScheduled", method=RequestMethod.POST)
     public BaseResult<String> timerOrderQueryScheduled(@RequestBody EmptyParam emptyParam);
 }
