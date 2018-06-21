@@ -85,7 +85,7 @@ public interface IpaymentService {
 	/**
 	 * 提现状态轮询
 	 */
-	@PostMapping("/payment/timerCheckCashReq")
+	@PostMapping("/cash/timerCheckCashReq")
 	public BaseResult<String> timerCheckCashReq(@RequestBody EmptyParam emptyParam);
 	
 	/**
