@@ -340,63 +340,8 @@ public class PayMentService extends AbstractService<PayMent> {
 				}else {
 					succThird = true;
 				}
-//				RspRefundEntity rspRefundEntity = null;
-//				if(payLog != null) {
-//					if(payCode.equals("app_rongbao")) {
-//						ReqRefundEntity reqEntity = new ReqRefundEntity();
-//						reqEntity.setAmount(thirdPartyPaid.toString());
-//						reqEntity.setNote("出票失败退款操作");
-//						reqEntity.setOrig_order_no(payLog.getPayOrderSn());
-//						try {
-//							rspRefundEntity = rongUtil.refundOrderInfo(reqEntity);
-//							log.info("rEntity:" + rspRefundEntity.toString());
-//							if(rspRefundEntity != null && rspRefundEntity.isSucc()) {
-//								succThird = true;
-//							}
-//						} catch (Exception e) {
-//							e.printStackTrace();
-//						}
-//					}else if(payCode.equals("app_weixin") || "app_weixin_h5".equals(payCode)){
-//						boolean isInWeChat = "app_weixin_h5".equals(payCode);
-//						String amt = thirdPartyPaid.toString();
-//						BigDecimal bigDec = new BigDecimal(amt);
-//						String amtFen = bigDec.movePointRight(2).intValue()+"";
-//						log.info("=========================");
-//						log.info("进入到了微信订单回滚 isInWeChat：" + isInWeChat + " amtFen" + amtFen + "payOrderSn:" + payLog.getPayOrderSn());
-//						rspRefundEntity = yinHeUtil.orderRefund(isInWeChat,payLog.getPayOrderSn(),amtFen);
-//						if(rspRefundEntity.isSucc()) {
-//							succThird = true;
-//						}
-//						log.info("微信订单回滚 isSucc:" + rspRefundEntity.isSucc() + " msg:" + rspRefundEntity.toString());
-//						log.info("=========================");
-//					}
-				
 				//第三方资金退回
-				if(succThird) {
-					log.info("第三方资金退回成功 payCode：" + payCode + " amt:" + amtReal.toString());
-					//===========记录退款流水==========
-					UserAccountParamByType userAccountParamByType = new UserAccountParamByType();
-					Integer accountType = ProjectConstant.ACCOUNT_ROLLBACK;
-					log.info("===========更新用户流水表=======:" + accountType);
-					userAccountParamByType.setAccountType(accountType);
-					userAccountParamByType.setAmount(BigDecimal.ZERO.subtract(payLog.getOrderAmount()));
-					userAccountParamByType.setBonusPrice(BigDecimal.ZERO);//暂无红包金额
-					userAccountParamByType.setOrderSn(payLog.getOrderSn());
-					userAccountParamByType.setPayId(payLog.getLogId());
-					userAccountParamByType.setThirdPartPaid(amtReal);
-					if(payCode.equals("app_weixin") || payCode.equals("app_weixin_h5")) {
-						payName = "微信";
-					}else {
-						payName = "银行卡";
-					}
-					userAccountParamByType.setPaymentName(payName);
-					userAccountParamByType.setThirdPartName(payName);
-					userAccountParamByType.setUserId(payLog.getUserId());
-					BaseResult<String> accountRst = userAccountService.insertUserAccount(userAccountParamByType);
-					if(accountRst.getCode() == 0) {
-						log.info("退款成功记录流水成功...");
-					}
-				}else {
+				if(!succThird) {
 					payLog.setPayMsg("第三方资金退回失败");
 					payLogService.update(payLog);
 					log.info("第三方资金退回失败 payCode：" + payCode + " amt:" + thirdPartyPaid.toString());
