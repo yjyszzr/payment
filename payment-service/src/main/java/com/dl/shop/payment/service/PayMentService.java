@@ -267,7 +267,7 @@ public class PayMentService extends AbstractService<PayMent> {
 		OrderSnParam snParam = new OrderSnParam();
 		snParam.setOrderSn(orderSn);
 		BaseResult<OrderDTO> orderRst = orderService.getOrderInfoByOrderSn(snParam);
-		if(orderRst.getCode() != 0 || orderRst.getData() == null) {
+		if(orderRst.getCode() != 0 || StringUtils.isEmpty(orderRst.getData().getOrderSn())) {
 			log.info("orderService.getOrderInfoByOrderSn rst code="+orderRst.getCode()+" msg="+orderRst.getMsg());
 			return ResultGenerator.genFailResult("[rollbackOrderAmount]" + " 查询订单失败");
 		}
