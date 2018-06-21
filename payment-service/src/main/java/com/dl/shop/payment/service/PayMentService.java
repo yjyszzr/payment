@@ -258,7 +258,7 @@ public class PayMentService extends AbstractService<PayMent> {
      * @return
      */
 	public BaseResult<?> rollbackOrderAmount(RollbackOrderAmountParam param) {
-		log.info("in rollbackOrderAmount ordersn=" + param.getOrderSn());
+		log.info("[rollbackOrderAmount] ordersn=" + param.getOrderSn() + " amt:" + param.getAmt());
 		String orderSn = param.getOrderSn();
 		OrderSnParam snParam = new OrderSnParam();
 		snParam.setOrderSn(orderSn);
