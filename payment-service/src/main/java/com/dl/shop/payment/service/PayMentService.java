@@ -291,6 +291,7 @@ public class PayMentService extends AbstractService<PayMent> {
 				}
 			}
 		}
+		logger.info("[rollbackOrderAmount]" +" 实际回退金额:" + amt);
 		MemRollParam mRollParam = new MemRollParam();
 		mRollParam.setUserId(userId);
 		mRollParam.setOrderSn(orderSn);
