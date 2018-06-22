@@ -116,13 +116,14 @@ public class XianFengService {
 			e.printStackTrace();
 		}
 		if(rspEntity != null) {
+			logger.info("[appPay]" + " rsp:" + rspEntity);
 			if(rspEntity.isSucc()) {
 				return ResultGenerator.genSuccessResult("succ",rspEntity);	
 			}else {
-				return ResultGenerator.genFailResult(rspEntity.resMessage);
+				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_PAY_ERROR.getcode(),PayEnums.PAY_XIANFENG_PAY_ERROR.getMsg()+"["+rspEntity.resMessage+"]");
 			}
 		}
-		return ResultGenerator.genFailResult("请求失败");
+		return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_PAY_ERROR.getcode(),PayEnums.PAY_XIANFENG_PAY_ERROR.getMsg()+"[先锋请求异常]");
 	}
 	
 	/**
