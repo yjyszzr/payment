@@ -111,8 +111,13 @@ public class XianFengService {
 		//userId, amt, certNo, accNo, accName, mobileNo, bankId, pName, pInfo
 		logger.info("===================请求先锋支付==========================");
 		logger.info("[appPay]" +" userId:" + userId +" amt:" + amt +" certNo:" + certNo 
-				+" accName:" + accName +" mobileNo:" + mobileNo + " bankId:" + bankId +" pName:" + pName +" pInfo:" + pInfo);
+				+" accName:" + accName +" mobileNo:" + mobileNo + " bankId:" + bankId +" pName:" 
+				+ pName +" pInfo:" + pInfo + " payOrderSn:" + payOrderSn);
 		logger.info("===================请求先锋支付==========================");
+		//test code
+		accNo = "6222021001115704287";
+		bankId = "ICBC";
+		//test code
 		try {
 			rspEntity = xFPayUtil.reqApply(payOrderSn,null,amt+"",certNo,accNo,accName,mobileNo,bankId,pName,pInfo);
 		} catch (Exception e) {
