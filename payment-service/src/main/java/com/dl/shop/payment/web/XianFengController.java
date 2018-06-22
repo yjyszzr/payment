@@ -15,6 +15,7 @@ import com.dl.base.result.ResultGenerator;
 import com.dl.member.api.IUserBankService;
 import com.dl.member.dto.BankDTO;
 import com.dl.shop.payment.dto.BankTypeDTO;
+import com.dl.shop.payment.dto.XianFengApplyDTO;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.param.XianFengBankTypeParam;
@@ -49,7 +50,7 @@ public class XianFengController {
 	@ApiOperation(value="先锋支付请求")
 	@PostMapping("/app")
 	@ResponseBody
-	public BaseResult<Object> appPay(@RequestBody XianFengPayParam payParam) {
+	public BaseResult<XianFengApplyDTO> appPay(@RequestBody XianFengPayParam payParam) {
 		return xianFengService.appPay(payParam);
 	}
 	

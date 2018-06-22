@@ -16,6 +16,7 @@ import com.dl.member.param.BankCardParam;
 import com.dl.member.param.BankCardSaveParam;
 import com.dl.member.param.UserBankPurposeQueryParam;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
+import com.dl.shop.payment.dto.XianFengApplyDTO;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.param.XianFengPayConfirmParam;
@@ -68,7 +69,7 @@ public class XianFengService {
 		return ResultGenerator.genFailResult("请求失败");
 	}
 	
-	public BaseResult<Object> appPay(XianFengPayParam param){
+	public BaseResult<XianFengApplyDTO> appPay(XianFengPayParam param){
 		int payLogId = param.getPayLogId();
 		PayLog payLog = payLogService.findById(payLogId);
 		if(payLog == null){
@@ -127,7 +128,15 @@ public class XianFengService {
 		if(rspEntity != null) {
 			logger.info("[appPay]" + " rsp:" + rspEntity);
 			if(rspEntity.isSucc()) {
-				return ResultGenerator.genSuccessResult("succ",rspEntity);	
+				//更新payLog信息
+				String tradeNo = rspEntity.tradeNo;
+				PayLog updatePayLog = new PayLog();
+				updatePayLog.setOrderSn(payLog.getOrderSn());
+				updatePayLog.setTradeNo(tradeNo);
+				payLogService.updatePayLogByOrderSn(updatePayLog);
+				XianFengApplyDTO xFApplyDTO = new XianFengApplyDTO();
+				xFApplyDTO.setTradeNo(tradeNo);
+				return ResultGenerator.genSuccessResult("succ",xFApplyDTO);	
 			}else {
 				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_PAY_ERROR.getcode(),PayEnums.PAY_XIANFENG_PAY_ERROR.getMsg()+"["+rspEntity.resMessage+"]");
 			}
