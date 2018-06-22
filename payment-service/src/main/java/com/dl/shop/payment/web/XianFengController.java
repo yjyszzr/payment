@@ -10,11 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import com.alibaba.druid.util.StringUtils;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
-import com.dl.base.util.SessionUtil;
 import com.dl.member.api.IUserBankService;
 import com.dl.member.dto.BankDTO;
 import com.dl.shop.payment.dto.BankTypeDTO;
@@ -66,7 +63,7 @@ public class XianFengController {
 	@ApiOperation(value="根据银行账号获取卡类型 目前只识别借记卡和贷记卡")
 	@PostMapping("/getBankType")
 	@ResponseBody
-	public BaseResult<BankDTO> getBankType(@RequestBody XianFengBankTypeParam param){
+	public BaseResult<BankTypeDTO> getBankType(@RequestBody XianFengBankTypeParam param){
 		String bankCardNo = param.getBankCardNo();
 		BaseResult<BankDTO> baseResult = xianFengService.queryBankType(bankCardNo);
 		if(baseResult.getCode() != 0) {
@@ -85,7 +82,7 @@ public class XianFengController {
 		if(bankTypeDTO == null) {
 			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_BANKTYPE_UNKNOW.getcode(),PayEnums.PAY_XIANFENG_BANKTYPE_UNKNOW.getMsg());
 		}
-		return ResultGenerator.genSuccessResult("succ",bankDTO);
+		return ResultGenerator.genSuccessResult("succ",bankTypeDTO);
 	}
 	
 	

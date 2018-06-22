@@ -270,6 +270,7 @@ public class PayMentService extends AbstractService<PayMent> {
 		BigDecimal surplus = order.getSurplus();
 		BigDecimal bonusAmount = order.getBonus();
 		BigDecimal moneyPaid = order.getMoneyPaid();
+		BigDecimal totalAmt = order.getTicketAmount();
 		String payName = order.getPayName();
 		BigDecimal thirdPartyPaid = order.getThirdPartyPaid();
 		Integer userBonusId = order.getUserBonusId();
@@ -291,7 +292,11 @@ public class PayMentService extends AbstractService<PayMent> {
 				}
 			}
 		}
-		logger.info("[rollbackOrderAmount]" +" 实际回退金额:" + amt);
+		logger.info("[rollbackOrderAmount]" +" 实际回退金额:" + amt + " 总金额:" + totalAmt);
+		if(amt.compareTo(totalAmt) > 0) {
+			logger.info("[rollbackOrderAmount]" + "回退");
+			return ResultGenerator.genFailResult("回退金额大于彩票总金额");
+		}
 		MemRollParam mRollParam = new MemRollParam();
 		mRollParam.setUserId(userId);
 		mRollParam.setOrderSn(orderSn);
