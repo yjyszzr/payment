@@ -42,11 +42,6 @@ public class CashController {
 	private final static Logger logger = LoggerFactory.getLogger(CashController.class);
 	@Resource
 	private IUserService userService;
-	@Autowired
-	private IUserBankService userBankService;
-	@Autowired
-	private IUserAccountService userAccountService;
-	
 	@Resource
 	private UserWithdrawLogService userWithdrawLogService;
 	@Resource

@@ -14,6 +14,9 @@ import lombok.Data;
 @Data
 public class UserWithdrawParam {
 
+	@ApiModelProperty("提现单号")
+    private String withDrawSn;
+	
 	@ApiModelProperty("提现金额")
     private BigDecimal amount;
 
