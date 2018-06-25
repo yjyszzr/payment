@@ -513,6 +513,7 @@ public class CashService {
 							   && !ProjectConstant.STATUS_SUCC.equals(userWithDraw.getStatus())) {
 								//test code
 								rspSingleCashEntity.resCode = "00008";
+								rspSingleCashEntity.resMessage = "测试提现失败";
 								//
 								int userId = userWithDraw.getUserId();
 								logger.info("[withdrawNotify]" + " userId:" + userId +  " withDrawSn:" + withDrawSn);
