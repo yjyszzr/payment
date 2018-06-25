@@ -613,7 +613,11 @@ public class CashService {
 		String checkTimeStr = this.getTimeStr(checkTime);
 		Integer payTime = userWithdraw.getPayTime();
 		String payTimeStr = this.getTimeStr(payTime);
-		messageAddParam.setMsgDesc(MessageFormat.format(CommonConstants.FORMAT_WITHDRAW_MSG_DESC, addTimeStr, checkTimeStr, payTimeStr));
+		String strDesc = CommonConstants.FORMAT_WITHDRAW_MSG_DESC;
+		if(ProjectConstant.STATUS_FAILURE.equals(status)) {
+			strDesc = CommonConstants.FORMAT_WITHDRAW_MSG_FAIL_DESC;
+		}
+		messageAddParam.setMsgDesc(MessageFormat.format(strDesc,addTimeStr, checkTimeStr, payTimeStr));
 		params.add(messageAddParam);
 		addParam.setParams(params);
 		userMessageService.add(addParam);
