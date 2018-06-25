@@ -125,7 +125,8 @@ public class CashController {
 	@PostMapping("/timerCheckCashReq")
 	@ResponseBody
 	public BaseResult<String> timerCheckCashReq(@RequestBody EmptyParam emptyParam){
-		cashService.timerCheckCashReq();
+		//test code
+//		cashService.timerCheckCashReq();
 		return ResultGenerator.genSuccessResult("success");
 	}
 	
