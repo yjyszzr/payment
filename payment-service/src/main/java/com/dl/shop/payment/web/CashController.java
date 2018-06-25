@@ -69,7 +69,11 @@ public class CashController {
 	@PostMapping("/withdraw")
 	@ResponseBody
 	public BaseResult<Object> withdrawForApp(@RequestBody WithdrawParam param, HttpServletRequest request){
-		return cashService.withdrawForApp(param, request);
+		//test code
+		for(int i = 0;i < 10;i++) {
+			cashService.withdrawForApp(param, request);
+		}
+		return ResultGenerator.genSuccessResult("succ");
 	}
 	
 	
