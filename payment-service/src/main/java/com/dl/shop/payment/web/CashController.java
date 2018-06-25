@@ -12,12 +12,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.dl.base.param.EmptyParam;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
-import com.dl.member.api.IUserAccountService;
-import com.dl.member.api.IUserBankService;
 import com.dl.member.api.IUserMessageService;
 import com.dl.member.api.IUserService;
 import com.dl.shop.payment.model.UserWithdraw;
@@ -69,11 +66,7 @@ public class CashController {
 	@PostMapping("/withdraw")
 	@ResponseBody
 	public BaseResult<Object> withdrawForApp(@RequestBody WithdrawParam param, HttpServletRequest request){
-		//test code
-		for(int i = 0;i < 10;i++) {
-			cashService.withdrawForApp(param, request);
-		}
-		return ResultGenerator.genSuccessResult("succ");
+		return cashService.withdrawForApp(param, request);
 	}
 	
 	
@@ -129,8 +122,7 @@ public class CashController {
 	@PostMapping("/timerCheckCashReq")
 	@ResponseBody
 	public BaseResult<String> timerCheckCashReq(@RequestBody EmptyParam emptyParam){
-		//test code
-//		cashService.timerCheckCashReq();
+		cashService.timerCheckCashReq();
 		return ResultGenerator.genSuccessResult("success");
 	}
 	
