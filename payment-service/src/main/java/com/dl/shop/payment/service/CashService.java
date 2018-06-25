@@ -502,19 +502,14 @@ public class CashService {
 						logger.info("[withdrawNotify]" + " data:" + baseResult.getData() + " code:" + baseResult.getCode());
 						if(baseResult.getCode() == 0) {
 							UserWithdraw userWithDraw = baseResult.getData();
-							//test code
-//							PrintWriter writer = response.getWriter();
-//				        	writer.write("SUCCESS");
-//				        	writer.flush();
+							PrintWriter writer = response.getWriter();
+				        	writer.write("SUCCESS");
+				        	writer.flush();
 				        	logger.info("============SUCESS返回====================");
 				        	//提现单没有达最终态
 							if(userWithDraw != null 
 							   && !ProjectConstant.STATUS_FAILURE.equals(userWithDraw.getStatus())
 							   && !ProjectConstant.STATUS_SUCC.equals(userWithDraw.getStatus())) {
-								//test code
-								rspSingleCashEntity.resCode = "00008";
-								rspSingleCashEntity.resMessage = "测试提现失败";
-								//
 								int userId = userWithDraw.getUserId();
 								logger.info("[withdrawNotify]" + " userId:" + userId +  " withDrawSn:" + withDrawSn);
 								operation(rspSingleCashEntity,rspSingleCashEntity.merchantNo, userId,false,true,false);
