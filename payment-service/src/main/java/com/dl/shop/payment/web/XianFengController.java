@@ -59,19 +59,20 @@ public class XianFengController {
 	@PostMapping("/app")
 	@ResponseBody
 	public BaseResult<XianFengApplyDTO> appPay(@RequestBody XianFengPayParam payParam) {
-		String token = payParam.getCode();
+		String token = payParam.getToken();
 		//只是校验token信息是否为空
 		if(!StringUtils.isEmpty(token)) {
+			logger.info("[appPay]" +" token:" + token);
 			XianFengPayParam p = new XianFengPayParam();
 			p.setAccNo(payParam.getAccNo());
 			p.setCertNo(payParam.getCertNo());
-			p.setCode(payParam.getCode());
 			p.setName(payParam.getName());
 			p.setPayLogId(payParam.getPayLogId());
 			p.setPhone(payParam.getPhone());
 			p.setToken(token);
 			return getPaySms(p);
 		}else {
+			logger.info("[appPay]" + " paySn...");
 			token = SNGenerator.nextSN(SNBusinessCodeEnum.PAY_SN.getCode());
 			return xianFengService.appPay(payParam,token);	
 		}

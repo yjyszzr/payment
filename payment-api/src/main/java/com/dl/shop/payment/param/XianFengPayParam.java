@@ -15,8 +15,6 @@ public class XianFengPayParam {
 	private String accNo;
 	@ApiModelProperty("手机号码")
 	private String phone;
-	@ApiModelProperty("手机验证码")
-	private String code;
 	@ApiModelProperty("上下文")
 	private String token;
 }
