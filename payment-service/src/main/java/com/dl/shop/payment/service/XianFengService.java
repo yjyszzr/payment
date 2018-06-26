@@ -133,6 +133,7 @@ public class XianFengService {
 				PayLog updatePayLog = new PayLog();
 				updatePayLog.setOrderSn(payLog.getOrderSn());
 				updatePayLog.setTradeNo(tradeNo);
+				updatePayLog.setIsPaid(0);
 				payLogService.updatePayLogByOrderSn(updatePayLog);
 				XianFengApplyDTO xFApplyDTO = new XianFengApplyDTO();
 				xFApplyDTO.setTradeNo(tradeNo);
