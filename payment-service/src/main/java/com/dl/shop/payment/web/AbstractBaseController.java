@@ -28,8 +28,7 @@ public abstract class AbstractBaseController {
 	 * @param payIp 客户端ip
 	 * @return
 	 */
-	protected PayLog newPayLog(String orderSn, BigDecimal totalAmount, Integer payType, String payCode, String payName, String payIp) {
-		Integer userId = SessionUtil.getUserId();
+	protected PayLog newPayLog(int userId,String orderSn, BigDecimal totalAmount, Integer payType, String payCode, String payName, String payIp) {
 		PayLog payLog = new PayLog();
 		payLog.setUserId(userId);
 		payLog.setPayType(payType);

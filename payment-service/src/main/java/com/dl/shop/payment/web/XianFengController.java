@@ -20,9 +20,11 @@ import com.dl.base.result.ResultGenerator;
 import com.dl.base.util.SNGenerator;
 import com.dl.member.api.IUserBankService;
 import com.dl.member.dto.BankDTO;
+import com.dl.shop.payment.dao.PayBankRecordMapper;
 import com.dl.shop.payment.dto.BankTypeDTO;
 import com.dl.shop.payment.dto.XianFengApplyDTO;
 import com.dl.shop.payment.enums.PayEnums;
+import com.dl.shop.payment.model.PayBankRecordModel;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.param.XianFengBankTypeParam;
 import com.dl.shop.payment.param.XianFengPayConfirmParam;
@@ -48,6 +50,8 @@ public class XianFengController {
 	private IUserBankService userBankService;
 	@Resource
 	private StringRedisTemplate stringRedisTemplate;
+	@Resource
+	private PayBankRecordMapper payBankRMapper;
 	
 	@ApiOperation(value="先锋支付回调")
 	@PostMapping("/notify")

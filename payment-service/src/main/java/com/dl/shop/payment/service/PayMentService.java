@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.util.TextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -40,12 +39,15 @@ import com.dl.order.param.OrderCondtionParam;
 import com.dl.order.param.OrderSnParam;
 import com.dl.order.param.UpdateOrderInfoParam;
 import com.dl.shop.payment.core.ProjectConstant;
+import com.dl.shop.payment.dao.PayBankRecordMapper;
 import com.dl.shop.payment.dao.PayLogMapper;
 import com.dl.shop.payment.dao.PayMentMapper;
 import com.dl.shop.payment.dao.RollBackLogMapper;
+import com.dl.shop.payment.dto.PayBankRecordDTO;
 import com.dl.shop.payment.dto.PaymentDTO;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.enums.PayEnums;
+import com.dl.shop.payment.model.PayBankRecordModel;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.PayMent;
 import com.dl.shop.payment.model.RollBackLog;
@@ -59,6 +61,8 @@ import com.dl.shop.payment.pay.rongbao.entity.ReqRefundEntity;
 import com.dl.shop.payment.pay.rongbao.entity.RspRefundEntity;
 import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
 import com.dl.shop.payment.web.PaymentController;
+
+import ch.qos.logback.core.joran.util.beans.BeanUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -103,6 +107,9 @@ public class PayMentService extends AbstractService<PayMent> {
 	
 	@Resource
 	private StringRedisTemplate stringRedisTemplate;
+	
+	@Resource
+	private PayBankRecordMapper payBankRecordMapper;
 	
     /**
      * 查询所有可用的支付方式
@@ -666,4 +673,26 @@ public class PayMentService extends AbstractService<PayMent> {
 		return ResultGenerator.genSuccessResult();
 	}
 	
+	
+	public List<PayBankRecordDTO> listUserBanks(int userId) {
+		List<PayBankRecordDTO> rList = new ArrayList<>();
+		PayBankRecordModel p = new PayBankRecordModel();
+		p.setUserId(userId);
+		List<PayBankRecordModel> mList = payBankRecordMapper.listUserBank(p);
+		if(mList != null) {
+			for(int i = 0;i < mList.size();i++) {
+				PayBankRecordModel payBankRModel = mList.get(i);
+				PayBankRecordDTO payBRDTO = new PayBankRecordDTO();
+				payBRDTO.setId(payBankRModel.getId());
+				payBRDTO.setUserId(payBankRModel.getUserId());
+				payBRDTO.setBankCardNo(payBankRModel.getBankCardNo());
+				payBRDTO.setUserName(payBankRModel.getUserName());
+				payBRDTO.setCertNo(payBankRModel.getCertNo());
+				payBRDTO.setPhone(payBankRModel.getPhone());
+				payBRDTO.setBankType(payBankRModel.getBankType());
+				rList.add(payBRDTO);
+			}
+		}
+		return rList;
+	}
 }

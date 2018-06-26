@@ -1,5 +1,7 @@
 package com.dl.shop.payment.dto;
 
+import java.util.List;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -13,6 +15,6 @@ public class PayReturnDTO {
    private String payLogId;
    @ApiModelProperty(value="订单id")
    private String orderId;
-   @ApiModelProperty(value="微信预支付信息")
-   private WxpayAppDTO wxAppPayInfo;
+   @ApiModelProperty(value="历史银行列表")
+   private List<PayBankRecordDTO> mListBanks;
 }

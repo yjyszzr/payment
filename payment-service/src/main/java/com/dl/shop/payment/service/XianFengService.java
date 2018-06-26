@@ -1,6 +1,8 @@
 package com.dl.shop.payment.service;
 
 import java.math.BigDecimal;
+import java.util.List;
+
 import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,9 +17,11 @@ import com.dl.member.dto.UserBankDTO;
 import com.dl.member.param.BankCardParam;
 import com.dl.member.param.BankCardSaveParam;
 import com.dl.member.param.UserBankPurposeQueryParam;
+import com.dl.shop.payment.dao.PayBankRecordMapper;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.dto.XianFengApplyDTO;
 import com.dl.shop.payment.enums.PayEnums;
+import com.dl.shop.payment.model.PayBankRecordModel;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.param.XianFengPayConfirmParam;
 import com.dl.shop.payment.param.XianFengPayParam;
@@ -39,6 +43,8 @@ public class XianFengService {
 	private IUserBankService userBankService;
 	@Resource
 	private PayMentService paymentService;
+	@Resource
+	private PayBankRecordMapper payBankRecordMapper;
 	
 	public BaseResult<Object> appPayCfm(XianFengPayConfirmParam param){
 		int payLogId = param.getPayLogId();
@@ -133,12 +139,50 @@ public class XianFengService {
 				payLogService.updatePayLogByOrderSn(updatePayLog);
 				XianFengApplyDTO xFApplyDTO = new XianFengApplyDTO();
 				xFApplyDTO.setToken(token);
+				//验证码发送成功，bank信息入库
+				int bankType = userBankDTO.getType();
+				logger.info("[appPay saveBankInfo]" + " userId:" + userId + " bankType:" + bankType 
+						+ " accNo:" + accNo + " certNo:" + certNo + " mobileNo:" + mobileNo + " accName:" + accName);
+				saveBankInfo(userId,bankType,accNo,certNo,mobileNo,accName);
 				return ResultGenerator.genSuccessResult("验证码发送成功",xFApplyDTO);	
 			}else {
 				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_PAY_ERROR.getcode(),PayEnums.PAY_XIANFENG_PAY_ERROR.getMsg()+"["+rspEntity.resMessage+"]");
 			}
 		}
 		return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_PAY_ERROR.getcode(),PayEnums.PAY_XIANFENG_PAY_ERROR.getMsg()+"[先锋请求异常]");
+	}
+	
+	private void saveBankInfo(int userId,int bankType,String accNo,String certNo,String mobileNo,String accName) {
+		PayBankRecordModel payBankRecordModel = new PayBankRecordModel();
+		payBankRecordModel.setUserId(userId);
+		List<PayBankRecordModel> sList = payBankRecordMapper.listUserBank(payBankRecordModel);
+		PayBankRecordModel findModel = null;
+		for(int i = 0;i < sList.size();i++) {
+			PayBankRecordModel payBRModel = sList.get(i);
+			if(payBRModel.getBankCardNo().equals(accNo)) {
+				findModel = payBankRecordModel;
+				break;
+			}
+		}
+		if(findModel == null) {
+			payBankRecordModel = new PayBankRecordModel();
+			payBankRecordModel.setUserId(userId);
+			payBankRecordModel.setBankCardNo(accNo);
+			payBankRecordModel.setCertNo(certNo);
+			payBankRecordModel.setPhone(mobileNo);
+			payBankRecordModel.setUserName(accName);
+			payBankRecordModel.setBankType(bankType);
+			int cnt = payBankRecordMapper.insert(payBankRecordModel);
+			logger.info("[appPay]" + " payBankRecordMapper.insert cnt:" + cnt);
+		}else {
+			findModel.setUserId(userId);
+			findModel.setBankCardNo(accNo);
+			findModel.setCertNo(certNo);
+			findModel.setPhone(mobileNo);
+			findModel.setUserName(accName);
+			int cnt = payBankRecordMapper.updateInfo(findModel);
+			logger.info("[appPay]" + " payBankRecordMapper.updateInfo cnt:" + cnt);
+		}
 	}
 	
 	/**

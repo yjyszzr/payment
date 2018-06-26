@@ -56,6 +56,7 @@ import com.dl.order.dto.OrderDTO;
 import com.dl.order.param.SubmitOrderParam;
 import com.dl.order.param.SubmitOrderParam.TicketDetail;
 import com.dl.order.param.UpdateOrderInfoParam;
+import com.dl.shop.payment.dto.PayBankRecordDTO;
 import com.dl.shop.payment.dto.PayLogDTO;
 import com.dl.shop.payment.dto.PayLogDetailDTO;
 import com.dl.shop.payment.dto.PayReturnDTO;
@@ -65,6 +66,7 @@ import com.dl.shop.payment.dto.PriceDTO;
 import com.dl.shop.payment.dto.RechargeUserDTO;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.enums.PayEnums;
+import com.dl.shop.payment.model.PayBankRecordModel;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.UnifiedOrderParam;
 import com.dl.shop.payment.model.UserWithdrawLog;
@@ -428,8 +430,9 @@ public class PaymentController extends AbstractBaseController{
 				payCode = "app_weixin" + "_h5";
 			}
 		}
+		int uid = SessionUtil.getUserId();
 		String payIp = this.getIpAddr(request);
-		PayLog payLog = super.newPayLog(orderSn, thirdPartyPaid,0,payCode,paymentDto.getPayName(), payIp);
+		PayLog payLog = super.newPayLog(uid,orderSn, thirdPartyPaid,0,payCode,paymentDto.getPayName(), payIp);
 		PayLog savePayLog = payLogService.savePayLog(payLog);
 		if(null == savePayLog) {
 			logger.info(loggerId + " payLog对象保存失败！"); 
@@ -605,7 +608,8 @@ public class PaymentController extends AbstractBaseController{
 				payCode = "app_weixin" + "_h5";
 			}
 		}
-		PayLog payLog = super.newPayLog(orderSn, BigDecimal.valueOf(totalAmount), 1, payCode, payName, payIp);
+		Integer userId = SessionUtil.getUserId();
+		PayLog payLog = super.newPayLog(userId,orderSn, BigDecimal.valueOf(totalAmount), 1, payCode, payName, payIp);
 		PayLog savePayLog = payLogService.savePayLog(payLog);
 		if(null == savePayLog) {
 			logger.info(loggerId + " payLog对象保存失败！"); 
@@ -654,6 +658,8 @@ public class PaymentController extends AbstractBaseController{
 			rEntity.setPayUrl("");
 			rEntity.setPayLogId(savePayLog.getLogId()+"");
 			rEntity.setOrderId(orderSn);
+			List<PayBankRecordDTO> mList = paymentService.listUserBanks(userId);
+			rEntity.setMListBanks(mList);
 			payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
 		}
 		//处理支付失败的情况
