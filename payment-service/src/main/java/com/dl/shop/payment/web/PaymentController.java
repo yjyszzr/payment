@@ -469,6 +469,12 @@ public class PaymentController extends AbstractBaseController{
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
+		}else if("app_xianfeng".equals(paymentDto.getPayCode())){
+			PayReturnDTO rEntity = new PayReturnDTO();
+			rEntity.setPayUrl("");
+			rEntity.setPayLogId(savePayLog.getLogId()+"");
+			rEntity.setOrderId(orderId);
+			payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
 		}
 		logger.info(loggerId + " result: code="+payBaseResult.getCode()+" , msg="+payBaseResult.getMsg());
 		return payBaseResult;
@@ -643,6 +649,12 @@ public class PaymentController extends AbstractBaseController{
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
+		}else if("app_xianfeng".equals(payCode)) {
+			PayReturnDTO rEntity = new PayReturnDTO();
+			rEntity.setPayUrl("");
+			rEntity.setPayLogId(savePayLog.getLogId()+"");
+			rEntity.setOrderId(orderSn);
+			payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
 		}
 		//处理支付失败的情况
 		if(null == payBaseResult || payBaseResult.getCode() != 0) {
