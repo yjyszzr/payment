@@ -185,11 +185,13 @@ public class XianFengService {
 	 * @param payOrderSn
 	 * @return
 	 */
-	public BaseResult<Object> getPaySms(String payOrderSn){
+	public BaseResult<XianFengApplyDTO> getPaySms(String payOrderSn){
 		try {
 			RspApplyBaseEntity rspEntity = xFPayUtil.reqApplySms(payOrderSn);
 			if(rspEntity.isSucc()) {
-				return ResultGenerator.genSuccessResult("查询成功");
+				XianFengApplyDTO applyDTO = new XianFengApplyDTO();
+				applyDTO.setTradeNo(rspEntity.tradeNo);
+				return ResultGenerator.genSuccessResult("查询成功",applyDTO);
 			}else {
 				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_SMS_ERROR.getcode(),PayEnums.PAY_XIANFENG_SMS_ERROR.getMsg() +"[" + rspEntity.resMessage + "]");
 			}

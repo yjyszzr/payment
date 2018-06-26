@@ -3,6 +3,8 @@ package com.dl.shop.payment.web;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -51,7 +53,19 @@ public class XianFengController {
 	@PostMapping("/app")
 	@ResponseBody
 	public BaseResult<XianFengApplyDTO> appPay(@RequestBody XianFengPayParam payParam) {
-		return xianFengService.appPay(payParam);
+		String code = payParam.getCode();
+		if(!StringUtils.isEmpty(code)) {
+			XianFengPayParam p = new XianFengPayParam();
+			p.setAccNo(payParam.getAccNo());
+			p.setCertNo(payParam.getCertNo());
+			p.setCode(payParam.getCode());
+			p.setName(payParam.getName());
+			p.setPayLogId(payParam.getPayLogId());
+			p.setPhone(payParam.getPhone());
+			return getPaySms(p);
+		}else {
+			return xianFengService.appPay(payParam);	
+		}
 	}
 	
 	@ApiOperation(value="先锋支付确认")
@@ -93,7 +107,7 @@ public class XianFengController {
 	@ApiOperation(value="先锋支付获取支付验证码")
 	@PostMapping("/sms")
 	@ResponseBody
-	public BaseResult<Object> getPaySms(@RequestBody XianFengPayParam payParam){
+	public BaseResult<XianFengApplyDTO> getPaySms(@RequestBody XianFengPayParam payParam){
 		int payLogId = payParam.getPayLogId();
 		PayLog payLog = payLogService.findById(payLogId);
 		if(payLog == null) {
@@ -101,7 +115,7 @@ public class XianFengController {
 			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_ORDER_BLANK.getcode(),PayEnums.PAY_XIANFENG_ORDER_BLANK.getMsg());	
 		}
 		String payOrderSn = payLog.getPayOrderSn();
-		BaseResult<Object> baseResult = xianFengService.getPaySms(payOrderSn);
+		BaseResult<XianFengApplyDTO> baseResult = xianFengService.getPaySms(payOrderSn);
 		if(baseResult == null) {
 			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_SMS_EXCEPTION.getcode(),PayEnums.PAY_XIANFENG_SMS_EXCEPTION.getMsg());
 		}else {
