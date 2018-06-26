@@ -16,5 +16,5 @@ public class PayReturnDTO {
    @ApiModelProperty(value="订单id")
    private String orderId;
    @ApiModelProperty(value="历史银行列表")
-   private List<PayBankRecordDTO> mListBanks;
+   private List<PayBankRecordDTO> bankList;
 }

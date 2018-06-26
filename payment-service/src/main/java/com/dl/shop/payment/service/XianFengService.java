@@ -140,7 +140,7 @@ public class XianFengService {
 				XianFengApplyDTO xFApplyDTO = new XianFengApplyDTO();
 				xFApplyDTO.setToken(token);
 				//验证码发送成功，bank信息入库
-				int bankType = userBankDTO.getType();
+				Integer bankType = userBankDTO.getType();
 				logger.info("[appPay saveBankInfo]" + " userId:" + userId + " bankType:" + bankType 
 						+ " accNo:" + accNo + " certNo:" + certNo + " mobileNo:" + mobileNo + " accName:" + accName);
 				saveBankInfo(userId,bankType,accNo,certNo,mobileNo,accName);

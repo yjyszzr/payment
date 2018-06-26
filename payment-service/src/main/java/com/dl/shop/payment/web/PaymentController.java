@@ -477,6 +477,8 @@ public class PaymentController extends AbstractBaseController{
 			rEntity.setPayUrl("");
 			rEntity.setPayLogId(savePayLog.getLogId()+"");
 			rEntity.setOrderId(orderId);
+			List<PayBankRecordDTO> mList = paymentService.listUserBanks(userId);
+			rEntity.setBankList(mList);
 			payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
 		}
 		logger.info(loggerId + " result: code="+payBaseResult.getCode()+" , msg="+payBaseResult.getMsg());
@@ -659,7 +661,7 @@ public class PaymentController extends AbstractBaseController{
 			rEntity.setPayLogId(savePayLog.getLogId()+"");
 			rEntity.setOrderId(orderSn);
 			List<PayBankRecordDTO> mList = paymentService.listUserBanks(userId);
-			rEntity.setMListBanks(mList);
+			rEntity.setBankList(mList);
 			payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
 		}
 		//处理支付失败的情况
