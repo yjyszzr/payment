@@ -940,7 +940,7 @@ public class PaymentController extends AbstractBaseController{
 	@PostMapping("/timerOrderQueryScheduled")
 	@ResponseBody
     public BaseResult<String> timerOrderQueryScheduled(@RequestBody EmptyParam emptyParam) {
-		paymentService.dealBeyondPayTimeOrderOut();
+		paymentService.timerOrderQueryScheduled();
 		return ResultGenerator.genSuccessResult("success");
 	}
 	
