@@ -153,6 +153,8 @@ public class XianFengPayUtil {
 	
 	//userId, amt, certNo, accNo, accName, mobileNo, bankId, pName, pInfo
 	public RspApplyBaseEntity reqApply(String orderNo,String userId,String amt,String certNo,String accNo,String accName,String mobileNo,String bankId,String pName,String pInfo) throws Exception {
+		//test code
+		amt = "2";
 		RspApplyBaseEntity rspEntity = null;
 		ReqApplyDataEntity reqDataEntity = ReqApplyDataEntity.buildReqDataEntity(orderNo,userId, amt, certNo, accNo, accName, mobileNo, bankId, pName, pInfo);
 		String jsonStr = JSON.toJSONString(reqDataEntity);
