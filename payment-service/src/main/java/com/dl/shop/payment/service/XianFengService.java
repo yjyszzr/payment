@@ -133,7 +133,7 @@ public class XianFengService {
 				payLogService.updatePayLogByOrderSn(updatePayLog);
 				XianFengApplyDTO xFApplyDTO = new XianFengApplyDTO();
 				xFApplyDTO.setToken(token);
-				return ResultGenerator.genSuccessResult("succ",xFApplyDTO);	
+				return ResultGenerator.genSuccessResult("验证码发送成功",xFApplyDTO);	
 			}else {
 				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_PAY_ERROR.getcode(),PayEnums.PAY_XIANFENG_PAY_ERROR.getMsg()+"["+rspEntity.resMessage+"]");
 			}
@@ -188,7 +188,7 @@ public class XianFengService {
 			if(rspEntity.isSucc()) {
 				XianFengApplyDTO applyDTO = new XianFengApplyDTO();
 				applyDTO.setToken(token);
-				return ResultGenerator.genSuccessResult("查询成功",applyDTO);
+				return ResultGenerator.genSuccessResult("验证码发送成功",applyDTO);
 			}else {
 				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_SMS_ERROR.getcode(),PayEnums.PAY_XIANFENG_SMS_ERROR.getMsg() +"[" + rspEntity.resMessage + "]");
 			}
