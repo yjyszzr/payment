@@ -73,12 +73,15 @@ public class XianFengController {
 		BankDTO bankDTO = baseResult.getData();
 		BankTypeDTO bankTypeDTO = null;
 		String cardtype = bankDTO.getCardtype();
+		String bankName = bankDTO.getBankname();
 		if("借记卡".equals(cardtype)) {
 			bankTypeDTO = new BankTypeDTO();
 			bankTypeDTO.setBankType(1);
+			bankTypeDTO.setBankName(bankName);
 		}else if("贷记卡".equals(cardtype)) {
 			bankTypeDTO = new BankTypeDTO();
 			bankTypeDTO.setBankType(2);
+			bankTypeDTO.setBankName(bankName);
 		}
 		if(bankTypeDTO == null) {
 			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_BANKTYPE_UNKNOW.getcode(),PayEnums.PAY_XIANFENG_BANKTYPE_UNKNOW.getMsg());

@@ -9,4 +9,6 @@ import lombok.Data;
 public class BankTypeDTO {
 	@ApiModelProperty(value="1储蓄卡，2信用卡")
     private Integer bankType;
+	@ApiModelProperty(value="银行名称")
+    private String bankName;
 }
