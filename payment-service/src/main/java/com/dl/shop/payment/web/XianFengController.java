@@ -72,8 +72,8 @@ public class XianFengController {
 			p.setToken(token);
 			return getPaySms(p);
 		}else {
-			logger.info("[appPay]" + " paySn...");
 			token = SNGenerator.nextSN(SNBusinessCodeEnum.PAY_SN.getCode());
+			logger.info("[appPay]" + " appPay call token:" + token);
 			return xianFengService.appPay(payParam,token);	
 		}
 	}
