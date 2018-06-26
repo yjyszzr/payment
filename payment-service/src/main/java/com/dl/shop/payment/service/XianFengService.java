@@ -69,7 +69,7 @@ public class XianFengService {
 		return ResultGenerator.genFailResult("请求失败");
 	}
 	
-	public BaseResult<XianFengApplyDTO> appPay(XianFengPayParam param){
+	public BaseResult<XianFengApplyDTO> appPay(XianFengPayParam param,String token){
 		int payLogId = param.getPayLogId();
 		PayLog payLog = payLogService.findById(payLogId);
 		if(payLog == null){
@@ -115,10 +115,6 @@ public class XianFengService {
 				+" accName:" + accName +" mobileNo:" + mobileNo + " bankId:" + bankId +" pName:" 
 				+ pName +" pInfo:" + pInfo + " payOrderSn:" + payOrderSn);
 		logger.info("===================请求先锋支付==========================");
-		//test code
-		accNo = "6222021001115704287";
-		bankId = "ICBC";
-		//test code
 		try {
 			rspEntity = xFPayUtil.reqApply(payOrderSn,null,amt+"",certNo,accNo,accName,mobileNo,bankId,pName,pInfo);
 		} catch (Exception e) {
@@ -136,7 +132,7 @@ public class XianFengService {
 				updatePayLog.setIsPaid(0);
 				payLogService.updatePayLogByOrderSn(updatePayLog);
 				XianFengApplyDTO xFApplyDTO = new XianFengApplyDTO();
-				xFApplyDTO.setTradeNo(tradeNo);
+				xFApplyDTO.setToken(token);
 				return ResultGenerator.genSuccessResult("succ",xFApplyDTO);	
 			}else {
 				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_PAY_ERROR.getcode(),PayEnums.PAY_XIANFENG_PAY_ERROR.getMsg()+"["+rspEntity.resMessage+"]");
@@ -186,12 +182,12 @@ public class XianFengService {
 	 * @param payOrderSn
 	 * @return
 	 */
-	public BaseResult<XianFengApplyDTO> getPaySms(String payOrderSn){
+	public BaseResult<XianFengApplyDTO> getPaySms(String payOrderSn,String token){
 		try {
 			RspApplyBaseEntity rspEntity = xFPayUtil.reqApplySms(payOrderSn);
 			if(rspEntity.isSucc()) {
 				XianFengApplyDTO applyDTO = new XianFengApplyDTO();
-				applyDTO.setTradeNo(rspEntity.tradeNo);
+				applyDTO.setToken(token);
 				return ResultGenerator.genSuccessResult("查询成功",applyDTO);
 			}else {
 				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_SMS_ERROR.getcode(),PayEnums.PAY_XIANFENG_SMS_ERROR.getMsg() +"[" + rspEntity.resMessage + "]");

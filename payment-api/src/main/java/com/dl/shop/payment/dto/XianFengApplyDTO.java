@@ -7,6 +7,6 @@ import lombok.Data;
 @Api("先锋支付申请返回")
 @Data
 public class XianFengApplyDTO {
-	@ApiModelProperty(value="交易号")
-	private String tradeNo;
+	@ApiModelProperty(value="token信息")
+	private String token;
 }

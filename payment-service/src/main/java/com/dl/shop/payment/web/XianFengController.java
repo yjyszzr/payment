@@ -7,13 +7,17 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.dl.base.enums.SNBusinessCodeEnum;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
+import com.dl.base.util.SNGenerator;
 import com.dl.member.api.IUserBankService;
 import com.dl.member.dto.BankDTO;
 import com.dl.shop.payment.dto.BankTypeDTO;
@@ -42,6 +46,8 @@ public class XianFengController {
 	private XianFengService xianFengService;
 	@Resource
 	private IUserBankService userBankService;
+	@Resource
+	private StringRedisTemplate stringRedisTemplate;
 	
 	@ApiOperation(value="先锋支付回调")
 	@PostMapping("/notify")
@@ -53,8 +59,9 @@ public class XianFengController {
 	@PostMapping("/app")
 	@ResponseBody
 	public BaseResult<XianFengApplyDTO> appPay(@RequestBody XianFengPayParam payParam) {
-		String code = payParam.getCode();
-		if(!StringUtils.isEmpty(code)) {
+		String token = payParam.getCode();
+		//只是校验token信息是否为空
+		if(!StringUtils.isEmpty(token)) {
 			XianFengPayParam p = new XianFengPayParam();
 			p.setAccNo(payParam.getAccNo());
 			p.setCertNo(payParam.getCertNo());
@@ -62,9 +69,11 @@ public class XianFengController {
 			p.setName(payParam.getName());
 			p.setPayLogId(payParam.getPayLogId());
 			p.setPhone(payParam.getPhone());
+			p.setToken(token);
 			return getPaySms(p);
 		}else {
-			return xianFengService.appPay(payParam);	
+			token = SNGenerator.nextSN(SNBusinessCodeEnum.PAY_SN.getCode());
+			return xianFengService.appPay(payParam,token);	
 		}
 	}
 	
@@ -110,12 +119,13 @@ public class XianFengController {
 	public BaseResult<XianFengApplyDTO> getPaySms(@RequestBody XianFengPayParam payParam){
 		int payLogId = payParam.getPayLogId();
 		PayLog payLog = payLogService.findById(payLogId);
+		String token = payParam.getToken();
 		if(payLog == null) {
 			logger.info("[getPaySms]" + "订单号查询失败");
 			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_ORDER_BLANK.getcode(),PayEnums.PAY_XIANFENG_ORDER_BLANK.getMsg());	
 		}
 		String payOrderSn = payLog.getPayOrderSn();
-		BaseResult<XianFengApplyDTO> baseResult = xianFengService.getPaySms(payOrderSn);
+		BaseResult<XianFengApplyDTO> baseResult = xianFengService.getPaySms(payOrderSn,token);
 		if(baseResult == null) {
 			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_SMS_EXCEPTION.getcode(),PayEnums.PAY_XIANFENG_SMS_EXCEPTION.getMsg());
 		}else {
