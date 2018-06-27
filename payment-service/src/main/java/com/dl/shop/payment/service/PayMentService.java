@@ -59,10 +59,10 @@ import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
 import com.dl.shop.payment.pay.rongbao.entity.ReqRefundEntity;
 import com.dl.shop.payment.pay.rongbao.entity.RspRefundEntity;
+import com.dl.shop.payment.pay.xianfeng.entity.RspApplyBaseEntity;
+import com.dl.shop.payment.pay.xianfeng.util.XianFengPayUtil;
 import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
 import com.dl.shop.payment.web.PaymentController;
-
-import ch.qos.logback.core.joran.util.beans.BeanUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -92,6 +92,9 @@ public class PayMentService extends AbstractService<PayMent> {
 
 	@Resource
 	private RongUtil rongUtil;
+	
+	@Resource
+	private XianFengPayUtil xFengPayUtil;
 	
 	@Resource
 	private  IActivityService activityService;
@@ -337,7 +340,6 @@ public class PayMentService extends AbstractService<PayMent> {
 	 */
 	public BaseResult<RspOrderQueryDTO> rechargeOptions(String loggerId, PayLog payLog, RspOrderQueryEntity response) {
 //		Integer tradeState = response.getTradeState();
-		RspOrderQueryDTO rspEntity = new RspOrderQueryDTO();
 		if(response.isSucc()) {
 			int currentTime = DateUtil.getCurrentTimeLong();
 			UpdateUserRechargeParam updateUserRechargeParam = new UpdateUserRechargeParam();
@@ -566,7 +568,6 @@ public class PayMentService extends AbstractService<PayMent> {
 	 */
     public void timerOrderQueryScheduled() {
 		String loggerId = "timer_orderquery_" + System.currentTimeMillis();
-//		log.info("订单支付Query任务...");
 		List<QueueItemEntity> mVector = PayManager.getInstance().getList();
 		if(mVector.size() > 0) {
 			for(int i = 0;i < mVector.size();i++) {
@@ -606,6 +607,16 @@ public class PayMentService extends AbstractService<PayMent> {
 		}else if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)) {
 			boolean isInWeChat = "app_weixin_h5".equals(payCode);
 			baseResult = yinHeUtil.orderQuery(isInWeChat,payOrderSn);
+		}else if("app_xianfeng".equals(payCode)) {
+			try {
+				RspApplyBaseEntity rspBaseEntity = xFengPayUtil.queryPayByOrderNo(payOrderSn);
+				if(rspBaseEntity != null) {
+					RspOrderQueryEntity rspOrderQueryEntity = rspBaseEntity.buildRspOrderQueryEntity(payCode);	
+					baseResult = ResultGenerator.genSuccessResult("succ",rspOrderQueryEntity);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		if(baseResult == null || baseResult.getCode() != 0) {
 			logger.info("订单支付状态轮询第三方[" + baseResult.getMsg()+"]");

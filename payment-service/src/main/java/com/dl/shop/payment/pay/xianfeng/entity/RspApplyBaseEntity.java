@@ -1,5 +1,6 @@
 package com.dl.shop.payment.pay.xianfeng.entity;
 
+import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 
 public class RspApplyBaseEntity{
 	public String resCode;
@@ -11,6 +12,18 @@ public class RspApplyBaseEntity{
 	public String tradeTime;
 	public String memo;
 
+	
+	public RspOrderQueryEntity buildRspOrderQueryEntity(String payCode) {
+		RspOrderQueryEntity rspEntity = new RspOrderQueryEntity();
+		rspEntity.setMerchant_id(merchantId);
+		rspEntity.setOrder_no(merchantNo);
+		rspEntity.setResult_code(resCode);
+		rspEntity.setResult_msg(resMessage);
+		rspEntity.setTrade_no(tradeNo);
+		rspEntity.setPayCode(payCode);
+		rspEntity.setType(RspOrderQueryEntity.TYPE_XIANFENG);
+		return rspEntity;
+	}
 	
 	@Override
 	public String toString() {

@@ -1,12 +1,8 @@
 package com.dl.shop.payment.pay.common;
 
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PayManager {
-	private final static Logger logger = LoggerFactory.getLogger(PayManager.class);
-	
 	private static PayManager instance;
 	private List<QueueItemEntity> mVector;
 	private List<QueueCashItemEntity> mCashVector;

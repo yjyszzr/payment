@@ -2,9 +2,6 @@ package com.dl.shop.payment.pay.common;
 
 import java.io.Serializable;
 import org.apache.http.util.TextUtils;
-
-import com.netflix.ribbon.hystrix.ResultCommandPair;
-
 import lombok.Data;
 
 @Data
@@ -23,10 +20,16 @@ public class RspOrderQueryEntity implements Serializable{
 	//微信支付使用
 	private Integer tradeEndTime;
 	private String payCode;
+
+	private int type;
+	public static final int TYPE_YINHE = 0;
+	public static final int TYPE_XIANFENG = 1;
 	
 	public boolean isSucc() {
-		if(!TextUtils.isEmpty(result_code)) {
+		if(!TextUtils.isEmpty(result_code) && type == TYPE_YINHE) {
 			return result_code.equals("0000");
+		}else if(!TextUtils.isEmpty(result_code) && type == TYPE_XIANFENG) {
+			return result_code.equals("00000");
 		}
 		return false;
 	}

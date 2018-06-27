@@ -2,12 +2,10 @@ package com.dl.shop.payment.service;
 
 import java.math.BigDecimal;
 import java.util.List;
-
 import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
 import com.alibaba.druid.util.StringUtils;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -25,6 +23,7 @@ import com.dl.shop.payment.model.PayBankRecordModel;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.param.XianFengPayConfirmParam;
 import com.dl.shop.payment.param.XianFengPayParam;
+import com.dl.shop.payment.pay.common.PayManager;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.xianfeng.entity.RspApplyBaseEntity;
 import com.dl.shop.payment.pay.xianfeng.util.XianFengPayUtil;
@@ -54,6 +53,8 @@ public class XianFengService {
 			logger.info("[appPayCfm]" + "查询PayLog失败");
 			return ResultGenerator.genFailResult("查询支付信息失败");
 		}
+		String payCode = payLog.getPayCode();
+		String orderSn = payLog.getOrderSn();
 		if(StringUtils.isEmpty(code)) {
 			logger.info("[appPayCfm]" + " code:" + code);
 			return ResultGenerator.genFailResult("请输入验证码");
@@ -67,7 +68,9 @@ public class XianFengService {
 		}
 		if(rspEntity != null) {
 			if(rspEntity.isSucc()) {
-				return ResultGenerator.genSuccessResult("succ");
+				//主动query接口
+				PayManager.getInstance().addReqQueue(orderSn, payOrderSn, payCode);
+				return ResultGenerator.genSuccessResult("支付申请成功");
 			}else {
 				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_PAY_ERROR.getcode(),PayEnums.PAY_XIANFENG_PAY_ERROR.getMsg() + "[" + rspEntity.resMessage +"]");
 			}

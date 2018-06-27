@@ -3,7 +3,6 @@ package com.dl.shop.payment.web;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.dl.base.enums.SNBusinessCodeEnum;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -24,12 +22,12 @@ import com.dl.shop.payment.dao.PayBankRecordMapper;
 import com.dl.shop.payment.dto.BankTypeDTO;
 import com.dl.shop.payment.dto.XianFengApplyDTO;
 import com.dl.shop.payment.enums.PayEnums;
-import com.dl.shop.payment.model.PayBankRecordModel;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.param.XianFengBankTypeParam;
 import com.dl.shop.payment.param.XianFengPayConfirmParam;
 import com.dl.shop.payment.param.XianFengPayParam;
 import com.dl.shop.payment.service.PayLogService;
+import com.dl.shop.payment.service.PayMentService;
 import com.dl.shop.payment.service.XianFengService;
 import io.swagger.annotations.ApiOperation;
 
@@ -52,6 +50,8 @@ public class XianFengController {
 	private StringRedisTemplate stringRedisTemplate;
 	@Resource
 	private PayBankRecordMapper payBankRMapper;
+	@Resource
+	private PayMentService paymentService;
 	
 	@ApiOperation(value="先锋支付回调")
 	@PostMapping("/notify")
@@ -162,7 +162,7 @@ public class XianFengController {
 			if(payType == 0) {
 				return ResultGenerator.genSuccessResult("订单已支付");
 			}else {
-				return ResultGenerator.genSuccessResult("充值成功");				
+				return ResultGenerator.genSuccessResult("充值成功");
 			}
 		}
 		BaseResult<String> baseResult = xianFengService.query(payLog,payOrderSn);
