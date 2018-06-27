@@ -487,9 +487,8 @@ public class PaymentController extends AbstractBaseController{
 	 */
 	private BaseResult<?> getWechatPayUrl(boolean isInnerWeChat,String isH5,int payType,PayLog savePayLog,String payIp,String orderId) {
 		BaseResult<?> payBaseResult = null;
-		double amtDouble = savePayLog.getOrderAmount().doubleValue();
-		BigDecimal bigD = new BigDecimal(amtDouble);
-		bigD = bigD.multiply(BigDecimal.valueOf(100));
+		BigDecimal amtDouble = savePayLog.getOrderAmount();
+		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100));
 		int amtFen = bigD.intValue();
 		String payOrderSn = savePayLog.getPayOrderSn();
 		String payLogId = savePayLog.getLogId()+"";
