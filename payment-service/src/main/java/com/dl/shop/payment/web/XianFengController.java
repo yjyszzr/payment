@@ -13,13 +13,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.dl.base.enums.SNBusinessCodeEnum;
+import com.dl.base.param.EmptyParam;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.base.util.SNGenerator;
+import com.dl.base.util.SessionUtil;
 import com.dl.member.api.IUserBankService;
 import com.dl.member.dto.BankDTO;
 import com.dl.shop.payment.dao.PayBankRecordMapper;
 import com.dl.shop.payment.dto.BankTypeDTO;
+import com.dl.shop.payment.dto.XianFengApplyCfgDTO;
 import com.dl.shop.payment.dto.XianFengApplyDTO;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.PayLog;
@@ -87,6 +90,14 @@ public class XianFengController {
 	@ResponseBody
 	public BaseResult<Object> appPayCfm(@RequestBody XianFengPayConfirmParam payParam) {
 		return xianFengService.appPayCfm(payParam);
+	}
+	
+	@ApiOperation(value="获取先锋银行列表配置")
+	@PostMapping("/appCfg")
+	@ResponseBody
+	public BaseResult<XianFengApplyCfgDTO> appCfg(@RequestBody EmptyParam payParam) {
+		int userId = SessionUtil.getUserId();
+		return xianFengService.appPayCfg(userId);
 	}
 	
 	@ApiOperation(value="根据银行账号获取卡类型 目前只识别借记卡和贷记卡")

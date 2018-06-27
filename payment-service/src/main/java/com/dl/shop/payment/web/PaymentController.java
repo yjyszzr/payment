@@ -8,10 +8,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.util.TextUtils;
 import org.slf4j.Logger;
@@ -23,7 +21,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.alibaba.fastjson.JSON;
 import com.dl.base.param.EmptyParam;
 import com.dl.base.result.BaseResult;
@@ -56,7 +53,6 @@ import com.dl.order.dto.OrderDTO;
 import com.dl.order.param.SubmitOrderParam;
 import com.dl.order.param.SubmitOrderParam.TicketDetail;
 import com.dl.order.param.UpdateOrderInfoParam;
-import com.dl.shop.payment.dto.PayBankRecordDTO;
 import com.dl.shop.payment.dto.PayLogDTO;
 import com.dl.shop.payment.dto.PayLogDetailDTO;
 import com.dl.shop.payment.dto.PayReturnDTO;
@@ -66,7 +62,6 @@ import com.dl.shop.payment.dto.PriceDTO;
 import com.dl.shop.payment.dto.RechargeUserDTO;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.enums.PayEnums;
-import com.dl.shop.payment.model.PayBankRecordModel;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.UnifiedOrderParam;
 import com.dl.shop.payment.model.UserWithdrawLog;
@@ -93,7 +88,6 @@ import com.dl.shop.payment.service.PayMentService;
 import com.dl.shop.payment.service.UserRechargeService;
 import com.dl.shop.payment.service.UserWithdrawLogService;
 import com.dl.shop.payment.utils.WxpayUtil;
-
 import io.swagger.annotations.ApiOperation;
 
 @Controller
@@ -477,8 +471,6 @@ public class PaymentController extends AbstractBaseController{
 			rEntity.setPayUrl("");
 			rEntity.setPayLogId(savePayLog.getLogId()+"");
 			rEntity.setOrderId(orderId);
-			List<PayBankRecordDTO> mList = paymentService.listUserBanks(userId);
-			rEntity.setBankList(mList);
 			payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
 		}
 		logger.info(loggerId + " result: code="+payBaseResult.getCode()+" , msg="+payBaseResult.getMsg());
@@ -660,8 +652,6 @@ public class PaymentController extends AbstractBaseController{
 			rEntity.setPayUrl("");
 			rEntity.setPayLogId(savePayLog.getLogId()+"");
 			rEntity.setOrderId(orderSn);
-			List<PayBankRecordDTO> mList = paymentService.listUserBanks(userId);
-			rEntity.setBankList(mList);
 			payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
 		}
 		//处理支付失败的情况

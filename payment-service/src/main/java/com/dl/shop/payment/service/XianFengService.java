@@ -16,7 +16,9 @@ import com.dl.member.param.BankCardParam;
 import com.dl.member.param.BankCardSaveParam;
 import com.dl.member.param.UserBankPurposeQueryParam;
 import com.dl.shop.payment.dao.PayBankRecordMapper;
+import com.dl.shop.payment.dto.PayBankRecordDTO;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
+import com.dl.shop.payment.dto.XianFengApplyCfgDTO;
 import com.dl.shop.payment.dto.XianFengApplyDTO;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.PayBankRecordModel;
@@ -243,6 +245,18 @@ public class XianFengService {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	/***
+	 * 支付配置相关
+	 * @param params
+	 * @return
+	 */
+	public BaseResult<XianFengApplyCfgDTO> appPayCfg(int userId){
+		List<PayBankRecordDTO> mBankList = paymentService.listUserBanks(userId);
+		XianFengApplyCfgDTO xFApplyCfgDTO = new XianFengApplyCfgDTO();
+		xFApplyCfgDTO.setBankList(mBankList);
+		return ResultGenerator.genSuccessResult("succ",xFApplyCfgDTO);
 	}
 	
 	/***
