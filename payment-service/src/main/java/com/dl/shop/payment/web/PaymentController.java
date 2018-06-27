@@ -487,9 +487,10 @@ public class PaymentController extends AbstractBaseController{
 	 */
 	private BaseResult<?> getWechatPayUrl(boolean isInnerWeChat,String isH5,int payType,PayLog savePayLog,String payIp,String orderId) {
 		BaseResult<?> payBaseResult = null;
-		String strAmt = savePayLog.getOrderAmount().doubleValue()+"";
-		BigDecimal bigD = new BigDecimal(strAmt);
-		strAmt = bigD.movePointRight(2).toString();
+		double amtDouble = savePayLog.getOrderAmount().doubleValue();
+		BigDecimal bigD = new BigDecimal(amtDouble);
+		bigD = bigD.multiply(BigDecimal.valueOf(100));
+		int amtFen = bigD.intValue();
 		String payOrderSn = savePayLog.getPayOrderSn();
 		String payLogId = savePayLog.getLogId()+"";
 		RspYinHeEntity rYinHeEntity = null;
@@ -504,9 +505,9 @@ public class PaymentController extends AbstractBaseController{
 //				// TODO Auto-generated catch block
 //				e.printStackTrace();
 //			}
-			rYinHeEntity = payUtil.getWechatPayUrl(true,payIp,strAmt,payOrderSn);
+			rYinHeEntity = payUtil.getWechatPayUrl(true,payIp,amtFen+"",payOrderSn);
 		}else {
-			rYinHeEntity = payUtil.getWechatPayUrl(false,payIp,strAmt,payOrderSn);
+			rYinHeEntity = payUtil.getWechatPayUrl(false,payIp,amtFen+"",payOrderSn);
 		}
 		if(rYinHeEntity != null) {
 			if(rYinHeEntity.isSucc() && !TextUtils.isEmpty(rYinHeEntity.qrCode)) {
