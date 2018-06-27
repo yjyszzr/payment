@@ -277,18 +277,22 @@ public class PayMentService extends AbstractService<PayMent> {
 			return ResultGenerator.genFailResult("[rollbackOrderAmount]" + " 查询订单失败");
 		}
 		OrderDTO order = orderRst.getData();
-		BigDecimal surplus = order.getSurplus();
 		BigDecimal bonusAmount = order.getBonus();
-		BigDecimal moneyPaid = order.getMoneyPaid();
 		BigDecimal totalAmt = order.getTicketAmount();
-		String payName = order.getPayName();
 		BigDecimal thirdPartyPaid = order.getThirdPartyPaid();
 		Integer userBonusId = order.getUserBonusId();
 		Integer userId = order.getUserId();
+		
+		logger.info("[rollbackOrderAmount]" +" 实际回退金额:" + amt + " 总金额:" + totalAmt);
+		if(amt.compareTo(totalAmt) > 0) {
+			logger.info("[rollbackOrderAmount]" + "回退金额大于彩票总金额");
+			return ResultGenerator.genFailResult("回退金额大于彩票总金额");
+		}
+		
 		logger.info("[rollbackOrderAmount]" + "优惠券:" +  bonusAmount);
 		//退回优惠券
 		if(userBonusId != null && userBonusId > 0) {
-			if(amt.compareTo(bonusAmount) > 0) {
+			if(amt.compareTo(bonusAmount) >= 0) {
 				amt = amt.subtract(bonusAmount);
 				log.info("[rollbackOrderAmount] 优惠券退回操作 userBonusId:" + userBonusId + " 优惠券金额:" + bonusAmount +" 实际回退金额:" + amt);
 				UserBonusParam userBP = new UserBonusParam();
@@ -302,11 +306,12 @@ public class PayMentService extends AbstractService<PayMent> {
 				}
 			}
 		}
-		logger.info("[rollbackOrderAmount]" +" 实际回退金额:" + amt + " 总金额:" + totalAmt);
-		if(amt.compareTo(totalAmt) > 0) {
-			logger.info("[rollbackOrderAmount]" + "回退");
-			return ResultGenerator.genFailResult("回退金额大于彩票总金额");
+		
+		if(amt.compareTo(BigDecimal.ZERO) <= 0) {
+			logger.info("[rollbackOrderAmount]" + "用户回退金额无效");
+			return ResultGenerator.genFailResult("用户回退金额无效");
 		}
+		
 		MemRollParam mRollParam = new MemRollParam();
 		mRollParam.setUserId(userId);
 		mRollParam.setOrderSn(orderSn);
@@ -321,8 +326,6 @@ public class PayMentService extends AbstractService<PayMent> {
 		log.info("[rollbackOrderAmount]" + " 回退用户可提现余额结果 succ:" + isSucc);
 		//第三方资金退回
 		if(!isSucc) {
-//			payLog.setPayMsg("第三方资金退回失败");
-//			payLogService.update(payLog);
 			log.info("第三方资金退回失败 payCode：" + " amt:" + thirdPartyPaid.toString());
 		}
 		return ResultGenerator.genSuccessResult();
