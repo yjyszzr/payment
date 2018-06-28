@@ -12,6 +12,9 @@ package com.dl.shop.payment.pay.xianfeng.config;
  */
 public class XianFengPayCfg {
 	
+	//开关测试，最后删除掉
+	public static final boolean isDebug = true;
+	
 //	public static final String NET_GATE = "http://sandbox.firstpay.com/security/gateway.do";	//支付网关
 	public static final String NET_GATE = "https://mapi.ucfpay.com/gateway.do";
 			
