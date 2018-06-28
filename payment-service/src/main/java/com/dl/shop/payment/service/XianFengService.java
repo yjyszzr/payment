@@ -299,4 +299,11 @@ public class XianFengService {
 		}
 		return null;
 	}
+	
+	/***
+	 * 先锋支付Notify通知
+	 */
+	public void payNotify() {
+		logger.info("[XianFengService.payNotify]");
+	}
 }

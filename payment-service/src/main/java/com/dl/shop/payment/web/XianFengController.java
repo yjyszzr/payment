@@ -1,5 +1,11 @@
 package com.dl.shop.payment.web;
 
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -12,6 +18,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.dl.base.enums.SNBusinessCodeEnum;
 import com.dl.base.param.EmptyParam;
 import com.dl.base.result.BaseResult;
@@ -20,18 +29,24 @@ import com.dl.base.util.SNGenerator;
 import com.dl.base.util.SessionUtil;
 import com.dl.member.api.IUserBankService;
 import com.dl.member.dto.BankDTO;
+import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dao.PayBankRecordMapper;
 import com.dl.shop.payment.dto.BankTypeDTO;
 import com.dl.shop.payment.dto.XianFengApplyCfgDTO;
 import com.dl.shop.payment.dto.XianFengApplyDTO;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.PayLog;
+import com.dl.shop.payment.model.UserWithdraw;
 import com.dl.shop.payment.param.XianFengBankTypeParam;
 import com.dl.shop.payment.param.XianFengPayConfirmParam;
 import com.dl.shop.payment.param.XianFengPayParam;
+import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
+import com.dl.shop.payment.pay.xianfeng.config.XianFengPayCfg;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
 import com.dl.shop.payment.service.XianFengService;
+import com.ucf.sdk.util.AESCoder;
+
 import io.swagger.annotations.ApiOperation;
 
 /**
@@ -58,8 +73,33 @@ public class XianFengController {
 	
 	@ApiOperation(value="先锋支付回调")
 	@PostMapping("/notify")
-	public void payNotify(HttpServletRequest request, HttpServletResponse response) {
-		
+	public void payNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+		request.setCharacterEncoding("UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		response.setHeader("Content-type","text/html;charset=UTF-8");
+	    Map<?,?> parameters = request.getParameterMap();//保存request请求参数的临时变量
+        String dataValue = "";//保存业务数据加密值
+        JSONObject jsonData = null;
+        //打印先锋支付返回值
+        logger.info("服务器端通知-接收到先锋支付返回报文：");
+        Iterator<?> paiter = parameters.keySet().iterator();
+        while (paiter.hasNext()) {
+            String key = paiter.next().toString();
+            String[] values = (String[])parameters.get(key);                        
+            logger.info(key+"-------------"+values[0]);
+            if(key.equals("data")) {
+            	dataValue = values[0];
+            	logger.info("===========payNotify==============");
+            	try {
+					String dataJson= AESCoder.decrypt(dataValue, XianFengPayCfg.RSA_KEY);
+					logger.info("[payNotify]" + " dataJson:" + dataJson);
+					xianFengService.payNotify();
+            	} catch (Exception e) {
+					e.printStackTrace();
+					logger.info("[payNotify]" + "exception msg:" + e.getMessage());
+				}
+            }
+        }
 	}
 	
 	@ApiOperation(value="先锋支付请求")
@@ -149,37 +189,37 @@ public class XianFengController {
 		}
 	}
 	
-	/***
-	 * 先锋订单查询
-	 * @param payParam
-	 * @return
-	 */
-	@ApiOperation(value="先锋支付信息查询")
-	@PostMapping("/query")
-	@ResponseBody
-	public BaseResult<String> query(@RequestBody XianFengPayParam payParam) {
-		logger.info("[query]" +" payParams:" + payParam.getPayLogId());
-		int payLogId = payParam.getPayLogId();
-		PayLog payLog = payLogService.findById(payLogId);
-		if(payLog == null) {
-			logger.info("[getPaySms]" + "订单号查询失败");
-			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_ORDER_BLANK.getcode(),PayEnums.PAY_XIANFENG_ORDER_BLANK.getMsg());	
-		}
-		int isPaid = payLog.getIsPaid();
-		int payType = payLog.getPayType();
-		String payOrderSn = payLog.getPayOrderSn();
-		if(isPaid == 1) {
-			logger.info("[query]" + " 订单:" + payLogId +" 已支付" + " payType:" + payType + " payOrderSn:" + payOrderSn);
-			if(payType == 0) {
-				return ResultGenerator.genSuccessResult("订单已支付");
-			}else {
-				return ResultGenerator.genSuccessResult("充值成功");
-			}
-		}
-		BaseResult<String> baseResult = xianFengService.query(payLog,payOrderSn);
-		if(baseResult == null) {
-			return ResultGenerator.genFailResult("先锋查询异常");
-		}
-		return baseResult;
-	}
+//	/***
+//	 * 先锋订单查询,先锋单独使用
+//	 * @param payParam
+//	 * @return
+//	 */
+//	@ApiOperation(value="先锋支付信息查询")
+//	@PostMapping("/query")
+//	@ResponseBody
+//	public BaseResult<String> query(@RequestBody XianFengPayParam payParam) {
+//		logger.info("[query]" +" payParams:" + payParam.getPayLogId());
+//		int payLogId = payParam.getPayLogId();
+//		PayLog payLog = payLogService.findById(payLogId);
+//		if(payLog == null) {
+//			logger.info("[getPaySms]" + "订单号查询失败");
+//			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_ORDER_BLANK.getcode(),PayEnums.PAY_XIANFENG_ORDER_BLANK.getMsg());	
+//		}
+//		int isPaid = payLog.getIsPaid();
+//		int payType = payLog.getPayType();
+//		String payOrderSn = payLog.getPayOrderSn();
+//		if(isPaid == 1) {
+//			logger.info("[query]" + " 订单:" + payLogId +" 已支付" + " payType:" + payType + " payOrderSn:" + payOrderSn);
+//			if(payType == 0) {
+//				return ResultGenerator.genSuccessResult("订单已支付");
+//			}else {
+//				return ResultGenerator.genSuccessResult("充值成功");
+//			}
+//		}
+//		BaseResult<String> baseResult = xianFengService.query(payLog,payOrderSn);
+//		if(baseResult == null) {
+//			return ResultGenerator.genFailResult("先锋查询异常");
+//		}
+//		return baseResult;
+//	}
 }

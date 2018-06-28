@@ -79,6 +79,8 @@ import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
 import com.dl.shop.payment.pay.rongbao.entity.ReqRongEntity;
+import com.dl.shop.payment.pay.xianfeng.entity.RspApplyBaseEntity;
+import com.dl.shop.payment.pay.xianfeng.util.XianFengPayUtil;
 import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
 import com.dl.shop.payment.pay.yinhe.entity.RspYinHeEntity;
 import com.dl.shop.payment.pay.yinhe.util.PayUtil;
@@ -129,6 +131,8 @@ public class PaymentController extends AbstractBaseController{
 	private ReapalH5Config rongCfg;
 	@Resource
 	private RongUtil rongUtil;
+	@Resource
+	private XianFengPayUtil xianFengUtil;
 	@Resource
 	private IActivityService activityService;
 	@Resource
@@ -791,6 +795,18 @@ public class PaymentController extends AbstractBaseController{
 			boolean isInWeixin = "app_wexin_h5".equals(payCode);
 //			baseResult = wxpayUtil.orderQuery(payLog.getPayOrderSn());
 			baseResult = yinHeUtil.orderQuery(isInWeixin,payLog.getPayOrderSn());
+		}else if("app_xianfeng".equals(payCode)) {
+			RspApplyBaseEntity rspBaseEntity;
+			try {
+				rspBaseEntity = xianFengUtil.queryPayByOrderNo(payLog.getPayOrderSn());
+				if(rspBaseEntity != null) {
+					RspOrderQueryEntity rspOrderQueryEntity = rspBaseEntity.buildRspOrderQueryEntity(payCode);	
+					baseResult = ResultGenerator.genSuccessResult("succ",rspOrderQueryEntity);
+				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		if(baseResult != null) {
 			if(baseResult.getCode() != 0) {
