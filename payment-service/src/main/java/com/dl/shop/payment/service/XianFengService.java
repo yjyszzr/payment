@@ -332,6 +332,7 @@ public class XianFengService {
 				response.setResult_code("00000");
 				response.setTrade_no(rspEntity.tradeNo);
 				response.setPayCode(payCode);
+				response.setType(RspOrderQueryEntity.TYPE_XIANFENG);
 				if(payType == 0) {
 					bResult = paymentService.orderOptions("xFengQuery",payLog,response);
 				}else {

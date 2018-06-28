@@ -96,7 +96,8 @@ public class XianFengController {
 					//进行验签,忽略该步骤
 		        	//处理返回数据
 					if(rspEntity != null) {
-						xianFengService.payNotify(rspEntity);
+						boolean isSucc = xianFengService.payNotify(rspEntity);
+						logger.info("[payNotify]" + " isSucc:" + isSucc);
 					}
             	} catch (Exception e) {
 					e.printStackTrace();
