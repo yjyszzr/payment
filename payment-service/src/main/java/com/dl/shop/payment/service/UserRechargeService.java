@@ -50,12 +50,12 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
     		userId = sessionUserId;
     	}
     	
-    	Integer count = userRechargeMapper.countUserCharge(userId);
+    	Integer count = userRechargeMapper.countChargeByUserId(userId);
     	YesOrNoDTO yesOrNoDTO = new YesOrNoDTO();
     	if(count == 0 ) {
-    		yesOrNoDTO.setYesOrNo("0");
+    		yesOrNoDTO.setYesOrNo(ProjectConstant.noRecharged);
     	}else {
-    		yesOrNoDTO.setYesOrNo("1");
+    		yesOrNoDTO.setYesOrNo(ProjectConstant.hasRecharged);
     	}
     	
     	return ResultGenerator.genSuccessResult("查询是否充值成功",yesOrNoDTO);
@@ -69,9 +69,9 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
     	Integer count = userRechargeMapper.countChargeByUserId(userId);
     	YesOrNoDTO yesOrNoDTO = new YesOrNoDTO();
     	if(count == 1 ) {
-    		yesOrNoDTO.setYesOrNo("0");
-    	}else {
-    		yesOrNoDTO.setYesOrNo("1");
+    		yesOrNoDTO.setYesOrNo(ProjectConstant.noRecharged);
+    	}else if(count > 1){
+    		yesOrNoDTO.setYesOrNo(ProjectConstant.hasRecharged);
     	}
     	
     	return ResultGenerator.genSuccessResult("查询是否充值成功",yesOrNoDTO);
@@ -148,7 +148,7 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
 		BaseResult<YesOrNoDTO> yesOrNotRst = this.countUserRecharge(userId);
 		YesOrNoDTO yesOrNoDTO = yesOrNotRst.getData();
 		List<DonationPriceDTO> donationPriceList = new ArrayList<DonationPriceDTO>();
-		if(yesOrNoDTO.getYesOrNo().equals("1")) {
+		if(ProjectConstant.hasRecharged.equals(yesOrNoDTO.getYesOrNo())) {
 			DonationPriceDTO donationPriceDTO = new DonationPriceDTO();
 			donationPriceDTO.setMinRechargeAmount(10);
 			donationPriceDTO.setDonationAmount(1);

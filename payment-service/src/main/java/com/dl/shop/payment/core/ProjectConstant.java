@@ -37,5 +37,15 @@ public class ProjectConstant {
 	public static final Integer IS_PAID_FAILURE = 3;
 	public static final Integer IS_PAID_REFOUND = 4;
 	
+	//是否充过值  1- 充过值 0- 未充过值
+	public static final String hasRecharged = "1";
+	public static final String noRecharged = "0";
+	
+	//通用 的代表 否-0 是 -1
+	public static final Integer NO_0 = 0;
+	public static final Integer YES_1 = 1;
+	
+	
+	
 	
 }
