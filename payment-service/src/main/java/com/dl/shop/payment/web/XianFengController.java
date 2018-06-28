@@ -8,8 +8,6 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +17,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.enums.SNBusinessCodeEnum;
@@ -73,54 +70,6 @@ public class XianFengController {
 	
 	private final String SIGN = "sign";
 	private final String SECID = "RSA";//签名算法
-	
-	@ApiOperation(value="先锋支付回调")
-	@PostMapping("/notify")
-	public void payNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
-		request.setCharacterEncoding("UTF-8");
-		response.setCharacterEncoding("UTF-8");
-		response.setHeader("Content-type","text/html;charset=UTF-8");
-	    Map<?,?> parameters = request.getParameterMap();//保存request请求参数的临时变量
-        String dataValue = "";//保存业务数据加密值
-        JSONObject jsonData = null;
-        //打印先锋支付返回值
-        logger.info("服务器端通知-接收到先锋支付返回报文：");
-        Iterator<?> paiter = parameters.keySet().iterator();
-        while (paiter.hasNext()) {
-            String key = paiter.next().toString();
-            String[] values = (String[])parameters.get(key);                        
-            logger.info(key+"-------------"+values[0]);
-            if(key.equals("data")) {
-            	dataValue = values[0];
-            	logger.info("===========payNotify==============");
-            	try {
-					String dataJson= AESCoder.decrypt(dataValue, XianFengPayCfg.RSA_KEY);
-					RspNotifyEntity rspEntity = JSON.parseObject(dataJson,RspNotifyEntity.class);
-					logger.info("[payNotify]" + " dataJson:" + dataJson);
-		        	//处理返回数据
-					if(rspEntity != null) {
-						//进行验签,忽略该步骤
-						RspNotifySignEntity signEntity = rspEntity.buildSignEntity();
-						String signJsonStr = JSON.toJSONString(signEntity);
-						Map<String,String> signMap = JSON.parseObject(signJsonStr,HashMap.class);
-						boolean verifyResult = UcfForOnline.verify(XianFengPayCfg.RSA_KEY, SIGN,rspEntity.sign, signMap, SECID);
-						logger.info("[payNotify]" + " 验签结果:" + verifyResult);
-						if(verifyResult) {
-							//通知先锋成功
-							PrintWriter writer = response.getWriter();
-				        	writer.write("SUCCESS");
-				        	writer.flush();
-							boolean isSucc = xianFengService.payNotify(rspEntity);
-							logger.info("[payNotify]" + " isSucc:" + isSucc);
-						}
-					}
-            	} catch (Exception e) {
-					e.printStackTrace();
-					logger.info("[payNotify]" + "exception msg:" + e.getMessage());
-				}
-            }
-        }
-	}
 	
 	@ApiOperation(value="先锋支付请求")
 	@PostMapping("/app")
@@ -207,6 +156,54 @@ public class XianFengController {
 		}else {
 			return baseResult;
 		}
+	}
+	
+	@ApiOperation(value="先锋支付回调")
+	@PostMapping("/notify")
+	public void payNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+		request.setCharacterEncoding("UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		response.setHeader("Content-type","text/html;charset=UTF-8");
+	    Map<?,?> parameters = request.getParameterMap();//保存request请求参数的临时变量
+        String dataValue = "";//保存业务数据加密值
+        JSONObject jsonData = null;
+        //打印先锋支付返回值
+        logger.info("服务器端通知-接收到先锋支付返回报文：");
+        Iterator<?> paiter = parameters.keySet().iterator();
+        while (paiter.hasNext()) {
+            String key = paiter.next().toString();
+            String[] values = (String[])parameters.get(key);                        
+            logger.info(key+"-------------"+values[0]);
+            if(key.equals("data")) {
+            	dataValue = values[0];
+            	logger.info("===========payNotify==============");
+            	try {
+					String dataJson= AESCoder.decrypt(dataValue, XianFengPayCfg.RSA_KEY);
+					RspNotifyEntity rspEntity = JSON.parseObject(dataJson,RspNotifyEntity.class);
+					logger.info("[payNotify]" + " dataJson:" + dataJson);
+		        	//处理返回数据
+					if(rspEntity != null) {
+						//进行验签,忽略该步骤
+						RspNotifySignEntity signEntity = rspEntity.buildSignEntity();
+						String signJsonStr = JSON.toJSONString(signEntity);
+						Map<String,String> signMap = JSON.parseObject(signJsonStr,HashMap.class);
+						boolean verifyResult = UcfForOnline.verify(XianFengPayCfg.RSA_KEY, SIGN,rspEntity.sign, signMap, SECID);
+						logger.info("[payNotify]" + " 验签结果:" + verifyResult);
+						if(verifyResult) {
+							//通知先锋成功
+							PrintWriter writer = response.getWriter();
+				        	writer.write("SUCCESS");
+				        	writer.flush();
+							boolean isSucc = xianFengService.payNotify(rspEntity);
+							logger.info("[payNotify]" + " isSucc:" + isSucc);
+						}
+					}
+            	} catch (Exception e) {
+					e.printStackTrace();
+					logger.info("[payNotify]" + "exception msg:" + e.getMessage());
+				}
+            }
+        }
 	}
 	
 //	/***

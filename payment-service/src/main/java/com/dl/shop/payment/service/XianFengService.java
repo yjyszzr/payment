@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.druid.util.StringUtils;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
+import com.dl.base.util.DateUtil;
 import com.dl.member.api.IUserBankService;
 import com.dl.member.dto.BankDTO;
 import com.dl.member.dto.UserBankDTO;
@@ -162,7 +163,7 @@ public class XianFengService {
 				Integer bankType = userBankDTO.getType();
 				logger.info("[appPay saveBankInfo]" + " userId:" + userId + " bankType:" + bankType 
 						+ " accNo:" + accNo + " certNo:" + certNo + " mobileNo:" + mobileNo + " accName:" + accName);
-				saveBankInfo(userId,bankType,accNo,certNo,mobileNo,accName);
+				saveBankInfo(userId,bankType,accNo,certNo,mobileNo,accName,cvn2,validDate);
 				return ResultGenerator.genSuccessResult("验证码发送成功",xFApplyDTO);	
 			}else {
 				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_PAY_ERROR.getcode(),PayEnums.PAY_XIANFENG_PAY_ERROR.getMsg()+"["+rspEntity.resMessage+"]");
@@ -171,7 +172,7 @@ public class XianFengService {
 		return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_PAY_ERROR.getcode(),PayEnums.PAY_XIANFENG_PAY_ERROR.getMsg()+"[先锋请求异常]");
 	}
 	
-	private void saveBankInfo(int userId,int bankType,String accNo,String certNo,String mobileNo,String accName) {
+	private void saveBankInfo(int userId,int bankType,String accNo,String certNo,String mobileNo,String accName,String cvn2,String vaildDate) {
 		PayBankRecordModel payBankRecordModel = new PayBankRecordModel();
 		payBankRecordModel.setUserId(userId);
 		List<PayBankRecordModel> sList = payBankRecordMapper.listUserBank(payBankRecordModel);
@@ -191,6 +192,9 @@ public class XianFengService {
 			payBankRecordModel.setPhone(mobileNo);
 			payBankRecordModel.setUserName(accName);
 			payBankRecordModel.setBankType(bankType);
+			payBankRecordModel.setCvn2(cvn2);
+			payBankRecordModel.setVaildDate(vaildDate);
+			payBankRecordModel.setLastTime(DateUtil.getCurrentTimeLong());
 			int cnt = payBankRecordMapper.insert(payBankRecordModel);
 			logger.info("[appPay]" + " payBankRecordMapper.insert cnt:" + cnt);
 		}else {
@@ -199,6 +203,9 @@ public class XianFengService {
 			findModel.setCertNo(certNo);
 			findModel.setPhone(mobileNo);
 			findModel.setUserName(accName);
+			findModel.setCvn2(cvn2);
+			findModel.setVaildDate(vaildDate);
+			findModel.setLastTime(DateUtil.getCurrentTimeLong());
 			int cnt = payBankRecordMapper.updateInfo(findModel);
 			logger.info("[appPay]" + " payBankRecordMapper.updateInfo cnt:" + cnt);
 		}

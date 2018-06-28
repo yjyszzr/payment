@@ -28,7 +28,39 @@ public class PayBankRecordModel {
      @Column(name = "bank_type")
      private int bankType;
 
+     @Column(name = "cvn2")
+     private String cvn2;
+
+     @Column(name = "vaild_date")
+     private String vaildDate;
      
+     @Column(name = "last_time")
+     private Integer lastTime;
+     
+	public String getCvn2() {
+		return cvn2;
+	}
+
+	public void setCvn2(String cvn2) {
+		this.cvn2 = cvn2;
+	}
+
+	public String getVaildDate() {
+		return vaildDate;
+	}
+
+	public void setVaildDate(String vaildDate) {
+		this.vaildDate = vaildDate;
+	}
+
+	public Integer getLastTime() {
+		return lastTime;
+	}
+
+	public void setLastTime(Integer lastTime) {
+		this.lastTime = lastTime;
+	}
+
 	public Integer getUserId() {
 		return userId;
 	}
