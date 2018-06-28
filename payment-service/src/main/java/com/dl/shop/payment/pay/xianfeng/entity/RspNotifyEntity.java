@@ -19,4 +19,19 @@ public class RspNotifyEntity {
 	public boolean isSucc() {
 		return "00000".equals(resCode);
 	}
+	
+	public RspNotifySignEntity buildSignEntity() {
+		RspNotifySignEntity rspNotifySignEntity = new RspNotifySignEntity();
+		rspNotifySignEntity.amount = this.amount;
+		rspNotifySignEntity.transCur = this.transCur;
+		rspNotifySignEntity.memo = this.memo;
+		rspNotifySignEntity.tradeNo = this.tradeNo;
+		rspNotifySignEntity.status = this.status;
+		rspNotifySignEntity.tradeTime = this.tradeTime;
+		rspNotifySignEntity.resCode = this.resCode;
+		rspNotifySignEntity.resMessage = this.resMessage;
+		rspNotifySignEntity.merchantId = this.merchantId;
+		rspNotifySignEntity.merchantNo = this.merchantNo;
+		return rspNotifySignEntity;
+	}
 }

@@ -2,11 +2,14 @@ package com.dl.shop.payment.web;
 
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +41,11 @@ import com.dl.shop.payment.param.XianFengPayConfirmParam;
 import com.dl.shop.payment.param.XianFengPayParam;
 import com.dl.shop.payment.pay.xianfeng.config.XianFengPayCfg;
 import com.dl.shop.payment.pay.xianfeng.entity.RspNotifyEntity;
+import com.dl.shop.payment.pay.xianfeng.entity.RspNotifySignEntity;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
 import com.dl.shop.payment.service.XianFengService;
+import com.ucf.sdk.UcfForOnline;
 import com.ucf.sdk.util.AESCoder;
 import io.swagger.annotations.ApiOperation;
 
@@ -66,6 +71,9 @@ public class XianFengController {
 	@Resource
 	private PayMentService paymentService;
 	
+	private final String SIGN = "sign";
+	private final String SECID = "RSA";//签名算法
+	
 	@ApiOperation(value="先锋支付回调")
 	@PostMapping("/notify")
 	public void payNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
@@ -89,9 +97,14 @@ public class XianFengController {
 					String dataJson= AESCoder.decrypt(dataValue, XianFengPayCfg.RSA_KEY);
 					RspNotifyEntity rspEntity = JSON.parseObject(dataJson,RspNotifyEntity.class);
 					logger.info("[payNotify]" + " dataJson:" + dataJson);
-					//进行验签,忽略该步骤
 		        	//处理返回数据
 					if(rspEntity != null) {
+						//进行验签,忽略该步骤
+						RspNotifySignEntity signEntity = rspEntity.buildSignEntity();
+						String signJsonStr = JSON.toJSONString(signEntity);
+						Map<String,String> signMap = JSON.parseObject(signJsonStr,HashMap.class);
+						boolean verifyResult = UcfForOnline.verify(XianFengPayCfg.RSA_KEY, SIGN,rspEntity.sign, signMap, SECID);
+						logger.info("[payNotify]" + " 验签结果:" + verifyResult);
 						//通知先锋成功
 						PrintWriter writer = response.getWriter();
 			        	writer.write("SUCCESS");
