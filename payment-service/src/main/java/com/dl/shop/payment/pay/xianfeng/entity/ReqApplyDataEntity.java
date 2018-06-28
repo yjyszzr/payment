@@ -7,6 +7,8 @@ import com.dl.shop.payment.pay.xianfeng.config.XianFengPayCfg;
 import com.ucf.sdk.CoderException;
 import com.ucf.sdk.util.UnRepeatCodeGenerator;
 
+import lombok.val;
+
 public class ReqApplyDataEntity {
 	public String merchantNo;
 	public String payerId;		//付款方ID，应为先锋支付合法用户ID
@@ -21,9 +23,11 @@ public class ReqApplyDataEntity {
 	public String productName;	//商品名称
 	public String productInfo;	//商品信息
 	public String noticeUrl;	//后台通知地址
+	public String cvn2;			//信用卡专用码
+	public String validDate;	//信用卡有效期
 	
 	public static final ReqApplyDataEntity buildReqDataEntity(String orderNo,String userId,String amt,String certNo,
-			String accNo,String accName,String mobileNo,String bankId,String pName,String pInfo) {
+			String accNo,String accName,String mobileNo,String bankId,String pName,String pInfo,String cvn2,String validDate) {
 		ReqApplyDataEntity reqEntity = new ReqApplyDataEntity();
 		reqEntity.merchantNo = orderNo;
 		reqEntity.payerId = userId;
@@ -38,6 +42,8 @@ public class ReqApplyDataEntity {
 		reqEntity.productName = pName;
 		reqEntity.productInfo = pInfo;
 		reqEntity.noticeUrl = XianFengPayCfg.NOTIFY_URL;
+		reqEntity.cvn2 = cvn2;
+		reqEntity.validDate = validDate;
 		return reqEntity;
 	}
 	

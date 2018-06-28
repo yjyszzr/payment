@@ -89,13 +89,13 @@ public class XianFengController {
 					String dataJson= AESCoder.decrypt(dataValue, XianFengPayCfg.RSA_KEY);
 					RspNotifyEntity rspEntity = JSON.parseObject(dataJson,RspNotifyEntity.class);
 					logger.info("[payNotify]" + " dataJson:" + dataJson);
-					//通知先锋成功
-					PrintWriter writer = response.getWriter();
-		        	writer.write("SUCCESS");
-		        	writer.flush();
 					//进行验签,忽略该步骤
 		        	//处理返回数据
 					if(rspEntity != null) {
+						//通知先锋成功
+						PrintWriter writer = response.getWriter();
+			        	writer.write("SUCCESS");
+			        	writer.flush();
 						boolean isSucc = xianFengService.payNotify(rspEntity);
 						logger.info("[payNotify]" + " isSucc:" + isSucc);
 					}

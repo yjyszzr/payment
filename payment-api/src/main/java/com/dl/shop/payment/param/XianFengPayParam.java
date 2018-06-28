@@ -17,4 +17,8 @@ public class XianFengPayParam {
 	private String phone;
 	@ApiModelProperty("上下文")
 	private String token;
+	@ApiModelProperty("信用卡安全码")
+	private String cvn2;
+	@ApiModelProperty("信用卡有效期")
+	private String validDate;
 }

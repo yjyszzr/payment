@@ -101,6 +101,8 @@ public class XianFengService {
 		String pName = null;
 		String pInfo = null;
 		String accName = param.getName();
+		String cvn2 = null;
+		String validDate = null;
 		if(payType == 0) {
 			pName = "足彩订单支付";
 			pInfo = "彩小秘支付服务";
@@ -120,6 +122,16 @@ public class XianFengService {
 		}
 		UserBankDTO userBankDTO = baseResult.getData();
 		String bankId = userBankDTO.getAbbreviation();
+		int type = userBankDTO.getType();
+		if(type == 1) {//信用卡|贷记卡
+			if(StringUtils.isEmpty(param.getCvn2()) || StringUtils.isEmpty(param.getValidDate())){
+				return ResultGenerator.genFailResult("信用卡cv2，有效期参数有误");
+			}else {
+				cvn2 = param.getCvn2();
+				validDate = param.getValidDate();
+			}
+			logger.info("[appPay]" + "信用卡 cvn2 有效期校验成功...");
+		}
 		RspApplyBaseEntity rspEntity = null;
 		//请求第三方申请接口
 		//userId, amt, certNo, accNo, accName, mobileNo, bankId, pName, pInfo
@@ -129,7 +141,7 @@ public class XianFengService {
 				+ pName +" pInfo:" + pInfo + " payOrderSn:" + payOrderSn);
 		logger.info("===================请求先锋支付==========================");
 		try {
-			rspEntity = xFPayUtil.reqApply(payOrderSn,null,amt+"",certNo,accNo,accName,mobileNo,bankId,pName,pInfo);
+			rspEntity = xFPayUtil.reqApply(payOrderSn,null,amt+"",certNo,accNo,accName,mobileNo,bankId,pName,pInfo,cvn2,validDate);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -334,9 +346,9 @@ public class XianFengService {
 				response.setPayCode(payCode);
 				response.setType(RspOrderQueryEntity.TYPE_XIANFENG);
 				if(payType == 0) {
-					bResult = paymentService.orderOptions("xFengQuery",payLog,response);
+					bResult = paymentService.orderOptions("xFengNotify",payLog,response);
 				}else {
-					bResult = paymentService.rechargeOptions("xFengQuery",payLog,response);
+					bResult = paymentService.rechargeOptions("xFengNotify",payLog,response);
 				}
 			}
 			if(bResult != null && bResult.getCode() == 0) {
