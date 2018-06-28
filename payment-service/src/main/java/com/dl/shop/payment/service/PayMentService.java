@@ -625,7 +625,9 @@ public class PayMentService extends AbstractService<PayMent> {
 			}
 		}
 		if(baseResult == null || baseResult.getCode() != 0) {
-			logger.info("订单支付状态轮询第三方[" + baseResult.getMsg()+"]");
+			if(baseResult != null) {
+				logger.info("订单支付状态轮询第三方[" + baseResult.getMsg()+"]");
+			}
 			return succ;
 		}
 		RspOrderQueryEntity rspEntity = baseResult.getData();
