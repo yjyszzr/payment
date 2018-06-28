@@ -613,7 +613,7 @@ public class PaymentController extends AbstractBaseController{
 			logger.info(loggerId + " payLog对象保存失败！"); 
 			return ResultGenerator.genFailResult("请求失败！", null);
 		}else {
-			logger.info("save paylog succ:" + " id:" + payLog.getPayIp() + " paycode:" + payCode + " payOrderSn:" + payLog.getPayOrderSn());
+			logger.info("save paylog succ:" + " id:" + payLog.getLogId() + " paycode:" + payCode + " payOrderSn:" + payLog.getPayOrderSn());
 		}
 		//第三方支付调用
 		UnifiedOrderParam unifiedOrderParam = new UnifiedOrderParam();
@@ -652,11 +652,13 @@ public class PaymentController extends AbstractBaseController{
 				e.printStackTrace();
 			}
 		}else if("app_xianfeng".equals(payCode)) {
+			logger.info("[rechargeForApp]" + " 先锋充值处理...");
 			PayReturnDTO rEntity = new PayReturnDTO();
 			rEntity.setPayUrl("");
 			rEntity.setPayLogId(savePayLog.getLogId()+"");
 			rEntity.setOrderId(orderSn);
 			payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
+			logger.info("[rechargeForApp]" + " 先锋充值处理结束:" + payBaseResult);
 		}
 		//处理支付失败的情况
 		if(null == payBaseResult || payBaseResult.getCode() != 0) {
