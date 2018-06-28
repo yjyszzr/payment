@@ -561,6 +561,9 @@ public class PayMentService extends AbstractService<PayMent> {
 				}else {
 					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"微信支付失败["+tips+"]");	
 				}
+			//先锋错误码处理
+			}else if(RspOrderQueryEntity.PAY_CODE_XIANFENG.equals(payCode)){
+				
 			}
 		}
 		return null;

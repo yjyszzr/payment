@@ -42,4 +42,5 @@ public class RspOrderQueryEntity implements Serializable{
 	
 	public static final String PAY_CODE_WECHAT = "app_weixin";
 	public static final String PAY_CODE_RONGBAO = "app_rongbao";
+	public static final String PAY_CODE_XIANFENG = "app_xianfeng";
 }

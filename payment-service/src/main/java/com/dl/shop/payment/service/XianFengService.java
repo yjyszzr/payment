@@ -27,7 +27,9 @@ import com.dl.shop.payment.param.XianFengPayConfirmParam;
 import com.dl.shop.payment.param.XianFengPayParam;
 import com.dl.shop.payment.pay.common.PayManager;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
+import com.dl.shop.payment.pay.xianfeng.config.XianFengPayCfg;
 import com.dl.shop.payment.pay.xianfeng.entity.RspApplyBaseEntity;
+import com.dl.shop.payment.pay.xianfeng.entity.RspNotifyEntity;
 import com.dl.shop.payment.pay.xianfeng.util.XianFengPayUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -303,7 +305,43 @@ public class XianFengService {
 	/***
 	 * 先锋支付Notify通知
 	 */
-	public void payNotify() {
+	public boolean payNotify(RspNotifyEntity rspEntity) {
+		boolean isSucc = false;
 		logger.info("[XianFengService.payNotify]");
+		String payLogSn = rspEntity.merchantNo;
+		PayLog payLog = payLogService.findPayLogByOrderSign(payLogSn);
+		if(payLog == null) {
+			logger.info("[payNotify]"+"该支付订单查询失败 payLogSn:" + payLogSn);
+			return isSucc;
+		}
+		int isPaid = payLog.getIsPaid();
+		if(isPaid == 1) {
+			logger.info("[payNotify]" +" 该订单已支付...");
+			return isSucc;
+		}
+		BigDecimal bigAmt = payLog.getOrderAmount();
+		bigAmt = bigAmt.movePointRight(2);
+		int amt = bigAmt.intValue();
+		int payType = payLog.getPayType();
+		String payCode = payLog.getPayCode();
+		if(XianFengPayCfg.MERCHANT_NO.equals(rspEntity.merchantId) && rspEntity.amount.equals(amt+"")) {
+			logger.info("[payNotify]" +" 商户号，交易金额校验成功, amt:" + rspEntity.amount +" merchantId:" + rspEntity.merchantId);
+			BaseResult<RspOrderQueryDTO> bResult = null;
+			if(rspEntity.isSucc()) {
+				RspOrderQueryEntity response = new RspOrderQueryEntity();
+				response.setResult_code("00000");
+				response.setTrade_no(rspEntity.tradeNo);
+				response.setPayCode(payCode);
+				if(payType == 0) {
+					bResult = paymentService.orderOptions("xFengQuery",payLog,response);
+				}else {
+					bResult = paymentService.rechargeOptions("xFengQuery",payLog,response);
+				}
+			}
+			if(bResult != null && bResult.getCode() == 0) {
+				isSucc = true;
+			}
+		}
+		return isSucc;
 	}
 }

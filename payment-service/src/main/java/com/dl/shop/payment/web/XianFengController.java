@@ -2,10 +2,8 @@ package com.dl.shop.payment.web;
 
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,24 +27,21 @@ import com.dl.base.util.SNGenerator;
 import com.dl.base.util.SessionUtil;
 import com.dl.member.api.IUserBankService;
 import com.dl.member.dto.BankDTO;
-import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dao.PayBankRecordMapper;
 import com.dl.shop.payment.dto.BankTypeDTO;
 import com.dl.shop.payment.dto.XianFengApplyCfgDTO;
 import com.dl.shop.payment.dto.XianFengApplyDTO;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.PayLog;
-import com.dl.shop.payment.model.UserWithdraw;
 import com.dl.shop.payment.param.XianFengBankTypeParam;
 import com.dl.shop.payment.param.XianFengPayConfirmParam;
 import com.dl.shop.payment.param.XianFengPayParam;
-import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
 import com.dl.shop.payment.pay.xianfeng.config.XianFengPayCfg;
+import com.dl.shop.payment.pay.xianfeng.entity.RspNotifyEntity;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
 import com.dl.shop.payment.service.XianFengService;
 import com.ucf.sdk.util.AESCoder;
-
 import io.swagger.annotations.ApiOperation;
 
 /**
@@ -92,8 +87,17 @@ public class XianFengController {
             	logger.info("===========payNotify==============");
             	try {
 					String dataJson= AESCoder.decrypt(dataValue, XianFengPayCfg.RSA_KEY);
+					RspNotifyEntity rspEntity = JSON.parseObject(dataJson,RspNotifyEntity.class);
 					logger.info("[payNotify]" + " dataJson:" + dataJson);
-					xianFengService.payNotify();
+					//通知先锋成功
+					PrintWriter writer = response.getWriter();
+		        	writer.write("SUCCESS");
+		        	writer.flush();
+					//进行验签,忽略该步骤
+		        	//处理返回数据
+					if(rspEntity != null) {
+						xianFengService.payNotify(rspEntity);
+					}
             	} catch (Exception e) {
 					e.printStackTrace();
 					logger.info("[payNotify]" + "exception msg:" + e.getMessage());
