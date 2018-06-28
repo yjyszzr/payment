@@ -160,11 +160,11 @@ public class XianFengController {
 		String bankName = bankDTO.getBankname();
 		if("借记卡".equals(cardtype)) {
 			bankTypeDTO = new BankTypeDTO();
-			bankTypeDTO.setBankType(1);
+			bankTypeDTO.setBankType(0);
 			bankTypeDTO.setBankName(bankName);
 		}else if("贷记卡".equals(cardtype)) {
 			bankTypeDTO = new BankTypeDTO();
-			bankTypeDTO.setBankType(2);
+			bankTypeDTO.setBankType(1);
 			bankTypeDTO.setBankName(bankName);
 		}
 		if(bankTypeDTO == null) {
