@@ -704,6 +704,7 @@ public class PayMentService extends AbstractService<PayMent> {
 				PayBankRecordModel payBankRModel = mList.get(i);
 				PayBankRecordDTO payBRDTO = new PayBankRecordDTO();
 				payBRDTO.setRecordId(payBankRModel.getId());
+				payBRDTO.setLastTime(payBankRModel.getLastTime());
 //				payBRDTO.setUserId(payBankRModel.getUserId());
 //				payBRDTO.setBankCardNo(payBankRModel.getBankCardNo());
 //				payBRDTO.setUserName(payBankRModel.getUserName());
@@ -713,8 +714,7 @@ public class PayMentService extends AbstractService<PayMent> {
 //				payBRDTO.setCvn2(payBankRModel.getCvn2());
 //				payBRDTO.setVaildDate(payBankRModel.getValidDate());
 //				payBRDTO.setBankName(payBankRModel.getBankName());
-				String msg = getMsg(payBRDTO);
-				payBRDTO.setLastTime(payBankRModel.getLastTime());
+				String msg = getMsg(payBankRModel);
 				payBRDTO.setMessage(msg);
 				rList.add(payBRDTO);
 			}
@@ -722,7 +722,7 @@ public class PayMentService extends AbstractService<PayMent> {
 		return rList;
 	}
 	
-	private String getMsg(PayBankRecordDTO entity) {
+	private String getMsg(PayBankRecordModel entity) {
 		String msg = null;
 		if(entity != null) {
 			String strType = "借记卡";
