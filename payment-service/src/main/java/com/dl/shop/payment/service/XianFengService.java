@@ -1,6 +1,9 @@
 package com.dl.shop.payment.service;
 
 import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import javax.annotation.Resource;
 import org.slf4j.Logger;
@@ -285,10 +288,24 @@ public class XianFengService {
 		}
 		BigDecimal bigAmt = payLog.getOrderAmount();
 		List<PayBankRecordDTO> mBankList = paymentService.listUserBanks(userId);
+		//按照时间先后排序
+		sortBankList(mBankList);
 		XianFengApplyCfgDTO xFApplyCfgDTO = new XianFengApplyCfgDTO();
 		xFApplyCfgDTO.setBankList(mBankList);
 		xFApplyCfgDTO.setAmt(bigAmt+"");
 		return ResultGenerator.genSuccessResult("succ",xFApplyCfgDTO);
+	}
+	
+	private void sortBankList(List<PayBankRecordDTO> mList) {
+		Collections.sort(mList,new Comparator<PayBankRecordDTO>() {
+			@Override
+			public int compare(PayBankRecordDTO left, PayBankRecordDTO right) {
+				if(left != null && right != null) {
+					return left.getLastTime() - right.getLastTime();
+				}
+				return 0;
+			}
+		});
 	}
 	
 	/***

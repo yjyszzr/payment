@@ -14,4 +14,5 @@ public class PayBankRecordDTO {
      private String cvn2;
      private String vaildDate;
      private String bankName;
+     private Integer lastTime;
 }

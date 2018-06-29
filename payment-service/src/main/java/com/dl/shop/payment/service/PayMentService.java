@@ -713,6 +713,7 @@ public class PayMentService extends AbstractService<PayMent> {
 				payBRDTO.setCvn2(payBankRModel.getCvn2());
 				payBRDTO.setVaildDate(payBankRModel.getValidDate());
 				payBRDTO.setBankName(payBankRModel.getBankName());
+				payBRDTO.setLastTime(payBankRModel.getLastTime());
 				rList.add(payBRDTO);
 			}
 		}
