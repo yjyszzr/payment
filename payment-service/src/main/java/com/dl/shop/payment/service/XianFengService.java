@@ -183,8 +183,7 @@ public class XianFengService {
 		for(int i = 0;i < sList.size();i++) {
 			PayBankRecordModel payBRModel = sList.get(i);
 			if(!StringUtils.isEmpty(accNo) && payBRModel.getBankCardNo().equals(accNo)) {
-				findModel = payBankRecordModel;
-				logger.info("[saveBankInfo]" + " findModel:" +findModel);
+				findModel = payBRModel;
 				break;
 			}
 		}
