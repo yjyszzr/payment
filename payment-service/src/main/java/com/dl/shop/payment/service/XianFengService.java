@@ -78,7 +78,11 @@ public class XianFengService {
 				//主动query接口
 				PayManager.getInstance().addReqQueue(orderSn, payOrderSn, payCode);
 				return ResultGenerator.genSuccessResult("支付申请成功");
-			}else {
+			}else if(rspEntity.isVerfyCodeWrong()){
+				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_PAY_ERROR.getcode(),PayEnums.PAY_XIANFENG_PAY_ERROR.getMsg());
+			}else if(rspEntity.isVerifyCodeInValid()) {
+				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_VERIFYCODE_INVALID.getcode(),PayEnums.PAY_XIANFENG_VERIFYCODE_INVALID.getMsg());
+			}else{
 				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_PAY_ERROR.getcode(),PayEnums.PAY_XIANFENG_PAY_ERROR.getMsg() + "[" + rspEntity.resMessage +"]");
 			}
 		}
