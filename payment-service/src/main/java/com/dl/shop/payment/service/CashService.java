@@ -160,6 +160,13 @@ public class CashService {
 			logger.info(loggerId+"提现金额超出用户可提现金额数值~");
 			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_NOT_ENOUGH.getcode(),PayEnums.PAY_RONGBAO_NOT_ENOUGH.getMsg()); 
 		}
+		
+		//限制1天最多能提现3次
+		int countUserWithdraw = userWithdrawService.countUserWithdraw(userId);
+		if(countUserWithdraw > 3) {
+			return ResultGenerator.genResult(PayEnums.PAY_MAX_COUNT_WITHDRAW.getcode(),PayEnums.PAY_MAX_COUNT_WITHDRAW.getMsg()); 
+		}
+		
 		UserBankDTO userBankDTO = queryUserBank.getData();
 		String bankCode = userBankDTO.getAbbreviation();
 		String realName = userBankDTO.getRealName();

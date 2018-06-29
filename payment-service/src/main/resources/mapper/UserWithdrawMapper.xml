@@ -69,5 +69,10 @@
   	 AND withdrawal_sn = #{withdrawalSn}
   </select>
   
+  <select id = "countUserWithdrawByUserId" resultType="java.lang.Integer">
+  	 select count(1) from dl_user_withdraw 
+  	 where user_id = #{userId} and status = '1' and FROM_UNIXTIME(add_time,"%Y-%m-%d") = curdate();
+  </select>
+  
   
 </mapper>
