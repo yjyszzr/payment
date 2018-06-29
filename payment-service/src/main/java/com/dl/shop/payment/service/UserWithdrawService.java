@@ -5,6 +5,7 @@ import com.dl.shop.payment.dto.UserWithdrawDTO;
 import com.dl.shop.payment.dto.WithdrawalSnDTO;
 import com.dl.shop.payment.model.UserWithdraw;
 import com.dl.shop.payment.param.UpdateUserWithdrawParam;
+import com.dl.shop.payment.param.UserIdParam;
 import com.dl.shop.payment.param.UserWithdrawParam;
 import lombok.extern.slf4j.Slf4j;
 import com.dl.member.api.IUserAccountService;
@@ -156,6 +157,17 @@ public class UserWithdrawService extends AbstractService<UserWithdraw> {
     	userWithdraw.setWithdrawalSn(updateUserWithdrawParam.getWithdrawalSn());
     	userWithdrawMapper.updateUserWithdrawBySelective(userWithdraw);
 		return ResultGenerator.genSuccessResult("更新数据库提现单成功",null);
+    }
+    
+    
+    /**
+     * 根据userId统计成功的提现单数量
+     * @param amount
+     * @return
+     */
+    public int countUserWithdraw(Integer userId){
+    	int countUserWithdraw = userWithdrawMapper.countUserWithdrawByUserId(userId);
+		return countUserWithdraw;
     }
     
 }
