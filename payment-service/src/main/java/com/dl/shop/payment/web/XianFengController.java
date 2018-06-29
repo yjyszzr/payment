@@ -34,6 +34,7 @@ import com.dl.shop.payment.dto.XianFengApplyDTO;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.param.XianFengBankTypeParam;
+import com.dl.shop.payment.param.XianFengCfgParam;
 import com.dl.shop.payment.param.XianFengPayConfirmParam;
 import com.dl.shop.payment.param.XianFengPayParam;
 import com.dl.shop.payment.pay.xianfeng.config.XianFengPayCfg;
@@ -104,9 +105,13 @@ public class XianFengController {
 	@ApiOperation(value="获取先锋银行列表配置")
 	@PostMapping("/appCfg")
 	@ResponseBody
-	public BaseResult<XianFengApplyCfgDTO> appCfg(@RequestBody EmptyParam payParam) {
+	public BaseResult<XianFengApplyCfgDTO> appCfg(@RequestBody XianFengCfgParam cfgParam) {
 		int userId = SessionUtil.getUserId();
-		return xianFengService.appPayCfg(userId);
+		int payLogId = cfgParam.getPayLogId();
+		if(payLogId <= 0) {
+			return ResultGenerator.genFailResult("PayLogId不合法");
+		}
+		return xianFengService.appPayCfg(userId,payLogId);
 	}
 	
 	@ApiOperation(value="根据银行账号获取卡类型 目前只识别借记卡和贷记卡")

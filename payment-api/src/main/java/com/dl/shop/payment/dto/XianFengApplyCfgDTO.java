@@ -11,4 +11,6 @@ import lombok.Data;
 public class XianFengApplyCfgDTO {
 	@ApiModelProperty(value="历史银行列表")
 	private List<PayBankRecordDTO> bankList;
+	@ApiModelProperty(value="支付金额")
+	private String amt;
 }

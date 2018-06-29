@@ -123,6 +123,7 @@ public class XianFengService {
 		}
 		UserBankDTO userBankDTO = baseResult.getData();
 		String bankId = userBankDTO.getAbbreviation();
+		String bankName = userBankDTO.getBankName();
 		int type = userBankDTO.getType();
 		if(type == 1) {//信用卡|贷记卡
 			if(StringUtils.isEmpty(param.getCvn2()) || StringUtils.isEmpty(param.getValidDate())){
@@ -139,7 +140,7 @@ public class XianFengService {
 		logger.info("===================请求先锋支付==========================");
 		logger.info("[appPay]" +" userId:" + userId +" amt:" + amt +" certNo:" + certNo 
 				+" accName:" + accName +" mobileNo:" + mobileNo + " bankId:" + bankId +" pName:" 
-				+ pName +" pInfo:" + pInfo + " payOrderSn:" + payOrderSn);
+				+ pName +" pInfo:" + pInfo + " payOrderSn:" + payOrderSn + " cvn2:" + cvn2 + " validDate:" + validDate);
 		logger.info("===================请求先锋支付==========================");
 		try {
 			rspEntity = xFPayUtil.reqApply(payOrderSn,null,amt+"",certNo,accNo,accName,mobileNo,bankId,pName,pInfo,cvn2,validDate);
@@ -163,7 +164,7 @@ public class XianFengService {
 				Integer bankType = userBankDTO.getType();
 				logger.info("[appPay saveBankInfo]" + " userId:" + userId + " bankType:" + bankType 
 						+ " accNo:" + accNo + " certNo:" + certNo + " mobileNo:" + mobileNo + " accName:" + accName);
-				saveBankInfo(userId,bankType,accNo,certNo,mobileNo,accName,cvn2,validDate);
+				saveBankInfo(userId,bankType,accNo,certNo,mobileNo,accName,cvn2,validDate,bankName,payLogId);
 				return ResultGenerator.genSuccessResult("验证码发送成功",xFApplyDTO);	
 			}else {
 				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_PAY_ERROR.getcode(),PayEnums.PAY_XIANFENG_PAY_ERROR.getMsg()+"["+rspEntity.resMessage+"]");
@@ -172,7 +173,7 @@ public class XianFengService {
 		return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_PAY_ERROR.getcode(),PayEnums.PAY_XIANFENG_PAY_ERROR.getMsg()+"[先锋请求异常]");
 	}
 	
-	private void saveBankInfo(int userId,int bankType,String accNo,String certNo,String mobileNo,String accName,String cvn2,String vaildDate) {
+	private void saveBankInfo(int userId,int bankType,String accNo,String certNo,String mobileNo,String accName,String cvn2,String vaildDate,String bankName,int payLogId) {
 		PayBankRecordModel payBankRecordModel = new PayBankRecordModel();
 		payBankRecordModel.setUserId(userId);
 		List<PayBankRecordModel> sList = payBankRecordMapper.listUserBank(payBankRecordModel);
@@ -195,6 +196,8 @@ public class XianFengService {
 			payBankRecordModel.setCvn2(cvn2);
 			payBankRecordModel.setValidDate(vaildDate);
 			payBankRecordModel.setLastTime(DateUtil.getCurrentTimeLong());
+			payBankRecordModel.setBankName(bankName);
+			payBankRecordModel.setPayLogId(payLogId);
 			int cnt = payBankRecordMapper.insert(payBankRecordModel);
 			logger.info("[appPay]" + " payBankRecordMapper.insert cnt:" + cnt);
 		}else {
@@ -206,6 +209,8 @@ public class XianFengService {
 			findModel.setCvn2(cvn2);
 			findModel.setValidDate(vaildDate);
 			findModel.setLastTime(DateUtil.getCurrentTimeLong());
+			findModel.setPayLogId(payLogId);
+			findModel.setBankName(bankName);
 			int cnt = payBankRecordMapper.updateInfo(findModel);
 			logger.info("[appPay]" + " payBankRecordMapper.updateInfo cnt:" + cnt);
 		}
@@ -273,10 +278,16 @@ public class XianFengService {
 	 * @param params
 	 * @return
 	 */
-	public BaseResult<XianFengApplyCfgDTO> appPayCfg(int userId){
+	public BaseResult<XianFengApplyCfgDTO> appPayCfg(int userId,int payLogId){
+		PayLog payLog = payLogService.findById(payLogId);
+		if(payLog == null) {
+			return ResultGenerator.genFailResult("订单查询失败 payLogId:" + payLogId);
+		}
+		BigDecimal bigAmt = payLog.getOrderAmount();
 		List<PayBankRecordDTO> mBankList = paymentService.listUserBanks(userId);
 		XianFengApplyCfgDTO xFApplyCfgDTO = new XianFengApplyCfgDTO();
 		xFApplyCfgDTO.setBankList(mBankList);
+		xFApplyCfgDTO.setAmt(bigAmt+"");
 		return ResultGenerator.genSuccessResult("succ",xFApplyCfgDTO);
 	}
 	
@@ -334,8 +345,14 @@ public class XianFengService {
 			return isSucc;
 		}
 		int isPaid = payLog.getIsPaid();
+		int payLogId = payLog.getLogId();
 		if(isPaid == 1) {
 			logger.info("[payNotify]" +" 该订单已支付...");
+			PayBankRecordModel payBankRecordModel = new PayBankRecordModel();
+			payBankRecordModel.setPayLogId(payLogId);
+			payBankRecordModel.setIsPaid(1);
+			int cnt = payBankRecordMapper.updateIsPaidInfo(payBankRecordModel);
+			logger.info("[payNotify]" + "先锋支付银行卡支付状态回写 cnt:" + cnt);
 			return isSucc;
 		}
 		BigDecimal bigAmt = payLog.getOrderAmount();
@@ -347,6 +364,12 @@ public class XianFengService {
 			logger.info("[payNotify]" +" 商户号，交易金额校验成功, amt:" + rspEntity.amount +" merchantId:" + rspEntity.merchantId);
 			BaseResult<RspOrderQueryDTO> bResult = null;
 			if(rspEntity.isSucc()) {
+				//先锋支付银行卡回写支付成功，该银行卡已生效
+				PayBankRecordModel payBankRecordModel = new PayBankRecordModel();
+				payBankRecordModel.setPayLogId(payLogId);
+				payBankRecordModel.setIsPaid(1);
+				int cnt = payBankRecordMapper.updateIsPaidInfo(payBankRecordModel);
+				logger.info("[payNotify]" + "先锋支付银行卡支付状态回写 cnt:" + cnt);
 				RspOrderQueryEntity response = new RspOrderQueryEntity();
 				response.setResult_code("00000");
 				response.setTrade_no(rspEntity.tradeNo);

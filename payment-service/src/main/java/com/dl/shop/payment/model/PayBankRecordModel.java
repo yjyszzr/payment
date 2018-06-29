@@ -37,6 +37,39 @@ public class PayBankRecordModel {
      @Column(name = "last_time")
      private Integer lastTime;
      
+     @Column(name = "bank_name")
+     private String bankName;
+     
+     @Column(name = "paylog_id")
+     private Integer payLogId;
+     
+     @Column(name = "is_paid")
+     private Integer isPaid;
+     
+	public String getBankName() {
+		return bankName;
+	}
+
+	public void setBankName(String bankName) {
+		this.bankName = bankName;
+	}
+
+	public Integer getPayLogId() {
+		return payLogId;
+	}
+
+	public void setPayLogId(Integer payLogId) {
+		this.payLogId = payLogId;
+	}
+
+	public Integer getIsPaid() {
+		return isPaid;
+	}
+
+	public void setIsPaid(Integer isPaid) {
+		this.isPaid = isPaid;
+	}
+
 	public String getCvn2() {
 		return cvn2;
 	}

@@ -697,6 +697,7 @@ public class PayMentService extends AbstractService<PayMent> {
 		List<PayBankRecordDTO> rList = new ArrayList<>();
 		PayBankRecordModel p = new PayBankRecordModel();
 		p.setUserId(userId);
+		p.setIsPaid(1);
 		List<PayBankRecordModel> mList = payBankRecordMapper.listUserBank(p);
 		if(mList != null) {
 			for(int i = 0;i < mList.size();i++) {

@@ -15,21 +15,28 @@
     <result column="cvn2" jdbcType="VARCHAR" property="cvn2" />
     <result column="valid_date" jdbcType="VARCHAR" property="validDate" />
     <result column="last_time" jdbcType="INTEGER" property="lastTime" />
-    
+    <result column="bank_name" jdbcType="VARCHAR" property="bankName" />
+    <result column="paylog_id" jdbcType="INTEGER" property="payLogId" />
+    <result column="is_paid" jdbcType="INTEGER" property="isPaid" />
+     
   </resultMap>
   
-  <sql id="queryFields"> id, user_id,bank_card_no, user_name, cert_no, phone, bank_type,cvn2,valid_date,last_time</sql>
+  <sql id="queryFields"> id, user_id,bank_card_no, user_name, cert_no, phone, bank_type,cvn2,valid_date,last_time,bank_name,paylog_id,is_paid</sql>
   
   <select id="listUserBank" parameterType="com.dl.shop.payment.model.PayBankRecordModel" resultMap="BaseResultMap">
 	  select 
 	  <include refid="queryFields" />
 	  from dl_pay_bank_record
-	  where user_id = #{userId}
+	  where user_id = #{userId} and is_paid = #{isPaid}
 	</select>
 	
    <update id="updateInfo" parameterType="com.dl.shop.payment.model.PayBankRecordModel">
-   	update dl_pay_bank_record set bank_card_no=#{bankCardNo},user_name=#{userName},cert_no=#{certNo},phone=#{phone},bank_type=#{bankType},cvn2=#{cvn2},valid_date=#{validDate},last_time=#{lastTime}
+   	update dl_pay_bank_record set bank_card_no=#{bankCardNo},user_name=#{userName},cert_no=#{certNo},phone=#{phone},bank_type=#{bankType},cvn2=#{cvn2},valid_date=#{validDate},last_time=#{lastTime},bank_name=#{bankName},paylog_id=#{payLogId},is_paid=#{isPaid}
    	where id = #{id}
 	</update>
 	
+	<update id="updateIsPaidInfo" parameterType="com.dl.shop.payment.model.PayBankRecordModel">
+	 update dl_pay_bank_record set is_paid = #{isPaid}
+	 where paylog_id = #{payLogId}
+	</update>
 </mapper>
