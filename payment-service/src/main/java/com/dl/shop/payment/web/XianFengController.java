@@ -123,8 +123,12 @@ public class XianFengController {
 	public BaseResult<XianFengApplyDTO> appBankListCfg(@RequestBody XianFengBankListCfgParam cfgParam){
 		int recordId = cfgParam.getRecordId();
 		String token = cfgParam.getToken();
+		int payLogId = cfgParam.getPayLogId();
 		if(recordId < 0) {
 			return ResultGenerator.genFailResult("recordId不合法");
+		}
+		if(payLogId < 0) {
+			return ResultGenerator.genFailResult("payLogId不合法");
 		}
 		PayBankRecordModel record = new PayBankRecordModel();
 		record.setId(recordId);
@@ -138,7 +142,7 @@ public class XianFengController {
 		xianFengPayParam.setCertNo(model.getBankCardNo());
 		xianFengPayParam.setCvn2(model.getCvn2());
 		xianFengPayParam.setName(model.getUserName());
-		xianFengPayParam.setPayLogId(model.getPayLogId());
+		xianFengPayParam.setPayLogId(payLogId);
 		xianFengPayParam.setPhone(model.getPhone());
 		xianFengPayParam.setToken(token);
 		xianFengPayParam.setValidDate(model.getValidDate());

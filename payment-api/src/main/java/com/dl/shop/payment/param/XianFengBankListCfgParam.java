@@ -9,4 +9,6 @@ public class XianFengBankListCfgParam {
 	private Integer recordId;
 	@ApiModelProperty("支付token信息")
 	private String token;
+	@ApiModelProperty("payLogId")
+	private int payLogId;
 }
