@@ -184,6 +184,7 @@ public class XianFengService {
 			PayBankRecordModel payBRModel = sList.get(i);
 			if(!StringUtils.isEmpty(accNo) && payBRModel.getBankCardNo().equals(accNo)) {
 				findModel = payBankRecordModel;
+				logger.info("[saveBankInfo]" + " findModel:" +findModel);
 				break;
 			}
 		}
@@ -203,7 +204,7 @@ public class XianFengService {
 			int cnt = payBankRecordMapper.insert(payBankRecordModel);
 			logger.info("[appPay]" + " payBankRecordMapper.insert cnt:" + cnt);
 		}else {
-			logger.info("[appPay]" + " payBankRecordMapper.updateInfo"+"id" + findModel.getId() + " payLogId:" + findModel.getPayLogId() +" accNo:" +accNo);
+			logger.info("[appPay]" + " payBankRecordMapper.updateInfo"+" id:" + findModel.getId() + " payLogId:" + findModel.getPayLogId() +" accNo:" +accNo);
 			findModel.setUserId(userId);
 			findModel.setBankCardNo(accNo);
 			findModel.setCertNo(certNo);

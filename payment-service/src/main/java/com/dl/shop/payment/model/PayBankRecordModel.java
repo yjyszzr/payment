@@ -46,6 +46,13 @@ public class PayBankRecordModel {
      @Column(name = "is_paid")
      private Integer isPaid;
      
+     
+     @Override
+    public String toString() {
+    	// TODO Auto-generated method stub
+    	 return "id:" + id +" userId:" + userId +" bankCardNo:" + bankCardNo + " user_name:" + userName;
+    }
+     
 	public String getBankName() {
 		return bankName;
 	}
@@ -149,4 +156,5 @@ public class PayBankRecordModel {
 	public void setBankType(Integer bankType) {
 		this.bankType = bankType;
 	}
+	
 }
