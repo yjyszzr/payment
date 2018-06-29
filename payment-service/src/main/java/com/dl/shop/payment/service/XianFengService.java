@@ -176,7 +176,7 @@ public class XianFengService {
 	private void saveBankInfo(int userId,int bankType,String accNo,String certNo,String mobileNo,String accName,String cvn2,String vaildDate,String bankName,int payLogId) {
 		PayBankRecordModel payBankRecordModel = new PayBankRecordModel();
 		payBankRecordModel.setUserId(userId);
-		List<PayBankRecordModel> sList = payBankRecordMapper.listUserBank(payBankRecordModel);
+		List<PayBankRecordModel> sList = payBankRecordMapper.listAllUserBank(payBankRecordModel);
 		PayBankRecordModel findModel = null;
 		for(int i = 0;i < sList.size();i++) {
 			PayBankRecordModel payBRModel = sList.get(i);

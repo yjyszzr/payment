@@ -8,6 +8,8 @@ public interface PayBankRecordMapper extends Mapper<PayBankRecordModel>{
 	
 	public List<PayBankRecordModel> listUserBank(PayBankRecordModel payModel);
 	
+	public List<PayBankRecordModel> listAllUserBank(PayBankRecordModel payModel);
+	
 	public int updateInfo(PayBankRecordModel payModel);
 	
 	public int updateIsPaidInfo(PayBankRecordModel payModel);

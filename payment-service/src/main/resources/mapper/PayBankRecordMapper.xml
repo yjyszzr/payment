@@ -30,6 +30,13 @@
 	  where user_id = #{userId} and is_paid = #{isPaid}
 	</select>
 	
+	<select id="listAllUserBank" parameterType="com.dl.shop.payment.model.PayBankRecordModel" resultMap="BaseResultMap">
+	  select 
+	  <include refid="queryFields" />
+	  from dl_pay_bank_record
+	  where user_id = #{userId}
+	</select>
+	
    <update id="updateInfo" parameterType="com.dl.shop.payment.model.PayBankRecordModel">
    	update dl_pay_bank_record set bank_card_no=#{bankCardNo},user_name=#{userName},cert_no=#{certNo},phone=#{phone},bank_type=#{bankType},cvn2=#{cvn2},valid_date=#{validDate},last_time=#{lastTime},bank_name=#{bankName},paylog_id=#{payLogId},is_paid=#{isPaid}
    	where id = #{id}
