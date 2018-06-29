@@ -14,4 +14,6 @@ public interface PayBankRecordMapper extends Mapper<PayBankRecordModel>{
 	
 	public int updateIsPaidInfo(PayBankRecordModel payModel);
 	
+	public List<PayBankRecordModel> queryPayBankRecordModelById(PayBankRecordModel payModel);
+	
 }

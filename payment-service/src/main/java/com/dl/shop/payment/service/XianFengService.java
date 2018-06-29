@@ -1,7 +1,6 @@
 package com.dl.shop.payment.service;
 
 import java.math.BigDecimal;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -215,7 +214,7 @@ public class XianFengService {
 			findModel.setPayLogId(payLogId);
 			findModel.setBankName(bankName);
 			int cnt = payBankRecordMapper.updateInfo(findModel);
-			logger.info("[appPay]" + " payBankRecordMapper.updateInfo cnt:" + cnt);
+			logger.info("[appPay]" + " payBankRecordMapper.updateInfo cnt:" + cnt + " id:" + findModel.getId() + " payLogId:" + findModel.getPayLogId());
 		}
 	}
 	

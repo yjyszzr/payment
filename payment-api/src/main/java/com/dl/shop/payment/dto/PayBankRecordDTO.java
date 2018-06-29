@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class PayBankRecordDTO {
-	 private Integer id;
+	 private Integer recordId;
      private Integer userId;
      private String bankCardNo;
      private String userName;
@@ -15,4 +15,5 @@ public class PayBankRecordDTO {
      private String vaildDate;
      private String bankName;
      private Integer lastTime;
+     private String message;
 }

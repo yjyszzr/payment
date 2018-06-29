@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -32,7 +33,9 @@ import com.dl.shop.payment.dto.BankTypeDTO;
 import com.dl.shop.payment.dto.XianFengApplyCfgDTO;
 import com.dl.shop.payment.dto.XianFengApplyDTO;
 import com.dl.shop.payment.enums.PayEnums;
+import com.dl.shop.payment.model.PayBankRecordModel;
 import com.dl.shop.payment.model.PayLog;
+import com.dl.shop.payment.param.XianFengBankListCfgParam;
 import com.dl.shop.payment.param.XianFengBankTypeParam;
 import com.dl.shop.payment.param.XianFengCfgParam;
 import com.dl.shop.payment.param.XianFengPayConfirmParam;
@@ -112,6 +115,34 @@ public class XianFengController {
 			return ResultGenerator.genFailResult("PayLogId不合法");
 		}
 		return xianFengService.appPayCfg(userId,payLogId);
+	}
+	
+	@ApiOperation(value="银行列表支付信息")
+	@PostMapping("/appBankListPay")
+	@ResponseBody
+	public BaseResult<XianFengApplyDTO> appBankListCfg(@RequestBody XianFengBankListCfgParam cfgParam){
+		int recordId = cfgParam.getRecordId();
+		String token = cfgParam.getToken();
+		if(recordId < 0) {
+			return ResultGenerator.genFailResult("recordId不合法");
+		}
+		PayBankRecordModel record = new PayBankRecordModel();
+		record.setId(recordId);
+		List<PayBankRecordModel> mList = payBankRMapper.queryPayBankRecordModelById(record);
+		if(mList == null || mList.size() <= 0) {
+			return ResultGenerator.genFailResult("未查询到支付记录");
+		}
+		PayBankRecordModel model = mList.get(0);
+		XianFengPayParam xianFengPayParam = new XianFengPayParam();
+		xianFengPayParam.setAccNo(model.getBankCardNo());
+		xianFengPayParam.setCertNo(model.getBankCardNo());
+		xianFengPayParam.setCvn2(model.getCvn2());
+		xianFengPayParam.setName(model.getUserName());
+		xianFengPayParam.setPayLogId(model.getPayLogId());
+		xianFengPayParam.setPhone(model.getPhone());
+		xianFengPayParam.setToken(token);
+		xianFengPayParam.setValidDate(model.getValidDate());
+		return appPay(xianFengPayParam);
 	}
 	
 	@ApiOperation(value="根据银行账号获取卡类型 目前只识别借记卡和贷记卡")

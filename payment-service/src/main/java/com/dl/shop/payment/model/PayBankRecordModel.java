@@ -26,7 +26,7 @@ public class PayBankRecordModel {
      private String phone;
      
      @Column(name = "bank_type")
-     private int bankType;
+     private Integer bankType;
 
      @Column(name = "cvn2")
      private String cvn2;
@@ -142,11 +142,11 @@ public class PayBankRecordModel {
 		this.phone = phone;
 	}
 
-	public int getBankType() {
+	public Integer getBankType() {
 		return bankType;
 	}
 
-	public void setBankType(int bankType) {
+	public void setBankType(Integer bankType) {
 		this.bankType = bankType;
 	}
 }

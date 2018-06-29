@@ -46,4 +46,13 @@
 	 update dl_pay_bank_record set is_paid = #{isPaid}
 	 where paylog_id = #{payLogId}
 	</update>
+	
+	
+	<select id="queryPayBankRecordModelById" parameterType="com.dl.shop.payment.model.PayBankRecordModel" resultMap="BaseResultMap">
+	  select 
+	  <include refid="queryFields" />
+	  from dl_pay_bank_record
+	  where id = #{id}
+	</select>
+	
 </mapper>

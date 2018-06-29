@@ -703,20 +703,38 @@ public class PayMentService extends AbstractService<PayMent> {
 			for(int i = 0;i < mList.size();i++) {
 				PayBankRecordModel payBankRModel = mList.get(i);
 				PayBankRecordDTO payBRDTO = new PayBankRecordDTO();
-				payBRDTO.setId(payBankRModel.getId());
-				payBRDTO.setUserId(payBankRModel.getUserId());
-				payBRDTO.setBankCardNo(payBankRModel.getBankCardNo());
-				payBRDTO.setUserName(payBankRModel.getUserName());
-				payBRDTO.setCertNo(payBankRModel.getCertNo());
-				payBRDTO.setPhone(payBankRModel.getPhone());
-				payBRDTO.setBankType(payBankRModel.getBankType());
-				payBRDTO.setCvn2(payBankRModel.getCvn2());
-				payBRDTO.setVaildDate(payBankRModel.getValidDate());
-				payBRDTO.setBankName(payBankRModel.getBankName());
+				payBRDTO.setRecordId(payBankRModel.getId());
+//				payBRDTO.setUserId(payBankRModel.getUserId());
+//				payBRDTO.setBankCardNo(payBankRModel.getBankCardNo());
+//				payBRDTO.setUserName(payBankRModel.getUserName());
+//				payBRDTO.setCertNo(payBankRModel.getCertNo());
+//				payBRDTO.setPhone(payBankRModel.getPhone());
+//				payBRDTO.setBankType(payBankRModel.getBankType());
+//				payBRDTO.setCvn2(payBankRModel.getCvn2());
+//				payBRDTO.setVaildDate(payBankRModel.getValidDate());
+//				payBRDTO.setBankName(payBankRModel.getBankName());
+				String msg = getMsg(payBRDTO);
 				payBRDTO.setLastTime(payBankRModel.getLastTime());
+				payBRDTO.setMessage(msg);
 				rList.add(payBRDTO);
 			}
 		}
 		return rList;
+	}
+	
+	private String getMsg(PayBankRecordDTO entity) {
+		String msg = null;
+		if(entity != null) {
+			String strType = "借记卡";
+			if(entity.getBankType() == 1) {
+				strType = "贷记卡";
+			}
+			String tail = "";
+			if(!StringUtils.isEmpty(entity.getBankCardNo()) && entity.getBankCardNo().length() > 4) {
+				tail = entity.getBankCardNo().substring(entity.getBankCardNo().length()-4);
+			}
+			msg = entity.getBankName()+strType+ "(尾号" + tail +")";
+		}
+		return msg;
 	}
 }
