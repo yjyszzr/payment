@@ -79,7 +79,7 @@ public class XianFengService {
 				PayManager.getInstance().addReqQueue(orderSn, payOrderSn, payCode);
 				return ResultGenerator.genSuccessResult("支付申请成功");
 			}else if(rspEntity.isVerfyCodeWrong()){
-				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_PAY_ERROR.getcode(),PayEnums.PAY_XIANFENG_PAY_ERROR.getMsg());
+				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_VERIFYCODE_WRONG.getcode(),PayEnums.PAY_XIANFENG_VERIFYCODE_WRONG.getMsg());
 			}else if(rspEntity.isVerifyCodeInValid()) {
 				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_VERIFYCODE_INVALID.getcode(),PayEnums.PAY_XIANFENG_VERIFYCODE_INVALID.getMsg());
 			}else{
