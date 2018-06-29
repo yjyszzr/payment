@@ -11,4 +11,6 @@ public class PayBankRecordDTO {
      private String certNo;
      private String phone;
      private int bankType;
+     private String cvn2;
+     private String vaildDate;
 }

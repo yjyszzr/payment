@@ -709,6 +709,8 @@ public class PayMentService extends AbstractService<PayMent> {
 				payBRDTO.setCertNo(payBankRModel.getCertNo());
 				payBRDTO.setPhone(payBankRModel.getPhone());
 				payBRDTO.setBankType(payBankRModel.getBankType());
+				payBRDTO.setCvn2(payBankRModel.getCvn2());
+				payBRDTO.setVaildDate(payBankRModel.getValidDate());
 				rList.add(payBRDTO);
 			}
 		}

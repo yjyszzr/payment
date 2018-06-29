@@ -13,12 +13,12 @@
     <result column="phone" jdbcType="VARCHAR" property="phone" />
     <result column="bank_type" jdbcType="INTEGER" property="bankType" />
     <result column="cvn2" jdbcType="VARCHAR" property="cvn2" />
-    <result column="vaild_date" jdbcType="VARCHAR" property="vaildDate" />
+    <result column="valid_date" jdbcType="VARCHAR" property="validDate" />
     <result column="last_time" jdbcType="INTEGER" property="lastTime" />
     
   </resultMap>
   
-  <sql id="queryFields"> id, user_id,bank_card_no, user_name, cert_no, phone, bank_type,cvn2,vaild_date,last_time</sql>
+  <sql id="queryFields"> id, user_id,bank_card_no, user_name, cert_no, phone, bank_type,cvn2,valid_date,last_time</sql>
   
   <select id="listUserBank" parameterType="com.dl.shop.payment.model.PayBankRecordModel" resultMap="BaseResultMap">
 	  select 
@@ -28,7 +28,7 @@
 	</select>
 	
    <update id="updateInfo" parameterType="com.dl.shop.payment.model.PayBankRecordModel">
-   	update dl_pay_bank_record set bank_card_no=#{bankCardNo},user_name=#{userName},cert_no=#{certNo},phone=#{phone},bank_type=#{bankType},cvn2=#{cvn2},vaild_date=#{vaildDate},last_time=#{lastTime}
+   	update dl_pay_bank_record set bank_card_no=#{bankCardNo},user_name=#{userName},cert_no=#{certNo},phone=#{phone},bank_type=#{bankType},cvn2=#{cvn2},valid_date=#{validDate},last_time=#{lastTime}
    	where id = #{id}
 	</update>
 	

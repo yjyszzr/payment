@@ -31,8 +31,8 @@ public class PayBankRecordModel {
      @Column(name = "cvn2")
      private String cvn2;
 
-     @Column(name = "vaild_date")
-     private String vaildDate;
+     @Column(name = "valid_date")
+     private String validDate;
      
      @Column(name = "last_time")
      private Integer lastTime;
@@ -45,12 +45,12 @@ public class PayBankRecordModel {
 		this.cvn2 = cvn2;
 	}
 
-	public String getVaildDate() {
-		return vaildDate;
+	public String getValidDate() {
+		return validDate;
 	}
 
-	public void setVaildDate(String vaildDate) {
-		this.vaildDate = vaildDate;
+	public void setValidDate(String validDate) {
+		this.validDate = validDate;
 	}
 
 	public Integer getLastTime() {

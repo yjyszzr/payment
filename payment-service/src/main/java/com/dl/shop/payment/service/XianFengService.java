@@ -193,7 +193,7 @@ public class XianFengService {
 			payBankRecordModel.setUserName(accName);
 			payBankRecordModel.setBankType(bankType);
 			payBankRecordModel.setCvn2(cvn2);
-			payBankRecordModel.setVaildDate(vaildDate);
+			payBankRecordModel.setValidDate(vaildDate);
 			payBankRecordModel.setLastTime(DateUtil.getCurrentTimeLong());
 			int cnt = payBankRecordMapper.insert(payBankRecordModel);
 			logger.info("[appPay]" + " payBankRecordMapper.insert cnt:" + cnt);
@@ -204,7 +204,7 @@ public class XianFengService {
 			findModel.setPhone(mobileNo);
 			findModel.setUserName(accName);
 			findModel.setCvn2(cvn2);
-			findModel.setVaildDate(vaildDate);
+			findModel.setValidDate(vaildDate);
 			findModel.setLastTime(DateUtil.getCurrentTimeLong());
 			int cnt = payBankRecordMapper.updateInfo(findModel);
 			logger.info("[appPay]" + " payBankRecordMapper.updateInfo cnt:" + cnt);
