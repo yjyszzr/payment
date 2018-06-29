@@ -35,4 +35,20 @@ public class RspApplyBaseEntity{
 	public boolean isSucc() {
 		return "00000".equals(resCode);
 	}
+
+	/**
+	 * 验证码校验失败
+	 * @return
+	 */
+	public boolean isVerfyCodeWrong() {
+		return "20005".equals(resCode);
+	}
+	
+	/**
+	 * 短信超出限制
+	 * @return
+	 */
+	public boolean isVerifyCodeInValid() {
+		return "20004".equals(resCode);
+	}
 }

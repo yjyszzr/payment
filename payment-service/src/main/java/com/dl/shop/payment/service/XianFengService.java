@@ -168,6 +168,10 @@ public class XianFengService {
 						+ " accNo:" + accNo + " certNo:" + certNo + " mobileNo:" + mobileNo + " accName:" + accName);
 				saveBankInfo(userId,bankType,accNo,certNo,mobileNo,accName,cvn2,validDate,bankName,payLogId);
 				return ResultGenerator.genSuccessResult("验证码发送成功",xFApplyDTO);	
+			}else if(rspEntity.isVerfyCodeWrong()){
+				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_VERIFYCODE_WRONG.getcode(),PayEnums.PAY_XIANFENG_VERIFYCODE_WRONG.getMsg());
+			}else if(rspEntity.isVerifyCodeInValid()){
+				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_VERIFYCODE_INVALID.getcode(),PayEnums.PAY_XIANFENG_VERIFYCODE_INVALID.getMsg());
 			}else {
 				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_PAY_ERROR.getcode(),PayEnums.PAY_XIANFENG_PAY_ERROR.getMsg()+"["+rspEntity.resMessage+"]");
 			}
@@ -267,7 +271,11 @@ public class XianFengService {
 				XianFengApplyDTO applyDTO = new XianFengApplyDTO();
 				applyDTO.setToken(token);
 				return ResultGenerator.genSuccessResult("验证码发送成功",applyDTO);
-			}else {
+			}else if(rspEntity.isVerfyCodeWrong()){
+				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_VERIFYCODE_WRONG.getcode(),PayEnums.PAY_XIANFENG_VERIFYCODE_WRONG.getMsg());
+			}else if(rspEntity.isVerifyCodeInValid()){
+				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_VERIFYCODE_INVALID.getcode(),PayEnums.PAY_XIANFENG_VERIFYCODE_INVALID.getMsg());
+			}else{
 				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_SMS_ERROR.getcode(),PayEnums.PAY_XIANFENG_SMS_ERROR.getMsg() +"[" + rspEntity.resMessage + "]");
 			}
 		} catch (Exception e) {
