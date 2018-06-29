@@ -21,7 +21,7 @@
      
   </resultMap>
   
-  <sql id="queryFields"> id, user_id,bank_card_no, user_name, cert_no, phone, bank_type,cvn2,valid_date,last_time,bank_name,paylog_id,is_paid</sql>
+  <sql id="queryFields">id, user_id,bank_card_no, user_name, cert_no, phone, bank_type,cvn2,valid_date,last_time,bank_name,paylog_id,is_paid</sql>
   
   <select id="listUserBank" parameterType="com.dl.shop.payment.model.PayBankRecordModel" resultMap="BaseResultMap">
 	  select 
