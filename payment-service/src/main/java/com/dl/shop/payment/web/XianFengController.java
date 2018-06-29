@@ -139,13 +139,16 @@ public class XianFengController {
 		PayBankRecordModel model = mList.get(0);
 		XianFengPayParam xianFengPayParam = new XianFengPayParam();
 		xianFengPayParam.setAccNo(model.getBankCardNo());
-		xianFengPayParam.setCertNo(model.getBankCardNo());
+		xianFengPayParam.setCertNo(model.getCertNo());
 		xianFengPayParam.setCvn2(model.getCvn2());
 		xianFengPayParam.setName(model.getUserName());
 		xianFengPayParam.setPayLogId(payLogId);
 		xianFengPayParam.setPhone(model.getPhone());
 		xianFengPayParam.setToken(token);
 		xianFengPayParam.setValidDate(model.getValidDate());
+		logger.info("[appBankListCfg]" + " bankCardNo:" + xianFengPayParam.getAccNo() + " certNo:" + xianFengPayParam.getAccNo()
+		+" cvn2:" + xianFengPayParam.getCvn2() +" name:" + xianFengPayParam.getName() +" payLogId:" + payLogId + " phone:" + xianFengPayParam.getPhone()
+		+" vaildeDate:" + xianFengPayParam.getValidDate());
 		return appPay(xianFengPayParam);
 	}
 	
