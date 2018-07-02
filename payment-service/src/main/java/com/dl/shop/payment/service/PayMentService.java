@@ -725,9 +725,9 @@ public class PayMentService extends AbstractService<PayMent> {
 	private String getMsg(PayBankRecordModel entity) {
 		String msg = null;
 		if(entity != null) {
-			String strType = "借记卡";
+			String strType = "储蓄卡";	//产品需求名称变更
 			if(entity.getBankType() == 1) {
-				strType = "贷记卡";
+				strType = "信用卡";
 			}
 			String tail = "";
 			if(!StringUtils.isEmpty(entity.getBankCardNo()) && entity.getBankCardNo().length() > 4) {
