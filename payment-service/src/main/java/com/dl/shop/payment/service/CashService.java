@@ -266,7 +266,7 @@ public class CashService {
 			rEntity = xianfengUtil.reqCash(orderSn,bigFen.intValue()+"", accNo, accName, phone, bankNo);
 			logger.info("RspCashEntity->"+rEntity);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("提现异常, ordersn="+orderSn, e);
 			tips = e.getMessage();
 			rEntity.resMessage = tips;
 		}
