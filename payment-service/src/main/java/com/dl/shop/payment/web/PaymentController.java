@@ -704,13 +704,14 @@ public class PaymentController extends AbstractBaseController{
 		if(userInfoExceptPass == null) {
 			return ResultGenerator.genFailResult("对不起，用户信息有误！", null);
 		}
+		
 		String mobile = userInfoExceptPass.getData().getMobile();
-//		double totalAmount = param.getTotalAmount();
 		double totalAmount = 0;
 		if(totalAmount <= 0) {
 			logger.info(loggerId+"提现金额提供有误！");
 			return ResultGenerator.genFailResult("对不起，请提供有效的提现金额！", null);
 		}
+		
 		//支付方式
 		int userBankId = param.getUserBankId();
 		if(userBankId < 1) {

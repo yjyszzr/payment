@@ -97,7 +97,9 @@ public class CashService {
 	public BaseResult<Object> withdrawForApp(@RequestBody WithdrawParam param, HttpServletRequest request){
 		String loggerId = "withdrawForApp_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/withdraw, userId="+SessionUtil.getUserId()+", totalAmount="+param.getTotalAmount()+",userBankId="+param.getUserBankId());
-		BaseResult<UserDTO> userInfoExceptPass = userService.userInfoExceptPassReal(new StrParam());
+		StrParam strParam = new StrParam();
+		strParam.setStr("");
+		BaseResult<UserDTO> userInfoExceptPass = userService.userInfoExceptPassReal(strParam);
 		if(userInfoExceptPass == null) {
 			return ResultGenerator.genFailResult("对不起，用户信息有误！", null);
 		}

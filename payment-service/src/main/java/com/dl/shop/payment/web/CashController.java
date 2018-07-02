@@ -69,7 +69,6 @@ public class CashController {
 		return cashService.withdrawForApp(param,request);
 	}
 	
-	
 	@ApiOperation(value="后台管理提现调用", notes="")
 	@PostMapping("/getcash")
 	@ResponseBody
