@@ -104,12 +104,12 @@ public class CashService {
 	
 	public BaseResult<Object> withdrawForApp(@RequestBody WithdrawParam param, HttpServletRequest request){
 		Integer userId = SessionUtil.getUserId();
-		Long mTime = System.currentTimeMillis();
-		String userIdInRedis = stringRedisTemplate.opsForValue().get("WS:"+String.valueOf(userId));
-		if(!StringUtils.isEmpty(userIdInRedis)) {
-			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_REPEAT.getcode(),PayEnums.PAY_WITHDRAW_REPEAT.getMsg());
-		}
-		stringRedisTemplate.opsForValue().set("WS:"+String.valueOf(userId),String.valueOf(mTime));
+//		Long mTime = System.currentTimeMillis();
+//		String userIdInRedis = stringRedisTemplate.opsForValue().get("WS:"+String.valueOf(userId));
+//		if(!StringUtils.isEmpty(userIdInRedis)) {
+//			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_REPEAT.getcode(),PayEnums.PAY_WITHDRAW_REPEAT.getMsg());
+//		}
+//		stringRedisTemplate.opsForValue().set("WS:"+String.valueOf(userId),String.valueOf(mTime));
 		
 		String loggerId = "withdrawForApp_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/withdraw, userId="+SessionUtil.getUserId()+", totalAmount="+param.getTotalAmount()+",userBankId="+param.getUserBankId());
@@ -237,7 +237,7 @@ public class CashService {
 		}
 		
 		logger.info("[withdrawForApp]" + "提现单号:"+ withdrawalSn +"生成提现单成功");
-		stringRedisTemplate.delete("WS:"+String.valueOf(userId));
+//		stringRedisTemplate.delete("WS:"+String.valueOf(userId));
 		String widthDrawSn = withdrawalSnDTO.getWithdrawalSn();
 		//保存提现进度
 		UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
