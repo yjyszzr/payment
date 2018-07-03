@@ -17,6 +17,7 @@ import org.apache.http.util.TextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +52,7 @@ import com.dl.member.param.UserIdParam;
 import com.dl.member.param.UserIdRealParam;
 import com.dl.member.param.WithDrawParam;
 import com.dl.shop.payment.core.ProjectConstant;
+import com.dl.shop.payment.dao.UserWithdrawMapper;
 import com.dl.shop.payment.dto.WithdrawalSnDTO;
 import com.dl.shop.payment.enums.CashEnums;
 import com.dl.shop.payment.enums.PayEnums;
@@ -93,20 +95,25 @@ public class CashService {
 	private XianFengCashUtil xianfengUtil;
 	@Resource
 	private Constants xFConstants;
+
+    @Resource
+    private UserWithdrawMapper userWithdrawMapper;
+	
+	@Resource
+	private StringRedisTemplate stringRedisTemplate;
 	
 	public BaseResult<Object> withdrawForApp(@RequestBody WithdrawParam param, HttpServletRequest request){
+		Integer userId = SessionUtil.getUserId();
+		Long mTime = System.currentTimeMillis();
+		String userIdInRedis = stringRedisTemplate.opsForValue().get("WS:"+String.valueOf(userId));
+		if(!StringUtils.isEmpty(userIdInRedis)) {
+			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_REPEAT.getcode(),PayEnums.PAY_WITHDRAW_REPEAT.getMsg());
+		}
+		stringRedisTemplate.opsForValue().set("WS:"+String.valueOf(userId),String.valueOf(mTime));
+		
 		String loggerId = "withdrawForApp_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/withdraw, userId="+SessionUtil.getUserId()+", totalAmount="+param.getTotalAmount()+",userBankId="+param.getUserBankId());
-		StrParam strParam = new StrParam();
-		strParam.setStr("");
-		BaseResult<UserDTO> userInfoExceptPass = userService.userInfoExceptPassReal(strParam);
-		if(userInfoExceptPass == null) {
-			return ResultGenerator.genFailResult("对不起，用户信息有误！", null);
-		}
-		UserDTO userDTO = userInfoExceptPass.getData();
-		if(userDTO == null) {
-			return ResultGenerator.genFailResult("未查询到该用户信息");
-		}
+
 		//bank判断
 		int userBankId = param.getUserBankId();
 		if(userBankId < 1) {
@@ -120,9 +127,8 @@ public class CashService {
 			logger.info(loggerId+"用户银行卡信息获取有误！");
 			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_BANK_QUERY_ERROR.getcode(),PayEnums.PAY_RONGBAO_BANK_QUERY_ERROR.getMsg());
 		}
-		String mobile = userDTO.getMobile();
+		
 		String strTotalAmount = param.getTotalAmount();
-		Integer userId = SessionUtil.getUserId();
 		//长度超过1000000 -> 7位数
 		if(StringUtils.isEmpty(strTotalAmount) || strTotalAmount.length() > 10) {
 			logger.info(loggerId+"输入金额超出有效范围");
@@ -138,34 +144,16 @@ public class CashService {
 			logger.info(loggerId+"提现金额提供有误！");
 			return ResultGenerator.genResult(PayEnums.PAY_TOTAL_NOTRANGE.getcode(),PayEnums.PAY_TOTAL_NOTRANGE.getMsg());
 		}
+		
 		//是否小于3元钱
 		if(totalAmount < 3) {
 			logger.info(loggerId+"最低提现金额大于3元~");
 			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_LOW_LIMIT.getcode(),PayEnums.PAY_RONGBAO_LOW_LIMIT.getMsg()); 
 		}
-		String strMoney = userDTO.getUserMoney();
-		Double dMoney = null;
-		logger.info("用户提现金额:" + strMoney);
-		if(!TextUtils.isEmpty(strMoney)) {
-			try {
-				dMoney = Double.valueOf(strMoney);
-			}catch(Exception ee) {
-				ee.printStackTrace();
-			}
-		}
-		if(dMoney == null) {
-			logger.info(loggerId+"金额转换失败！");
-			return ResultGenerator.genFailResult("用户钱包金额转换失败！",null);
-		}
-		//提现金额大于可提现金额
-		if(totalAmount > dMoney) {
-			logger.info(loggerId+"提现金额超出用户可提现金额数值~");
-			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_NOT_ENOUGH.getcode(),PayEnums.PAY_RONGBAO_NOT_ENOUGH.getMsg()); 
-		}
 		
-		//限制1天最多能提现3次
+		//限制1天最多能提现1次
 		int countUserWithdraw = userWithdrawService.countUserWithdraw(userId);
-		if(countUserWithdraw > 3) {
+		if(countUserWithdraw > 1) {
 			return ResultGenerator.genResult(PayEnums.PAY_MAX_COUNT_WITHDRAW.getcode(),PayEnums.PAY_MAX_COUNT_WITHDRAW.getMsg()); 
 		}
 		
@@ -199,19 +187,57 @@ public class CashService {
 			throw new ServiceException(PayEnums.CASH_USER_MOENY_REDUC_ERROR.getcode(),PayEnums.CASH_USER_MOENY_REDUC_ERROR.getMsg());
 		}
 		logger.info("[withdrawForApp]" + " 扣除用户余额成功:" + totalAmount);
+		
+		StrParam strParam = new StrParam();
+		strParam.setStr("");
+		BaseResult<UserDTO> userInfoExceptPass = userService.userInfoExceptPassReal(strParam);
+		if(userInfoExceptPass.getCode() != 0) {
+			return ResultGenerator.genFailResult("对不起，用户信息有误！", null);
+		}
+		
+		UserDTO userDTO = userInfoExceptPass.getData();
+		String mobile = userDTO.getMobile();
+		String strMoney = userDTO.getUserMoney();
+		Double dMoney = null;
+		logger.info("用户提现金额:" + strMoney);
+		if(!TextUtils.isEmpty(strMoney)) {
+			try {
+				dMoney = Double.valueOf(strMoney);
+			}catch(Exception ee) {
+				ee.printStackTrace();
+			}
+		}
+		if(dMoney == null) {
+			logger.info(loggerId+"金额转换失败！");
+			return ResultGenerator.genFailResult("用户钱包金额转换失败！",null);
+		}
+		
+		//提现金额大于可提现金额
+		if(totalAmount > dMoney) {
+			logger.info(loggerId+"提现金额超出用户可提现金额数值~");
+			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_NOT_ENOUGH.getcode(),PayEnums.PAY_RONGBAO_NOT_ENOUGH.getMsg()); 
+		}
+		
 		//生成提现单
 		UserWithdrawParam userWithdrawParam = new UserWithdrawParam();
 		userWithdrawParam.setAmount(BigDecimal.valueOf(totalAmount));
 		userWithdrawParam.setCardNo(cardNo);
 		userWithdrawParam.setRealName(realName);
-		userWithdrawParam.setStatus(ProjectConstant.STATUS_UNCOMPLETE);
+		if(inReview) {//大于阈值
+			userWithdrawParam.setStatus(ProjectConstant.STATUS_UNCOMPLETE);
+		}else {//小于阈值
+			userWithdrawParam.setStatus(ProjectConstant.STATUS_BANK_APPROVING);
+		}
+		
 		userWithdrawParam.setWithDrawSn(withdrawalSn);
 		WithdrawalSnDTO withdrawalSnDTO = userWithdrawService.saveWithdraw(userWithdrawParam);
 		if(StringUtils.isEmpty(withdrawalSnDTO.getWithdrawalSn())) {
 			logger.info(loggerId+" 生成提现单失败");
 			return ResultGenerator.genFailResult("提现失败！", null);
 		}
+		
 		logger.info("[withdrawForApp]" + "提现单号:"+ withdrawalSn +"生成提现单成功");
+		stringRedisTemplate.delete("WS:"+String.valueOf(userId));
 		String widthDrawSn = withdrawalSnDTO.getWithdrawalSn();
 		//保存提现进度
 		UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
@@ -449,37 +475,45 @@ public class CashService {
 			if(rspSCashEntity.isHandleing()) {
 				PayManager.getInstance().addReq2CashQueue(sn);
 			}
+			
+			//后台点击的都变为提现审核中
+	    	UserWithdraw userWithdraw = new UserWithdraw();
+	    	userWithdraw.setStatus(ProjectConstant.STATUS_BANK_APPROVING);
+	    	userWithdraw.setWithdrawalSn(sn);
+			userWithdrawMapper.updateUserWithdrawBySelective(userWithdraw);
+			
 			return operation(rspSCashEntity,sn,userId,true,false,false);
 		}else {
-			logger.info("后台管理审核拒绝，提现单状态为失败...");
+//			logger.info("后台管理审核拒绝，提现单状态为失败...");
 			//更新提现单失败状态
-			UpdateUserWithdrawParam updateParams = new UpdateUserWithdrawParam();
-			updateParams.setWithdrawalSn(sn);
-			updateParams.setStatus(ProjectConstant.STATUS_FAILURE);
-			updateParams.setPayTime(DateUtil.getCurrentTimeLong());
-			updateParams.setPaymentName("审核被拒绝，提现失败~");
-			userWithdrawService.updateWithdraw(updateParams);
-			this.goWithdrawMessage(param.getWithdrawSn());
-			
-			//增加提现流水为失敗
-			logger.info("后台管理审核拒绝，增加提现单log日志...");
-			UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
-			userWithdrawLog.setLogCode(CashEnums.CASH_FAILURE.getcode());
-			userWithdrawLog.setLogName(CashEnums.CASH_FAILURE.getMsg());
-			userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
-			userWithdrawLog.setWithdrawSn(sn);
-			userWithdrawLogService.save(userWithdrawLog);
-			
-			logger.info("后台管理审核拒绝，资金进行回滚...sn:" + sn + "userId:" + userId);
-			MemWithDrawSnParam snParams = new MemWithDrawSnParam();
-			snParams.setWithDrawSn(sn);
-			snParams.setUserId(userId);
-			BaseResult<SurplusPaymentCallbackDTO> baseR = userAccountService.rollbackUserMoneyWithDrawFailure(snParams);
-			if(baseR != null && baseR.getCode() == 0) {
-				logger.info("进入第三方提现失败，资金回滚成功...");
-			}else {
-				logger.info("资金回滚失败...");
-			}
+//			UpdateUserWithdrawParam updateParams = new UpdateUserWithdrawParam();
+//			updateParams.setWithdrawalSn(sn);
+//			updateParams.setStatus(ProjectConstant.STATUS_FAILURE);
+//			updateParams.setPayTime(DateUtil.getCurrentTimeLong());
+//			updateParams.setPaymentName("审核被拒绝，提现失败~");
+//			userWithdrawService.updateWithdraw(updateParams);
+//			this.goWithdrawMessage(param.getWithdrawSn());
+//			
+//			//增加提现流水为失敗
+//			logger.info("后台管理审核拒绝，增加提现单log日志...");
+//			UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
+//			userWithdrawLog.setLogCode(CashEnums.CASH_FAILURE.getcode());
+//			userWithdrawLog.setLogName(CashEnums.CASH_FAILURE.getMsg());
+//			userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
+//			userWithdrawLog.setWithdrawSn(sn);
+//			userWithdrawLogService.save(userWithdrawLog);
+//			
+//			logger.info("后台管理审核拒绝，资金进行回滚...sn:" + sn + "userId:" + userId);
+//			MemWithDrawSnParam snParams = new MemWithDrawSnParam();
+//			snParams.setWithDrawSn(sn);
+//			snParams.setUserId(userId);
+//			BaseResult<SurplusPaymentCallbackDTO> baseR = userAccountService.rollbackUserMoneyWithDrawFailure(snParams);
+//			if(baseR != null && baseR.getCode() == 0) {
+//				logger.info("进入第三方提现失败，资金回滚成功...");
+//			}else {
+//				logger.info("资金回滚失败...");
+//			}
+			logger.info("后台管理审核拒绝，提现单状态为失败...");
 			return ResultGenerator.genFailResult("后台管理审核拒绝成功...");
 		}
 	}
