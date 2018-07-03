@@ -495,35 +495,35 @@ public class CashService {
 			
 			return operation(rspSCashEntity,sn,userId,true,false,false);
 		}else {
-//			logger.info("后台管理审核拒绝，提现单状态为失败...");
-			//更新提现单失败状态
-//			UpdateUserWithdrawParam updateParams = new UpdateUserWithdrawParam();
-//			updateParams.setWithdrawalSn(sn);
-//			updateParams.setStatus(ProjectConstant.STATUS_FAILURE);
-//			updateParams.setPayTime(DateUtil.getCurrentTimeLong());
-//			updateParams.setPaymentName("审核被拒绝，提现失败~");
-//			userWithdrawService.updateWithdraw(updateParams);
-//			this.goWithdrawMessage(param.getWithdrawSn());
-//			
-//			//增加提现流水为失敗
-//			logger.info("后台管理审核拒绝，增加提现单log日志...");
-//			UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
-//			userWithdrawLog.setLogCode(CashEnums.CASH_FAILURE.getcode());
-//			userWithdrawLog.setLogName(CashEnums.CASH_FAILURE.getMsg());
-//			userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
-//			userWithdrawLog.setWithdrawSn(sn);
-//			userWithdrawLogService.save(userWithdrawLog);
-//			
-//			logger.info("后台管理审核拒绝，资金进行回滚...sn:" + sn + "userId:" + userId);
-//			MemWithDrawSnParam snParams = new MemWithDrawSnParam();
-//			snParams.setWithDrawSn(sn);
-//			snParams.setUserId(userId);
-//			BaseResult<SurplusPaymentCallbackDTO> baseR = userAccountService.rollbackUserMoneyWithDrawFailure(snParams);
-//			if(baseR != null && baseR.getCode() == 0) {
-//				logger.info("进入第三方提现失败，资金回滚成功...");
-//			}else {
-//				logger.info("资金回滚失败...");
-//			}
+			logger.info("后台管理审核拒绝，提现单状态为失败...");
+//			更新提现单失败状态
+			UpdateUserWithdrawParam updateParams = new UpdateUserWithdrawParam();
+			updateParams.setWithdrawalSn(sn);
+			updateParams.setStatus(ProjectConstant.STATUS_FAILURE);
+			updateParams.setPayTime(DateUtil.getCurrentTimeLong());
+			updateParams.setPaymentName("审核被拒绝，提现失败~");
+			userWithdrawService.updateWithdraw(updateParams);
+			this.goWithdrawMessage(param.getWithdrawSn());
+			
+			//增加提现流水为失敗
+			logger.info("后台管理审核拒绝，增加提现单log日志...");
+			UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
+			userWithdrawLog.setLogCode(CashEnums.CASH_FAILURE.getcode());
+			userWithdrawLog.setLogName(CashEnums.CASH_FAILURE.getMsg());
+			userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
+			userWithdrawLog.setWithdrawSn(sn);
+			userWithdrawLogService.save(userWithdrawLog);
+			
+			logger.info("后台管理审核拒绝，资金进行回滚...sn:" + sn + "userId:" + userId);
+			MemWithDrawSnParam snParams = new MemWithDrawSnParam();
+			snParams.setWithDrawSn(sn);
+			snParams.setUserId(userId);
+			BaseResult<SurplusPaymentCallbackDTO> baseR = userAccountService.rollbackUserMoneyWithDrawFailure(snParams);
+			if(baseR != null && baseR.getCode() == 0) {
+				logger.info("进入第三方提现失败，资金回滚成功...");
+			}else {
+				logger.info("资金回滚失败...");
+			}
 			logger.info("后台管理审核拒绝，提现单状态为失败...");
 			return ResultGenerator.genFailResult("后台管理审核拒绝成功...");
 		}
