@@ -104,6 +104,8 @@ public class CashService {
 	
 	public BaseResult<Object> withdrawForApp(@RequestBody WithdrawParam param, HttpServletRequest request){
 		Integer userId = SessionUtil.getUserId();
+		long time1 = System.currentTimeMillis();
+		log.info("time1:"+System.currentTimeMillis());
 //		Long mTime = System.currentTimeMillis();
 //		String userIdInRedis = stringRedisTemplate.opsForValue().get("WS:"+String.valueOf(userId));
 //		if(!StringUtils.isEmpty(userIdInRedis)) {
@@ -153,6 +155,7 @@ public class CashService {
 		
 		//限制1天最多能提现1次
 		int countUserWithdraw = userWithdrawService.countUserWithdraw(userId);
+		log.info(userId+"一天提现次数:"+countUserWithdraw);
 		if(countUserWithdraw > 1) {
 			return ResultGenerator.genResult(PayEnums.PAY_MAX_COUNT_WITHDRAW.getcode(),PayEnums.PAY_MAX_COUNT_WITHDRAW.getMsg()); 
 		}
@@ -256,6 +259,9 @@ public class CashService {
 			userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
 			userWithdrawLog.setWithdrawSn(widthDrawSn);
 			userWithdrawLogService.save(userWithdrawLog);
+			long time2 = System.currentTimeMillis();
+			log.info("time2为："+time2);
+			log.info("提现所用时间为："+(time2-time1));
 			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_APPLY_SUC.getcode(),PayEnums.PAY_WITHDRAW_APPLY_SUC.getMsg());
 		}else {
 			//先减少用户钱包余额
@@ -264,8 +270,13 @@ public class CashService {
 			if(rEntity != null && rEntity.isHandleing()) {
 				PayManager.getInstance().addReq2CashQueue(widthDrawSn);
 			}
+			long time3 = System.currentTimeMillis();
+			log.info("time3为："+time3);
+			log.info("提现所用时间为："+(time3-time1));
 			return operation(rEntity,widthDrawSn,userId,false,false,false);
 		}
+		
+
 	}
 	
 	/**
