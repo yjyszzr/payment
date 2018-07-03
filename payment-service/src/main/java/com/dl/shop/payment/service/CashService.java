@@ -156,7 +156,7 @@ public class CashService {
 		//限制1天最多能提现1次
 		int countUserWithdraw = userWithdrawService.countUserWithdraw(userId);
 		log.info(userId+"一天提现次数:"+countUserWithdraw);
-		if(countUserWithdraw > 1) {
+		if(countUserWithdraw >= 1) {
 			return ResultGenerator.genResult(PayEnums.PAY_MAX_COUNT_WITHDRAW.getcode(),PayEnums.PAY_MAX_COUNT_WITHDRAW.getMsg()); 
 		}
 		
