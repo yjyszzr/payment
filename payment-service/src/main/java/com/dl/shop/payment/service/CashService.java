@@ -347,50 +347,51 @@ public class CashService {
 			userWithdrawLogService.save(userWithdrawLog);
 			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_APPLY_SUC.getcode(),PayEnums.PAY_WITHDRAW_APPLY_SUC.getMsg());
 		}else{
-			if(isQuery && !isManagerBack) {
-				return null;
-			}
-			UserWithdrawLog userWithdrawLog = null;
-			//保存提现中状态记录 dl_user_withdraw_log
-			if(!isManagerBack) {
-				userWithdrawLog = new UserWithdrawLog();
-				if(!isNotify) {
-					userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
-					userWithdrawLog.setLogName(CashEnums.CASH_REVIEWING.getMsg());
-					userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
-					userWithdrawLog.setWithdrawSn(widthDrawSn);
-					userWithdrawLogService.save(userWithdrawLog);
-				}
-			}
-			//保存提现中状态记录位失败到数据库中...
-			userWithdrawLog = new UserWithdrawLog();
-			userWithdrawLog.setLogCode(CashEnums.CASH_FAILURE.getcode());
-			userWithdrawLog.setLogName(CashEnums.CASH_FAILURE.getMsg()+"[" +rEntity.resMessage+"]");
-			userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
-			userWithdrawLog.setWithdrawSn(widthDrawSn);
-			userWithdrawLogService.save(userWithdrawLog);
-			
-			//更新提现单失败状态
-			UpdateUserWithdrawParam updateParams = new UpdateUserWithdrawParam();
-			updateParams.setWithdrawalSn(widthDrawSn);
-			updateParams.setStatus(ProjectConstant.STATUS_FAILURE);
-			updateParams.setPayTime(DateUtil.getCurrentTimeLong());
-			updateParams.setPaymentId(widthDrawSn);
-			updateParams.setPaymentName("用户发起提现");
-			userWithdrawService.updateWithdraw(updateParams);
-			this.goWithdrawMessage(widthDrawSn);
-			
-			//三方返回失败，用户资金回滚
-			logger.info("进入第三方提现失败，资金回滚...isManagerBack:" + isManagerBack);
-			MemWithDrawSnParam snParams = new MemWithDrawSnParam();
-			snParams.setWithDrawSn(widthDrawSn);
-			snParams.setUserId(userId);
-			BaseResult<SurplusPaymentCallbackDTO> baseR = userAccountService.rollbackUserMoneyWithDrawFailure(snParams);
-			if(baseR != null && baseR.getCode() == 0) {
-				logger.info("进入第三方提现失败，资金回滚成功...");
-			}else {
-				logger.info("进入第三方提现失败，资金回滚失败...");
-			}
+//			if(isQuery && !isManagerBack) {
+//				return null;
+//			}
+//			UserWithdrawLog userWithdrawLog = null;
+//			//保存提现中状态记录 dl_user_withdraw_log
+//			if(!isManagerBack) {
+//				userWithdrawLog = new UserWithdrawLog();
+//				if(!isNotify) {
+//					userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
+//					userWithdrawLog.setLogName(CashEnums.CASH_REVIEWING.getMsg());
+//					userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
+//					userWithdrawLog.setWithdrawSn(widthDrawSn);
+//					userWithdrawLogService.save(userWithdrawLog);
+//				}
+//			}
+//			//保存提现中状态记录位失败到数据库中...
+//			userWithdrawLog = new UserWithdrawLog();
+//			userWithdrawLog.setLogCode(CashEnums.CASH_FAILURE.getcode());
+//			userWithdrawLog.setLogName(CashEnums.CASH_FAILURE.getMsg()+"[" +rEntity.resMessage+"]");
+//			userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
+//			userWithdrawLog.setWithdrawSn(widthDrawSn);
+//			userWithdrawLogService.save(userWithdrawLog);
+//			
+//			//更新提现单失败状态
+//			UpdateUserWithdrawParam updateParams = new UpdateUserWithdrawParam();
+//			updateParams.setWithdrawalSn(widthDrawSn);
+//			updateParams.setStatus(ProjectConstant.STATUS_FAILURE);
+//			updateParams.setPayTime(DateUtil.getCurrentTimeLong());
+//			updateParams.setPaymentId(widthDrawSn);
+//			updateParams.setPaymentName("用户发起提现");
+//			userWithdrawService.updateWithdraw(updateParams);
+//			this.goWithdrawMessage(widthDrawSn);
+//			
+//			//三方返回失败，用户资金回滚
+//			logger.info("进入第三方提现失败，资金回滚...isManagerBack:" + isManagerBack);
+//			MemWithDrawSnParam snParams = new MemWithDrawSnParam();
+//			snParams.setWithDrawSn(widthDrawSn);
+//			snParams.setUserId(userId);
+//			BaseResult<SurplusPaymentCallbackDTO> baseR = userAccountService.rollbackUserMoneyWithDrawFailure(snParams);
+//			if(baseR != null && baseR.getCode() == 0) {
+//				logger.info("进入第三方提现失败，资金回滚成功...");
+//			}else {
+//				logger.info("进入第三方提现失败，资金回滚失败...");
+//			}
+			logger.info("提现失败[" +rEntity.resMessage +"]");
 			return ResultGenerator.genResult(PayEnums.CASH_FAILURE.getcode(),"提现失败[" +rEntity.resMessage +"]");
 		}
 	}
