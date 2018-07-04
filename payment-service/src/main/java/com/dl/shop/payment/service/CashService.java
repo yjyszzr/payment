@@ -322,7 +322,7 @@ public class CashService {
 		updateParams.setPaymentId(withDrawSn);
 		updateParams.setPaymentName("管理后台发起提现");
 		userWithdrawService.updateWithdraw(updateParams);
-		this.goWithdrawMessage(withDrawSn);
+		this.goWithdrawMessageSuccess(withDrawSn);
 		
 		//提现中，提现成功两条记录到 withdraw_log中
 		UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
@@ -336,100 +336,67 @@ public class CashService {
 	
 	public BaseResult<Object> operation(RspSingleCashEntity rEntity,String widthDrawSn,Integer userId,boolean isManagerBack,boolean isNotify,boolean isQuery) {
 		if(rEntity.isSucc()) {
-			logger.info("单号:"+widthDrawSn+"第三方提现成功，扣除用户余额");
-			//更新提现单
-			logger.info("提现单号:"+widthDrawSn+"更新提现单位成功状态");
-			UpdateUserWithdrawParam updateParams = new UpdateUserWithdrawParam();
-//			updateParams.setWithdrawalSn(withdrawalSnDTO.getWithdrawalSn());
-			updateParams.setWithdrawalSn(widthDrawSn);
-			updateParams.setStatus(ProjectConstant.STATUS_SUCC);
-			updateParams.setPayTime(DateUtil.getCurrentTimeLong());
-			updateParams.setPaymentId(widthDrawSn);
-			if(isManagerBack) {
-				updateParams.setPaymentName("管理后台发起提现");
-			}else {
-				updateParams.setPaymentName("银行卡提现");
-			}
-			userWithdrawService.updateWithdraw(updateParams);
-			this.goWithdrawMessage(widthDrawSn);
-			
-			//保存提现中状态记录 dl_user_withdraw_log
-			UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
-			if(!isNotify) {
+			logger.info("提现单号:"+widthDrawSn+"更新提现单为成功状态");
+			UserWithdraw userWithdraw = new UserWithdraw();
+	    	userWithdraw.setPayTime(DateUtil.getCurrentTimeLong());
+	    	userWithdraw.setWithdrawalSn(widthDrawSn);
+			int row = userWithdrawMapper.updateUserWithdrawStatus0To1(userWithdraw);
+			if(row==1){
+				this.goWithdrawMessageSuccess(widthDrawSn);
+				UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
 				userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
 				userWithdrawLog.setLogName(CashEnums.CASH_REVIEWING.getMsg());
 				userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
 				userWithdrawLog.setWithdrawSn(widthDrawSn);
 				userWithdrawLogService.save(userWithdrawLog);
+				userWithdrawLog = new UserWithdrawLog();
+				userWithdrawLog.setLogCode(CashEnums.CASH_SUCC.getcode());
+				userWithdrawLog.setLogName(CashEnums.CASH_SUCC.getMsg());
+				userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
+				userWithdrawLog.setWithdrawSn(widthDrawSn);
+				userWithdrawLogService.save(userWithdrawLog);
+				return ResultGenerator.genSuccessResult("提现成功");
+			}else{
+				log.warn("withdrawSn={},更新数据状态为1（成功），更新失败,",widthDrawSn);
+				return ResultGenerator.genSuccessResult("提现成功");
 			}
-			
-			//提现中，提现成功两条记录到 withdraw_log中
-			userWithdrawLog = new UserWithdrawLog();
-			userWithdrawLog.setLogCode(CashEnums.CASH_SUCC.getcode());
-			userWithdrawLog.setLogName(CashEnums.CASH_SUCC.getMsg());
-			userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
-			userWithdrawLog.setWithdrawSn(widthDrawSn);
-			userWithdrawLogService.save(userWithdrawLog);
-			return ResultGenerator.genSuccessResult("提现成功");
 		}else if(rEntity.isHandleing()){
 			if(isQuery) {
 				return null;
 			}
-			//保存提现中状态记录 dl_user_withdraw_log
-			UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
-			userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
-			userWithdrawLog.setLogName(CashEnums.CASH_REVIEWING.getMsg());
-			userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
-			userWithdrawLog.setWithdrawSn(widthDrawSn);
-			userWithdrawLogService.save(userWithdrawLog);
 			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_APPLY_SUC.getcode(),PayEnums.PAY_WITHDRAW_APPLY_SUC.getMsg());
 		}else{
-//			if(isQuery && !isManagerBack) {
-//				return null;
-//			}
-//			UserWithdrawLog userWithdrawLog = null;
-//			//保存提现中状态记录 dl_user_withdraw_log
-//			if(!isManagerBack) {
-//				userWithdrawLog = new UserWithdrawLog();
-//				if(!isNotify) {
-//					userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
-//					userWithdrawLog.setLogName(CashEnums.CASH_REVIEWING.getMsg());
-//					userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
-//					userWithdrawLog.setWithdrawSn(widthDrawSn);
-//					userWithdrawLogService.save(userWithdrawLog);
-//				}
-//			}
-//			//保存提现中状态记录位失败到数据库中...
-//			userWithdrawLog = new UserWithdrawLog();
-//			userWithdrawLog.setLogCode(CashEnums.CASH_FAILURE.getcode());
-//			userWithdrawLog.setLogName(CashEnums.CASH_FAILURE.getMsg()+"[" +rEntity.resMessage+"]");
-//			userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
-//			userWithdrawLog.setWithdrawSn(widthDrawSn);
-//			userWithdrawLogService.save(userWithdrawLog);
-//			
-//			//更新提现单失败状态
-//			UpdateUserWithdrawParam updateParams = new UpdateUserWithdrawParam();
-//			updateParams.setWithdrawalSn(widthDrawSn);
-//			updateParams.setStatus(ProjectConstant.STATUS_FAILURE);
-//			updateParams.setPayTime(DateUtil.getCurrentTimeLong());
-//			updateParams.setPaymentId(widthDrawSn);
-//			updateParams.setPaymentName("用户发起提现");
-//			userWithdrawService.updateWithdraw(updateParams);
-//			this.goWithdrawMessage(widthDrawSn);
-//			
-//			//三方返回失败，用户资金回滚
-//			logger.info("进入第三方提现失败，资金回滚...isManagerBack:" + isManagerBack);
-//			MemWithDrawSnParam snParams = new MemWithDrawSnParam();
-//			snParams.setWithDrawSn(widthDrawSn);
-//			snParams.setUserId(userId);
-//			BaseResult<SurplusPaymentCallbackDTO> baseR = userAccountService.rollbackUserMoneyWithDrawFailure(snParams);
-//			if(baseR != null && baseR.getCode() == 0) {
-//				logger.info("进入第三方提现失败，资金回滚成功...");
-//			}else {
-//				logger.info("进入第三方提现失败，资金回滚失败...");
-//			}
-			logger.info("提现失败[" +rEntity.resMessage +"]");
-			return ResultGenerator.genResult(PayEnums.CASH_FAILURE.getcode(),"提现失败[" +rEntity.resMessage +"]");
+			if(isQuery && !isManagerBack) {
+				return null;
+			}
+			logger.info("提现订单号={}，提现失败信息={}",widthDrawSn,rEntity.resMessage);
+			UserWithdraw userWithdraw = new UserWithdraw();
+	    	userWithdraw.setPayTime(DateUtil.getCurrentTimeLong());
+	    	userWithdraw.setWithdrawalSn(widthDrawSn);
+			int updateRowNum = userWithdrawMapper.updateUserWithdrawStatus0To4(userWithdraw);
+			if(updateRowNum==1){				
+				UserWithdrawLog userWithdrawLog = null;
+				//保存提现中状态记录 dl_user_withdraw_log
+				if(!isManagerBack) {
+					userWithdrawLog = new UserWithdrawLog();
+					userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
+					userWithdrawLog.setLogName(CashEnums.CASH_REVIEWING.getMsg());
+					userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
+					userWithdrawLog.setWithdrawSn(widthDrawSn);
+					userWithdrawLogService.save(userWithdrawLog);
+				}
+				//保存提现中状态记录位失败到数据库中...
+				userWithdrawLog = new UserWithdrawLog();
+				userWithdrawLog.setLogCode(CashEnums.CASH_FAILURE.getcode());
+				userWithdrawLog.setLogName(CashEnums.CASH_FAILURE.getMsg()+"[" +rEntity.resCode+":"+rEntity.resMessage+"]");
+				userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
+				userWithdrawLog.setWithdrawSn(widthDrawSn);
+				userWithdrawLogService.save(userWithdrawLog);
+				return ResultGenerator.genResult(PayEnums.CASH_FAILURE.getcode(),"提现失败");
+			}else{
+				log.warn("withdrawSn={}",widthDrawSn);
+				return ResultGenerator.genResult(PayEnums.CASH_FAILURE.getcode(),"提现失败");
+			}
 		}
 	}
 	
@@ -499,12 +466,10 @@ public class CashService {
 //			更新提现单失败状态
 			UpdateUserWithdrawParam updateParams = new UpdateUserWithdrawParam();
 			updateParams.setWithdrawalSn(sn);
-			updateParams.setStatus(ProjectConstant.STATUS_FAILURE);
+			updateParams.setStatus(ProjectConstant.STATUS_FAIL_REFUNDING);
 			updateParams.setPayTime(DateUtil.getCurrentTimeLong());
 			updateParams.setPaymentName("审核被拒绝，提现失败~");
 			userWithdrawService.updateWithdraw(updateParams);
-			this.goWithdrawMessage(param.getWithdrawSn());
-			
 			//增加提现流水为失敗
 			logger.info("后台管理审核拒绝，增加提现单log日志...");
 			UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
@@ -513,18 +478,6 @@ public class CashService {
 			userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
 			userWithdrawLog.setWithdrawSn(sn);
 			userWithdrawLogService.save(userWithdrawLog);
-			
-			logger.info("后台管理审核拒绝，资金进行回滚...sn:" + sn + "userId:" + userId);
-			MemWithDrawSnParam snParams = new MemWithDrawSnParam();
-			snParams.setWithDrawSn(sn);
-			snParams.setUserId(userId);
-			BaseResult<SurplusPaymentCallbackDTO> baseR = userAccountService.rollbackUserMoneyWithDrawFailure(snParams);
-			if(baseR != null && baseR.getCode() == 0) {
-				logger.info("进入第三方提现失败，资金回滚成功...");
-			}else {
-				logger.info("资金回滚失败...");
-			}
-			logger.info("后台管理审核拒绝，提现单状态为失败...");
 			return ResultGenerator.genFailResult("后台管理审核拒绝成功...");
 		}
 	}
@@ -564,6 +517,7 @@ public class CashService {
 				        	//提现单没有达最终态
 							if(userWithDraw != null 
 							   && !ProjectConstant.STATUS_FAILURE.equals(userWithDraw.getStatus())
+									   && !ProjectConstant.STATUS_FAIL_REFUNDING.equals(userWithDraw.getStatus())
 							   && !ProjectConstant.STATUS_SUCC.equals(userWithDraw.getStatus())) {
 								int userId = userWithDraw.getUserId();
 								logger.info("[withdrawNotify]" + " userId:" + userId +  " withDrawSn:" + withDrawSn);
@@ -627,7 +581,7 @@ public class CashService {
 	}
 	
 	@Async
-	private void goWithdrawMessage(String withDrawSn) {
+	private void goWithdrawMessageSuccess(String withDrawSn) {
 		UserWithdraw userWithdraw = userWithdrawService.queryUserWithdraw(withDrawSn).getData();
 		if(userWithdraw == null) {
 			return;
@@ -644,10 +598,7 @@ public class CashService {
 		//消息
 		String status = userWithdraw.getStatus();
 		MessageAddParam messageAddParam = new MessageAddParam();
-		if(ProjectConstant.STATUS_FAILURE.equals(status)) {
-			messageAddParam.setTitle(CommonConstants.FORMAT_WITHDRAW_FAIL_TITLE);
-			messageAddParam.setContentDesc(CommonConstants.FORMAT_WITHDRAW_FAIL_CONTENT_DESC);
-		} else if(ProjectConstant.STATUS_SUCC.equals(status)) {
+		if(ProjectConstant.STATUS_SUCC.equals(status)) {
 			messageAddParam.setTitle(CommonConstants.FORMAT_WITHDRAW_SUC_TITLE);
 			messageAddParam.setContentDesc(CommonConstants.FORMAT_WITHDRAW_SUC_CONTENT_DESC);
 		}else {
@@ -779,7 +730,8 @@ public class CashService {
 			UserWithdraw userWithDraw = baseResult.getData();
 			int userId = userWithDraw.getUserId();
 			if(userWithDraw != null 
-			  &&!ProjectConstant.STATUS_FAILURE.equals(userWithDraw.getStatus()) 
+			  &&!ProjectConstant.STATUS_FAILURE.equals(userWithDraw.getStatus())
+			  &&!ProjectConstant.STATUS_FAIL_REFUNDING.equals(userWithDraw.getStatus())
 			  &&!ProjectConstant.STATUS_SUCC.equals(userWithDraw.getStatus())){
 				//query订单状态
 				RspSingleQueryEntity rspEntity = xianfengUtil.queryCash(withDrawSn);

@@ -26,6 +26,7 @@ public class ProjectConstant {
     public static final Integer ACCOUNT_ROLLBACK =6;//账户回滚
     public static final Integer REFOUND =7;
       
+    public static final String STATUS_FAIL_REFUNDING = "4";
     public static final String STATUS_BANK_APPROVING = "3";
     public static final String STATUS_FAILURE = "2";
 	public static final String STATUS_SUCC = "1";

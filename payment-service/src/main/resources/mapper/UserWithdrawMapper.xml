@@ -35,6 +35,15 @@
 		 </trim>
 	 WHERE withdrawal_sn = #{withdrawalSn}  
   </update>
+  <update id="updateUserWithdrawStatus0To1" parameterType="com.dl.shop.payment.model.UserWithdraw">
+   	 UPDATE dl_user_withdraw status = 1,pay_time=#{payTime} WHERE withdrawal_sn = #{withdrawalSn} and status=0 
+  </update>
+  
+  <update id="updateUserWithdrawStatus0To4" parameterType="com.dl.shop.payment.model.UserWithdraw">
+   	 UPDATE dl_user_withdraw status = 4,pay_time=#{payTime} WHERE withdrawal_sn = #{withdrawalSn} and status=0 
+  </update>
+  
+  
   
   <select id="queryUserWithdrawBySelective" parameterType="com.dl.shop.payment.model.UserWithdraw" resultMap="BaseResultMap">
   	 select * from dl_user_withdraw 

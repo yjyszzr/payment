@@ -13,6 +13,11 @@ public interface UserWithdrawMapper extends Mapper<UserWithdraw> {
 	
 	int updateUserWithdrawBySelective(UserWithdraw userWithdraw);
 	
+	int updateUserWithdrawStatus0To1(UserWithdraw userWithdraw);
+	
+	int updateUserWithdrawStatus0To4(UserWithdraw userWithdraw);
+	
+	
 	List<UserWithdraw> queryUserWithdrawBySelective(UserWithdraw userWithdraw);
 	
 	List<UserWithdraw> queryUserWithdrawByWithDrawSnAndUserId(UserWithdraw userWithdraw);

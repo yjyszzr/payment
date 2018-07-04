@@ -147,7 +147,7 @@ public class UserWithdrawService extends AbstractService<UserWithdraw> {
      * @param amount
      * @return
      */
-    public BaseResult<String> updateWithdraw(UpdateUserWithdrawParam updateUserWithdrawParam){
+    public int updateWithdraw(UpdateUserWithdrawParam updateUserWithdrawParam){
     	String inPrams = JSON.toJSONString(updateUserWithdrawParam);
     	log.info(DateUtil.getCurrentDateTime()+"更新提现单参数:"+inPrams);
     	UserWithdraw userWithdraw = new UserWithdraw();
@@ -155,8 +155,7 @@ public class UserWithdrawService extends AbstractService<UserWithdraw> {
     	userWithdraw.setPayTime(updateUserWithdrawParam.getPayTime());
     	userWithdraw.setStatus(updateUserWithdrawParam.getStatus());
     	userWithdraw.setWithdrawalSn(updateUserWithdrawParam.getWithdrawalSn());
-    	userWithdrawMapper.updateUserWithdrawBySelective(userWithdraw);
-		return ResultGenerator.genSuccessResult("更新数据库提现单成功",null);
+    	return userWithdrawMapper.updateUserWithdrawBySelective(userWithdraw);
     }
     
     
