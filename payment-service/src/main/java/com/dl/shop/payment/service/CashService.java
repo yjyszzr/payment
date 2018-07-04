@@ -369,6 +369,9 @@ public class CashService {
 			if(isQuery && !isManagerBack) {
 				return null;
 			}
+			if(rEntity.isNotErrorCode()){
+				return null;
+			}
 			logger.info("提现订单号={}，提现失败信息={}",widthDrawSn,rEntity.resMessage);
 			UserWithdraw userWithdraw = new UserWithdraw();
 	    	userWithdraw.setPayTime(DateUtil.getCurrentTimeLong());

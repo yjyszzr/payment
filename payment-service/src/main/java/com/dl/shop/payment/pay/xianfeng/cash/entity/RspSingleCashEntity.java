@@ -23,6 +23,14 @@ public class RspSingleCashEntity {
 	public boolean isHandleing() {
 		return "00001".equals(resCode) || "00002".equals(resCode);
 	}
+	/**
+	 * 10008	业务处理中 10005	订单重复提交
+	 * @return
+	 */
+	public boolean isNotErrorCode() {
+//		10008	业务处理中 10005	订单重复提交
+		return "10005".equals(resCode) || "10008".equals(resCode);
+	}
 	
 	@Override
 	public String toString() {
