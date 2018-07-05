@@ -239,7 +239,7 @@ public class CashService {
 		withdrawParam.setThirdPartPaid(BigDecimal.valueOf(totalAmount));
 		withdrawParam.setUserId(SessionUtil.getUserId());
 		BaseResult<String> withdrawRst = userAccountService.withdrawUserMoney(withdrawParam);
-		if(withdrawRst.getCode() != 0) {
+		if(withdrawRst==null || withdrawRst.getCode() != 0) {
 			log.info(loggerId+"用户可提现余额提现失败,用户资金钱包未变化");
 			log.info("userId={}提现扣款失败，设置提现单withdrawsn={}失败",SessionUtil.getUserId(),withdrawalSn);
 			UserWithdraw userWithdraw = new UserWithdraw();
@@ -252,7 +252,8 @@ public class CashService {
 			userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
 			userWithdrawLog.setWithdrawSn(widthDrawSn);
 			userWithdrawLogService.save(userWithdrawLog);
-			throw new ServiceException(PayEnums.CASH_USER_MOENY_REDUC_ERROR.getcode(),PayEnums.CASH_USER_MOENY_REDUC_ERROR.getMsg());
+			log.info("扣除用户余额返回={}",withdrawRst==null?"":withdrawRst.getCode()+":"+withdrawRst.getMsg()+":"+withdrawRst.getData());
+			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_NOT_ENOUGH.getcode(),PayEnums.PAY_RONGBAO_NOT_ENOUGH.getMsg());
 		}
 		if(inReview) {
 			log.info("单号:"+widthDrawSn+"超出提现阈值,进入审核通道  系统阈值:" + limit);
