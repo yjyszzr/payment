@@ -61,6 +61,7 @@ import com.dl.shop.payment.dto.PaymentDTO;
 import com.dl.shop.payment.dto.PriceDTO;
 import com.dl.shop.payment.dto.RechargeUserDTO;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
+import com.dl.shop.payment.dto.ValidPayDTO;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.UnifiedOrderParam;
@@ -73,6 +74,7 @@ import com.dl.shop.payment.param.RechargeParam;
 import com.dl.shop.payment.param.ReqOrderQueryParam;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
 import com.dl.shop.payment.param.RollbackThirdOrderAmountParam;
+import com.dl.shop.payment.param.UserIdParam;
 import com.dl.shop.payment.param.WithdrawParam;
 import com.dl.shop.payment.pay.common.PayManager;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
@@ -954,5 +956,16 @@ public class PaymentController extends AbstractBaseController{
 		paymentService.timerOrderQueryScheduled();
 		return ResultGenerator.genSuccessResult("success");
 	}
+	
+	/**
+     * 	校验用户是否支付过
+     */
+	@ApiOperation(value="校验用户是否有过钱的交易", notes="校验用户是否有过钱的交易")
+	@PostMapping("/validUserPay")
+	@ResponseBody
+    public BaseResult<ValidPayDTO> validUserPay(@RequestBody UserIdParam userIdParam){
+		return payLogService.validUserPay(userIdParam.getUserId());
+ 	}
+	
 	
 }

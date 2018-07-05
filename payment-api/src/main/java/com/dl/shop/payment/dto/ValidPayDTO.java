@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 public class ValidPayDTO {
 	
-	@ApiModelProperty("是否支付过")
-    private String hasPaid;
+	@ApiModelProperty("是否支付过:0-未支付过 ,1-已支付过")
+    private String hasPaid = "0";
 
 }

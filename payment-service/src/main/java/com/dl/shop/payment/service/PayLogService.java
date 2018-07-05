@@ -3,6 +3,7 @@ import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.dao.PayLogMapper;
 import com.dl.shop.payment.dto.PayLogDTO;
 import com.dl.shop.payment.dto.PayLogDetailDTO;
+import com.dl.shop.payment.dto.ValidPayDTO;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -90,5 +91,21 @@ public class PayLogService extends AbstractService<PayLog> {
 		BeanUtils.copyProperties(payLog, payLogDTO);
 		return ResultGenerator.genSuccessResult("success", payLogDTO);
 	}
+	
+	/**
+	 * 查询用户是否有成功的交易
+	 * @param userId
+	 * @return
+	 */
+	public BaseResult<ValidPayDTO> validUserPay(Integer userId){
+		ValidPayDTO validPayDTO= new ValidPayDTO();
+		int rst = payLogMapper.countValidPayLogByUserId(userId);
+		if(rst > 0) {
+			validPayDTO.setHasPaid("1");
+			return ResultGenerator.genSuccessResult("success", validPayDTO);
+		}
+		return ResultGenerator.genSuccessResult("success", validPayDTO);
+	}
+	
 }
 

@@ -102,4 +102,5 @@ public interface IpaymentService {
 	 */
 	@RequestMapping(path="/payment/timerOrderQueryScheduled", method=RequestMethod.POST)
     public BaseResult<String> timerOrderQueryScheduled(@RequestBody EmptyParam emptyParam);
+
 }

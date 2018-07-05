@@ -77,4 +77,11 @@ public interface PayLogMapper extends Mapper<PayLog> {
 	//获取没有支付的订单支付信息
 	List<PayLog> findUnPayOrderPayLogs();
 	
+	/**
+	 * 
+	 * @param 根据userId查询有效的支付记录
+	 * @return
+	 */
+	int countValidPayLogByUserId(@Param("userId")Integer userId);
+	
 }
