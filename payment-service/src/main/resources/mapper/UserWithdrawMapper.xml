@@ -36,11 +36,11 @@
 	 WHERE withdrawal_sn = #{withdrawalSn}  
   </update>
   <update id="updateUserWithdrawStatus3To1" parameterType="com.dl.shop.payment.model.UserWithdraw">
-   	 UPDATE dl_user_withdraw status = 1,pay_time=#{payTime} WHERE withdrawal_sn = #{withdrawalSn} and status=3 
+   	 UPDATE dl_user_withdraw set status = 1,pay_time=#{payTime} WHERE withdrawal_sn = #{withdrawalSn} and status=3 
   </update>
   
   <update id="updateUserWithdrawStatus3To4" parameterType="com.dl.shop.payment.model.UserWithdraw">
-   	 UPDATE dl_user_withdraw status = 4,pay_time=#{payTime} WHERE withdrawal_sn = #{withdrawalSn} and status=3 
+   	 UPDATE dl_user_withdraw set status = 4,pay_time=#{payTime} WHERE withdrawal_sn = #{withdrawalSn} and status=3 
   </update>
   
   
