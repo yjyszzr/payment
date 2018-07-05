@@ -232,12 +232,14 @@ public class XianFengController {
 						boolean verifyResult = UcfForOnline.verify(XianFengPayCfg.RSA_KEY, SIGN,rspEntity.sign, signMap, SECID);
 						logger.info("[payNotify]" + " 验签结果:" + verifyResult);
 						if(verifyResult) {
-							//通知先锋成功
-							PrintWriter writer = response.getWriter();
-				        	writer.write("SUCCESS");
-				        	writer.flush();
 							boolean isSucc = xianFengService.payNotify(rspEntity);
 							logger.info("[payNotify]" + " isSucc:" + isSucc);
+							if(isSucc) {
+								//通知先锋成功
+								PrintWriter writer = response.getWriter();
+								writer.write("SUCCESS");
+								writer.flush();
+							}
 						}
 					}
             	} catch (Exception e) {

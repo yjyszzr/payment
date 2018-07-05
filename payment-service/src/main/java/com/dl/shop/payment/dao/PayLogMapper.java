@@ -1,5 +1,7 @@
 package com.dl.shop.payment.dao;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.InsertProvider;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Param;
@@ -71,5 +73,8 @@ public interface PayLogMapper extends Mapper<PayLog> {
 	 * @return
 	 */
 	PayLog findPayLogByPayLogId(@Param("logId")Integer logId);
+	
+	//获取没有支付的订单支付信息
+	List<PayLog> findUnPayOrderPayLogs();
 	
 }

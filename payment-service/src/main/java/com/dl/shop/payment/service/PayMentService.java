@@ -38,6 +38,7 @@ import com.dl.order.dto.OrderDTO;
 import com.dl.order.param.OrderCondtionParam;
 import com.dl.order.param.OrderSnParam;
 import com.dl.order.param.UpdateOrderInfoParam;
+import com.dl.order.param.UpdateOrderPayStatusParam;
 import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dao.PayBankRecordMapper;
 import com.dl.shop.payment.dao.PayLogMapper;
@@ -428,7 +429,7 @@ public class PayMentService extends AbstractService<PayMent> {
 					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
 				}else {
 					String tips = response.getResult_msg();
-					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"融宝服务返回[" + tips +"]");
+					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),PayEnums.PAY_RONGBAO_FAILURE.getMsg());
 				}
 			}else {
 				String code = response.getResult_code(); //104 -> 未支付  404 -> 订单不存在
@@ -436,7 +437,7 @@ public class PayMentService extends AbstractService<PayMent> {
 					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
 				}else {
 					String tips = response.getResult_msg();
-					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"微信支付失败["+tips+"]");	
+					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),PayEnums.PAY_RONGBAO_FAILURE.getMsg());	
 				}
 			}
 		}
@@ -452,9 +453,38 @@ public class PayMentService extends AbstractService<PayMent> {
 	 */
 	public BaseResult<RspOrderQueryDTO> orderOptions(String loggerId, PayLog payLog, RspOrderQueryEntity response) {
 		if(response.isSucc()) {
-			//预出票操作
-			String orderSn = payLog.getOrderSn();
+			//2018-07-04
 			int currentTime = DateUtil.getCurrentTimeLong();
+			//更新order
+			UpdateOrderPayStatusParam param = new UpdateOrderPayStatusParam();
+			param.setPayStatus(1);
+			param.setPayTime(currentTime);
+//			param.setPayId(payId);
+			param.setPaySn(payLog.getLogId()+"");
+			param.setPayName(payLog.getPayName());
+			param.setPayCode(payLog.getPayCode());
+			param.setOrderSn(payLog.getOrderSn());
+			BaseResult<Integer> updateOrderInfo = orderService.updateOrderPayStatus(param);
+			
+			logger.info("==============支付成功订单回调[orderService]==================");
+			logger.info("payLogId:" + payLog.getLogId() + " payName:" + payLog.getPayName() 
+			+ " payCode:" + payLog.getPayCode() + " payOrderSn:" + payLog.getPayOrderSn());
+			logger.info("==================================");
+			if(updateOrderInfo.getCode() == 0) {
+				PayLog updatePayLog = new PayLog();
+				updatePayLog.setPayTime(currentTime);
+				payLog.setLastTime(currentTime);
+				updatePayLog.setTradeNo(response.getTrade_no());
+				updatePayLog.setLogId(payLog.getLogId());
+				updatePayLog.setIsPaid(1);
+				updatePayLog.setPayMsg("支付成功");
+				payLogService.update(updatePayLog);
+			}else {
+				logger.error(loggerId+" paylogid="+"ordersn=" + payLog.getOrderSn()+"更新订单成功状态失败");
+			}
+			//old
+			/*//预出票操作
+			String orderSn = payLog.getOrderSn();
 			SaveLotteryPrintInfoParam saveLotteryPrintParam = new SaveLotteryPrintInfoParam();
 			saveLotteryPrintParam.setOrderSn(orderSn);
 			BaseResult<String> saveLotteryPrintInfo = lotteryPrintService.saveLotteryPrintInfo(saveLotteryPrintParam);
@@ -527,7 +557,7 @@ public class PayMentService extends AbstractService<PayMent> {
 				logger.info(loggerId + "生成账户流水异常");
 			}else {
 				logger.info("生成账户流水成功");
-			}
+			}*/
 //			if(!isLotteryPrintSucc) {
 //				//资金回滚
 //				RollbackOrderAmountParam p = new RollbackOrderAmountParam();
@@ -573,33 +603,20 @@ public class PayMentService extends AbstractService<PayMent> {
 	 * 处理订单支付超时的定时任务
 	 */
     public void timerOrderQueryScheduled() {
-		String loggerId = "timer_orderquery_" + System.currentTimeMillis();
-		List<QueueItemEntity> mVector = PayManager.getInstance().getList();
-		if(mVector.size() > 0) {
-			for(int i = 0;i < mVector.size();i++) {
-				QueueItemEntity entity = mVector.get(i);
-				int cnt = entity.cnt;
-				if(cnt >= QueueItemEntity.MAX_CNT) {
-					mVector.remove(entity);
-				}
-				entity.cnt++;
-				boolean succ = task(loggerId,entity);
-				if(succ) {
-					entity.cnt = QueueItemEntity.MAX_CNT;
-				}
+    	String loggerId = "timerOrderQueryScheduled_"+System.currentTimeMillis();
+    	List<PayLog> findUnPayOrderPayLogs = payLogMapper.findUnPayOrderPayLogs();
+		if(findUnPayOrderPayLogs.size() > 0) {
+			for(PayLog paylog: findUnPayOrderPayLogs) {
+				boolean succ = this.task(paylog, loggerId);
 			}
 		}
 	}
-
-	private boolean task(String loggerId,QueueItemEntity entity) {
+    //主动查询支付状态
+	private boolean task(PayLog payLog, String loggerId) {
 		boolean succ = false;
 		BaseResult<RspOrderQueryEntity> baseResult = null;
 		//http request
-		String payCode = entity.payCode;
-		String payOrderSn = entity.payOrderSn;
-		PayLog payLog = payLogService.findPayLogByOrderSign(payOrderSn);
 		if(payLog == null) {
-			log.info("查询到该订单不存在...payOrderSn:" + payOrderSn);
 			return succ;
 		}
 		int isPaid = payLog.getIsPaid();
@@ -608,6 +625,8 @@ public class PayMentService extends AbstractService<PayMent> {
 			succ = true;
 			return succ;
 		}
+		String payCode = payLog.getPayCode();
+		String payOrderSn = payLog.getPayOrderSn();
 		if("app_rongbao".equals(payCode)) {
 			baseResult = rongUtil.queryOrderInfo(payOrderSn);
 		}else if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)) {
@@ -635,11 +654,31 @@ public class PayMentService extends AbstractService<PayMent> {
 		if(rspEntity != null && rspEntity.isSucc()) {
 			logger.info("payType:" + payLog.getPayType() +" payCode:" + payCode + "第三方定时器查询订单 payordersn:" + payOrderSn +"succ..");
 			Integer payType = payLog.getPayType();
-			BaseResult<RspOrderQueryDTO> bResult = null;
 			if(payType == 0) {
-				bResult = this.orderOptions(loggerId, payLog,rspEntity);
+				int currentTime = DateUtil.getCurrentTimeLong();
+				//更新order
+				UpdateOrderPayStatusParam param = new UpdateOrderPayStatusParam();
+				param.setPayStatus(1);
+				param.setPayTime(currentTime);
+//				param.setPayId(payId);
+				param.setPaySn(payLog.getLogId()+"");
+				param.setPayName(payLog.getPayName());
+				param.setPayCode(payLog.getPayCode());
+				param.setOrderSn(payLog.getOrderSn());
+				BaseResult<Integer> updateOrderInfo = orderService.updateOrderPayStatus(param);
+				if(updateOrderInfo.getCode() == 0) {
+					PayLog updatePayLog = new PayLog();
+					updatePayLog.setPayTime(currentTime);
+					payLog.setLastTime(currentTime);
+					updatePayLog.setTradeNo(rspEntity.getTrade_no());
+					updatePayLog.setLogId(payLog.getLogId());
+					updatePayLog.setIsPaid(1);
+					updatePayLog.setPayMsg("支付成功");
+					payLogService.update(updatePayLog);
+				}
+//				bResult = this.orderOptions(loggerId, payLog,rspEntity);
 			}else if(payType == 1) {
-				bResult = this.rechargeOptions(loggerId, payLog, rspEntity);
+				BaseResult<RspOrderQueryDTO> bResult = this.rechargeOptions(loggerId, payLog, rspEntity);
 			}
 		}
 		return succ;

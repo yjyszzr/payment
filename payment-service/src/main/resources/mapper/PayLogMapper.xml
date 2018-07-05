@@ -70,4 +70,11 @@
 	  from dl_pay_log
 	  where log_id = #{logId}
 	</select>
+	
+	<select id="findUnPayOrderPayLogs" resultMap="BaseResultMap">
+	  select 
+	  <include refid="queryFields" />
+	  from dl_pay_log
+	  where is_paid=0 and pay_type=0 order by add_time
+	</select>
 </mapper>
