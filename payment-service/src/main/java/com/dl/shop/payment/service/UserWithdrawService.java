@@ -1,35 +1,35 @@
 package com.dl.shop.payment.service;
-import com.dl.shop.payment.core.ProjectConstant;
-import com.dl.shop.payment.dao.UserWithdrawMapper;
-import com.dl.shop.payment.dto.UserWithdrawDTO;
-import com.dl.shop.payment.dto.WithdrawalSnDTO;
-import com.dl.shop.payment.model.UserWithdraw;
-import com.dl.shop.payment.param.UpdateUserWithdrawParam;
-import com.dl.shop.payment.param.UserIdParam;
-import com.dl.shop.payment.param.UserWithdrawParam;
+import java.util.List;
+
+import javax.annotation.Resource;
+
 import lombok.extern.slf4j.Slf4j;
-import com.dl.member.api.IUserAccountService;
-import com.dl.member.api.IUserBankService;
-import com.dl.member.dto.UserBankDTO;
-import com.dl.member.enums.MemberEnums;
-import com.dl.member.param.UserBankQueryParam;
-import com.alibaba.fastjson.JSON;
-import com.dl.base.enums.SNBusinessCodeEnum;
-import com.dl.base.exception.ServiceException;
-import com.dl.base.result.BaseResult;
-import com.dl.base.result.ResultGenerator;
-import com.dl.base.service.AbstractService;
-import com.dl.base.util.DateUtil;
-import com.dl.base.util.SNGenerator;
-import com.dl.base.util.SessionUtil;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
-import javax.annotation.Resource;
+
+import com.alibaba.fastjson.JSON;
+import com.dl.base.exception.ServiceException;
+import com.dl.base.result.BaseResult;
+import com.dl.base.result.ResultGenerator;
+import com.dl.base.service.AbstractService;
+import com.dl.base.util.DateUtil;
+import com.dl.base.util.SessionUtil;
+import com.dl.member.api.IUserAccountService;
+import com.dl.member.api.IUserBankService;
+import com.dl.member.dto.UserBankDTO;
+import com.dl.member.enums.MemberEnums;
+import com.dl.member.param.UserBankQueryParam;
+import com.dl.shop.payment.dao.UserWithdrawMapper;
+import com.dl.shop.payment.dto.UserWithdrawDTO;
+import com.dl.shop.payment.dto.WithdrawalSnDTO;
+import com.dl.shop.payment.model.UserWithdraw;
+import com.dl.shop.payment.param.UpdateUserWithdrawParam;
+import com.dl.shop.payment.param.UserWithdrawParam;
 
 @Service
 @Transactional
@@ -76,7 +76,6 @@ public class UserWithdrawService extends AbstractService<UserWithdraw> {
     	
     	UserBankDTO userBankDTO = userBankRst.getData();
     	userWithdraw.setBankName(userBankDTO.getBankName());
-    	userWithdraw.setStatus(ProjectConstant.NOT_FINISH);
     	int rst = userWithdrawMapper.insertUserWithdraw(userWithdraw);
     	if(1 != rst) {
     		log.error("保存数据库提现单失败");
