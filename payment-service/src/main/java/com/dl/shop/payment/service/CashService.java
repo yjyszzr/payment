@@ -10,9 +10,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.apache.http.util.TextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +26,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
+
 import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -37,13 +42,11 @@ import com.dl.member.api.IUserAccountService;
 import com.dl.member.api.IUserBankService;
 import com.dl.member.api.IUserMessageService;
 import com.dl.member.api.IUserService;
-import com.dl.member.dto.SurplusPaymentCallbackDTO;
 import com.dl.member.dto.SysConfigDTO;
 import com.dl.member.dto.UserBankDTO;
 import com.dl.member.dto.UserDTO;
 import com.dl.member.param.AddMessageParam;
 import com.dl.member.param.IDParam;
-import com.dl.member.param.MemWithDrawSnParam;
 import com.dl.member.param.MessageAddParam;
 import com.dl.member.param.StrParam;
 import com.dl.member.param.SysConfigParam;
@@ -69,7 +72,6 @@ import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleQueryEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.util.XianFengCashUtil;
 import com.ucf.sdk.util.AESCoder;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * 代支付
@@ -340,7 +342,7 @@ public class CashService {
 			UserWithdraw userWithdraw = new UserWithdraw();
 	    	userWithdraw.setPayTime(DateUtil.getCurrentTimeLong());
 	    	userWithdraw.setWithdrawalSn(widthDrawSn);
-			int row = userWithdrawMapper.updateUserWithdrawStatus0To1(userWithdraw);
+			int row = userWithdrawMapper.updateUserWithdrawStatus3To1(userWithdraw);
 			if(row==1){
 				this.goWithdrawMessageSuccess(widthDrawSn);
 				UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
@@ -376,7 +378,7 @@ public class CashService {
 			UserWithdraw userWithdraw = new UserWithdraw();
 	    	userWithdraw.setPayTime(DateUtil.getCurrentTimeLong());
 	    	userWithdraw.setWithdrawalSn(widthDrawSn);
-			int updateRowNum = userWithdrawMapper.updateUserWithdrawStatus0To4(userWithdraw);
+			int updateRowNum = userWithdrawMapper.updateUserWithdrawStatus3To4(userWithdraw);
 			if(updateRowNum==1){				
 				UserWithdrawLog userWithdrawLog = null;
 				//保存提现中状态记录 dl_user_withdraw_log
