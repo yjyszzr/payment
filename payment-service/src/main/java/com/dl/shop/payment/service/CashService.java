@@ -471,15 +471,16 @@ public class CashService {
 				        	writer.write("SUCCESS");
 				        	writer.flush();
 				        	log.info("============SUCESS返回====================");
-				        	//提现单没有达最终态
-							if(userWithDraw != null 
-							   && !ProjectConstant.STATUS_FAILURE.equals(userWithDraw.getStatus())
-									   && !ProjectConstant.STATUS_FAIL_REFUNDING.equals(userWithDraw.getStatus())
-							   && !ProjectConstant.STATUS_SUCC.equals(userWithDraw.getStatus())) {
-								int userId = userWithDraw.getUserId();
-								log.info("[withdrawNotify]" + " userId:" + userId +  " withDrawSn:" + withDrawSn);
-								operation(rspSingleCashEntity,rspSingleCashEntity.merchantNo, userId,Boolean.FALSE);
-							}
+//				        	TODO 胡贺东 暂时注释回调处理 调试主动查询定时是否处理得当
+//				        	//提现单没有达最终态
+//							if(userWithDraw != null 
+//							   && !ProjectConstant.STATUS_FAILURE.equals(userWithDraw.getStatus())
+//									   && !ProjectConstant.STATUS_FAIL_REFUNDING.equals(userWithDraw.getStatus())
+//							   && !ProjectConstant.STATUS_SUCC.equals(userWithDraw.getStatus())) {
+//								int userId = userWithDraw.getUserId();
+//								log.info("[withdrawNotify]" + " userId:" + userId +  " withDrawSn:" + withDrawSn);
+//								operation(rspSingleCashEntity,rspSingleCashEntity.merchantNo, userId,Boolean.FALSE);
+//							}
 						}
 					}
 					log.info("[withdrawNotify]" + " jsonObject:" + dataJson);
