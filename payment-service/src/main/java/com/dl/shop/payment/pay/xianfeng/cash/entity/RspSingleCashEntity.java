@@ -23,7 +23,7 @@ public class RspSingleCashEntity {
 	public boolean isTradeSucc() {
 		return !StringUtils.isEmpty(status)&&"S".equalsIgnoreCase(status);
 	}
-	public boolean isTradeFail() {
+	public boolean isTradeFail(Boolean isApply) {
 		return !StringUtils.isEmpty(status)&&"F".equalsIgnoreCase(status);
 	}
 	public boolean isTradeDoing() {

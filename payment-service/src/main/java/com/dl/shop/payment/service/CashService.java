@@ -248,18 +248,15 @@ public class CashService {
 			log.info("扣除用户余额返回={}",withdrawRst==null?"":withdrawRst.getCode()+":"+withdrawRst.getMsg()+":"+withdrawRst.getData());
 			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_NOT_ENOUGH.getcode(),PayEnums.PAY_RONGBAO_NOT_ENOUGH.getMsg());
 		}
+		
+		userWithdrawLog = new UserWithdrawLog();
+		userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
+		userWithdrawLog.setLogName(CashEnums.CASH_REVIEWING.getMsg());
+		userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
+		userWithdrawLog.setWithdrawSn(widthDrawSn);
+		userWithdrawLogService.save(userWithdrawLog);
 		if(inReview) {
 			log.info("单号:"+widthDrawSn+"超出提现阈值,进入审核通道  系统阈值:" + limit);
-			//保存'提现中'状态到dl_user_withdraw_log
-			userWithdrawLog = new UserWithdrawLog();
-			userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
-			userWithdrawLog.setLogName(CashEnums.CASH_REVIEWING.getMsg());
-			userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
-			userWithdrawLog.setWithdrawSn(widthDrawSn);
-			userWithdrawLogService.save(userWithdrawLog);
-			long time2 = System.currentTimeMillis();
-			log.info("time2为："+time2);
-			log.info("提现所用时间为："+(time2-time1));
 			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_APPLY_SUC.getcode(),PayEnums.PAY_WITHDRAW_APPLY_SUC.getMsg());
 		}else {
 			//先减少用户钱包余额
@@ -268,7 +265,7 @@ public class CashService {
 			long time3 = System.currentTimeMillis();
 			log.info("time3为："+time3);
 			log.info("提现所用时间为："+(time3-time1));
-			return operation(rEntity,widthDrawSn,userId,false,false,false);
+			return operation(rEntity,widthDrawSn,userId,Boolean.TRUE);
 		}
 		
 
@@ -329,7 +326,7 @@ public class CashService {
 		return ResultGenerator.genSuccessResult("提现成功");
 	}
 	
-	public BaseResult<Object> operation(RspSingleCashEntity rEntity,String widthDrawSn,Integer userId,boolean isManagerBack,boolean isNotify,boolean isQuery) {
+	public BaseResult<Object> operation(RspSingleCashEntity rEntity,String widthDrawSn,Integer userId,Boolean isApply) {
 		if(rEntity.isTradeSucc()) {
 			log.info("提现单号:"+widthDrawSn+"更新提现单为成功状态");
 			UserWithdraw userWithdraw = new UserWithdraw();
@@ -339,12 +336,6 @@ public class CashService {
 			if(row==1){
 				this.goWithdrawMessageSuccess(widthDrawSn);
 				UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
-				userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
-				userWithdrawLog.setLogName(CashEnums.CASH_REVIEWING.getMsg());
-				userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
-				userWithdrawLog.setWithdrawSn(widthDrawSn);
-				userWithdrawLogService.save(userWithdrawLog);
-				userWithdrawLog = new UserWithdrawLog();
 				userWithdrawLog.setLogCode(CashEnums.CASH_SUCC.getcode());
 				userWithdrawLog.setLogName(CashEnums.CASH_SUCC.getMsg());
 				userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
@@ -355,28 +346,15 @@ public class CashService {
 				log.warn("withdrawSn={},更新数据状态为1（成功），更新失败,",widthDrawSn);
 				return ResultGenerator.genSuccessResult("提现成功");
 			}
-		}else if(rEntity.isTradeFail()){
-			if(isQuery && !isManagerBack) {
-				return null;
-			}
+		}else if(rEntity.isTradeFail(isApply)){
 			log.info("提现订单号={}，提现失败信息={}",widthDrawSn,rEntity.resMessage);
 			UserWithdraw userWithdraw = new UserWithdraw();
 	    	userWithdraw.setPayTime(DateUtil.getCurrentTimeLong());
 	    	userWithdraw.setWithdrawalSn(widthDrawSn);
 			int updateRowNum = userWithdrawMapper.updateUserWithdrawStatus3To4(userWithdraw);
-			if(updateRowNum==1){				
-				UserWithdrawLog userWithdrawLog = null;
-				//保存提现中状态记录 dl_user_withdraw_log
-				if(!isManagerBack) {
-					userWithdrawLog = new UserWithdrawLog();
-					userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
-					userWithdrawLog.setLogName(CashEnums.CASH_REVIEWING.getMsg());
-					userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
-					userWithdrawLog.setWithdrawSn(widthDrawSn);
-					userWithdrawLogService.save(userWithdrawLog);
-				}
+			if(updateRowNum==1){	
 				//保存提现中状态记录位失败到数据库中...
-				userWithdrawLog = new UserWithdrawLog();
+				UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
 				userWithdrawLog.setLogCode(CashEnums.CASH_FAILURE.getcode());
 				userWithdrawLog.setLogName(CashEnums.CASH_FAILURE.getMsg()+"[" +rEntity.resCode+":"+rEntity.resMessage+"]");
 				userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
@@ -388,9 +366,6 @@ public class CashService {
 				return ResultGenerator.genResult(PayEnums.CASH_FAILURE.getcode(),"提现失败");
 			}
 		}else if(rEntity.isTradeDoing()){
-			if(isQuery) {
-				return null;
-			}
 			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_APPLY_SUC.getcode(),PayEnums.PAY_WITHDRAW_APPLY_SUC.getMsg());
 		}
 		return null;
@@ -440,7 +415,7 @@ public class CashService {
 	    	userWithdraw.setStatus(ProjectConstant.STATUS_BANK_APPROVING);
 	    	userWithdraw.setWithdrawalSn(sn);
 			userWithdrawMapper.updateUserWithdrawBySelective(userWithdraw);
-			return operation(rspSCashEntity,sn,userId,true,false,false);
+			return operation(rspSCashEntity,sn,userId,Boolean.TRUE);
 		}else {
 			log.info("后台管理审核拒绝，提现单状态为失败...");
 //			更新提现单失败状态
@@ -498,7 +473,7 @@ public class CashService {
 							   && !ProjectConstant.STATUS_SUCC.equals(userWithDraw.getStatus())) {
 								int userId = userWithDraw.getUserId();
 								log.info("[withdrawNotify]" + " userId:" + userId +  " withDrawSn:" + withDrawSn);
-								operation(rspSingleCashEntity,rspSingleCashEntity.merchantNo, userId,false,true,false);
+								operation(rspSingleCashEntity,rspSingleCashEntity.merchantNo, userId,Boolean.FALSE);
 							}
 						}
 					}
@@ -641,11 +616,11 @@ public class CashService {
 		RspSingleQueryEntity rspEntity;
 		try {
 			rspEntity = xianfengUtil.queryCash(withDrawSn);
-			if(rspEntity != null && rspEntity.isSucc()) {
-				return operation(convert2RspSingleCashEntity(rspEntity),withDrawSn, userId,false,true,true);
+			if(rspEntity != null) {
+				return operation(convert2RspSingleCashEntity(rspEntity),withDrawSn, userId,Boolean.FALSE);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.info("调取先锋支付查询报错",e);
 		}
 		return ResultGenerator.genFailResult("查询失败~",null);
 	}
@@ -684,7 +659,7 @@ public class CashService {
 		String withDrawSn = userWithdraw.getWithdrawalSn();
 		Integer userId = userWithdraw.getUserId();
 		RspSingleQueryEntity rspEntity = xianfengUtil.queryCash(withDrawSn);
-		if(rspEntity != null && rspEntity.isSucc()) {
+		if(rspEntity != null) {
 			this.operation(convert2RspSingleCashEntity(rspEntity),withDrawSn, userId,false,true,true);
 		}
 	}
