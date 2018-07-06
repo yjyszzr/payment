@@ -85,6 +85,9 @@
   	 select count(1) from dl_user_withdraw 
   	 where user_id = #{userId} and FROM_UNIXTIME(add_time,"%Y-%m-%d") = curdate();
   </select>
+  <select id="queryUserWithdrawIng" resultMap="BaseResultMap">
+  	select * from dl_user_withdraw where status = 3;
+  </select>
   
   
 </mapper>
