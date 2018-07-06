@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.dl.base.constant.CommonConstants;
 import com.dl.base.enums.SNBusinessCodeEnum;
 import com.dl.base.result.BaseResult;
@@ -332,7 +330,7 @@ public class CashService {
 	}
 	
 	public BaseResult<Object> operation(RspSingleCashEntity rEntity,String widthDrawSn,Integer userId,boolean isManagerBack,boolean isNotify,boolean isQuery) {
-		if(rEntity.isSucc()) {
+		if(rEntity.isTradeSucc()) {
 			log.info("提现单号:"+widthDrawSn+"更新提现单为成功状态");
 			UserWithdraw userWithdraw = new UserWithdraw();
 	    	userWithdraw.setPayTime(DateUtil.getCurrentTimeLong());
@@ -357,16 +355,8 @@ public class CashService {
 				log.warn("withdrawSn={},更新数据状态为1（成功），更新失败,",widthDrawSn);
 				return ResultGenerator.genSuccessResult("提现成功");
 			}
-		}else if(rEntity.isHandleing()){
-			if(isQuery) {
-				return null;
-			}
-			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_APPLY_SUC.getcode(),PayEnums.PAY_WITHDRAW_APPLY_SUC.getMsg());
-		}else{
+		}else if(rEntity.isTradeFail()){
 			if(isQuery && !isManagerBack) {
-				return null;
-			}
-			if(rEntity.isNotErrorCode()){
 				return null;
 			}
 			log.info("提现订单号={}，提现失败信息={}",widthDrawSn,rEntity.resMessage);
@@ -397,25 +387,20 @@ public class CashService {
 				log.warn("withdrawSn={}",widthDrawSn);
 				return ResultGenerator.genResult(PayEnums.CASH_FAILURE.getcode(),"提现失败");
 			}
+		}else if(rEntity.isTradeDoing()){
+			if(isQuery) {
+				return null;
+			}
+			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_APPLY_SUC.getcode(),PayEnums.PAY_WITHDRAW_APPLY_SUC.getMsg());
 		}
+		return null;
 	}
 	
-	public BaseResult<Object> getCash(@RequestBody CashGetParam param, HttpServletRequest request){
-		String sn = param.getWithdrawSn();
-		if(StringUtils.isEmpty(sn)) {
-			log.info("提现单号不能为空");
-			return ResultGenerator.genFailResult("提现单号不能为空",null);
-		}
-		//查询该用户的提现金额
-		BaseResult<UserWithdraw> baseResult = userWithdrawService.queryUserWithdraw(sn);
-		UserWithdraw userEntity = baseResult.getData();
-		if(baseResult.getCode() != 0 || userEntity == null) {
-			log.info("查询提现单失败");
-			return ResultGenerator.genFailResult("查询提现单失败",null);
-		}
-		int userId = userEntity.getUserId();
-		String realName = userEntity.getRealName();
-		String cardNo = userEntity.getCardNo();
+	public BaseResult<Object> getCash(UserWithdraw userWithDraw,Boolean approvePass){
+		String sn = userWithDraw.getWithdrawalSn();
+		int userId = userWithDraw.getUserId();
+		String realName = userWithDraw.getRealName();
+		String cardNo = userWithDraw.getCardNo();
 		UserIdRealParam params = new UserIdRealParam();
 		params.setUserId(userId);
 		//通过UserService查询到手机号码
@@ -444,10 +429,10 @@ public class CashService {
 		if(StringUtils.isEmpty(bankCode)) {
 			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_BIND_CARD_RETRY.getcode(),PayEnums.PAY_WITHDRAW_BIND_CARD_RETRY.getMsg());
 		}
-		if(param.isPass()) {
-			BigDecimal amt = userEntity.getAmount();
+		if(approvePass) {
+			BigDecimal amt = userWithDraw.getAmount();
 			log.info("=================后台管理审核通过====================");
-			log.info("进入到第三方提现流程，金额:" + amt.doubleValue() +" 用户名:" +userEntity.getUserId()  + " sn:" + sn + " realName:" + realName + " phone:" + phone + " amt:" + amt + " bankCode:" + bankCode);
+			log.info("进入到第三方提现流程，金额:" + amt.doubleValue() +" 用户名:" +userWithDraw.getUserId()  + " sn:" + sn + " realName:" + realName + " phone:" + phone + " amt:" + amt + " bankCode:" + bankCode);
 			log.info("=================后台管理审核通过====================");
 			RspSingleCashEntity rspSCashEntity = callThirdGetCash(sn,amt.doubleValue(),cardNo,realName,phone,bankCode);
 			//后台点击的都变为提现审核中
@@ -481,11 +466,8 @@ public class CashService {
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		response.setHeader("Content-type","text/html;charset=UTF-8");
-	    Map<String,String> signParameters = new HashMap<String,String>();//保存参与验签字段
 	    Map parameters = request.getParameterMap();//保存request请求参数的临时变量
-        String signValue = "";//保存签名值
         String dataValue = "";//保存业务数据加密值
-        JSONObject jsonData = null;
         //打印先锋支付返回值
         log.info("服务器端通知-接收到先锋支付返回报文：");
         Iterator paiter = parameters.keySet().iterator();
@@ -648,9 +630,7 @@ public class CashService {
 		if(userInfoExceptPass.getCode() != 0 || userInfoExceptPass.getData() == null) {
 			return ResultGenerator.genFailResult("该用户不存在 userID:" + userId);
 		}
-		UserDTO userDTO = userInfoExceptPass.getData();
 		//银行信息
-		String bankCode = "";
 		UserBankQueryParam userBQP = new UserBankQueryParam();
 		userBQP.setUserId(userId);
 		userBQP.setBankCardCode(cardNo);
@@ -658,8 +638,6 @@ public class CashService {
 		if(base.getCode() != 0 || base.getData() == null) {
 			return ResultGenerator.genFailResult("查询银行信息失败",null);
 		}
-		bankCode = base.getData().getAbbreviation();
-		//query订单状态
 		RspSingleQueryEntity rspEntity;
 		try {
 			rspEntity = xianfengUtil.queryCash(withDrawSn);

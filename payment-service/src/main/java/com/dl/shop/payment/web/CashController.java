@@ -1,17 +1,22 @@
 package com.dl.shop.payment.web;
 
+import io.swagger.annotations.ApiOperation;
+
 import java.io.IOException;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.dl.base.param.EmptyParam;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -21,13 +26,10 @@ import com.dl.shop.payment.model.UserWithdraw;
 import com.dl.shop.payment.param.CashGetParam;
 import com.dl.shop.payment.param.CashReqParam;
 import com.dl.shop.payment.param.WithdrawParam;
-import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
-import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleQueryEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.util.XianFengCashUtil;
 import com.dl.shop.payment.service.CashService;
 import com.dl.shop.payment.service.UserWithdrawLogService;
 import com.dl.shop.payment.service.UserWithdrawService;
-import io.swagger.annotations.ApiOperation;
 
 /**
  * 代支付
@@ -35,8 +37,8 @@ import io.swagger.annotations.ApiOperation;
  */
 @Controller
 @RequestMapping("/cash")
+@Slf4j
 public class CashController {
-	private final static Logger logger = LoggerFactory.getLogger(CashController.class);
 	@Resource
 	private IUserService userService;
 	@Resource
@@ -58,7 +60,7 @@ public class CashController {
 			cashService.withdrawNotify(request,response);
 		} catch (IOException e) {
 			e.printStackTrace();
-			logger.error(e.getMessage());
+			log.error(e.getMessage());
 		}
 	}
 	
@@ -73,47 +75,26 @@ public class CashController {
 	@PostMapping("/getcash")
 	@ResponseBody
 	public BaseResult<Object> getCash(@RequestBody CashGetParam param, HttpServletRequest request){
-		logger.info("[getCash]" + " sn:" + param.getWithdrawSn());
-		if(param.isPass()) {
-			//如果数据库提现单已经成功
-			String withDrawSn = param.getWithdrawSn();
-			BaseResult<UserWithdraw> baseResult = userWithdrawService.queryUserWithdraw(withDrawSn);
-			if(baseResult.getCode() != 0 || baseResult.getData() == null) {
-				return ResultGenerator.genFailResult("查询提现单失败",null);
-			}
-			//提现状态,2-失败,1-已完成，0-未完成
-			UserWithdraw userWithDraw = baseResult.getData();
-			logger.info("[getCash]" + " 提现单状态:" + userWithDraw.getStatus());
-			if("1".equals(userWithDraw.getStatus()) || "2".equals(userWithDraw.getStatus())) {
-				logger.info("[getCash]" + " 提现单状态已达终态");
-				return ResultGenerator.genSuccessResult("提现单已达终态");
-			}
-			//查询第三方是否提现成功
-			RspSingleCashEntity rspEntity = null;
-			try {
-				RspSingleQueryEntity sEntity = xianfengUtil.queryCash(withDrawSn);
-				rspEntity = CashService.convert2RspSingleCashEntity(sEntity);
-				logger.info("[getCash]" +" 提现单第三方查询结果:" + rspEntity);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			if(rspEntity != null) {
-				//查询第三方已提现成功
-				if(rspEntity.isSucc()) {
-					//更改订单成功状态,增加提现金日志
-					logger.info("[getCash]" +" 第三方提现成功，提现单状态修改为成功...");
-					return cashService.operationSucc(rspEntity,withDrawSn);
-				}
-			}
+//		FIXME  胡贺东 俩个管理员同时点击同一单的审核，存在并发问题，但是目前这种情况几乎不可能，因此暂时先不增加对并发的控制
+		log.info("[getCash]" + " sn:" + param.getWithdrawSn());
+		BaseResult<UserWithdraw> baseResult = userWithdrawService.queryUserWithdraw(param.getWithdrawSn());
+		if(baseResult.getCode() != 0 || baseResult.getData() == null) {
+			log.error("提现单号withdrawSn={}查不到对应的提现数据",param.getWithdrawSn());
+			return ResultGenerator.genFailResult("未找到对应的提现单号信息",null);
 		}
-		return cashService.getCash(param, request);
+		UserWithdraw userWithDraw = baseResult.getData();
+		if(!"0".equals(userWithDraw.getStatus())){
+			log.error("提现单号withdrawSn={}查不到对应的提现数据",param.getWithdrawSn());
+			return ResultGenerator.genFailResult("未找到对应的提现单号信息",null);
+		}
+		return cashService.getCash(userWithDraw,param.isPass());
 	}
 	
 	@ApiOperation(value="app提现调用", notes="")
 	@PostMapping("/querycash")
 	@ResponseBody
 	public BaseResult<Object> queryCash(@RequestBody CashReqParam param){
-		logger.info("[queryCash]" + " withDrawSn:" + param.getWithdrawSn());
+		log.info("[queryCash]" + " withDrawSn:" + param.getWithdrawSn());
 		return cashService.queryCash(param.getWithdrawSn());
 	}
 	
