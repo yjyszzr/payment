@@ -1,13 +1,17 @@
 package com.dl.shop.payment.service;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.annotation.Resource;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.dl.base.service.AbstractService;
 import com.dl.shop.payment.dao.UserWithdrawLogMapper;
 import com.dl.shop.payment.dao.WithdrawLogMapper;
 import com.dl.shop.payment.dto.UserWithdrawLogDTO;
+import com.dl.shop.payment.enums.CashEnums;
 import com.dl.shop.payment.model.UserWithdrawLog;
 
 @Service
@@ -28,7 +32,11 @@ public class UserWithdrawLogService extends AbstractService<UserWithdrawLog> {
 				UserWithdrawLog logEntity =logs.get(i);
 	    		UserWithdrawLogDTO entity = new UserWithdrawLogDTO();
 	    		entity.setLogTime(logEntity.getLogTime()+"");
+	    		Integer logCode = logEntity.getLogCode();
 	    		entity.setLogName(logEntity.getLogName());
+	    		if(CashEnums.CASH_FAILURE.getcode() == logCode){//提现失败特殊处理
+	    			entity.setLogName(CashEnums.CASH_FAILURE.getMsg());
+	    		}
 	    		entity.setLogCode(logEntity.getLogCode());
 	    		rList.add(entity);
 			}
