@@ -62,7 +62,6 @@ import com.dl.shop.payment.param.CashGetParam;
 import com.dl.shop.payment.param.UpdateUserWithdrawParam;
 import com.dl.shop.payment.param.UserWithdrawParam;
 import com.dl.shop.payment.param.WithdrawParam;
-import com.dl.shop.payment.pay.common.PayManager;
 import com.dl.shop.payment.pay.xianfeng.cash.config.Constants;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleQueryEntity;
@@ -268,9 +267,6 @@ public class CashService {
 			//先减少用户钱包余额
 			log.info("进入第三方提现流程...系统阈值:" + limit + " widthDrawSn:" + widthDrawSn);
 			RspSingleCashEntity rEntity = callThirdGetCash(widthDrawSn,totalAmount,cardNo,realName,mobile,bankCode);
-			if(rEntity != null && rEntity.isHandleing()) {
-				PayManager.getInstance().addReq2CashQueue(widthDrawSn);
-			}
 			long time3 = System.currentTimeMillis();
 			log.info("time3为："+time3);
 			log.info("提现所用时间为："+(time3-time1));
@@ -454,16 +450,11 @@ public class CashService {
 			log.info("进入到第三方提现流程，金额:" + amt.doubleValue() +" 用户名:" +userEntity.getUserId()  + " sn:" + sn + " realName:" + realName + " phone:" + phone + " amt:" + amt + " bankCode:" + bankCode);
 			log.info("=================后台管理审核通过====================");
 			RspSingleCashEntity rspSCashEntity = callThirdGetCash(sn,amt.doubleValue(),cardNo,realName,phone,bankCode);
-			if(rspSCashEntity.isHandleing()) {
-				PayManager.getInstance().addReq2CashQueue(sn);
-			}
-			
 			//后台点击的都变为提现审核中
 	    	UserWithdraw userWithdraw = new UserWithdraw();
 	    	userWithdraw.setStatus(ProjectConstant.STATUS_BANK_APPROVING);
 	    	userWithdraw.setWithdrawalSn(sn);
 			userWithdrawMapper.updateUserWithdrawBySelective(userWithdraw);
-			
 			return operation(rspSCashEntity,sn,userId,true,false,false);
 		}else {
 			log.info("后台管理审核拒绝，提现单状态为失败...");

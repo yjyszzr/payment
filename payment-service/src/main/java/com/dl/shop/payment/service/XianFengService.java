@@ -4,10 +4,15 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
 import javax.annotation.Resource;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
 import com.alibaba.druid.util.StringUtils;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -28,13 +33,11 @@ import com.dl.shop.payment.model.PayBankRecordModel;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.param.XianFengPayConfirmParam;
 import com.dl.shop.payment.param.XianFengPayParam;
-import com.dl.shop.payment.pay.common.PayManager;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.xianfeng.config.XianFengPayCfg;
 import com.dl.shop.payment.pay.xianfeng.entity.RspApplyBaseEntity;
 import com.dl.shop.payment.pay.xianfeng.entity.RspNotifyEntity;
 import com.dl.shop.payment.pay.xianfeng.util.XianFengPayUtil;
-import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
@@ -75,8 +78,6 @@ public class XianFengService {
 		}
 		if(rspEntity != null) {
 			if(rspEntity.isSucc()) {
-				//主动query接口
-				PayManager.getInstance().addReqQueue(orderSn, payOrderSn, payCode);
 				return ResultGenerator.genSuccessResult("支付申请成功");
 			}else if(rspEntity.isVerfyCodeWrong()){
 				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_VERIFYCODE_WRONG.getcode(),PayEnums.PAY_XIANFENG_VERIFYCODE_WRONG.getMsg());
