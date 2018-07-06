@@ -60,7 +60,7 @@ public class HttpUtil {
 	        } catch (IOException e) {
 	        	rspEntity.isSucc = false;
 	        	rspEntity.msg = e.getMessage();
-	            e.printStackTrace(System.out);
+	            logger.error("",e);
 	        }finally {
 	        	if(out != null) {
 	        		try {

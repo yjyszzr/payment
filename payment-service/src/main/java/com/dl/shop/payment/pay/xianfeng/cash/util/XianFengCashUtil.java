@@ -12,7 +12,6 @@ import com.dl.shop.payment.pay.xianfeng.cash.entity.ReqQueryCashEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.ReqRealCashEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.ReqSingleCashEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
-import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleQueryEntity;
 import com.ucf.sdk.util.AESCoder;
 
 @Component
@@ -49,8 +48,8 @@ public class XianFengCashUtil {
 		return rEntity;
 	}
 	
-	public RspSingleQueryEntity queryCash(String orderNo) throws Exception {
-		RspSingleQueryEntity rspEntity = null;//String orderNo,String secId,String version,String merID,String MER_RSAKEY
+	public RspSingleCashEntity queryCash(String orderNo) throws Exception {
+		RspSingleCashEntity rspEntity = null;//String orderNo,String secId,String version,String merID,String MER_RSAKEY
 		ReqQueryCashEntity reqEntity = reqQueryCashEntity.buildReqQueryEntity(orderNo,
 				xFConstants.getSEC_ID(),xFConstants.getVERSION(),xFConstants.getMER_ID(),xFConstants.getMER_RSAKEY());
 		String url = xFConstants.getUCF_GATEWAY_URL() + "?" + reqEntity.buildReqStr();
@@ -61,10 +60,10 @@ public class XianFengCashUtil {
 			String signVal = rspHttpEntity.msg;
 			//AESCoder.decrypt
 			String dataValue = AESCoder.decrypt(signVal, xFConstants.getMER_RSAKEY());
-			rspEntity = JSON.parseObject(dataValue,RspSingleQueryEntity.class);
+			rspEntity = JSON.parseObject(dataValue,RspSingleCashEntity.class);
 			logger.info("[queryCash]" + dataValue);
 		}else {
-			rspEntity = new RspSingleQueryEntity();
+			rspEntity = new RspSingleCashEntity();
 			rspEntity.resMessage = rspHttpEntity.msg;
 		}
 		return rspEntity;

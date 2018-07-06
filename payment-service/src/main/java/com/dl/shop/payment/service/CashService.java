@@ -61,7 +61,6 @@ import com.dl.shop.payment.param.UserWithdrawParam;
 import com.dl.shop.payment.param.WithdrawParam;
 import com.dl.shop.payment.pay.xianfeng.cash.config.Constants;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
-import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleQueryEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.util.XianFengCashUtil;
 import com.ucf.sdk.util.AESCoder;
 
@@ -619,31 +618,16 @@ public class CashService {
 		if(base.getCode() != 0 || base.getData() == null) {
 			return ResultGenerator.genFailResult("查询银行信息失败",null);
 		}
-		RspSingleQueryEntity rspEntity;
+		RspSingleCashEntity rspEntity;
 		try {
 			rspEntity = xianfengUtil.queryCash(withDrawSn);
 			if(rspEntity != null) {
-				return operation(convert2RspSingleCashEntity(rspEntity),withDrawSn, userId,Boolean.FALSE);
+				return operation(rspEntity,withDrawSn, userId,Boolean.FALSE);
 			}
 		} catch (Exception e) {
 			log.info("调取先锋支付查询报错",e);
 		}
 		return ResultGenerator.genFailResult("查询失败~",null);
-	}
-	
-	public static RspSingleCashEntity convert2RspSingleCashEntity(RspSingleQueryEntity sEntity) {
-		RspSingleCashEntity rspSingleCashEntity = new RspSingleCashEntity();
-		if(sEntity != null) {
-			rspSingleCashEntity.resCode = sEntity.resCode;
-			rspSingleCashEntity.resMessage = sEntity.resMessage;
-			rspSingleCashEntity.tradeNo = sEntity.tradeNo;
-			rspSingleCashEntity.status = sEntity.status;
-			rspSingleCashEntity.amount = sEntity.amount;
-			rspSingleCashEntity.transCur = sEntity.transCur;
-			rspSingleCashEntity.merchantId = sEntity.merchantId;
-			rspSingleCashEntity.merchantNo = sEntity.merchantNo;
-		}
-		return rspSingleCashEntity;
 	}
 	
 	/**
@@ -664,9 +648,9 @@ public class CashService {
 	private void queryWithdrawResult(UserWithdraw userWithdraw) throws Exception{
 		String withDrawSn = userWithdraw.getWithdrawalSn();
 		Integer userId = userWithdraw.getUserId();
-		RspSingleQueryEntity rspEntity = xianfengUtil.queryCash(withDrawSn);
+		RspSingleCashEntity rspEntity = xianfengUtil.queryCash(withDrawSn);
 		if(rspEntity != null) {
-			this.operation(convert2RspSingleCashEntity(rspEntity),withDrawSn, userId,Boolean.FALSE);
+			this.operation(rspEntity,withDrawSn, userId,Boolean.FALSE);
 		}
 	}
 	
