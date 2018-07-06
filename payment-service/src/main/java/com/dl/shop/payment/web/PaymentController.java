@@ -1,5 +1,7 @@
 package com.dl.shop.payment.web;
 
+import io.swagger.annotations.ApiOperation;
+
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -8,8 +10,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.util.TextUtils;
 import org.slf4j.Logger;
@@ -21,6 +25,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.alibaba.fastjson.JSON;
 import com.dl.base.param.EmptyParam;
 import com.dl.base.result.BaseResult;
@@ -76,7 +81,6 @@ import com.dl.shop.payment.param.RollbackOrderAmountParam;
 import com.dl.shop.payment.param.RollbackThirdOrderAmountParam;
 import com.dl.shop.payment.param.UserIdParam;
 import com.dl.shop.payment.param.WithdrawParam;
-import com.dl.shop.payment.pay.common.PayManager;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
@@ -92,7 +96,6 @@ import com.dl.shop.payment.service.PayMentService;
 import com.dl.shop.payment.service.UserRechargeService;
 import com.dl.shop.payment.service.UserWithdrawLogService;
 import com.dl.shop.payment.utils.WxpayUtil;
-import io.swagger.annotations.ApiOperation;
 
 @Controller
 @RequestMapping("/payment")
