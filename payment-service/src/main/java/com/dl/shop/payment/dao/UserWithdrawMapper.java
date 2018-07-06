@@ -24,6 +24,8 @@ public interface UserWithdrawMapper extends Mapper<UserWithdraw> {
 	
 	List<UserWithdraw> queryUserWithdrawByWithDrawSnAndUserId(UserWithdraw userWithdraw);
 	
+	List<UserWithdraw> queryUserWithdrawIng();
+	
 	int countUserWithdrawByUserId(@Param("userId") Integer userId);
 	
 }

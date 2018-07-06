@@ -18,8 +18,6 @@ import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.http.util.TextUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
@@ -32,7 +30,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.constant.CommonConstants;
 import com.dl.base.enums.SNBusinessCodeEnum;
-import com.dl.base.exception.ServiceException;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.base.util.DateUtil;
@@ -66,7 +63,6 @@ import com.dl.shop.payment.param.UpdateUserWithdrawParam;
 import com.dl.shop.payment.param.UserWithdrawParam;
 import com.dl.shop.payment.param.WithdrawParam;
 import com.dl.shop.payment.pay.common.PayManager;
-import com.dl.shop.payment.pay.common.PayManager.QueueCashItemEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.config.Constants;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleQueryEntity;
@@ -704,51 +700,24 @@ public class CashService {
 	 * 提现状态轮询
 	 */
     public void timerCheckCashReq() {
-//		logger.info("[timerCheckCashReq]" +" call...");
-		List<QueueCashItemEntity> mVector = PayManager.getInstance().getCashList();
-		if(mVector.size() > 0) {
-			for(int i = 0;i < mVector.size();i++) {
-				QueueCashItemEntity itemEntity = mVector.get(i);
-				if(itemEntity != null) {
-					if(itemEntity.cnt >= QueueCashItemEntity.MAX_CNT) {
-						mVector.remove(itemEntity);
-					}else {
-						itemEntity.cnt++;
-						boolean isSucc;
-						try {
-							isSucc = task(itemEntity);
-							if(isSucc) {
-								itemEntity.cnt = QueueCashItemEntity.MAX_CNT;
-							}
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-				}
+    	List<UserWithdraw> userWithdrawList = userWithdrawMapper.queryUserWithdrawIng();
+    	for(UserWithdraw userWithdraw:userWithdrawList){
+    		try {
+				queryWithdrawResult(userWithdraw);
+			} catch (Exception e) {
+				log.error("提现查询失败withdrawSn={}",userWithdraw.getWithdrawalSn(),e);
 			}
-		}
+    	}
 	}
 	
 	
-	private boolean task(QueueCashItemEntity itemEntity) throws Exception {
-		boolean isSucc = false;
-		String withDrawSn = itemEntity.withDrawSn;
-		BaseResult<UserWithdraw> baseResult = userWithdrawService.queryUserWithdraw(withDrawSn);
-		if(baseResult.getCode() == 0 && baseResult.getData() != null) {
-			UserWithdraw userWithDraw = baseResult.getData();
-			int userId = userWithDraw.getUserId();
-			if(userWithDraw != null 
-			  &&!ProjectConstant.STATUS_FAILURE.equals(userWithDraw.getStatus())
-			  &&!ProjectConstant.STATUS_FAIL_REFUNDING.equals(userWithDraw.getStatus())
-			  &&!ProjectConstant.STATUS_SUCC.equals(userWithDraw.getStatus())){
-				//query订单状态
-				RspSingleQueryEntity rspEntity = xianfengUtil.queryCash(withDrawSn);
-				if(rspEntity != null && rspEntity.isSucc()) {
-					this.operation(convert2RspSingleCashEntity(rspEntity),withDrawSn, userId,false,true,true);
-				}
-			}
+	private void queryWithdrawResult(UserWithdraw userWithdraw) throws Exception{
+		String withDrawSn = userWithdraw.getWithdrawalSn();
+		Integer userId = userWithdraw.getUserId();
+		RspSingleQueryEntity rspEntity = xianfengUtil.queryCash(withDrawSn);
+		if(rspEntity != null && rspEntity.isSucc()) {
+			this.operation(convert2RspSingleCashEntity(rspEntity),withDrawSn, userId,false,true,true);
 		}
-		return isSucc;
 	}
 	
 }
