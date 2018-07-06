@@ -77,15 +77,16 @@ public class CashController {
 	@ResponseBody
 	public BaseResult<Object> getCash(@RequestBody CashGetParam param, HttpServletRequest request){
 //		FIXME  胡贺东 俩个管理员同时点击同一单的审核，存在并发问题，但是目前这种情况几乎不可能，因此暂时先不增加对并发的控制
-		log.info("[getCash]" + " sn:" + param.getWithdrawSn());
+		log.info("[getCash]" + " sn:{},approve={}",param.getWithdrawSn(),param.isPass());
 		BaseResult<UserWithdraw> baseResult = userWithdrawService.queryUserWithdraw(param.getWithdrawSn());
 		if(baseResult.getCode() != 0 || baseResult.getData() == null) {
 			log.error("提现单号withdrawSn={}查不到对应的提现数据",param.getWithdrawSn());
 			return ResultGenerator.genFailResult("未找到对应的提现单号信息",null);
 		}
 		UserWithdraw userWithDraw = baseResult.getData();
+		log.info("后台审核状态={},withdrawsn={},status={}",userWithDraw.getWithdrawalSn(),userWithDraw.getStatus());
 		if(!"0".equals(userWithDraw.getStatus())){
-			log.error("提现单号withdrawSn={}查不到对应的提现数据",param.getWithdrawSn());
+			log.error("提现单号withdrawSn={}查到的对应的提现状态={}",param.getWithdrawSn(),userWithDraw.getStatus());
 			return ResultGenerator.genFailResult("未找到对应的提现单号信息",null);
 		}
 		return cashService.getCash(userWithDraw,param.isPass());
