@@ -1,5 +1,8 @@
 package com.dl.shop.payment.pay.xianfeng.cash.entity;
 
+import java.util.Map;
+
+import org.apache.commons.collections.map.HashedMap;
 import org.springframework.util.StringUtils;
 
 public class RspSingleCashEntity {
@@ -16,15 +19,29 @@ public class RspSingleCashEntity {
 	public String tradeTime;
 	public String sign;
 	public String memo;
-	
 //	public boolean isSucc() {
 //		return "00000".equals(resCode);
 //	}
+	private static Map<String,String> notErrorRetCode = null; 
+	static{
+		notErrorRetCode = new HashedMap(); 
+		notErrorRetCode.put("00000", "");
+		notErrorRetCode.put("00001", "");
+		notErrorRetCode.put("00002", "");
+		notErrorRetCode.put("10005", "");
+		notErrorRetCode.put("00000", "");
+	}
+	
 	public boolean isTradeSucc() {
 		return !StringUtils.isEmpty(status)&&"S".equalsIgnoreCase(status);
 	}
 	public boolean isTradeFail(Boolean isApply) {
-		return !StringUtils.isEmpty(status)&&"F".equalsIgnoreCase(status);
+		if(!StringUtils.isEmpty(status)&&"F".equalsIgnoreCase(status)){
+			return Boolean.TRUE;
+		}
+//		10009 交易记录不存在
+		Boolean notApplyAndSomeError = !isApply&&StringUtils.isEmpty(status)&&(!notErrorRetCode.containsKey(resCode));
+		return notApplyAndSomeError;
 	}
 	public boolean isTradeDoing() {
 		return StringUtils.isEmpty(status)||"I".equalsIgnoreCase(status);
