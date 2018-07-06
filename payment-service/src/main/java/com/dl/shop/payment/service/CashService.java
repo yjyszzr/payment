@@ -56,7 +56,6 @@ import com.dl.shop.payment.enums.CashEnums;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.UserWithdraw;
 import com.dl.shop.payment.model.UserWithdrawLog;
-import com.dl.shop.payment.param.CashGetParam;
 import com.dl.shop.payment.param.UpdateUserWithdrawParam;
 import com.dl.shop.payment.param.UserWithdrawParam;
 import com.dl.shop.payment.param.WithdrawParam;
@@ -325,7 +324,14 @@ public class CashService {
 		userWithdrawLogService.save(userWithdrawLog);
 		return ResultGenerator.genSuccessResult("提现成功");
 	}
-	
+	/**
+	 * 提现第三方结果解析处理
+	 * @param rEntity
+	 * @param widthDrawSn
+	 * @param userId
+	 * @param isApply 是否申请响应信息 true 申请接口返回 false 是主动查询或者异步通知接口响应
+	 * @return
+	 */
 	public BaseResult<Object> operation(RspSingleCashEntity rEntity,String widthDrawSn,Integer userId,Boolean isApply) {
 		if(rEntity.isTradeSucc()) {
 			log.info("提现单号:"+widthDrawSn+"更新提现单为成功状态");
@@ -660,7 +666,7 @@ public class CashService {
 		Integer userId = userWithdraw.getUserId();
 		RspSingleQueryEntity rspEntity = xianfengUtil.queryCash(withDrawSn);
 		if(rspEntity != null) {
-			this.operation(convert2RspSingleCashEntity(rspEntity),withDrawSn, userId,false,true,true);
+			this.operation(convert2RspSingleCashEntity(rspEntity),withDrawSn, userId,Boolean.FALSE);
 		}
 	}
 	
