@@ -54,6 +54,7 @@ public class XianFengCashUtil {
 		ReqQueryCashEntity reqEntity = reqQueryCashEntity.buildReqQueryEntity(orderNo,
 				xFConstants.getSEC_ID(),xFConstants.getVERSION(),xFConstants.getMER_ID(),xFConstants.getMER_RSAKEY());
 		String url = xFConstants.getUCF_GATEWAY_URL() + "?" + reqEntity.buildReqStr();
+		logger.info("queryCash orderNo={},url={}",orderNo,url);
 		RspHttpEntity rspHttpEntity = HttpUtil.sendMsg(null,url,false);
 		logger.info("[queryCash]" + rspHttpEntity.toString());
 		if(rspHttpEntity.isSucc){
