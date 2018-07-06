@@ -102,7 +102,17 @@ public class CashController {
 	@PostMapping("/timerCheckCashReq")
 	@ResponseBody
 	public BaseResult<String> timerCheckCashReq(@RequestBody EmptyParam emptyParam){
+		Long now = System.currentTimeMillis();
+		log.info("timerCheckCashReq start={}",now);
 		cashService.timerCheckCashReq();
+//		TODO 胡贺东测试定时任务会不会多次调用在第一次没有结束的时候再次调用 如果会，可能会有并发问题
+		try {
+			log.info("{}进入休眠",now);
+			Thread.sleep(600000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		log.info("timerCheckCashReq end={}",now);
 		return ResultGenerator.genSuccessResult("success");
 	}
 	
