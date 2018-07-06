@@ -683,55 +683,6 @@ public class PayMentService extends AbstractService<PayMent> {
 		}
 		return succ;
 	}
-	
-//	TODO 胡贺东 20180706 删除 暂时看着没用，删除QueueItemEntity 此处报错，但是没有被调用，因此直接注释
-//	//第三方返回成功，扣除钱包余额
-//	private BaseResult<String> optionMoney(QueueItemEntity entity) {
-//		String payCode = entity.payCode;
-//		String orderSn = entity.orderSn;
-//		String payOrderSn = entity.payOrderSn;
-//		OrderSnParam p = new OrderSnParam();
-//		p.setOrderSn(orderSn);
-//		BaseResult<OrderDTO> baseResult = orderService.getOrderInfoByOrderSn(p);
-//		OrderDTO orderDTO = baseResult.getData();
-//		if(orderDTO.getThirdPartyPaid().doubleValue() > 0) {
-//			//用户余额扣除
-//			SurplusPayParam surplusPayParam = new SurplusPayParam();
-//			surplusPayParam.setOrderSn(orderSn);
-//			surplusPayParam.setSurplus(orderDTO.getSurplus());
-//			surplusPayParam.setBonusMoney(orderDTO.getBonus());
-//			surplusPayParam.setPayType(1);
-//			surplusPayParam.setMoneyPaid(orderDTO.getSurplus());
-//			surplusPayParam.setThirdPartName(orderDTO.getPayName());
-//			surplusPayParam.setThirdPartPaid(orderDTO.getThirdPartyPaid());
-//			BaseResult<SurplusPaymentCallbackDTO> changeUserAccountByPay = userAccountService.changeUserAccountByPay(surplusPayParam);
-//			if(changeUserAccountByPay.getCode() != 0) {
-//				logger.info(orderSn + "用户余额扣减失败！");
-//				return ResultGenerator.genFailResult("支付失败！");
-//			}
-//			BigDecimal surplus = changeUserAccountByPay.getData().getSurplus();
-//			//更新余额支付信息到订单
-//			BigDecimal userSurplus = changeUserAccountByPay.getData().getUserSurplus();
-//			BigDecimal userSurplusLimit = changeUserAccountByPay.getData().getUserSurplusLimit();
-//			UpdateOrderInfoParam updateOrderInfoParam = new UpdateOrderInfoParam();
-//			updateOrderInfoParam.setOrderSn(orderSn);
-//			updateOrderInfoParam.setUserSurplus(userSurplus);
-//			updateOrderInfoParam.setUserSurplusLimit(userSurplusLimit);
-//			BaseResult<String> updateOrderInfo = orderService.updateOrderInfo(updateOrderInfoParam);
-//			if(updateOrderInfo.getCode() != 0) {
-//				logger.info(orderSn + "订单回写用户余额扣减详情失败！");
-//				BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
-//				logger.info(orderSn + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在回滚用户余额结束！ 订单回调返回结果：status=" + rollbackUserAccountChangeByPay.getCode()+" , message="+rollbackUserAccountChangeByPay.getMsg());
-//				if(rollbackUserAccountChangeByPay.getCode() != 0) {
-//					logger.info(orderSn + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在回滚用户余额时出错！");
-//				}
-//				return ResultGenerator.genFailResult("支付失败！");
-//			}
-//		}
-//		return ResultGenerator.genSuccessResult();
-//	}
-//	
-	
 	public List<PayBankRecordDTO> listUserBanks(int userId) {
 		List<PayBankRecordDTO> rList = new ArrayList<>();
 		PayBankRecordModel p = new PayBankRecordModel();
