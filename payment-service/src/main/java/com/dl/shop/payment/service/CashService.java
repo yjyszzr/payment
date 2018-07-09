@@ -377,38 +377,38 @@ public class CashService {
 	
 	public BaseResult<Object> getCash(UserWithdraw userWithDraw,Boolean approvePass){
 		String sn = userWithDraw.getWithdrawalSn();
-		int userId = userWithDraw.getUserId();
-		String realName = userWithDraw.getRealName();
-		String cardNo = userWithDraw.getCardNo();
-		UserIdRealParam params = new UserIdRealParam();
-		params.setUserId(userId);
-		//通过UserService查询到手机号码
-		BaseResult<UserDTO> bR = userService.queryUserInfoReal(params);
-		UserDTO userDTO = null;
-		String phone = "";
-		if(bR.getCode() == 0 && bR.getData() != null) {
-			userDTO = bR.getData();
-			phone = userDTO.getMobile();
-		}
-		if(StringUtils.isEmpty(phone)) {
-			return  ResultGenerator.genFailResult("手机号码查询失败",null);
-		}
-		//银行信息
-		String bankCode = "";
-		UserBankQueryParam userBQP = new UserBankQueryParam();
-		userBQP.setUserId(userId);
-		userBQP.setBankCardCode(cardNo);
-		BaseResult<UserBankDTO> base = userBankService.queryUserBankByCondition(userBQP);
-		if(base.getCode() != 0 || base.getData() == null) {
-			return ResultGenerator.genFailResult("查询银行信息失败",null);
-		}
-		UserBankDTO userBankDTO = base.getData();
-		bankCode = userBankDTO.getAbbreviation();
-		log.info("[queryUserBankByCondition]" +" bankAcc:" + userBankDTO.getCardNo() +" bankName:" + userBankDTO.getBankName() +" bankCode:" + userBankDTO.getAbbreviation());
-		if(StringUtils.isEmpty(bankCode)) {
-			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_BIND_CARD_RETRY.getcode(),PayEnums.PAY_WITHDRAW_BIND_CARD_RETRY.getMsg());
-		}
 		if(approvePass) {
+			int userId = userWithDraw.getUserId();
+			String realName = userWithDraw.getRealName();
+			String cardNo = userWithDraw.getCardNo();
+			UserIdRealParam params = new UserIdRealParam();
+			params.setUserId(userId);
+			//通过UserService查询到手机号码
+			BaseResult<UserDTO> bR = userService.queryUserInfoReal(params);
+			UserDTO userDTO = null;
+			String phone = "";
+			if(bR.getCode() == 0 && bR.getData() != null) {
+				userDTO = bR.getData();
+				phone = userDTO.getMobile();
+			}
+			if(StringUtils.isEmpty(phone)) {
+				return  ResultGenerator.genFailResult("手机号码查询失败",null);
+			}
+			//银行信息
+			String bankCode = "";
+			UserBankQueryParam userBQP = new UserBankQueryParam();
+			userBQP.setUserId(userId);
+			userBQP.setBankCardCode(cardNo);
+			BaseResult<UserBankDTO> base = userBankService.queryUserBankByCondition(userBQP);
+			if(base.getCode() != 0 || base.getData() == null) {
+				return ResultGenerator.genFailResult("查询银行信息失败",null);
+			}
+			UserBankDTO userBankDTO = base.getData();
+			bankCode = userBankDTO.getAbbreviation();
+			log.info("[queryUserBankByCondition]" +" bankAcc:" + userBankDTO.getCardNo() +" bankName:" + userBankDTO.getBankName() +" bankCode:" + userBankDTO.getAbbreviation());
+			if(StringUtils.isEmpty(bankCode)) {
+				return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_BIND_CARD_RETRY.getcode(),PayEnums.PAY_WITHDRAW_BIND_CARD_RETRY.getMsg());
+			}
 			BigDecimal amt = userWithDraw.getAmount();
 			log.info("=================后台管理审核通过====================");
 			log.info("进入到第三方提现流程，金额:" + amt.doubleValue() +" 用户名:" +userWithDraw.getUserId()  + " sn:" + sn + " realName:" + realName + " phone:" + phone + " amt:" + amt + " bankCode:" + bankCode);
