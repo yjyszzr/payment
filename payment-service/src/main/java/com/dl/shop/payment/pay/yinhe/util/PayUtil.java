@@ -45,12 +45,12 @@ public class PayUtil {
 			String val = (String) entry.getValue();
 			builder.append(key + "=" + val + "&");
 		}
-		System.out.println("原串:" +builder.toString());
+		logger.info("原串:" +builder.toString());
 		//remove the last item &
 		if(builder.length() > 0) {
 			builder.delete(builder.length()-1,builder.length());
 		}
-		System.out.println("结果:" + builder.toString());
+		logger.info("结果:" + builder.toString());
 		return builder.toString();
 	}
 	
@@ -76,6 +76,7 @@ public class PayUtil {
 //		if("true".equals(cfgPay.getDEBUG())) {
 //			amount = "2";
 //		}
+		logger.info(" step4 PayOrderSn={},payAmount={}",orderNo,amount);
 		RspYinHeEntity rEntity = null;
 		ReqQRPayEntity reqQREntity = null;
 		ReqPayEntity reqH5Entity = null;
@@ -88,6 +89,7 @@ public class PayUtil {
 			signEntity = reqH5Entity.buildSignEntity();
 		}
 		String str = JSON.toJSONString(signEntity);
+		logger.info(" step5 PayOrderSn={},str={}",orderNo,str);
 		JSONObject jsonObj = JSON.parseObject(str,JSONObject.class);
 		Set<java.util.Map.Entry<String, Object>> mSet = jsonObj.entrySet();
 		Iterator<java.util.Map.Entry<String, Object>> iterator = mSet.iterator();
@@ -107,6 +109,7 @@ public class PayUtil {
 		}else {
 			secret = cfgPay.getSECRET_PUBLIC();
 		}
+		logger.info(" step6 PayOrderSn={},amt={}",orderNo,reqQREntity.getAmt());
 		//生成signCode
 		String signCode = getSignCode(paraStr,secret);
 		signCode = signCode.toUpperCase();
