@@ -416,29 +416,31 @@ public class CashService {
 			RspSingleCashEntity rspSCashEntity = callThirdGetCash(sn,amt.doubleValue(),cardNo,realName,phone,bankCode);
 			//后台点击的都变为提现审核中
 	    	UserWithdraw userWithdraw = new UserWithdraw();
-	    	userWithdraw.setStatus(ProjectConstant.STATUS_BANK_APPROVING);
 	    	userWithdraw.setWithdrawalSn(sn);
-			userWithdrawMapper.updateUserWithdrawBySelective(userWithdraw);
-			return operation(rspSCashEntity,sn,userId,Boolean.TRUE);
+			int row = userWithdrawMapper.updateUserWithdrawStatus0To3(userWithdraw);
+			if(row==1){
+				return operation(rspSCashEntity,sn,userId,Boolean.TRUE);
+			}
 		}else {
 			log.info("后台管理审核拒绝，提现单状态为失败...");
 //			更新提现单失败状态
-			UpdateUserWithdrawParam updateParams = new UpdateUserWithdrawParam();
-			updateParams.setWithdrawalSn(sn);
-			updateParams.setStatus(ProjectConstant.STATUS_FAIL_REFUNDING);
-			updateParams.setPayTime(DateUtil.getCurrentTimeLong());
-			updateParams.setPaymentName("审核被拒绝，提现失败~");
-			userWithdrawService.updateWithdraw(updateParams);
-			//增加提现流水为失敗
-			log.info("后台管理审核拒绝，增加提现单log日志...");
-			UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
-			userWithdrawLog.setLogCode(CashEnums.CASH_FAILURE.getcode());
-			userWithdrawLog.setLogName(CashEnums.CASH_FAILURE.getMsg());
-			userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
-			userWithdrawLog.setWithdrawSn(sn);
-			userWithdrawLogService.save(userWithdrawLog);
-			return ResultGenerator.genFailResult("后台管理审核拒绝成功...");
+			UserWithdraw userWithdraw = new UserWithdraw();
+			userWithdraw.setWithdrawalSn(sn);
+			userWithdraw.setPayTime(DateUtil.getCurrentTimeLong());
+			int row=userWithdrawMapper.updateUserWithdrawStatus0To4(userWithdraw);
+			if(row==1){				
+				//增加提现流水为失敗
+				log.info("后台管理审核拒绝，增加提现单log日志...");
+				UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
+				userWithdrawLog.setLogCode(CashEnums.CASH_FAILURE.getcode());
+				userWithdrawLog.setLogName(CashEnums.CASH_FAILURE.getMsg());
+				userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
+				userWithdrawLog.setWithdrawSn(sn);
+				userWithdrawLogService.save(userWithdrawLog);
+				return ResultGenerator.genFailResult("后台管理审核拒绝成功...");
+			}
 		}
+		return ResultGenerator.genFailResult("已审核");
 	}
 	
 	public void withdrawNotify(HttpServletRequest request, HttpServletResponse response) throws IOException{

@@ -45,6 +45,12 @@
   <update id="updateUserWithdrawStatus0To2" parameterType="com.dl.shop.payment.model.UserWithdraw">
    	 UPDATE dl_user_withdraw set status = 2,pay_time=#{payTime} WHERE withdrawal_sn = #{withdrawalSn} and status=0 
   </update>
+  <update id="updateUserWithdrawStatus0To3" parameterType="com.dl.shop.payment.model.UserWithdraw">
+   	 UPDATE dl_user_withdraw set status = 3  WHERE withdrawal_sn = #{withdrawalSn} and status=0 
+  </update>
+  <update id="updateUserWithdrawStatus0To4" parameterType="com.dl.shop.payment.model.UserWithdraw">
+   	 UPDATE dl_user_withdraw set status = 4,pay_time=#{payTime} WHERE withdrawal_sn = #{withdrawalSn} and status=0 
+  </update>
   
   
   
