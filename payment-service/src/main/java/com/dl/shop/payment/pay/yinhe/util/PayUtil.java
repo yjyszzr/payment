@@ -109,7 +109,7 @@ public class PayUtil {
 		}else {
 			secret = cfgPay.getSECRET_PUBLIC();
 		}
-		logger.info(" step6 PayOrderSn={},amt={}",orderNo,reqQREntity.getAmt());
+		logger.info(" step6 PayOrderSn={},amt={}",orderNo,reqQREntity==null?reqH5Entity.getAmt():reqQREntity.getAmt());
 		//生成signCode
 		String signCode = getSignCode(paraStr,secret);
 		signCode = signCode.toUpperCase();
