@@ -143,13 +143,12 @@ public class CashService {
 			log.info(loggerId+"最低提现金额大于3元~");
 			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_LOW_LIMIT.getcode(),PayEnums.PAY_RONGBAO_LOW_LIMIT.getMsg()); 
 		}
-//		TODO 胡贺东 暂时注释 为了测试方便
-//		//限制1天最多能提现1次
-//		int countUserWithdraw = userWithdrawService.countUserWithdraw(userId);
-//		log.info(userId+"一天提现次数:"+countUserWithdraw);
-//		if(countUserWithdraw >= 1) {
-//			return ResultGenerator.genResult(PayEnums.PAY_MAX_COUNT_WITHDRAW.getcode(),PayEnums.PAY_MAX_COUNT_WITHDRAW.getMsg()); 
-//		}
+		//限制1天最多能提现1次
+		int countUserWithdraw = userWithdrawService.countUserWithdraw(userId);
+		log.info(userId+"一天提现次数:"+countUserWithdraw);
+		if(countUserWithdraw >= 1) {
+			return ResultGenerator.genResult(PayEnums.PAY_MAX_COUNT_WITHDRAW.getcode(),PayEnums.PAY_MAX_COUNT_WITHDRAW.getMsg()); 
+		}
 		UserBankDTO userBankDTO = queryUserBank.getData();
 		String bankCode = userBankDTO.getAbbreviation();
 		String realName = userBankDTO.getRealName();
