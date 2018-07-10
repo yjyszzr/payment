@@ -72,9 +72,10 @@ public class PayUtil {
 	 * @return
 	 */
 	public final RspYinHeEntity getWechatPayUrl(boolean isInnerWechat,String ip,String amount,String orderNo){
-		if("true".equals(cfgPay.getDEBUG())) {
-			amount = "2";
-		}
+//		TODO 胡贺东暂时注释
+//		if("true".equals(cfgPay.getDEBUG())) {
+//			amount = "2";
+//		}
 		RspYinHeEntity rEntity = null;
 		ReqQRPayEntity reqQREntity = null;
 		ReqPayEntity reqH5Entity = null;

@@ -76,7 +76,6 @@ public class CashController {
 	@PostMapping("/getcash")
 	@ResponseBody
 	public BaseResult<Object> getCash(@RequestBody CashGetParam param, HttpServletRequest request){
-//		FIXME  胡贺东 俩个管理员同时点击同一单的审核，存在并发问题，但是目前这种情况几乎不可能，因此暂时先不增加对并发的控制
 		log.info("[getCash]" + " sn:{},approve={}",param.getWithdrawSn(),param.isPass());
 		BaseResult<UserWithdraw> baseResult = userWithdrawService.queryUserWithdraw(param.getWithdrawSn());
 		if(baseResult.getCode() != 0 || baseResult.getData() == null) {
