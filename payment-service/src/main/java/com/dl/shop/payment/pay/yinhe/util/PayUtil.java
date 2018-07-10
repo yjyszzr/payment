@@ -72,11 +72,9 @@ public class PayUtil {
 	 * @return
 	 */
 	public final RspYinHeEntity getWechatPayUrl(boolean isInnerWechat,String ip,String amount,String orderNo){
-//		TODO 胡贺东 测试临时关闭挡板
-//		if("true".equals(cfgPay.getDEBUG())) {
-//			amount = "2";
-//		}
-		logger.info(" step4 PayOrderSn={},payAmount={}",orderNo,amount);
+		if("true".equals(cfgPay.getDEBUG())) {
+			amount = "2";
+		}
 		RspYinHeEntity rEntity = null;
 		ReqQRPayEntity reqQREntity = null;
 		ReqPayEntity reqH5Entity = null;
@@ -89,7 +87,6 @@ public class PayUtil {
 			signEntity = reqH5Entity.buildSignEntity();
 		}
 		String str = JSON.toJSONString(signEntity);
-		logger.info(" step5 PayOrderSn={},str={}",orderNo,str);
 		JSONObject jsonObj = JSON.parseObject(str,JSONObject.class);
 		Set<java.util.Map.Entry<String, Object>> mSet = jsonObj.entrySet();
 		Iterator<java.util.Map.Entry<String, Object>> iterator = mSet.iterator();
@@ -109,7 +106,6 @@ public class PayUtil {
 		}else {
 			secret = cfgPay.getSECRET_PUBLIC();
 		}
-		logger.info(" step6 PayOrderSn={},amt={}",orderNo,reqQREntity==null?reqH5Entity.getAmt():reqQREntity.getAmt());
 		//生成signCode
 		String signCode = getSignCode(paraStr,secret);
 		signCode = signCode.toUpperCase();

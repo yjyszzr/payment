@@ -485,7 +485,6 @@ public class PaymentController extends AbstractBaseController{
 		logger.info(loggerId + " result: code="+payBaseResult.getCode()+" , msg="+payBaseResult.getMsg());
 		return payBaseResult;
 	}
-	
 	/***
 	 * 根据savePayLog生成微信支付链接
 	 * @param savePayLog
@@ -497,11 +496,8 @@ public class PaymentController extends AbstractBaseController{
 	private BaseResult<?> getWechatPayUrl(boolean isInnerWeChat,String isH5,int payType,PayLog savePayLog,String payIp,String orderId) {
 		BaseResult<?> payBaseResult = null;
 		BigDecimal amtDouble = savePayLog.getOrderAmount();
-		logger.info(" step1 PayOrderSn={},payAmount={}",savePayLog.getPayOrderSn(),amtDouble);
 		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100));
-		logger.info(" step2 PayOrderSn={},payAmount={}",savePayLog.getPayOrderSn(),bigD);
 		int amtFen = bigD.intValue();
-		logger.info(" step3 PayOrderSn={},payAmount={}",savePayLog.getPayOrderSn(),amtFen);
 		String payOrderSn = savePayLog.getPayOrderSn();
 		String payLogId = savePayLog.getLogId()+"";
 		RspYinHeEntity rYinHeEntity = null;
