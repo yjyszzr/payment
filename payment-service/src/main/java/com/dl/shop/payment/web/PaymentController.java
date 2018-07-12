@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiOperation;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.time.Instant;
 import java.util.Date;
@@ -496,8 +497,7 @@ public class PaymentController extends AbstractBaseController{
 	private BaseResult<?> getWechatPayUrl(boolean isInnerWeChat,String isH5,int payType,PayLog savePayLog,String payIp,String orderId) {
 		BaseResult<?> payBaseResult = null;
 		BigDecimal amtDouble = savePayLog.getOrderAmount();
-		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100));
-		int amtFen = bigD.intValue();
+		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100)).setScale(0,RoundingMode.HALF_EVEN);
 		String payOrderSn = savePayLog.getPayOrderSn();
 		String payLogId = savePayLog.getLogId()+"";
 		RspYinHeEntity rYinHeEntity = null;
@@ -512,9 +512,9 @@ public class PaymentController extends AbstractBaseController{
 //				// TODO Auto-generated catch block
 //				e.printStackTrace();
 //			}
-			rYinHeEntity = payUtil.getWechatPayUrl(true,payIp,amtFen+"",payOrderSn);
+			rYinHeEntity = payUtil.getWechatPayUrl(true,payIp,bigD.toString(),payOrderSn);
 		}else {
-			rYinHeEntity = payUtil.getWechatPayUrl(false,payIp,amtFen+"",payOrderSn);
+			rYinHeEntity = payUtil.getWechatPayUrl(false,payIp,bigD.toString(),payOrderSn);
 		}
 		if(rYinHeEntity != null) {
 			if(rYinHeEntity.isSucc() && !TextUtils.isEmpty(rYinHeEntity.qrCode)) {

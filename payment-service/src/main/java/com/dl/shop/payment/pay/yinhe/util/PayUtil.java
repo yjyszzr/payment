@@ -72,6 +72,7 @@ public class PayUtil {
 	 * @return
 	 */
 	public final RspYinHeEntity getWechatPayUrl(boolean isInnerWechat,String ip,String amount,String orderNo){
+		logger.info("调取微信支付订单orderSn={},amount={}",orderNo,amount);
 //		TODO 胡贺东暂时注释
 //		if("true".equals(cfgPay.getDEBUG())) {
 //			amount = "2";
