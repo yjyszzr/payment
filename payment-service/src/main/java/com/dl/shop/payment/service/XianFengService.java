@@ -1,6 +1,7 @@
 package com.dl.shop.payment.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -101,8 +102,7 @@ public class XianFengService {
 		int userId = payLog.getUserId();
 		BigDecimal bigDecimal = payLog.getOrderAmount();
 		String payOrderSn = payLog.getPayOrderSn();
-		BigDecimal bigDec = bigDecimal.multiply(BigDecimal.valueOf(100));
-		String amt = bigDec.intValue()+"";
+		BigDecimal bigDec = bigDecimal.multiply(BigDecimal.valueOf(100)).setScale(0,RoundingMode.HALF_EVEN);
 		String certNo = param.getCertNo();
 		String accNo = param.getAccNo();
 		String mobileNo = param.getPhone();
@@ -145,15 +145,14 @@ public class XianFengService {
 		//请求第三方申请接口
 		//userId, amt, certNo, accNo, accName, mobileNo, bankId, pName, pInfo
 		logger.info("===================请求先锋支付==========================");
-		logger.info("[appPay]" +" userId:" + userId +" amt:" + amt +" certNo:" + certNo 
+		logger.info("[appPay]" +" userId:" + userId +" amt:" + bigDec.toString() +" certNo:" + certNo 
 				+" accName:" + accName +" mobileNo:" + mobileNo + " bankId:" + bankId +" pName:" 
 				+ pName +" pInfo:" + pInfo + " payOrderSn:" + payOrderSn + " cvn2:" + cvn2 + " validDate:" + validDate);
 		logger.info("===================请求先锋支付==========================");
 		try {
-			rspEntity = xFPayUtil.reqApply(payOrderSn,null,amt+"",certNo,accNo,accName,mobileNo,bankId,pName,pInfo,cvn2,validDate);
+			rspEntity = xFPayUtil.reqApply(payOrderSn,null,bigDec.toString(),certNo,accNo,accName,mobileNo,bankId,pName,pInfo,cvn2,validDate);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("appPay支付报错payOrderSn={}",payOrderSn,e);
 		}
 		if(rspEntity != null) {
 			logger.info("[appPay]" + " rsp:" + rspEntity);

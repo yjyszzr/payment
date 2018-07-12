@@ -76,7 +76,7 @@ public class XianFengPayUtil {
 		ReqApplyQueryEntity reqQueryEntity = ReqApplyQueryEntity.buildReqApplyQueryEntity(orderNo);
 		//生成data
 		String url = XianFengPayCfg.NET_GATE + "?" + reqQueryEntity.buildReqStr();
-		System.out.println("请求参数:" + url);
+		logger.info("支付查询orderNo={},请求参数={}",orderNo,url);
 		RspHttpEntity rspHttpEntity = HttpUtil.sendMsg(null,url,false);
 		RspApplyBaseEntity rEntity = null;
 		if(rspHttpEntity.isSucc) {
@@ -160,10 +160,10 @@ public class XianFengPayUtil {
 		RspApplyBaseEntity rspEntity = null;
 		ReqApplyDataEntity reqDataEntity = ReqApplyDataEntity.buildReqDataEntity(orderNo,userId, amt, certNo, accNo, accName, mobileNo, bankId, pName, pInfo,cvn2,validDate);
 		String jsonStr = JSON.toJSONString(reqDataEntity);
-//		System.out.println("jsonStr:" + jsonStr);
+		logger.info("jsonStr:" + jsonStr);
 		//data生成
 		String data = AESCoder.encrypt(jsonStr,XianFengPayCfg.RSA_KEY);
-//		System.out.println("data:" + data);
+		logger.info("data:" + data);
 		ReqSnEntity reqSnEntity = reqDataEntity.buildSnCashEntity(data);
 		String strInfo = JSON.toJSONString(reqSnEntity);
 		//sort key
@@ -178,7 +178,7 @@ public class XianFengPayUtil {
 		if(rspHttpEntity.isSucc) {
 			String strMsg = rspHttpEntity.msg;
 			String dataResult = AESCoder.decrypt(strMsg,XianFengPayCfg.RSA_KEY);
-			System.out.println("dataResult:" + dataResult);
+			logger.info("dataResult:" + dataResult);
 			rspEntity = JSON.parseObject(dataResult,RspApplyBaseEntity.class);
 		}else {
 			rspEntity = new RspApplyBaseEntity();
