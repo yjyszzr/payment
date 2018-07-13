@@ -66,9 +66,9 @@ public class YinHeUtil {
 		}
 		//获取sign code 参数
 		String paraStr = payUtil.getPayParams(treeMap);
-		System.out.println("sign code params:" + paraStr + " secret:" + cfgPay.getSECRET());
+		System.out.println("sign code params:" + paraStr + " secret:" + cfgPay.getSECRET_PUBLIC());
 		//生成signCode
-		String signCode = payUtil.getSignCode(paraStr,cfgPay.getSECRET());
+		String signCode = payUtil.getSignCode(paraStr,cfgPay.getSECRET_PUBLIC());
 		signCode = signCode.toUpperCase();
 		System.out.println("sign code:" + signCode);
 		//赋值signCode
@@ -114,7 +114,7 @@ public class YinHeUtil {
 		String paraStr = payUtil.getPayParams(treeMap);
 //		System.out.println("sign code params:" + paraStr + " secret:" +cfgPay.getSECRET());
 		//生成signCode
-		String signCode = payUtil.getSignCode(paraStr,cfgPay.getSECRET());
+		String signCode = payUtil.getSignCode(paraStr,cfgPay.getSECRET_PUBLIC());
 		signCode = signCode.toUpperCase();
 //		System.out.println("sign code:" + signCode);
 		//赋值signCode
