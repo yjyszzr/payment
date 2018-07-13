@@ -2,6 +2,7 @@ package com.dl.shop.payment.web;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -110,7 +111,7 @@ public class WxpayNotifyController {
 			try {
 				responseModel = XmlUtil.xmlToBean(requestStr, WxpayNotifyModel.class);
 			} catch (Exception e1) {
-				e1.printStackTrace();
+				logger.error("微信外部回调处理异常",e1);
 			}
 
 			String resultCode = null;
@@ -135,7 +136,7 @@ public class WxpayNotifyController {
 					try {
 						response.getWriter().write(xml);
 					} catch (IOException e) {
-						e.printStackTrace();
+						logger.error("payOrderSn={},银河微信回调 write return error",payOrderSn,e);
 					}
 					return;
 				}
@@ -147,13 +148,13 @@ public class WxpayNotifyController {
 					try {
 						response.getWriter().write(xml);
 					} catch (IOException e) {
-						e.printStackTrace();
+						logger.error("payOrderSn={},银河微信回调 write return error",payOrderSn,e);
 					}
 					return;
 				}
-				int orderAmount = payLog.getOrderAmount().multiply(BigDecimal.valueOf(100)).intValue();
+				BigDecimal orderAmount = payLog.getOrderAmount().multiply(BigDecimal.valueOf(100)).setScale(0,RoundingMode.HALF_EVEN);
 				logger.info("实际交易金额:" + amount +" 订单金额:" + orderAmount);
-				if (((amount == orderAmount) || "true".equals(cfgPay.getDEBUG())) && (appid.equals(cfgPay.getAPPID()))) {
+				if (((amount == Integer.parseInt(orderAmount.toString())) || "true".equals(cfgPay.getDEBUG())) && (appid.equals(cfgPay.getAPPID()))) {
 					logger.info(loggerId + " 订单金额或appid,mchId校验成功，前去回调订单服务！");
 					RspOrderQueryEntity rspOrderQueryEntity = new RspOrderQueryEntity();
 					rspOrderQueryEntity.setResult_code("0000");

@@ -48,11 +48,8 @@ public class ConfigerPay {
 	@Value("${yinhe.app_device}")
 	private String DEVICE_NO;
 	
-	@Value("${yinhe_app_screct}")
+	@Value("${yinhe.app_screct}")
 	private String SECRET_PUBLIC;
-	
-	@Value("${yinhe_app_screct}")
-	private String SECRET;
 	
 	@Value("${yinhe.app.app_id}")
 	private String APPID;
