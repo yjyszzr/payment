@@ -79,7 +79,7 @@ public class XianFengPayUtil {
 	}
 
 	public RspApplyBaseEntity queryPayByOrderNo(String orderNo) throws Exception {
-		ReqApplyQueryEntity reqQueryEntity = ReqApplyQueryEntity.buildReqApplyQueryEntity(orderNo);
+		ReqApplyQueryEntity reqQueryEntity = ReqApplyQueryEntity.buildReqApplyQueryEntity(orderNo,xFConstants);
 		//生成data
 		String url = xFConstants.getUCF_GATEWAY_URL() + "?" + reqQueryEntity.buildReqStr();
 		logger.info("支付查询orderNo={},请求参数={}",orderNo,url);
@@ -99,7 +99,7 @@ public class XianFengPayUtil {
 	
 	public RspApplyBaseEntity reqApplySms(String orderNo) throws Exception {
 		RspApplyBaseEntity rEntity = null;
-		ReqApplySmsEntity reqApplySmsEntity = ReqApplySmsEntity.buildApplySmsEntity(orderNo);
+		ReqApplySmsEntity reqApplySmsEntity = ReqApplySmsEntity.buildApplySmsEntity(orderNo,xFConstants);
 		//生成data
 		String url = xFConstants.getUCF_GATEWAY_URL()+ "?" + reqApplySmsEntity.buildReqStr();
 		logger.info("请求参数:" + url);
@@ -126,7 +126,7 @@ public class XianFengPayUtil {
 		String data = AESCoder.encrypt(jsonStr,xFConstants.getMER_RSAKEY());
 		logger.info("data:" + data);
 		//sn
-		ReqSnEntity reqSnEntity = reqCfgEntity.buildSnCashEntity(data);
+		ReqSnEntity reqSnEntity = reqCfgEntity.buildSnCashEntity(data,xFConstants);
 		String strInfo = JSON.toJSONString(reqSnEntity);
 		//sort key
 		JSONObject jsonObj = JSONObject.parseObject(strInfo,JSONObject.class);
@@ -141,7 +141,7 @@ public class XianFengPayUtil {
 		}
 		//生成signVal
 		String signValue = UcfForOnline.createSign(xFConstants.getMER_RSAKEY(),"sign", mMap, "RSA");
-		ReqApplyCfgEntity reqApplyCfgEntity = ReqApplyCfgEntity.buildReqApplyCfgEntity(reqSnEntity.reqSn,data,signValue);
+		ReqApplyCfgEntity reqApplyCfgEntity = ReqApplyCfgEntity.buildReqApplyCfgEntity(reqSnEntity.reqSn,data,signValue,xFConstants);
 		String url = xFConstants.getUCF_GATEWAY_URL() + "?" + reqApplyCfgEntity.buildReqStr();
 		logger.info("请求参数:" + url);
 		RspHttpEntity rspHttpEntity = HttpUtil.sendMsg(null,url,false);
@@ -164,19 +164,19 @@ public class XianFengPayUtil {
 			amt = "2";
 		}
 		RspApplyBaseEntity rspEntity = null;
-		ReqApplyDataEntity reqDataEntity = ReqApplyDataEntity.buildReqDataEntity(orderNo,userId, amt, certNo, accNo, accName, mobileNo, bankId, pName, pInfo,cvn2,validDate);
+		ReqApplyDataEntity reqDataEntity = ReqApplyDataEntity.buildReqDataEntity(orderNo,userId, amt, certNo, accNo, accName, mobileNo, bankId, pName, pInfo,cvn2,validDate,xFConstants);
 		String jsonStr = JSON.toJSONString(reqDataEntity);
 		logger.info("jsonStr:" + jsonStr);
 		//data生成
 		String data = AESCoder.encrypt(jsonStr,xFConstants.getMER_RSAKEY());
 		logger.info("data:" + data);
-		ReqSnEntity reqSnEntity = reqDataEntity.buildSnCashEntity(data);
+		ReqSnEntity reqSnEntity = reqDataEntity.buildSnCashEntity(data,xFConstants);
 		String strInfo = JSON.toJSONString(reqSnEntity);
 		//sort key
 		Map<String,String> mMap = JSON.parseObject(strInfo,HashMap.class);
 		//生成signVal
 		String signValue = UcfForOnline.createSign(xFConstants.getMER_RSAKEY(),"sign", mMap, "RSA");
-		ReqApplyEntity reqApplyEntity = ReqApplyEntity.buildReqApplyEntity(reqSnEntity.reqSn,data,signValue);
+		ReqApplyEntity reqApplyEntity = ReqApplyEntity.buildReqApplyEntity(reqSnEntity.reqSn,data,signValue,xFConstants);
 		//生成请求链接
 		String url = xFConstants.getUCF_GATEWAY_URL() + "?" + reqApplyEntity.buildReqStr();
 		logger.info("请求参数:" + url);

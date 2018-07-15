@@ -2,12 +2,11 @@ package com.dl.shop.payment.pay.xianfeng.entity;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import com.dl.shop.payment.pay.xianfeng.cash.config.Constants;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.ReqSnEntity;
-import com.dl.shop.payment.pay.xianfeng.config.XianFengPayCfg;
 import com.ucf.sdk.CoderException;
 import com.ucf.sdk.util.UnRepeatCodeGenerator;
-
-import lombok.val;
 
 public class ReqApplyDataEntity {
 	public String merchantNo;
@@ -27,13 +26,13 @@ public class ReqApplyDataEntity {
 	public String validDate;	//信用卡有效期
 	
 	public static final ReqApplyDataEntity buildReqDataEntity(String orderNo,String userId,String amt,String certNo,
-			String accNo,String accName,String mobileNo,String bankId,String pName,String pInfo,String cvn2,String validDate) {
+			String accNo,String accName,String mobileNo,String bankId,String pName,String pInfo,String cvn2,String validDate,Constants xfConstants) {
 		ReqApplyDataEntity reqEntity = new ReqApplyDataEntity();
 		reqEntity.merchantNo = orderNo;
 		reqEntity.payerId = userId;
 		reqEntity.amount = amt;
-		reqEntity.transCur = XianFengPayCfg.TRANSCUR;
-		reqEntity.certificateType = XianFengPayCfg.CERTIFICATETYPE;
+		reqEntity.transCur = Constants.TRANSCUR;
+		reqEntity.certificateType = Constants.CERTIFICATETYPE;
 		reqEntity.certificateNo = certNo;
 		reqEntity.accountNo = accNo;
 		reqEntity.accountName = accName;
@@ -41,19 +40,19 @@ public class ReqApplyDataEntity {
 		reqEntity.bankId = bankId;
 		reqEntity.productName = pName;
 		reqEntity.productInfo = pInfo;
-		reqEntity.noticeUrl = XianFengPayCfg.NOTIFY_URL;
+		reqEntity.noticeUrl = xfConstants.getAPP_PAYMENT_NOTICE_URL();
 		reqEntity.cvn2 = cvn2;
 		reqEntity.validDate = validDate;
 		return reqEntity;
 	}
 	
-	public ReqSnEntity buildSnCashEntity(String data) throws CoderException {
+	public ReqSnEntity buildSnCashEntity(String data,Constants xfConstants) throws CoderException {
 		ReqSnEntity reqEntity = new ReqSnEntity();
 		reqEntity.service = "REQ_PAY_QUICK_APPLY";
-		reqEntity.version = XianFengPayCfg.VERSION;
-		reqEntity.merchantId = XianFengPayCfg.MERCHANT_NO;
+		reqEntity.version = xfConstants.getVERSION();
+		reqEntity.merchantId = xfConstants.getMER_ID();
 		reqEntity.data = data;
-		reqEntity.secId = XianFengPayCfg.SEC_ID;
+		reqEntity.secId = xfConstants.getSEC_ID();
 		String reqSn = UnRepeatCodeGenerator.createUnRepeatCode(reqEntity.merchantId, reqEntity.service, new SimpleDateFormat("yyyyMMddhhmmssSSS").format(new Date()));
 		reqEntity.reqSn = reqSn;
 		return reqEntity;

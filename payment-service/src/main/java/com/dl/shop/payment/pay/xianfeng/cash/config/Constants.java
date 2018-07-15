@@ -7,6 +7,8 @@ import lombok.Data;
 @Data
 @Configuration
 public class Constants {
+	public static final String TRANSCUR = "156";
+	public static final String CERTIFICATETYPE = "0";	//证件类型
 	@Value("${xianfeng.isdebug}")
 	private Boolean IS_DEBUBG;
 //	public static String MER_ID = "M200000550";
@@ -16,7 +18,7 @@ public class Constants {
 //	public static String MER_RSAKEY = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQChFetx5+VKDoEXzZ+5Wozt3MfWMM/TiKMlWmAKXBViv8/e6j6SU/lSlWkMajd59aiWczs+qf9dMuRpe/l9Qke9DnVMn24JNLXjWD+y+w3yKRwd3CTtF7gx8/ToZl5XqFIT5YB1QfQCdAf8Z18IdQrJIijs8ssczY/RfqKZLo+KLQIDAQAB";
 	@Value("${xianfeng.app_mer_rsakey}")
 	private String MER_RSAKEY;
-	
+
 	@Value("${xianfeng.app_secid}")
 	private String SEC_ID = "RSA";
 	

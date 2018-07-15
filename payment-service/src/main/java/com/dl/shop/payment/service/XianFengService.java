@@ -37,7 +37,6 @@ import com.dl.shop.payment.param.XianFengPayConfirmParam;
 import com.dl.shop.payment.param.XianFengPayParam;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.config.Constants;
-import com.dl.shop.payment.pay.xianfeng.config.XianFengPayCfg;
 import com.dl.shop.payment.pay.xianfeng.entity.RspApplyBaseEntity;
 import com.dl.shop.payment.pay.xianfeng.entity.RspNotifyEntity;
 import com.dl.shop.payment.pay.xianfeng.util.XianFengPayUtil;
@@ -57,7 +56,8 @@ public class XianFengService {
 	private PayMentService paymentService;
 	@Resource
 	private PayBankRecordMapper payBankRecordMapper;
-	
+	@Resource
+	private Constants xfConstants;
 	
 	public BaseResult<Object> appPayCfm(XianFengPayConfirmParam param){
 		int payLogId = param.getPayLogId();
@@ -403,7 +403,7 @@ public class XianFengService {
 		int amt = bigAmt.intValue();
 		int payType = payLog.getPayType();
 		String payCode = payLog.getPayCode();
-		if(XianFengPayCfg.MERCHANT_NO.equals(rspEntity.merchantId) && (rspEntity.amount.equals(amt+"") || XianFengPayCfg.isDebug)) {
+		if(xfConstants.getMER_ID().equals(rspEntity.merchantId) && (rspEntity.amount.equals(amt+"") || xfConstants.getIS_DEBUBG())) {
 			logger.info("[payNotify]" +" 商户号，交易金额校验成功, amt:" + rspEntity.amount +" merchantId:" + rspEntity.merchantId);
 			BaseResult<RspOrderQueryDTO> bResult = null;
 			if(rspEntity.isSucc()) {

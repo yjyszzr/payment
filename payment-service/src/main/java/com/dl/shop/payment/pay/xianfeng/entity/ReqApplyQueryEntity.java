@@ -11,9 +11,8 @@ import java.util.TreeMap;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.dl.shop.payment.pay.xianfeng.config.XianFengPayCfg;
+import com.dl.shop.payment.pay.xianfeng.cash.config.Constants;
 import com.dl.shop.payment.pay.yinhe.util.PayKeyComparator;
-import com.ucf.sdk.CoderException;
 import com.ucf.sdk.UcfForOnline;
 import com.ucf.sdk.util.UnRepeatCodeGenerator;
 
@@ -31,12 +30,12 @@ public class ReqApplyQueryEntity {
 	public String sign;
 
 	
-	public static final ReqApplyQueryEntity buildReqApplyQueryEntity(String orderNo) throws Exception {
+	public static final ReqApplyQueryEntity buildReqApplyQueryEntity(String orderNo,Constants xfConstants) throws Exception {
 		ReqApplyQueryEntity reqEntity = new ReqApplyQueryEntity();
 		reqEntity.service = "REQ_QUICK_QUERY_BY_ID";
-		reqEntity.secId = XianFengPayCfg.SEC_ID;
-		reqEntity.version = XianFengPayCfg.VERSION;
-		reqEntity.merchantId = XianFengPayCfg.MERCHANT_NO;
+		reqEntity.secId = xfConstants.getSEC_ID();
+		reqEntity.version = xfConstants.getVERSION();
+		reqEntity.merchantId = xfConstants.getMER_ID();
 		reqEntity.merchantNo = orderNo;
 		
 		String reqSn = UnRepeatCodeGenerator.createUnRepeatCode(reqEntity.merchantId, reqEntity.service, new SimpleDateFormat("yyyyMMddhhmmssSSS").format(new Date()));
@@ -54,7 +53,7 @@ public class ReqApplyQueryEntity {
 			mMap.put(key,val);
 		}
 		System.out.println("map.size:" + mMap.size());
-		String signValue = UcfForOnline.createSign(XianFengPayCfg.RSA_KEY,"sign", mMap, "RSA");
+		String signValue = UcfForOnline.createSign(xfConstants.getMER_RSAKEY(),"sign", mMap, "RSA");
 		reqEntity.sign = signValue;
 		return reqEntity;
 	}
