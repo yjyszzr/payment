@@ -5,15 +5,19 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+
+import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.shop.payment.pay.common.HttpUtil;
 import com.dl.shop.payment.pay.common.RspHttpEntity;
+import com.dl.shop.payment.pay.xianfeng.cash.config.Constants;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.ReqSnEntity;
-import com.dl.shop.payment.pay.xianfeng.config.XianFengPayCfg;
 import com.dl.shop.payment.pay.xianfeng.entity.ReqApplyCfgDataEntity;
 import com.dl.shop.payment.pay.xianfeng.entity.ReqApplyCfgEntity;
 import com.dl.shop.payment.pay.xianfeng.entity.ReqApplyDataEntity;
@@ -28,6 +32,8 @@ import com.ucf.sdk.util.AESCoder;
 @Component
 public class XianFengPayUtil {
 	private final static Logger logger = LoggerFactory.getLogger(XianFengPayUtil.class);
+	@Resource
+	private Constants xFConstants;
 	
 	public XianFengPayUtil() throws Exception {
 		// TODO Auto-generated constructor stub
@@ -75,13 +81,13 @@ public class XianFengPayUtil {
 	public RspApplyBaseEntity queryPayByOrderNo(String orderNo) throws Exception {
 		ReqApplyQueryEntity reqQueryEntity = ReqApplyQueryEntity.buildReqApplyQueryEntity(orderNo);
 		//生成data
-		String url = XianFengPayCfg.NET_GATE + "?" + reqQueryEntity.buildReqStr();
+		String url = xFConstants.getUCF_GATEWAY_URL() + "?" + reqQueryEntity.buildReqStr();
 		logger.info("支付查询orderNo={},请求参数={}",orderNo,url);
 		RspHttpEntity rspHttpEntity = HttpUtil.sendMsg(null,url,false);
 		RspApplyBaseEntity rEntity = null;
 		if(rspHttpEntity.isSucc) {
 			String str = rspHttpEntity.msg;
-			String dataResult = AESCoder.decrypt(str,XianFengPayCfg.RSA_KEY);
+			String dataResult = AESCoder.decrypt(str,xFConstants.getMER_RSAKEY());
 			rEntity = JSON.parseObject(dataResult,RspApplyBaseEntity.class);
 		}else {
 			rEntity = new RspApplyBaseEntity();
@@ -95,12 +101,12 @@ public class XianFengPayUtil {
 		RspApplyBaseEntity rEntity = null;
 		ReqApplySmsEntity reqApplySmsEntity = ReqApplySmsEntity.buildApplySmsEntity(orderNo);
 		//生成data
-		String url = XianFengPayCfg.NET_GATE + "?" + reqApplySmsEntity.buildReqStr();
+		String url = xFConstants.getUCF_GATEWAY_URL()+ "?" + reqApplySmsEntity.buildReqStr();
 		logger.info("请求参数:" + url);
 		RspHttpEntity rspHttpEntity = HttpUtil.sendMsg(null,url,false);
 		if(rspHttpEntity.isSucc) {
 			String str = rspHttpEntity.msg;
-			String dataResult = AESCoder.decrypt(str,XianFengPayCfg.RSA_KEY);
+			String dataResult = AESCoder.decrypt(str,xFConstants.getMER_RSAKEY());
 			rEntity = JSON.parseObject(dataResult,RspApplyBaseEntity.class);
 		}else {
 			rEntity = new RspApplyBaseEntity();
@@ -117,7 +123,7 @@ public class XianFengPayUtil {
 		//生成data
 		String jsonStr = JSON.toJSONString(reqCfgEntity);
 		logger.info("jsonStr:" + jsonStr);
-		String data = AESCoder.encrypt(jsonStr,XianFengPayCfg.RSA_KEY);
+		String data = AESCoder.encrypt(jsonStr,xFConstants.getMER_RSAKEY());
 		logger.info("data:" + data);
 		//sn
 		ReqSnEntity reqSnEntity = reqCfgEntity.buildSnCashEntity(data);
@@ -134,14 +140,14 @@ public class XianFengPayUtil {
 			mMap.put(key,val);
 		}
 		//生成signVal
-		String signValue = UcfForOnline.createSign(XianFengPayCfg.RSA_KEY,"sign", mMap, "RSA");
+		String signValue = UcfForOnline.createSign(xFConstants.getMER_RSAKEY(),"sign", mMap, "RSA");
 		ReqApplyCfgEntity reqApplyCfgEntity = ReqApplyCfgEntity.buildReqApplyCfgEntity(reqSnEntity.reqSn,data,signValue);
-		String url = XianFengPayCfg.NET_GATE + "?" + reqApplyCfgEntity.buildReqStr();
+		String url = xFConstants.getUCF_GATEWAY_URL() + "?" + reqApplyCfgEntity.buildReqStr();
 		logger.info("请求参数:" + url);
 		RspHttpEntity rspHttpEntity = HttpUtil.sendMsg(null,url,false);
 		if(rspHttpEntity.isSucc) {
 			String str = rspHttpEntity.msg;
-			String dataResult = AESCoder.decrypt(str,XianFengPayCfg.RSA_KEY);
+			String dataResult = AESCoder.decrypt(str,xFConstants.getMER_RSAKEY());
 			logger.info("dataResult:" + dataResult);
 			rspEntity = JSON.parseObject(dataResult,RspApplyBaseEntity.class);
 		}else {
@@ -154,7 +160,7 @@ public class XianFengPayUtil {
 	//userId, amt, certNo, accNo, accName, mobileNo, bankId, pName, pInfo
 	public RspApplyBaseEntity reqApply(String orderNo,String userId,String amt,String certNo,String accNo,String accName,String mobileNo,String bankId,String pName,String pInfo,String cvn2,String validDate) throws Exception {
 		//test code
-		if(XianFengPayCfg.isDebug) {
+		if(xFConstants.getIS_DEBUBG()) {
 			amt = "2";
 		}
 		RspApplyBaseEntity rspEntity = null;
@@ -162,22 +168,22 @@ public class XianFengPayUtil {
 		String jsonStr = JSON.toJSONString(reqDataEntity);
 		logger.info("jsonStr:" + jsonStr);
 		//data生成
-		String data = AESCoder.encrypt(jsonStr,XianFengPayCfg.RSA_KEY);
+		String data = AESCoder.encrypt(jsonStr,xFConstants.getMER_RSAKEY());
 		logger.info("data:" + data);
 		ReqSnEntity reqSnEntity = reqDataEntity.buildSnCashEntity(data);
 		String strInfo = JSON.toJSONString(reqSnEntity);
 		//sort key
 		Map<String,String> mMap = JSON.parseObject(strInfo,HashMap.class);
 		//生成signVal
-		String signValue = UcfForOnline.createSign(XianFengPayCfg.RSA_KEY,"sign", mMap, "RSA");
+		String signValue = UcfForOnline.createSign(xFConstants.getMER_RSAKEY(),"sign", mMap, "RSA");
 		ReqApplyEntity reqApplyEntity = ReqApplyEntity.buildReqApplyEntity(reqSnEntity.reqSn,data,signValue);
 		//生成请求链接
-		String url = XianFengPayCfg.NET_GATE + "?" + reqApplyEntity.buildReqStr();
+		String url = xFConstants.getUCF_GATEWAY_URL() + "?" + reqApplyEntity.buildReqStr();
 		logger.info("请求参数:" + url);
 		RspHttpEntity rspHttpEntity = HttpUtil.sendMsg(null,url,false);
 		if(rspHttpEntity.isSucc) {
 			String strMsg = rspHttpEntity.msg;
-			String dataResult = AESCoder.decrypt(strMsg,XianFengPayCfg.RSA_KEY);
+			String dataResult = AESCoder.decrypt(strMsg,xFConstants.getMER_RSAKEY());
 			logger.info("dataResult:" + dataResult);
 			rspEntity = JSON.parseObject(dataResult,RspApplyBaseEntity.class);
 		}else {

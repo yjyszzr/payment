@@ -7,7 +7,8 @@ import lombok.Data;
 @Data
 @Configuration
 public class Constants {
-	
+	@Value("${xianfeng.isdebug}")
+	private Boolean IS_DEBUBG;
 //	public static String MER_ID = "M200000550";
 	@Value("${xianfeng.app_merid}")
 	private String MER_ID;
@@ -28,6 +29,9 @@ public class Constants {
 //	public static String NOTICE_URL = "http://39.106.18.39:7076/cash/notify";
 	@Value("${xianfeng.app_notice_url}")
 	private String NOTICE_URL;
+	
+	@Value("${xianfeng.app_payment_notice_url}")
+	private String APP_PAYMENT_NOTICE_URL;
 	
 	@Value("${xianfeng.app_version}")
 	private String VERSION;

@@ -18,6 +18,7 @@ import com.alibaba.druid.util.StringUtils;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.base.util.DateUtil;
+import com.dl.base.util.RegexUtil;
 import com.dl.member.api.IUserBankService;
 import com.dl.member.dto.BankDTO;
 import com.dl.member.dto.UserBankDTO;
@@ -35,6 +36,7 @@ import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.param.XianFengPayConfirmParam;
 import com.dl.shop.payment.param.XianFengPayParam;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
+import com.dl.shop.payment.pay.xianfeng.cash.config.Constants;
 import com.dl.shop.payment.pay.xianfeng.config.XianFengPayCfg;
 import com.dl.shop.payment.pay.xianfeng.entity.RspApplyBaseEntity;
 import com.dl.shop.payment.pay.xianfeng.entity.RspNotifyEntity;
@@ -55,6 +57,7 @@ public class XianFengService {
 	private PayMentService paymentService;
 	@Resource
 	private PayBankRecordMapper payBankRecordMapper;
+	
 	
 	public BaseResult<Object> appPayCfm(XianFengPayConfirmParam param){
 		int payLogId = param.getPayLogId();
@@ -90,13 +93,24 @@ public class XianFengService {
 		}
 		return ResultGenerator.genFailResult("请求失败");
 	}
-	
 	public BaseResult<XianFengApplyDTO> appPay(XianFengPayParam param,String token){
 		int payLogId = param.getPayLogId();
 		PayLog payLog = payLogService.findById(payLogId);
 		if(payLog == null){
 			logger.info("查询PayLog失败");
 			return ResultGenerator.genFailResult("查询支付信息失败");
+		}
+		if(StringUtils.isEmpty(param.getAccNo())){
+			logger.info("先锋支付申请卡号输入不正确");
+			return ResultGenerator.genFailResult("卡号输入不正确");
+		}
+		if(StringUtils.isEmpty(param.getPhone())||RegexUtil.checkMobile(param.getPhone())){
+			logger.info("先锋支付申请手机号输入不正确");
+			return ResultGenerator.genFailResult("手机号输入不正确");
+		}
+		if(StringUtils.isEmpty(param.getCertNo())||RegexUtil.checkIdCard(param.getCertNo())){
+			logger.info("先锋支付申请身份证号输入不正确");
+			return ResultGenerator.genFailResult("身份证号输入不正确");
 		}
 		int payType = payLog.getPayType();
 		int userId = payLog.getUserId();
