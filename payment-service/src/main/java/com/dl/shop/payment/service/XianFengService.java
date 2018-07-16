@@ -104,11 +104,11 @@ public class XianFengService {
 			logger.info("先锋支付申请卡号输入不正确");
 			return ResultGenerator.genFailResult("卡号输入不正确");
 		}
-		if(StringUtils.isEmpty(param.getPhone())||RegexUtil.checkMobile(param.getPhone())){
+		if(StringUtils.isEmpty(param.getPhone())||!RegexUtil.checkMobile(param.getPhone())){
 			logger.info("先锋支付申请手机号输入不正确");
 			return ResultGenerator.genFailResult("手机号输入不正确");
 		}
-		if(StringUtils.isEmpty(param.getCertNo())||RegexUtil.checkIdCard(param.getCertNo())){
+		if(StringUtils.isEmpty(param.getCertNo())||!RegexUtil.checkIdCard(param.getCertNo())){
 			logger.info("先锋支付申请身份证号输入不正确");
 			return ResultGenerator.genFailResult("身份证号输入不正确");
 		}
