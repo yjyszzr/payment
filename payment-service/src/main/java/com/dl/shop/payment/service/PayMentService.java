@@ -640,7 +640,7 @@ public class PayMentService extends AbstractService<PayMent> {
 					baseResult = ResultGenerator.genSuccessResult("succ",rspOrderQueryEntity);
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("先锋支付报错payOrderSn={}",payOrderSn,e);
 			}
 		}
 		if(baseResult == null || baseResult.getCode() != 0) {

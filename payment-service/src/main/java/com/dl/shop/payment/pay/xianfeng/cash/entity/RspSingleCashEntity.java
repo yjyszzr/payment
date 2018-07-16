@@ -39,9 +39,10 @@ public class RspSingleCashEntity {
 		if(!StringUtils.isEmpty(status)&&"F".equalsIgnoreCase(status)){
 			return Boolean.TRUE;
 		}
-//		10009 交易记录不存在
-		Boolean notApplyAndSomeError = !isApply&&StringUtils.isEmpty(status)&&(!notErrorRetCode.containsKey(resCode));
-		return notApplyAndSomeError;
+		return Boolean.FALSE;
+////		10009 交易记录不存在
+//		Boolean notApplyAndSomeError = !isApply&&StringUtils.isEmpty(status)&&(!notErrorRetCode.containsKey(resCode));
+//		return notApplyAndSomeError;
 	}
 	public boolean isTradeDoing() {
 		return StringUtils.isEmpty(status)||"I".equalsIgnoreCase(status);

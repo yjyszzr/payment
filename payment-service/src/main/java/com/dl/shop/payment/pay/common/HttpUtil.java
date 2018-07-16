@@ -17,6 +17,7 @@ public class HttpUtil {
 	private final static Logger logger = LoggerFactory.getLogger(PaymentController.class);
 	
 	 public static RspHttpEntity sendMsg(String postData, String postUrl,boolean isJson) {
+		 logger.info("postUrl={},postData={}",postUrl,postData);
 		 RspHttpEntity rspEntity = new RspHttpEntity();
 		 OutputStreamWriter out = null;
 		 HttpURLConnection conn = null;
