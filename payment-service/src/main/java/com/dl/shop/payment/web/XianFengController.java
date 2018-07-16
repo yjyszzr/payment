@@ -89,15 +89,15 @@ public class XianFengController {
 		String token = payParam.getToken();
 		if(StringUtils.isEmpty(payParam.getAccNo())){
 			logger.info("先锋支付申请卡号输入不正确");
-			return ResultGenerator.genFailResult("卡号输入不正确");
+			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_QUICKPAY_CARDNO_ERROR.getcode(),PayEnums.PAY_XIANFENG_QUICKPAY_CARDNO_ERROR.getMsg());
 		}
 		if(StringUtils.isEmpty(payParam.getPhone())||!RegexUtil.checkMobile(payParam.getPhone())){
 			logger.info("先锋支付申请手机号输入不正确");
-			return ResultGenerator.genFailResult("手机号输入不正确");
+			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_QUICKPAY_PHONE_ERROR.getcode(),PayEnums.PAY_XIANFENG_QUICKPAY_PHONE_ERROR.getMsg());
 		}
 		if(StringUtils.isEmpty(payParam.getCertNo())||!RegexUtil.checkIdCard(payParam.getCertNo())){
 			logger.info("先锋支付申请身份证号输入不正确");
-			return ResultGenerator.genFailResult("身份证号输入不正确");
+			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_QUICKPAY_ID_ERROR.getcode(),PayEnums.PAY_XIANFENG_QUICKPAY_ID_ERROR.getMsg());
 		}
 		//只是校验token信息是否为空
 		if(!StringUtils.isEmpty(token)) {
