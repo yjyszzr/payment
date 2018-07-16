@@ -26,6 +26,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dl.base.enums.SNBusinessCodeEnum;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
+import com.dl.base.util.RegexUtil;
 import com.dl.base.util.SNGenerator;
 import com.dl.base.util.SessionUtil;
 import com.dl.member.api.IUserBankService;
@@ -86,6 +87,18 @@ public class XianFengController {
 	@ResponseBody
 	public BaseResult<XianFengApplyDTO> appPay(@RequestBody XianFengPayParam payParam) {
 		String token = payParam.getToken();
+		if(StringUtils.isEmpty(payParam.getAccNo())){
+			logger.info("先锋支付申请卡号输入不正确");
+			return ResultGenerator.genFailResult("卡号输入不正确");
+		}
+		if(StringUtils.isEmpty(payParam.getPhone())||!RegexUtil.checkMobile(payParam.getPhone())){
+			logger.info("先锋支付申请手机号输入不正确");
+			return ResultGenerator.genFailResult("手机号输入不正确");
+		}
+		if(StringUtils.isEmpty(payParam.getCertNo())||!RegexUtil.checkIdCard(payParam.getCertNo())){
+			logger.info("先锋支付申请身份证号输入不正确");
+			return ResultGenerator.genFailResult("身份证号输入不正确");
+		}
 		//只是校验token信息是否为空
 		if(!StringUtils.isEmpty(token)) {
 			logger.info("[appPay]" +" token:" + token);
@@ -191,9 +204,13 @@ public class XianFengController {
 	@PostMapping("/sms")
 	@ResponseBody
 	public BaseResult<XianFengApplyDTO> getPaySms(@RequestBody XianFengPayParam payParam){
+		String token = payParam.getToken();
+		if(StringUtils.isEmpty(payParam.getPhone())||!RegexUtil.checkMobile(payParam.getPhone())){
+			logger.info("先锋支付申请手机号输入不正确");
+			return ResultGenerator.genFailResult("手机号输入不正确");
+		}
 		int payLogId = payParam.getPayLogId();
 		PayLog payLog = payLogService.findById(payLogId);
-		String token = payParam.getToken();
 		if(payLog == null) {
 			logger.info("[getPaySms]" + "订单号查询失败");
 			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_ORDER_BLANK.getcode(),PayEnums.PAY_XIANFENG_ORDER_BLANK.getMsg());	
