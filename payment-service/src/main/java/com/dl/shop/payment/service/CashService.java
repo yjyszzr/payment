@@ -458,7 +458,6 @@ public class CashService {
             log.info(key+"-------------"+values[0]);
             if(key.equals("data")) {
             	dataValue = values[0];
-            	log.info("=========================");
             	try {//String dataValue = AESCoder.decrypt(signVal, Constants.MER_RSAKEY);
 					String dataJson= AESCoder.decrypt(dataValue, xFConstants.getMER_RSAKEY());
 					RspSingleCashEntity rspSingleCashEntity = JSON.parseObject(dataJson,RspSingleCashEntity.class);
@@ -485,8 +484,7 @@ public class CashService {
 					}
 					log.info("[withdrawNotify]" + " jsonObject:" + dataJson);
             	} catch (Exception e) {
-					e.printStackTrace();
-					log.info("[withdrawNotify]" + "msg:" + e.getMessage());
+					log.error("[withdrawNotify]",e);
 				}
             }
         }

@@ -60,7 +60,6 @@ public class CashController {
 		try {
 			cashService.withdrawNotify(request,response);
 		} catch (IOException e) {
-			e.printStackTrace();
 			log.error(e.getMessage());
 		}
 	}

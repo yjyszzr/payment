@@ -1,5 +1,7 @@
 package com.dl.shop.payment.pay.xianfeng.entity;
 
+import org.springframework.util.StringUtils;
+
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 
 public class RspApplyBaseEntity{
@@ -33,7 +35,16 @@ public class RspApplyBaseEntity{
 	}
 	
 	public boolean isSucc() {
-		return "00000".equals(resCode);
+		return !StringUtils.isEmpty(status)&&"S".equalsIgnoreCase(status);
+	}
+	public boolean isDoing() {
+		return StringUtils.isEmpty(status)||"I".equalsIgnoreCase(status);
+	}
+	public boolean isFail() {
+		if(!StringUtils.isEmpty(status)&&"F".equalsIgnoreCase(status)){
+			return Boolean.TRUE;
+		}
+		return Boolean.FALSE;
 	}
 
 	/**
