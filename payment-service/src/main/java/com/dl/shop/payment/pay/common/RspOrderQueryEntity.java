@@ -1,7 +1,10 @@
 package com.dl.shop.payment.pay.common;
 
 import java.io.Serializable;
+
 import org.apache.http.util.TextUtils;
+import org.springframework.util.StringUtils;
+
 import lombok.Data;
 
 @Data
@@ -16,6 +19,7 @@ public class RspOrderQueryEntity implements Serializable{
 	private String timestamp;
 	private String total_fee;
 	private String trade_no;
+	private String trade_status;
 	
 	//微信支付使用
 	private Integer tradeEndTime;
@@ -29,7 +33,23 @@ public class RspOrderQueryEntity implements Serializable{
 		if(!TextUtils.isEmpty(result_code) && type == TYPE_YINHE) {
 			return result_code.equals("0000");
 		}else if(!TextUtils.isEmpty(result_code) && type == TYPE_XIANFENG) {
-			return result_code.equals("00000");
+			return !StringUtils.isEmpty(status)&&"S".equalsIgnoreCase(status);
+		}
+		return false;
+	}
+	public boolean isDoing() {
+		if(!TextUtils.isEmpty(result_code) && type == TYPE_YINHE) {
+			return result_code.equals("106");
+		}else if(!TextUtils.isEmpty(result_code) && type == TYPE_XIANFENG) {
+			return StringUtils.isEmpty(status)||"I".equalsIgnoreCase(status);
+		}
+		return false;
+	}
+	public boolean isFail() {
+		if(!TextUtils.isEmpty(result_code) && type == TYPE_YINHE) {
+			return result_code.equals("104");
+		}else if(!TextUtils.isEmpty(result_code) && type == TYPE_XIANFENG) {
+			return !StringUtils.isEmpty(status)&&"F".equalsIgnoreCase(status);
 		}
 		return false;
 	}

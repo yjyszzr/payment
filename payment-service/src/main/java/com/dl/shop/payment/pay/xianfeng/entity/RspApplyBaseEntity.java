@@ -24,6 +24,7 @@ public class RspApplyBaseEntity{
 		rspEntity.setTrade_no(tradeNo);
 		rspEntity.setPayCode(payCode);
 		rspEntity.setType(RspOrderQueryEntity.TYPE_XIANFENG);
+		rspEntity.setTrade_status(status);
 		return rspEntity;
 	}
 	

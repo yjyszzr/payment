@@ -411,6 +411,18 @@ public class PayMentService extends AbstractService<PayMent> {
 			stringRedisTemplate.opsForValue().set(String.valueOf(payLog.getLogId()),rspOrderQueryDTO.getDonationPrice());
 			logger.info("充值成功后返回的信息："+rspOrderQueryDTO.getIsHaveRechargeAct() +"-----"+rspOrderQueryDTO.getDonationPrice());
 			return ResultGenerator.genSuccessResult("充值成功",rspOrderQueryDTO);
+		}else if(response.isFail()){
+			//更新paylog
+			try {
+				PayLog updatePayLog = new PayLog();
+				updatePayLog.setLogId(payLog.getLogId());
+				updatePayLog.setIsPaid(3);
+				updatePayLog.setPayMsg("充值失败["+response.getResult_msg()+"]");
+				payLogService.updatePayMsg(updatePayLog);
+			} catch (Exception e) {
+				logger.error(loggerId + " paylogid="+payLog.getLogId()+" , paymsg="+response.getResult_msg()+"，保存失败记录时出错", e);
+			}
+			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),PayEnums.PAY_RONGBAO_FAILURE.getMsg());
 		}else {
 			//更新paylog
 			try {
