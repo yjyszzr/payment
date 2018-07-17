@@ -391,7 +391,7 @@ public class XianFengService {
 		int amt = bigAmt.intValue();
 		int payType = payLog.getPayType();
 		String payCode = payLog.getPayCode();
-		if(xfConstants.getMER_ID().equals(rspEntity.merchantId) && (rspEntity.amount.equals(amt+"") || xfConstants.getIS_DEBUBG())) {
+		if(xfConstants.getMER_ID().equals(rspEntity.merchantId) && (rspEntity.amount.equals(amt+""))) {
 			logger.info("[payNotify]" +" 商户号，交易金额校验成功, amt:" + rspEntity.amount +" merchantId:" + rspEntity.merchantId);
 			BaseResult<RspOrderQueryDTO> bResult = null;
 			if(rspEntity.isSucc()) {

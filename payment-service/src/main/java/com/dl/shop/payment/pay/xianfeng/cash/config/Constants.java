@@ -11,6 +11,9 @@ public class Constants {
 	public static final String CERTIFICATETYPE = "0";	//证件类型
 	@Value("${xianfeng.isdebug}")
 	private Boolean IS_DEBUBG;
+	@Value("${xianfeng.testMode}")
+	private Boolean TESTMODE;
+	
 //	public static String MER_ID = "M200000550";
 	@Value("${xianfeng.app_merid}")
 	private String MER_ID;

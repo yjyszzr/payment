@@ -26,6 +26,9 @@ public class XianFengCashUtil {
 	
 	//String secID,String version,String merID,String notifyURL,String mer_rsakey
 	public RspSingleCashEntity reqCash(String orderNo,String amt,String accNo,String accName,String phone,String bankNo) throws Exception {
+		if(xFConstants.getIS_DEBUBG()&&xFConstants.getTESTMODE()){
+			amt="2";
+		}
 		RspSingleCashEntity rEntity;
 		ReqSingleCashEntity reqEntity = null;
 		reqEntity = ReqSingleCashEntity.buildReqSingleCashEntity(orderNo, amt, accNo, accName, phone, bankNo

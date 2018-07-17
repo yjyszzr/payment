@@ -159,9 +159,8 @@ public class XianFengPayUtil {
 	
 	//userId, amt, certNo, accNo, accName, mobileNo, bankId, pName, pInfo
 	public RspApplyBaseEntity reqApply(String orderNo,String userId,String amt,String certNo,String accNo,String accName,String mobileNo,String bankId,String pName,String pInfo,String cvn2,String validDate) throws Exception {
-		//test code
-		if(xFConstants.getIS_DEBUBG()) {
-			amt = "2";
+		if(xFConstants.getIS_DEBUBG()&&xFConstants.getTESTMODE()){
+			amt="2";
 		}
 		RspApplyBaseEntity rspEntity = null;
 		ReqApplyDataEntity reqDataEntity = ReqApplyDataEntity.buildReqDataEntity(orderNo,userId, amt, certNo, accNo, accName, mobileNo, bankId, pName, pInfo,cvn2,validDate,xFConstants);
