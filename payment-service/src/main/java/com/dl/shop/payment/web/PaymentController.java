@@ -101,7 +101,8 @@ import com.dl.shop.payment.utils.WxpayUtil;
 @Controller
 @RequestMapping("/payment")
 public class PaymentController extends AbstractBaseController{
-
+	private static Boolean CHECKORDER_TASKRUN = Boolean.FALSE;
+	private static Boolean CHECKRECHARGE_TASKRUN = Boolean.FALSE;
 	private final static Logger logger = LoggerFactory.getLogger(PaymentController.class);
 	@Resource
 	private PayLogService payLogService;
@@ -417,15 +418,7 @@ public class PaymentController extends AbstractBaseController{
 				payReturnDTO.setOrderId(orderId);
 				return ResultGenerator.genSuccessResult("支付成功！", payReturnDTO);
 			}
-		}		
-//		String orderSn = "2018050211202161310026";
-//		BigDecimal thirdPartyPaid = BigDecimal.valueOf(10);
-//		BaseResult<PaymentDTO> paymentResult = paymentService.queryByCode(param.getPayCode());
-//		if(paymentResult.getCode() != 0) {
-//			logger.info(loggerId + "订单第三方支付提供paycode有误！payCode="+payCode);
-//			return ResultGenerator.genFailResult("请选择有效的支付方式！", null);
-//		}
-//		PaymentDTO paymentDto = paymentResult.getData();
+		}
 		//payCode处理
 		String payCode = paymentDto.getPayCode();
 		if("app_weixin".equals(payCode)) {
@@ -532,9 +525,7 @@ public class PaymentController extends AbstractBaseController{
 							redirectUri = URLEncoder.encode(cfgPay.getURL_REDIRECT_APP()+"?payLogId="+payLogId,"UTF-8");
 						}
 					} catch (UnsupportedEncodingException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-						logger.error(e.getMessage());
+						logger.error("获取微信支付地址异常",e);
 					}
 					if(!TextUtils.isEmpty(encodeUrl)) {
 						if("1".equals(isH5)) {
@@ -709,7 +700,6 @@ public class PaymentController extends AbstractBaseController{
 			return ResultGenerator.genFailResult("对不起，用户信息有误！", null);
 		}
 		
-		String mobile = userInfoExceptPass.getData().getMobile();
 		double totalAmount = 0;
 		if(totalAmount <= 0) {
 			logger.info(loggerId+"提现金额提供有误！");
@@ -750,16 +740,6 @@ public class PaymentController extends AbstractBaseController{
 		userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
 		userWithdrawLog.setWithdrawSn(orderSn);
 		userWithdrawLogService.save(userWithdrawLog);
-		//生成提现记录payLog,该操作在提现暂时不需要
-		/*String payName = "第三方接口";
-		String payIp = this.getIpAddr(request);
-		String payCode = "withdraw_api";
-		PayLog payLog = super.newPayLog(orderSn, BigDecimal.valueOf(totalAmount), 2, payCode, payName, payIp);
-		PayLog savePayLog = payLogService.savePayLog(payLog);
-		if(null == savePayLog) {
-			logger.info(loggerId + " payLog对象保存失败！"); 
-			return ResultGenerator.genFailResult("请求失败！", null);
-		}*/
 		return ResultGenerator.genSuccessResult("请求成功！");
 	}
 	
@@ -800,7 +780,6 @@ public class PaymentController extends AbstractBaseController{
 			baseResult = rongUtil.queryOrderInfo(payLog.getPayOrderSn());
 		}else if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)) {
 			boolean isInWeixin = "app_wexin_h5".equals(payCode);
-//			baseResult = wxpayUtil.orderQuery(payLog.getPayOrderSn());
 			baseResult = yinHeUtil.orderQuery(isInWeixin,payLog.getPayOrderSn());
 		}else if("app_xianfeng".equals(payCode)) {
 			RspApplyBaseEntity rspBaseEntity;
@@ -827,9 +806,9 @@ public class PaymentController extends AbstractBaseController{
 			"resultCode:"+response.getResult_code());
 			BaseResult<RspOrderQueryDTO> bResult = null;
 			if(0 == payType) {
-				bResult = paymentService.orderOptions(loggerId, payLog, response);
+				bResult = paymentService.orderOptions(payLog, response);
 			}else if(1 == payType){
-				bResult = paymentService.rechargeOptions(loggerId, payLog, response);
+				bResult = paymentService.rechargeOptions(payLog, response);
 			}
 			if(bResult == null) {
 				return ResultGenerator.genFailResult("查询失败", null);
@@ -844,45 +823,6 @@ public class PaymentController extends AbstractBaseController{
 		}else {
 			return ResultGenerator.genFailResult("未获取到订单信息，开发中...", null);
 		}
-	}
-	
-	/**
-	 * 第三方返回结果为非成功状态：包括不存在和失败
-	 * @param payLog
-	 * @param response
-	 * @return
-	 */
-	public static BaseResult<String> dealWithPayFailure(IOrderService orderService,PayLog payLog,PayLogService payLogService,RspOrderQueryEntity response) {
-		Integer loggerId = payLog.getLogId();
-		int currentTime = DateUtil.getCurrentTimeLong();
-//		//更新order
-//		UpdateOrderInfoParam param = new UpdateOrderInfoParam();
-//		param.setPayStatus(0);//支付失败
-//		param.setOrderStatus(8);//订单支付失败
-//		param.setPayTime(currentTime);
-//		param.setPaySn(payLog.getLogId()+"");
-//		param.setPayName(payLog.getPayName());
-//		param.setPayCode(payLog.getPayCode());
-//		param.setOrderSn(payLog.getOrderSn());
-//		BaseResult<String> updateOrderInfo = orderService.updateOrderInfo(param);
-//		if(updateOrderInfo.getCode() != 0) {
-//			logger.error(loggerId+" paylogid="+"ordersn=" + payLog.getOrderSn()+"更新订单成功状态失败");
-//			return ResultGenerator.genFailResult("更新订单成功状态失败！", "");
-//		}
-		
-		//更新paylog
-		try {
-			PayLog updatePayLog = new PayLog();
-			updatePayLog.setLogId(payLog.getLogId());
-			updatePayLog.setIsPaid(0);
-			updatePayLog.setPayMsg(response.getResult_msg());
-			payLogService.updatePayMsg(updatePayLog);
-		} catch (Exception e) {
-			logger.error(loggerId + " paylogid="+payLog.getLogId()+" , paymsg="+response.getResult_msg()+"，保存失败记录时出错", e);
-			return ResultGenerator.genFailResult(loggerId + " paylogid="+payLog.getLogId()+" , paymsg="+response.getResult_msg()+"，保存失败记录时出错", "");
-		}
-		
-		return ResultGenerator.genSuccessResult("更新订单成功状态成功！", "");
 	}
 	
 	/**
@@ -926,36 +866,36 @@ public class PaymentController extends AbstractBaseController{
 		logger.info("redis 取出2："+donationPrice);
 		return ResultGenerator.genSuccessResult("success", donationPriceDTO);
  	}
-	
-	/**
-     * 	校验用户是否支付过
-     */
-//	@ApiOperation(value="校验用户是否有过钱的交易", notes="校验用户是否有过钱的交易")
-//	@PostMapping("/validUserPay")
-//	@ResponseBody
-//    public BaseResult<ValidPayDTO> validUserPay(@RequestBody UserIdParam userIdParam){
-//		return payLogService.validUserPay(userIdParam.getUserId());
-// 	}
-	
-    /**
-     * 处理支付超时订单
-     */
-	@ApiOperation(value="处理支付超时订单", notes="处理支付超时订单")
-	@PostMapping("/dealBeyondPayTimeOrderOut")
-	@ResponseBody
-    public BaseResult<String> dealBeyondPayTimeOrderOut(@RequestBody EmptyParam emptyParam){
-		paymentService.dealBeyondPayTimeOrderOut();
-		return ResultGenerator.genSuccessResult("success");
-    }
-	
 	/**
 	 * 第三方支付的query后的更新支付状态
 	 */
-	@ApiOperation(value="第三方支付的query后的更新支付状态", notes="第三方支付的query后的更新支付状态")
+	@ApiOperation(value="第三方支付的订单query后的更新支付状态", notes="第三方支付的query后的更新支付状态")
 	@PostMapping("/timerOrderQueryScheduled")
 	@ResponseBody
     public BaseResult<String> timerOrderQueryScheduled(@RequestBody EmptyParam emptyParam) {
+		if(CHECKORDER_TASKRUN){
+			logger.info("check cash is running ...... 请稍后重试");
+			return ResultGenerator.genSuccessResult("success","check cash is running ...... 请稍后重试");
+		}
+		CHECKORDER_TASKRUN = Boolean.TRUE;
 		paymentService.timerOrderQueryScheduled();
+		CHECKORDER_TASKRUN = Boolean.FALSE;
+		return ResultGenerator.genSuccessResult("success");
+	}
+	/**
+	 * 第三方支付的query后的更新支付状态
+	 */
+	@ApiOperation(value="第三方支付的充值query后的更新支付状态", notes="第三方支付的query后的更新支付状态")
+	@PostMapping("/timerRechargeQueryScheduled")
+	@ResponseBody
+    public BaseResult<String> timerRechargeQueryScheduled(@RequestBody EmptyParam emptyParam) {
+		if(CHECKRECHARGE_TASKRUN){
+			logger.info("check cash is running ...... 请稍后重试");
+			return ResultGenerator.genSuccessResult("success","check cash is running ...... 请稍后重试");
+		}
+		CHECKRECHARGE_TASKRUN = Boolean.TRUE;
+		paymentService.timerRechargeQueryScheduled();
+		CHECKRECHARGE_TASKRUN = Boolean.FALSE;
 		return ResultGenerator.genSuccessResult("success");
 	}
 	

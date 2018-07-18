@@ -177,7 +177,6 @@ public class XianFengService {
 				Integer bankType = userBankDTO.getType();
 				logger.info("[appPay saveBankInfo]" + " userId:" + userId + " bankType:" + bankType 
 						+ " accNo:" + accNo + " certNo:" + certNo + " mobileNo:" + mobileNo + " accName:" + accName);
-				saveBankInfo(userId,bankType,accNo,certNo,mobileNo,accName,cvn2,validDate,bankName,payLogId);
 				return ResultGenerator.genSuccessResult("验证码发送成功",xFApplyDTO);	
 			}else if(rspEntity.isVerfyCodeWrong()){
 				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_VERIFYCODE_WRONG.getcode(),PayEnums.PAY_XIANFENG_VERIFYCODE_WRONG.getMsg());
@@ -349,9 +348,9 @@ public class XianFengService {
 				response.setResult_msg(rEntity.resMessage);
 				BaseResult<RspOrderQueryDTO> bResult = null;
 				if(payType == 0) {
-					bResult = paymentService.orderOptions("xFengQuery",payLog,response);
+					bResult = paymentService.orderOptions(payLog,response);
 				}else {
-					bResult = paymentService.rechargeOptions("xFengQuery",payLog,response);
+					bResult = paymentService.rechargeOptions(payLog,response);
 				}
 				if(bResult != null && bResult.getCode() == 0) {
 					if(payType == 0) {
@@ -417,9 +416,9 @@ public class XianFengService {
 				response.setType(RspOrderQueryEntity.TYPE_XIANFENG);
 				response.setTrade_status(rspEntity.status);
 				if(payType == 0) {
-					bResult = paymentService.orderOptions("xFengNotify",payLog,response);
+					bResult = paymentService.orderOptions(payLog,response);
 				}else {
-					bResult = paymentService.rechargeOptions("xFengNotify",payLog,response);
+					bResult = paymentService.rechargeOptions(payLog,response);
 				}
 			}
 			if(bResult != null && bResult.getCode() == 0) {

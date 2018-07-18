@@ -1,5 +1,7 @@
 package com.dl.shop.payment.web;
 
+import io.swagger.annotations.ApiOperation;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -20,10 +22,8 @@ import com.dl.base.result.BaseResult;
 import com.dl.base.util.DateUtil;
 import com.dl.lottery.api.ILotteryPrintService;
 import com.dl.member.api.IUserAccountService;
-import com.dl.member.param.UserAccountParamByType;
 import com.dl.order.api.IOrderService;
 import com.dl.order.param.UpdateOrderPayStatusParam;
-import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.WxpayNotifyModel;
@@ -34,8 +34,6 @@ import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
 import com.dl.shop.payment.service.UserRechargeService;
 import com.dl.shop.payment.utils.XmlUtil;
-
-import io.swagger.annotations.ApiOperation;
 
 @Controller
 @RequestMapping("/payment/wxpay")
@@ -60,8 +58,7 @@ public class WxpayNotifyController {
 	@ApiOperation(value="微信支付回调")
 	@PostMapping("notify")
 	public void payNotify(HttpServletRequest request, HttpServletResponse response) {
-		String loggerId = "wxNotify_"+System.currentTimeMillis();
-		logger.warn(loggerId + " in controller /payment/wxpay/notify");
+		logger.warn(" in controller /payment/wxpay/notify");
 		String val = request.getParameter("result");
 		RspNotifyWeChatEntity rspEntity = null;
 		if(TextUtils.isEmpty(val)) {
@@ -98,15 +95,15 @@ public class WxpayNotifyController {
 						rspQueryEntity.setResult_code("0000");
 						rspQueryEntity.setPayCode("app_weixin");
 						rspQueryEntity.setTrade_no(transNo);
-						operation(payLog,loggerId,transNo,response,rspQueryEntity);
+						operation(payLog,transNo,response,rspQueryEntity);
 					}
 				}else {
-					logger.info("微信内部H5支付失败 订单查询payLog=空");
+					logger.info("payOrderSn="+transNo+"微信内部H5支付失败 订单查询payLog=空");
 				}
 			}
 		}else {	//微信外部回调处理逻辑
 			String requestStr = val;
-			logger.warn(loggerId + "  /payment/wxpay/notify requestStr 微信支付 验证信息: " + requestStr);
+			logger.warn("requestStr="+requestStr+ "  /payment/wxpay/notify requestStr 微信支付 验证信息: " + requestStr);
 			WxpayNotifyModel responseModel = null;
 			try {
 				responseModel = XmlUtil.xmlToBean(requestStr, WxpayNotifyModel.class);
@@ -120,17 +117,16 @@ public class WxpayNotifyController {
 			}
 			if ("SUCCESS".equals(resultCode)) {
 				// 获取回调的具体参数
-				logger.debug(loggerId + " 开始回调接口处理");
 				String appid = responseModel.getAppid();//prePayJo.getString("appid");
 				String mchId = responseModel.getMch_id();//prePayJo.getString("mch_id");
 				String bank_type = responseModel.getBank_type();//prePayJo.getString("bank_type");
 				String payOrderSn = responseModel.getOut_trade_no();//prePayJo.getString("out_trade_no");
-				logger.info(loggerId + " payOrderSn="+payOrderSn);
+				logger.info(" payOrderSn="+payOrderSn+"开始回调接口处理");
 				String tradeNo = responseModel.getTransaction_id();//prePayJo.getString("transaction_id");
 				int amount = responseModel.getTotal_fee();
 				PayLog payLog = payLogService.findPayLogByOrderSign(payOrderSn);
 				if(null == payLog) {
-					logger.info(loggerId + " payLog对象未查询到，返回失败！");
+					logger.info("payOrderSn="+payOrderSn + " payLog对象未查询到，返回失败！");
 					//fail
 					String xml = "<xml><return_code><![CDATA[FAIL]]></return_code> <return_msg><![CDATA[order no find]]></return_msg></xml>";
 					try {
@@ -143,7 +139,7 @@ public class WxpayNotifyController {
 				int isPaid = payLog.getIsPaid();
 				logger.info("=======isPaid:" + isPaid +" payLogId:" +payLog.getLogId() +"==========");
 				if(1== isPaid) {
-					logger.info(loggerId + " paylog.ispaid=1,已支付成功，返回OK！");
+					logger.info("payOrderSn="+payOrderSn+ " paylog.ispaid=1,已支付成功，返回OK！");
 					String xml = "<xml><return_code><![CDATA[SUCCESS]]></return_code> <return_msg><![CDATA[OK]]></return_msg></xml>";
 					try {
 						response.getWriter().write(xml);
@@ -155,15 +151,15 @@ public class WxpayNotifyController {
 				BigDecimal orderAmount = payLog.getOrderAmount().multiply(BigDecimal.valueOf(100)).setScale(0,RoundingMode.HALF_EVEN);
 				logger.info("实际交易金额:" + amount +" 订单金额:" + orderAmount);
 				if (((amount == Integer.parseInt(orderAmount.toString())) || "true".equals(cfgPay.getDEBUG())) && (appid.equals(cfgPay.getAPPID()))) {
-					logger.info(loggerId + " 订单金额或appid,mchId校验成功，前去回调订单服务！");
+					logger.info("payOrderSn="+payOrderSn+"订单金额或appid,mchId校验成功，前去回调订单服务！");
 					RspOrderQueryEntity rspOrderQueryEntity = new RspOrderQueryEntity();
 					rspOrderQueryEntity.setResult_code("0000");
 					rspOrderQueryEntity.setPayCode("app_weixin");
 					rspOrderQueryEntity.setTrade_no(payOrderSn);
 					rspOrderQueryEntity.setTotal_fee(amount+"");
-					this.operation(payLog, loggerId, tradeNo,response,rspOrderQueryEntity);
+					this.operation(payLog,tradeNo,response,rspOrderQueryEntity);
 				}else {
-					logger.info(loggerId + " 订单金额或appid,mchId校验失败！");
+					logger.info("payOrderSn="+payLog.getPayOrderSn()+ " 订单金额或appid,mchId校验失败！");
 				}
 			}
 		}
@@ -176,18 +172,18 @@ public class WxpayNotifyController {
 	 * @param tradeNo
 	 * @param response
 	 */
-	private void operation(PayLog payLog,String loggerId,String tradeNo,
+	private void operation(PayLog payLog,String tradeNo,
 			HttpServletResponse response,RspOrderQueryEntity rspEntity) {
 		try {
 			int payType = payLog.getPayType();
 			boolean rst = false;
 			if(0 == payType) {
-				paymentService.orderOptions(loggerId,payLog,rspEntity);
+				paymentService.orderOptions(payLog,rspEntity);
 				/*if(rspEntity.isSucc()) {
 					rst = this.orderOptionsSucc(tradeNo, payLog, loggerId, rspEntity);
 				}*/
 			} else if(1 == payType){
-				BaseResult<RspOrderQueryDTO> result = paymentService.rechargeOptions(loggerId,payLog,rspEntity);
+				BaseResult<RspOrderQueryDTO> result = paymentService.rechargeOptions(payLog,rspEntity);
 				if(result.getCode() == 0) {
 					rst = true;
 				}

@@ -44,7 +44,9 @@
 	<update id="updatePayLogFail0To3"> 
 		update dl_pay_log set is_paid=3, pay_msg=#{payMsg}, last_time=#{lastTime} where log_id=#{logId} and is_paid=0
 	</update>
-	
+	<update id="updatePayLogSuccess0To1"> 
+		update dl_pay_log set is_paid=1, pay_msg=#{payMsg}, last_time=#{lastTime},pay_time=#{payTime},trade_no=#{tradeNo} where log_id=#{logId} and is_paid=0
+	</update>
 	<select id="findPayLogByOrderSign" resultMap="BaseResultMap">
 	  select 
 	  <include refid="queryFields" />
@@ -78,8 +80,15 @@
 	  select 
 	  <include refid="queryFields" />
 	  from dl_pay_log
-	  where is_paid=0 order by add_time
+	  where is_paid=0 and pay_type=0 order by add_time
 	</select>
+	<select id="findUnPayChargePayLogs" resultMap="BaseResultMap">
+	  select 
+	  <include refid="queryFields" />
+	  from dl_pay_log
+	  where is_paid=0 and pay_type=1 order by add_time
+	</select>
+	
 	
 	<select id="countValidPayLogByUserId" resultType="java.lang.Integer">
 	  select count(1) from dl_pay_log  where user_id = #{userId} and is_paid = 1

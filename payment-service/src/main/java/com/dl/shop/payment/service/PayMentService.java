@@ -342,75 +342,73 @@ public class PayMentService extends AbstractService<PayMent> {
 	 * @return
 	 * 
 	 */
-	public BaseResult<RspOrderQueryDTO> rechargeOptions(String loggerId, PayLog payLog, RspOrderQueryEntity response) {
+	public BaseResult<RspOrderQueryDTO> rechargeOptions(PayLog payLog, RspOrderQueryEntity response) {
 //		Integer tradeState = response.getTradeState();
 		if(response.isSucc()) {
 			int currentTime = DateUtil.getCurrentTimeLong();
-			UpdateUserRechargeParam updateUserRechargeParam = new UpdateUserRechargeParam();
-			updateUserRechargeParam.setPaymentCode(payLog.getPayCode());
-			updateUserRechargeParam.setPaymentId(payLog.getPayOrderSn());
-			updateUserRechargeParam.setPaymentName(payLog.getPayName());
-			updateUserRechargeParam.setPayTime(currentTime);
-			updateUserRechargeParam.setStatus("1");
-			updateUserRechargeParam.setRechargeSn(payLog.getOrderSn());
-			userRechargeService.updateReCharege(updateUserRechargeParam);
-			
-			RecharegeParam recharegeParam = new RecharegeParam();
-			recharegeParam.setAmount(payLog.getOrderAmount());
-			recharegeParam.setPayId(payLog.getPayOrderSn());//解决充值两次问题
-			String payCode = payLog.getPayCode();
-			if("app_weixin".equals(payCode)) {
-				recharegeParam.setThirdPartName("微信");
-			}else if("app_rongbao".equals(payCode)){
-				recharegeParam.setThirdPartName("银行卡");
-			}
-			recharegeParam.setThirdPartPaid(payLog.getOrderAmount());
-			recharegeParam.setUserId(payLog.getUserId());
-			BaseResult<String>  rechargeRst = userAccountService.rechargeUserMoneyLimit(recharegeParam);
-			if(rechargeRst.getCode() != 0) {
-				logger.error(loggerId+" 给个人用户充值：code"+rechargeRst.getCode() +"message:"+rechargeRst.getMsg());
-			}
-			//更新paylog
-			try {
-				PayLog updatePayLog = new PayLog();
-				updatePayLog.setPayTime(currentTime);
-				payLog.setLastTime(currentTime);
-				updatePayLog.setTradeNo(response.getTrade_no());
-				updatePayLog.setLogId(payLog.getLogId());
-				updatePayLog.setIsPaid(1);
-				updatePayLog.setPayMsg("充值成功");
-				payLogService.update(updatePayLog);
-			} catch (Exception e) {
-				logger.error(loggerId+" paylogid="+payLog.getLogId()+" , paymsg=支付成功，保存成功记录时出错", e);
-			}
-			
-			
-			RspOrderQueryDTO rspOrderQueryDTO = new RspOrderQueryDTO();
-			rspOrderQueryDTO.setIsHaveRechargeAct(0);
-			rspOrderQueryDTO.setDonationPrice("");
-			StrParam strParam = new StrParam();
-			strParam.setStr("");
-			BaseResult<RechargeDataActivityDTO> rechargeDataAct = activityService.queryValidRechargeActivity(strParam);
-			if(rechargeDataAct.getCode() == 0) {
-				RechargeDataActivityDTO  rechargeDataActivityDTO  = rechargeDataAct.getData();
-				rspOrderQueryDTO.setIsHaveRechargeAct(rechargeDataActivityDTO.getIsHaveRechargeAct());
-				if(1 == rechargeDataActivityDTO.getIsHaveRechargeAct()) {
-					logger.info("开始执行充值赠送红包逻辑");
-					com.dl.member.param.PayLogIdParam payLogIdParam = new com.dl.member.param.PayLogIdParam();
-					payLogIdParam.setPayLogId(String.valueOf(payLog.getLogId()));
-					BaseResult<DonationPriceDTO> donationPriceRst = userBonusService.reiceiveBonusAfterRecharge(payLogIdParam);
-					logger.info("充值赠送红包结果："+ JSON.toJSONString(donationPriceRst));
-					if(donationPriceRst.getCode() == 0) {
-						logger.info("结束执行充值赠送红包逻辑");
-						rspOrderQueryDTO.setDonationPrice(donationPriceRst.getData().getDonationPrice());
+			PayLog updatePayLog = new PayLog();
+			updatePayLog.setPayTime(currentTime);
+			payLog.setLastTime(currentTime);
+			updatePayLog.setTradeNo(response.getTrade_no());
+			updatePayLog.setLogId(payLog.getLogId());
+			updatePayLog.setIsPaid(1);
+			updatePayLog.setPayMsg("充值成功");
+			payLogService.update(updatePayLog);
+			int updateRow = payLogMapper.updatePayLogSuccess0To1(updatePayLog);
+			logger.info("充值记录payOrderSn={},更新充值成功,updateRow={}",payLog.getPayOrderSn(),updateRow);
+			if(updateRow>1){
+				UpdateUserRechargeParam updateUserRechargeParam = new UpdateUserRechargeParam();
+				updateUserRechargeParam.setPaymentCode(payLog.getPayCode());
+				updateUserRechargeParam.setPaymentId(payLog.getPayOrderSn());
+				updateUserRechargeParam.setPaymentName(payLog.getPayName());
+				updateUserRechargeParam.setPayTime(currentTime);
+				updateUserRechargeParam.setStatus("1");
+				updateUserRechargeParam.setRechargeSn(payLog.getOrderSn());
+				userRechargeService.updateReCharege(updateUserRechargeParam);
+				RecharegeParam recharegeParam = new RecharegeParam();
+				recharegeParam.setAmount(payLog.getOrderAmount());
+				recharegeParam.setPayId(payLog.getPayOrderSn());//解决充值两次问题
+				String payCode = payLog.getPayCode();
+				if("app_weixin".equals(payCode)) {
+					recharegeParam.setThirdPartName("微信");
+				}else if("app_rongbao".equals(payCode)){
+					recharegeParam.setThirdPartName("银行卡");
+				}
+				recharegeParam.setThirdPartPaid(payLog.getOrderAmount());
+				recharegeParam.setUserId(payLog.getUserId());
+				BaseResult<String>  rechargeRst = userAccountService.rechargeUserMoneyLimit(recharegeParam);
+				if(rechargeRst.getCode() != 0) {
+					logger.error(payLog.getPayOrderSn()+" 给个人用户充值：code"+rechargeRst.getCode() +"message:"+rechargeRst.getMsg());
+				}
+				//更新paylog
+				RspOrderQueryDTO rspOrderQueryDTO = new RspOrderQueryDTO();
+				rspOrderQueryDTO.setIsHaveRechargeAct(0);
+				rspOrderQueryDTO.setDonationPrice("");
+				StrParam strParam = new StrParam();
+				strParam.setStr("");
+				BaseResult<RechargeDataActivityDTO> rechargeDataAct = activityService.queryValidRechargeActivity(strParam);
+				if(rechargeDataAct.getCode() == 0) {
+					RechargeDataActivityDTO  rechargeDataActivityDTO  = rechargeDataAct.getData();
+					rspOrderQueryDTO.setIsHaveRechargeAct(rechargeDataActivityDTO.getIsHaveRechargeAct());
+					if(1 == rechargeDataActivityDTO.getIsHaveRechargeAct()) {
+						logger.info("开始执行充值赠送红包逻辑");
+						com.dl.member.param.PayLogIdParam payLogIdParam = new com.dl.member.param.PayLogIdParam();
+						payLogIdParam.setPayLogId(String.valueOf(payLog.getLogId()));
+						BaseResult<DonationPriceDTO> donationPriceRst = userBonusService.reiceiveBonusAfterRecharge(payLogIdParam);
+						logger.info("充值赠送红包结果："+ JSON.toJSONString(donationPriceRst));
+						if(donationPriceRst.getCode() == 0) {
+							logger.info("结束执行充值赠送红包逻辑");
+							rspOrderQueryDTO.setDonationPrice(donationPriceRst.getData().getDonationPrice());
+						}
 					}
 				}
+				log.info("放入redis："+String.valueOf(payLog.getLogId())+"-----------"+rspOrderQueryDTO.getDonationPrice());
+				stringRedisTemplate.opsForValue().set(String.valueOf(payLog.getLogId()),rspOrderQueryDTO.getDonationPrice());
+				logger.info("充值成功后返回的信息："+rspOrderQueryDTO.getIsHaveRechargeAct() +"-----"+rspOrderQueryDTO.getDonationPrice());
+				return ResultGenerator.genSuccessResult("充值成功",rspOrderQueryDTO);	
 			}
-			
-			log.info("放入redis："+String.valueOf(payLog.getLogId())+"-----------"+rspOrderQueryDTO.getDonationPrice());
-			stringRedisTemplate.opsForValue().set(String.valueOf(payLog.getLogId()),rspOrderQueryDTO.getDonationPrice());
-			logger.info("充值成功后返回的信息："+rspOrderQueryDTO.getIsHaveRechargeAct() +"-----"+rspOrderQueryDTO.getDonationPrice());
-			return ResultGenerator.genSuccessResult("充值成功",rspOrderQueryDTO);
+			logger.error("充值记录payOrderSn={}已变更，更新失败",payLog.getPayOrderSn());
+			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),PayEnums.PAY_RONGBAO_FAILURE.getMsg());
 		}else if(response.isFail()){
 			//更新paylog
 			try {
@@ -420,7 +418,7 @@ public class PayMentService extends AbstractService<PayMent> {
 				updatePayLog.setLastTime(DateUtil.getCurrentTimeLong());
 				payLogMapper.updatePayLogFail0To3(updatePayLog);
 			} catch (Exception e) {
-				logger.error(loggerId + " paylogid="+payLog.getLogId()+" , paymsg="+response.getResult_msg()+"，保存失败记录时出错", e);
+				logger.error("payOrderSn="+payLog.getPayOrderSn()+ ", paylogid="+payLog.getLogId()+" , paymsg="+response.getResult_msg()+"，保存失败记录时出错", e);
 			}
 			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),PayEnums.PAY_RONGBAO_FAILURE.getMsg());
 		}else {
@@ -454,7 +452,7 @@ public class PayMentService extends AbstractService<PayMent> {
 	 * @param response
 	 * @return
 	 */
-	public BaseResult<RspOrderQueryDTO> orderOptions(String loggerId, PayLog payLog, RspOrderQueryEntity response) {
+	public BaseResult<RspOrderQueryDTO> orderOptions(PayLog payLog, RspOrderQueryEntity response) {
 		if(response.isSucc()) {
 			//2018-07-04
 			int currentTime = DateUtil.getCurrentTimeLong();
@@ -483,99 +481,12 @@ public class PayMentService extends AbstractService<PayMent> {
 				updatePayLog.setPayMsg("支付成功");
 				payLogService.update(updatePayLog);
 			}else {
-				logger.error(loggerId+" paylogid="+"ordersn=" + payLog.getOrderSn()+"更新订单成功状态失败");
+				logger.error("payOrderSn={}"+payLog.getPayOrderSn()+" paylogid="+"ordersn=" + payLog.getOrderSn()+"更新订单成功状态失败");
 			}
-			//old
-			/*//预出票操作
-			String orderSn = payLog.getOrderSn();
-			SaveLotteryPrintInfoParam saveLotteryPrintParam = new SaveLotteryPrintInfoParam();
-			saveLotteryPrintParam.setOrderSn(orderSn);
-			BaseResult<String> saveLotteryPrintInfo = lotteryPrintService.saveLotteryPrintInfo(saveLotteryPrintParam);
-			boolean isLotteryPrintSucc = false;
-			if(saveLotteryPrintInfo.getCode() != 0) {
-				isLotteryPrintSucc = false;
-			}else {
-				isLotteryPrintSucc = true;
-			}
-			logger.info("查询已经支付成功，进行预出票操作...isLotteryPrintSucc:" + isLotteryPrintSucc);
-			//更新order
-			UpdateOrderInfoParam param = new UpdateOrderInfoParam();
-			if(isLotteryPrintSucc) {
-				param.setOrderStatus(1);	
-			}else {
-				param.setOrderStatus(2);//2->出票失败   1->待出票
-			}
-			param.setPayStatus(1);
-			param.setPayTime(currentTime);
-			param.setPaySn(payLog.getLogId()+"");
-			param.setPayName(payLog.getPayName());
-			param.setPayCode(payLog.getPayCode());
-			param.setOrderSn(payLog.getOrderSn());
-			BaseResult<String> updateOrderInfo = orderService.updateOrderInfo(param);
-			
-			logger.info("==============支付成功订单回调[orderService]==================");
-			logger.info("payLogId:" + payLog.getLogId() + " payName:" + payLog.getPayName() 
-			+ " payCode:" + payLog.getPayCode() + " payOrderSn:" + payLog.getPayOrderSn());
-			logger.info("==================================");
-			
-			if(updateOrderInfo.getCode() != 0) {
-				logger.error(loggerId+" paylogid="+"ordersn=" + payLog.getOrderSn()+"更新订单成功状态失败");
-			}
-			//更新paylog
-			try {
-				PayLog updatePayLog = new PayLog();
-				updatePayLog.setPayTime(currentTime);
-				payLog.setLastTime(currentTime);
-				updatePayLog.setTradeNo(response.getTrade_no());
-				updatePayLog.setLogId(payLog.getLogId());
-				updatePayLog.setIsPaid(1);
-				updatePayLog.setPayMsg("支付成功");
-				payLogService.update(updatePayLog);
-			} catch (Exception e) {
-				logger.error(loggerId+" paylogid="+payLog.getLogId()+" , paymsg=支付成功，保存成功记录时出错", e);
-			}
-			//订单支付付款成功就要生成流水
-			logger.info("订单支付付款成功就要生成流水...");
-			UserAccountParamByType userAccountParamByType = new UserAccountParamByType();
-			Integer accountType = ProjectConstant.BUY;
-			logger.info("===========更新用户流水表=======:" + accountType);
-			userAccountParamByType.setAccountType(accountType);
-			userAccountParamByType.setAmount(payLog.getOrderAmount());
-			userAccountParamByType.setBonusPrice(BigDecimal.ZERO);//暂无红包金额
-			userAccountParamByType.setOrderSn(payLog.getOrderSn());
-			userAccountParamByType.setPayId(payLog.getLogId());
-			String payCode = payLog.getPayCode();
-			String payName;
-			if(payCode.equals("app_weixin") || payCode.equals("app_weixin_h5")) {
-				payName = "微信";
-			}else {
-				payName = "银行卡";
-			}
-			userAccountParamByType.setPaymentName(payName);
-			userAccountParamByType.setThirdPartName(payName);
-			userAccountParamByType.setThirdPartPaid(payLog.getOrderAmount());
-			userAccountParamByType.setUserId(payLog.getUserId());
-			BaseResult<String> accountRst = userAccountService.insertUserAccount(userAccountParamByType);
-			if(accountRst.getCode() != 0) {
-				logger.info(loggerId + "生成账户流水异常");
-			}else {
-				logger.info("生成账户流水成功");
-			}*/
-//			if(!isLotteryPrintSucc) {
-//				//资金回滚
-//				RollbackOrderAmountParam p = new RollbackOrderAmountParam();
-//				p.setOrderSn(orderSn);
-//				p.setAmt(amt);
-//				this.rollbackOrderAmount(p);
-//			}
 			return ResultGenerator.genSuccessResult("订单已支付成功！", null);
 		}else {
 			//预扣款 的方案 这里什么也不做
 			String payCode = payLog.getPayCode();
-//			String code = response.getResult_code();
-//			if(StringUtils.isBlank(code) || "3015".equals(code) || response.isYinHeWeChatNotPay()) {//融宝和银河返回值  为 订单不存在和未支付
-//				dealWithPayFailure(orderService, payLog,payLogService, response);
-//			}
 			//融宝处理
 			if(RspOrderQueryEntity.PAY_CODE_RONGBAO.equals(payCode)) {
 				String code = response.getResult_code();
@@ -603,19 +514,38 @@ public class PayMentService extends AbstractService<PayMent> {
 	}
 	
 	/**
-	 * 处理订单支付超时的定时任务
+	 * 处理订单支付 轮询
 	 */
     public void timerOrderQueryScheduled() {
-    	String loggerId = "timerOrderQueryScheduled_"+System.currentTimeMillis();
     	List<PayLog> findUnPayOrderPayLogs = payLogMapper.findUnPayOrderPayLogs();
 		if(findUnPayOrderPayLogs.size() > 0) {
 			for(PayLog paylog: findUnPayOrderPayLogs) {
-				boolean succ = this.task(paylog, loggerId);
+				try{
+					boolean succ = this.task(paylog);
+				}catch(Exception e){
+					logger.error("订单支付payOrderSn={}异常",paylog.getPayOrderSn(),e);
+				}
 			}
 		}
 	}
+    /**
+	 * 处理充值订单轮询
+	 */
+    public void timerRechargeQueryScheduled() {
+    	List<PayLog> findUnPayChargePayLogs = payLogMapper.findUnPayChargePayLogs();
+		if(findUnPayChargePayLogs.size() > 0) {
+			for(PayLog paylog: findUnPayChargePayLogs) {
+				try{
+					boolean succ = this.task(paylog);
+				}catch(Exception e){
+					logger.error("充值支付payOrderSn={}异常",paylog.getPayOrderSn(),e);
+				}
+			}
+		}
+	}
+    
     //主动查询支付状态
-	private boolean task(PayLog payLog, String loggerId) {
+	private boolean task(PayLog payLog) {
 		boolean succ = false;
 		BaseResult<RspOrderQueryEntity> baseResult = null;
 		//http request
@@ -655,10 +585,10 @@ public class PayMentService extends AbstractService<PayMent> {
 		RspOrderQueryEntity rspEntity = baseResult.getData();
 		succ = rspEntity.isSucc();
 		logger.info("支付查询 payOrderSn={},payCode={},retCode={},retMsg={},isSucc={}",rspEntity.getOrder_no(),payCode,rspEntity.getResult_code(),rspEntity.getResult_msg(),rspEntity.isSucc());
-		if(rspEntity != null && rspEntity.isSucc()) {
+		if(rspEntity != null) {
 			logger.info("payType:" + payLog.getPayType() +" payCode:" + payCode + "第三方定时器查询订单 payordersn:" + payOrderSn +"succ..");
 			Integer payType = payLog.getPayType();
-			if(payType == 0) {
+			if(payType == 0 && rspEntity.isSucc()) {
 				int currentTime = DateUtil.getCurrentTimeLong();
 				//更新order
 				UpdateOrderPayStatusParam param = new UpdateOrderPayStatusParam();
@@ -682,7 +612,7 @@ public class PayMentService extends AbstractService<PayMent> {
 				}
 //				bResult = this.orderOptions(loggerId, payLog,rspEntity);
 			}else if(payType == 1) {
-				BaseResult<RspOrderQueryDTO> bResult = this.rechargeOptions(loggerId, payLog, rspEntity);
+				BaseResult<RspOrderQueryDTO> bResult = this.rechargeOptions(payLog, rspEntity);
 			}
 		}
 		return succ;

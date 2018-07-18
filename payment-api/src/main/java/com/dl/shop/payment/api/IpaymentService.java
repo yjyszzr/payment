@@ -102,5 +102,10 @@ public interface IpaymentService {
 	 */
 	@RequestMapping(path="/payment/timerOrderQueryScheduled", method=RequestMethod.POST)
     public BaseResult<String> timerOrderQueryScheduled(@RequestBody EmptyParam emptyParam);
+	/**
+	 * 第三方支付的query后的更新支付状态
+	 */
+	@RequestMapping(path="/payment/timerRechargeQueryScheduled", method=RequestMethod.POST)
+    public BaseResult<String> timerRechargeQueryScheduled(@RequestBody EmptyParam emptyParam);
 
 }
