@@ -415,6 +415,7 @@ public class XianFengService {
 				response.setTrade_no(rspEntity.tradeNo);
 				response.setPayCode(payCode);
 				response.setType(RspOrderQueryEntity.TYPE_XIANFENG);
+				response.setTrade_status(rspEntity.status);
 				if(payType == 0) {
 					bResult = paymentService.orderOptions("xFengNotify",payLog,response);
 				}else {
@@ -425,7 +426,7 @@ public class XianFengService {
 				isSucc = true;
 			}
 		}else {
-			logger.info("[payNotify]" +" 商户号，交易金额校验失败, amt:" + rspEntity.amount +" merchantId:" + rspEntity.merchantId);
+			logger.error("[payNotify] payOrderSn=" +rspEntity.merchantNo+" 商户号，交易金额校验失败, amt:" + rspEntity.amount +" merchantId:" + rspEntity.merchantId);
 		}
 		return isSucc;
 	}
