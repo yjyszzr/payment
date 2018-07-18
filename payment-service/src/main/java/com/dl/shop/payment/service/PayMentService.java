@@ -654,7 +654,7 @@ public class PayMentService extends AbstractService<PayMent> {
 		}
 		RspOrderQueryEntity rspEntity = baseResult.getData();
 		succ = rspEntity.isSucc();
-		logger.info("payOrderSn={},payCode={},retCode={},retMsg={}",rspEntity.getOrder_no(),payCode,rspEntity.getResult_code(),rspEntity.getResult_msg());
+		logger.info("支付查询 payOrderSn={},payCode={},retCode={},retMsg={},isSucc={}",rspEntity.getOrder_no(),payCode,rspEntity.getResult_code(),rspEntity.getResult_msg(),rspEntity.isSucc());
 		if(rspEntity != null && rspEntity.isSucc()) {
 			logger.info("payType:" + payLog.getPayType() +" payCode:" + payCode + "第三方定时器查询订单 payordersn:" + payOrderSn +"succ..");
 			Integer payType = payLog.getPayType();
