@@ -33,7 +33,7 @@ public class RspOrderQueryEntity implements Serializable{
 		if(!TextUtils.isEmpty(result_code) && type == TYPE_YINHE) {
 			return result_code.equals("0000");
 		}else if(!TextUtils.isEmpty(result_code) && type == TYPE_XIANFENG) {
-			return !StringUtils.isEmpty(status)&&"S".equalsIgnoreCase(status);
+			return !StringUtils.isEmpty(trade_status)&&"S".equalsIgnoreCase(trade_status);
 		}
 		return false;
 	}
@@ -41,7 +41,7 @@ public class RspOrderQueryEntity implements Serializable{
 		if(!TextUtils.isEmpty(result_code) && type == TYPE_YINHE) {
 			return result_code.equals("106");
 		}else if(!TextUtils.isEmpty(result_code) && type == TYPE_XIANFENG) {
-			return StringUtils.isEmpty(status)||"I".equalsIgnoreCase(status);
+			return StringUtils.isEmpty(trade_status)||"I".equalsIgnoreCase(trade_status);
 		}
 		return false;
 	}
@@ -49,7 +49,7 @@ public class RspOrderQueryEntity implements Serializable{
 		if(!TextUtils.isEmpty(result_code) && type == TYPE_YINHE) {
 			return result_code.equals("104");
 		}else if(!TextUtils.isEmpty(result_code) && type == TYPE_XIANFENG) {
-			return !StringUtils.isEmpty(status)&&"F".equalsIgnoreCase(status);
+			return !StringUtils.isEmpty(trade_status)&&"F".equalsIgnoreCase(trade_status);
 		}
 		return false;
 	}
