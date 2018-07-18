@@ -280,10 +280,12 @@ public class XianFengService {
 	public BaseResult<XianFengApplyDTO> getPaySms(String payOrderSn,String token){
 		try {
 			RspApplyBaseEntity rspEntity = xFPayUtil.reqApplySms(payOrderSn);
-			if(rspEntity.isSucc()) {
+			if(rspEntity.isSucc()||rspEntity.isDoing()) {
 				XianFengApplyDTO applyDTO = new XianFengApplyDTO();
 				applyDTO.setToken(token);
 				return ResultGenerator.genSuccessResult("验证码发送成功",applyDTO);
+			}else if(rspEntity.isFail()){
+				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_BANK_IINFO_ERROR.getcode(),PayEnums.PAY_XIANFENG_BANK_IINFO_ERROR.getMsg());
 			}else if(rspEntity.isVerfyCodeWrong()){
 				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_VERIFYCODE_WRONG.getcode(),PayEnums.PAY_XIANFENG_VERIFYCODE_WRONG.getMsg());
 			}else if(rspEntity.isVerifyCodeInValid()){
