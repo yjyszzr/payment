@@ -416,25 +416,16 @@ public class PayMentService extends AbstractService<PayMent> {
 			try {
 				PayLog updatePayLog = new PayLog();
 				updatePayLog.setLogId(payLog.getLogId());
-				updatePayLog.setIsPaid(3);
 				updatePayLog.setPayMsg("充值失败["+response.getResult_msg()+"]");
-				payLogService.updatePayMsg(updatePayLog);
+				updatePayLog.setLastTime(DateUtil.getCurrentTimeLong());
+				payLogMapper.updatePayLogFail0To3(updatePayLog);
 			} catch (Exception e) {
 				logger.error(loggerId + " paylogid="+payLog.getLogId()+" , paymsg="+response.getResult_msg()+"，保存失败记录时出错", e);
 			}
 			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),PayEnums.PAY_RONGBAO_FAILURE.getMsg());
 		}else {
-			//更新paylog
-			try {
-				PayLog updatePayLog = new PayLog();
-				updatePayLog.setLogId(payLog.getLogId());
-				updatePayLog.setIsPaid(0);
-				updatePayLog.setPayMsg(response.getResult_msg());
-				payLogService.updatePayMsg(updatePayLog);
-			} catch (Exception e) {
-				logger.error(loggerId + " paylogid="+payLog.getLogId()+" , paymsg="+response.getResult_msg()+"，保存失败记录时出错", e);
-			}
 			String payCode = payLog.getPayCode();
+			logger.info("payOrderSn={},payCode={},retCode={},retMsg={}",payLog.getPayOrderSn(),payCode,response.getResult_code(),response.getResult_msg());
 			if(RspOrderQueryEntity.PAY_CODE_RONGBAO.equals(payCode)) {
 				String code = response.getResult_code();
 				if(StringUtils.isBlank(code) || "3015".equals(code)) {//订单不存在

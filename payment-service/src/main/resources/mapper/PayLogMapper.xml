@@ -41,6 +41,9 @@
 	<update id="updatePayMsg"> 
 		update dl_pay_log set is_paid=#{isPaid}, pay_msg=#{payMsg}, last_time=#{lastTime} where log_id=#{logId} 
 	</update>
+	<update id="updatePayLogFail0To3"> 
+		update dl_pay_log set is_paid=3, pay_msg=#{payMsg}, last_time=#{lastTime} where log_id=#{logId} and is_paid=0
+	</update>
 	
 	<select id="findPayLogByOrderSign" resultMap="BaseResultMap">
 	  select 

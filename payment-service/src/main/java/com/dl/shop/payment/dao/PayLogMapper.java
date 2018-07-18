@@ -83,5 +83,6 @@ public interface PayLogMapper extends Mapper<PayLog> {
 	 * @return
 	 */
 	int countValidPayLogByUserId(@Param("userId")Integer userId);
+	int updatePayLogFail0To3(PayLog updatePayLog);
 	
 }
