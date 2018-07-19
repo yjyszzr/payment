@@ -588,29 +588,51 @@ public class PayMentService extends AbstractService<PayMent> {
 		if(rspEntity != null) {
 			logger.info("payType:" + payLog.getPayType() +" payCode:" + payCode + "第三方定时器查询订单 payordersn:" + payOrderSn +"succ..");
 			Integer payType = payLog.getPayType();
-			if(payType == 0 && rspEntity.isSucc()) {
+			if(payType == 0) {
 				int currentTime = DateUtil.getCurrentTimeLong();
-				//更新order
-				UpdateOrderPayStatusParam param = new UpdateOrderPayStatusParam();
-				param.setPayStatus(1);
-				param.setPayTime(currentTime);
-//				param.setPayId(payId);
-				param.setPaySn(payLog.getLogId()+"");
-				param.setPayName(payLog.getPayName());
-				param.setPayCode(payLog.getPayCode());
-				param.setOrderSn(payLog.getOrderSn());
-				BaseResult<Integer> updateOrderInfo = orderService.updateOrderPayStatus(param);
-				if(updateOrderInfo.getCode() == 0) {
-					PayLog updatePayLog = new PayLog();
-					updatePayLog.setPayTime(currentTime);
-					payLog.setLastTime(currentTime);
-					updatePayLog.setTradeNo(rspEntity.getTrade_no());
-					updatePayLog.setLogId(payLog.getLogId());
-					updatePayLog.setIsPaid(1);
-					updatePayLog.setPayMsg("支付成功");
-					payLogService.update(updatePayLog);
+				if(rspEntity.isSucc()){
+					//更新order
+					UpdateOrderPayStatusParam param = new UpdateOrderPayStatusParam();
+					param.setPayStatus(1);
+					param.setPayTime(currentTime);
+	//				param.setPayId(payId);
+					param.setPaySn(payLog.getLogId()+"");
+					param.setPayName(payLog.getPayName());
+					param.setPayCode(payLog.getPayCode());
+					param.setOrderSn(payLog.getOrderSn());
+					BaseResult<Integer> updateOrderInfo = orderService.updateOrderPayStatus(param);
+					if(updateOrderInfo.getCode() == 0) {
+						PayLog updatePayLog = new PayLog();
+						updatePayLog.setPayTime(currentTime);
+						payLog.setLastTime(currentTime);
+						updatePayLog.setTradeNo(rspEntity.getTrade_no());
+						updatePayLog.setLogId(payLog.getLogId());
+						updatePayLog.setIsPaid(1);
+						updatePayLog.setPayMsg("支付成功");
+						payLogService.update(updatePayLog);
+					}
+				}else if(rspEntity.isFail()){
+					//更新order
+					UpdateOrderPayStatusParam param = new UpdateOrderPayStatusParam();
+					param.setPayStatus(2);
+					param.setPayTime(currentTime);
+	//				param.setPayId(payId);
+					param.setPaySn(payLog.getLogId()+"");
+					param.setPayName(payLog.getPayName());
+					param.setPayCode(payLog.getPayCode());
+					param.setOrderSn(payLog.getOrderSn());
+					BaseResult<Integer> updateOrderInfo = orderService.updateOrderPayStatus(param);
+					if(updateOrderInfo.getCode() == 0) {
+						PayLog updatePayLog = new PayLog();
+						updatePayLog.setPayTime(currentTime);
+						payLog.setLastTime(currentTime);
+						updatePayLog.setTradeNo(rspEntity.getTrade_no());
+						updatePayLog.setLogId(payLog.getLogId());
+						updatePayLog.setIsPaid(3);
+						updatePayLog.setPayMsg("支付失败");
+						payLogService.update(updatePayLog);
+					}
 				}
-//				bResult = this.orderOptions(loggerId, payLog,rspEntity);
 			}else if(payType == 1) {
 				BaseResult<RspOrderQueryDTO> bResult = this.rechargeOptions(payLog, rspEntity);
 			}
