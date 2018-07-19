@@ -52,6 +52,7 @@ import com.dl.shop.payment.service.XianFengService;
 import com.ucf.sdk.UcfForOnline;
 import com.ucf.sdk.util.AESCoder;
 
+import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 
 /**
@@ -121,7 +122,23 @@ public class XianFengController {
 	@PostMapping("/appConfirm")
 	@ResponseBody
 	public BaseResult<Object> appPayCfm(@RequestBody XianFengPayConfirmParam payParam) {
-		return xianFengService.appPayCfm(payParam);
+		int payLogId = payParam.getPayLogId();
+		String code = payParam.getCode();
+		String token = payParam.getToken();
+		PayLog payLog = payLogService.findById(payLogId);
+		if(StringUtils.isEmpty(token)){
+			logger.info("[appPayCfm]" + " code:" + code+"还未获取验证码");
+			return ResultGenerator.genFailResult("请先获取验证码");
+		}
+		if(StringUtils.isEmpty(code)) {
+			logger.info("[appPayCfm]" + " code:" + code);
+			return ResultGenerator.genFailResult("请输入验证码");
+		}
+		if(payLog == null) {
+			logger.info("[appPayCfm]" + "查询PayLog失败");
+			return ResultGenerator.genFailResult("查询支付信息失败");
+		}
+		return xianFengService.appPayCfm(payLog,code);
 	}
 	
 	@ApiOperation(value="获取先锋银行列表配置")

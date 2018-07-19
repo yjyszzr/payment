@@ -59,20 +59,7 @@ public class XianFengService {
 	@Resource
 	private Constants xfConstants;
 	
-	public BaseResult<Object> appPayCfm(XianFengPayConfirmParam param){
-		int payLogId = param.getPayLogId();
-		String code = param.getCode();
-		PayLog payLog = payLogService.findById(payLogId);
-		if(payLog == null) {
-			logger.info("[appPayCfm]" + "查询PayLog失败");
-			return ResultGenerator.genFailResult("查询支付信息失败");
-		}
-		String payCode = payLog.getPayCode();
-		String orderSn = payLog.getOrderSn();
-		if(StringUtils.isEmpty(code)) {
-			logger.info("[appPayCfm]" + " code:" + code);
-			return ResultGenerator.genFailResult("请输入验证码");
-		}
+	public BaseResult<Object> appPayCfm(PayLog payLog,String code){
 		String payOrderSn = payLog.getPayOrderSn();
 		RspApplyBaseEntity rspEntity = null;
 		try {

@@ -9,4 +9,6 @@ public class XianFengPayConfirmParam {
 	private int payLogId;
 	@ApiModelProperty("支付验证码")
 	private String code;
+	@ApiModelProperty("上下文")
+	private String token;
 }
