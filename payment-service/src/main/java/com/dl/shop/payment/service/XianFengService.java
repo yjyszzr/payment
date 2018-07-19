@@ -374,14 +374,8 @@ public class XianFengService {
 			return isSucc;
 		}
 		int isPaid = payLog.getIsPaid();
-		int payLogId = payLog.getLogId();
 		if(isPaid == 1) {
 			logger.info("[payNotify]" +" 该订单已支付...");
-			PayBankRecordModel payBankRecordModel = new PayBankRecordModel();
-			payBankRecordModel.setPayLogId(payLogId);
-			payBankRecordModel.setIsPaid(1);
-			int cnt = payBankRecordMapper.updateIsPaidInfo(payBankRecordModel);
-			logger.info("[payNotify]" + "先锋支付银行卡支付状态回写 cnt:" + cnt);
 			return isSucc;
 		}
 		BigDecimal bigAmt = payLog.getOrderAmount();
