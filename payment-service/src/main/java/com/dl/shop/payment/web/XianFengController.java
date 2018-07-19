@@ -128,15 +128,15 @@ public class XianFengController {
 		PayLog payLog = payLogService.findById(payLogId);
 		if(StringUtils.isEmpty(token)){
 			logger.info("[appPayCfm]" + " code:" + code+"还未获取验证码");
-			return ResultGenerator.genFailResult("请先获取验证码");
+			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_VERIFYCODE_WRONG.getcode(),PayEnums.PAY_XIANFENG_VERIFYCODE_WRONG.getMsg());
 		}
 		if(StringUtils.isEmpty(code)) {
 			logger.info("[appPayCfm]" + " code:" + code);
-			return ResultGenerator.genFailResult("请输入验证码");
+			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_VERIFYCODE_WRONG.getcode(),PayEnums.PAY_XIANFENG_VERIFYCODE_WRONG.getMsg());
 		}
 		if(payLog == null) {
 			logger.info("[appPayCfm]" + "查询PayLog失败");
-			return ResultGenerator.genFailResult("查询支付信息失败");
+			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
 		}
 		return xianFengService.appPayCfm(payLog,code);
 	}
