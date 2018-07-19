@@ -511,7 +511,7 @@ public class PayMentService extends AbstractService<PayMent> {
 				PayLog updatePayLog = new PayLog();
 				updatePayLog.setPayTime(currentTime);
 				payLog.setLastTime(currentTime);
-				updatePayLog.setTradeNo(rspEntity.getTrade_no());
+				updatePayLog.setTradeNo(response.getTrade_no());
 				updatePayLog.setLogId(payLog.getLogId());
 				updatePayLog.setIsPaid(3);
 				updatePayLog.setPayMsg("支付失败");
