@@ -285,7 +285,7 @@ public class XianFengController {
 					}
             	} catch (Exception e) {
 					e.printStackTrace();
-					logger.info("[payNotify]" + "exception msg:" + e.getMessage());
+					logger.info("[payNotify] exception msg:", e);
 				}
             }
         }

@@ -391,12 +391,6 @@ public class XianFengService {
 			logger.info("[payNotify]" +" 商户号，交易金额校验成功, amt:" + rspEntity.amount +" merchantId:" + rspEntity.merchantId);
 			BaseResult<RspOrderQueryDTO> bResult = null;
 			if(rspEntity.isSucc()) {
-				//先锋支付银行卡回写支付成功，该银行卡已生效
-				PayBankRecordModel payBankRecordModel = new PayBankRecordModel();
-				payBankRecordModel.setPayLogId(payLogId);
-				payBankRecordModel.setIsPaid(1);
-				int cnt = payBankRecordMapper.updateIsPaidInfo(payBankRecordModel);
-				logger.info("[payNotify]" + "先锋支付银行卡支付状态回写 cnt:" + cnt +" payLogId:" + payLogId);
 				RspOrderQueryEntity response = new RspOrderQueryEntity();
 				response.setResult_code("00000");
 				response.setTrade_no(rspEntity.tradeNo);
