@@ -85,7 +85,7 @@ public class XianFengService {
 			if(rspEntity.isSucc()) {
 				return ResultGenerator.genSuccessResult("支付申请成功");
 			}else if(rspEntity.isDoing()) {
-				return ResultGenerator.genSuccessResult("支付中");
+				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_BANK_PAY_DOING.getcode(),PayEnums.PAY_XIANFENG_BANK_PAY_DOING.getMsg());
 			}else if(rspEntity.isVerfyCodeWrong()){
 				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_VERIFYCODE_WRONG.getcode(),PayEnums.PAY_XIANFENG_VERIFYCODE_WRONG.getMsg());
 			}else if(rspEntity.isVerifyCodeInValid()) {

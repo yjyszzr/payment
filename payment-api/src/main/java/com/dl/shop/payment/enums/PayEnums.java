@@ -40,7 +40,8 @@ public enum PayEnums {
 	PAY_XIANFENG_QUICKPAY_PHONE_ERROR(304070,"手机号格式不正确"),
 	PAY_XIANFENG_QUICKPAY_CARDNO_ERROR(304071,"卡号格式不正确"),
 	PAY_XIANFENG_QUICKPAY_ID_ERROR(304072,"身份证格式不正确"),
-	PAY_XIANFENG_BANK_IINFO_ERROR(304073,"因银行信息填写错误,订单已取消请重新下单");
+	PAY_XIANFENG_BANK_IINFO_ERROR(304073,"因银行信息填写错误,订单已取消请重新下单"),
+	PAY_XIANFENG_BANK_PAY_DOING(304074,"支付处理中");
 	
 	private Integer code;
     private String msg;
