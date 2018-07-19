@@ -19,10 +19,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
+import com.dl.base.model.UserDeviceInfo;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.base.service.AbstractService;
 import com.dl.base.util.DateUtil;
+import com.dl.base.util.SessionUtil;
 import com.dl.lottery.api.ILotteryPrintService;
 import com.dl.member.api.IActivityService;
 import com.dl.member.api.IUserAccountService;
@@ -120,11 +122,19 @@ public class PayMentService extends AbstractService<PayMent> {
      * @return
      */
     public List<PaymentDTO> findAllDto() {
+    	UserDeviceInfo userDevice = SessionUtil.getUserDevice();
+    	final Boolean isH5 = userDevice!=null&&"h5".equalsIgnoreCase(userDevice.getChannel());
 		List<PayMent> payments = super.findAll();
 		if(CollectionUtils.isEmpty(payments)) {
 			return new ArrayList<PaymentDTO>();
 		}
-		List<PaymentDTO> list = payments.stream().filter(payment->payment.getIsEnable() == 1).map(payment->{
+		List<PaymentDTO> list = payments.stream().filter(payment->{
+			Boolean isEnable = payment.getIsEnable() == 1;
+			if(!isH5&&"app_xianfeng".equalsIgnoreCase(payment.getPayCode())){
+				isEnable = Boolean.FALSE;
+			}
+			return isEnable;
+		}).map(payment->{
 			PaymentDTO paymentDTO = new PaymentDTO();
 			paymentDTO.setPayCode(payment.getPayCode());
 			paymentDTO.setPayDesc(payment.getPayDesc());
