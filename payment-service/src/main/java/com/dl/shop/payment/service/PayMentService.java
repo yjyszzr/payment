@@ -356,7 +356,7 @@ public class PayMentService extends AbstractService<PayMent> {
 			payLogService.update(updatePayLog);
 			int updateRow = payLogMapper.updatePayLogSuccess0To1(updatePayLog);
 			logger.info("充值记录payOrderSn={},更新充值成功,updateRow={}",payLog.getPayOrderSn(),updateRow);
-			if(updateRow>1){
+			if(updateRow>0){
 				//先锋支付银行卡回写支付成功，该银行卡已生效
 				PayBankRecordModel payBankRecordModel = new PayBankRecordModel();
 				payBankRecordModel.setPayLogId(payLog.getLogId());

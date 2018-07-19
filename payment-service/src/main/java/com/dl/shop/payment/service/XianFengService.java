@@ -134,6 +134,7 @@ public class XianFengService {
 				cvn2 = param.getCvn2();
 				validDate = param.getValidDate();
 			}
+			
 			logger.info("[appPay]" + "信用卡 cvn2 有效期校验成功...");
 		}
 		RspApplyBaseEntity rspEntity = null;
@@ -165,6 +166,7 @@ public class XianFengService {
 				Integer bankType = userBankDTO.getType();
 				logger.info("[appPay saveBankInfo]" + " userId:" + userId + " bankType:" + bankType 
 						+ " accNo:" + accNo + " certNo:" + certNo + " mobileNo:" + mobileNo + " accName:" + accName);
+                saveBankInfo(userId,bankType,accNo,certNo,mobileNo,accName,cvn2,validDate,bankName,payLogId);
 				return ResultGenerator.genSuccessResult("验证码发送成功",xFApplyDTO);	
 			}else if(rspEntity.isVerfyCodeWrong()){
 				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_VERIFYCODE_WRONG.getcode(),PayEnums.PAY_XIANFENG_VERIFYCODE_WRONG.getMsg());
