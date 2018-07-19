@@ -353,7 +353,6 @@ public class PayMentService extends AbstractService<PayMent> {
 			updatePayLog.setLogId(payLog.getLogId());
 			updatePayLog.setIsPaid(1);
 			updatePayLog.setPayMsg("充值成功");
-			payLogService.update(updatePayLog);
 			int updateRow = payLogMapper.updatePayLogSuccess0To1(updatePayLog);
 			logger.info("充值记录payOrderSn={},更新充值成功,updateRow={}",payLog.getPayOrderSn(),updateRow);
 			if(updateRow>0){
