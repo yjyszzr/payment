@@ -293,7 +293,7 @@ public class XianFengService {
 				return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_SMS_ERROR.getcode(),PayEnums.PAY_XIANFENG_SMS_ERROR.getMsg() +"[" + rspEntity.resMessage + "]");
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("先锋支付重发验证码失败payOrderSn={}",payOrderSn,e);
 		}
 		return null;
 	}
