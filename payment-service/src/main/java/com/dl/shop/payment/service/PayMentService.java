@@ -366,12 +366,7 @@ public class PayMentService extends AbstractService<PayMent> {
 			int updateRow = payLogMapper.updatePayLogSuccess0To1(updatePayLog);
 			logger.info("充值记录payOrderSn={},更新充值成功,updateRow={}",payLog.getPayOrderSn(),updateRow);
 			if(updateRow>0){
-				//先锋支付银行卡回写支付成功，该银行卡已生效
-				PayBankRecordModel payBankRecordModel = new PayBankRecordModel();
-				payBankRecordModel.setPayLogId(payLog.getLogId());
-				payBankRecordModel.setIsPaid(1);
-				int cnt = payBankRecordMapper.updateIsPaidInfo(payBankRecordModel);
-				logger.info("[payNotify]" + "先锋支付银行卡支付状态回写 cnt:" + cnt +" payLogId:" + payLog.getLogId());
+				updatePaybankRecord(payLog.getLogId());
 				UpdateUserRechargeParam updateUserRechargeParam = new UpdateUserRechargeParam();
 				updateUserRechargeParam.setPaymentCode(payLog.getPayCode());
 				updateUserRechargeParam.setPaymentId(payLog.getPayOrderSn());
@@ -495,12 +490,7 @@ public class PayMentService extends AbstractService<PayMent> {
 				updatePayLog.setIsPaid(1);
 				updatePayLog.setPayMsg("支付成功");
 				payLogService.update(updatePayLog);
-				//先锋支付银行卡回写支付成功，该银行卡已生效
-				PayBankRecordModel payBankRecordModel = new PayBankRecordModel();
-				payBankRecordModel.setPayLogId(payLog.getLogId());
-				payBankRecordModel.setIsPaid(1);
-				int cnt = payBankRecordMapper.updateIsPaidInfo(payBankRecordModel);
-				logger.info("[payNotify]" + "先锋支付银行卡支付状态回写 cnt:" + cnt +" payLogId:" + payLog.getLogId());
+				updatePaybankRecord(payLog.getLogId());
 			}else {
 				logger.error("payOrderSn={}"+payLog.getPayOrderSn()+" paylogid="+"ordersn=" + payLog.getOrderSn()+"更新订单成功状态失败");
 			}
@@ -554,7 +544,17 @@ public class PayMentService extends AbstractService<PayMent> {
 		}
 		return null;
 	}
-	
+	private void updatePaybankRecord(Integer payLogId){
+		//先锋支付银行卡回写支付成功，该银行卡已生效
+		PayBankRecordModel payBankRecordModel = new PayBankRecordModel();
+		payBankRecordModel.setPayLogId(payLogId);
+		PayBankRecordModel cardPay = payBankRecordMapper.selectPayBankCardNoByPayLog(payBankRecordModel);
+		int updateRow = payBankRecordMapper.updatePayBankCardNoByPayLog(cardPay);
+		log.info("更新历史卡号={},更新行数={}",cardPay==null?"":cardPay.getBankCardNo(),updateRow);
+		payBankRecordModel.setIsPaid(1);
+		int cnt = payBankRecordMapper.updateIsPaidInfo(payBankRecordModel);
+		logger.info("[payNotify]" + "先锋支付银行卡支付状态回写 cnt:" + cnt +" payLogId:" + payLogId);
+	}
 	/**
 	 * 处理订单支付 轮询
 	 */

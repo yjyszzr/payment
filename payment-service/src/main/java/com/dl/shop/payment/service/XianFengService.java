@@ -183,17 +183,17 @@ public class XianFengService {
 	
 	private void saveBankInfo(int userId,int bankType,String accNo,String certNo,String mobileNo,String accName,String cvn2,String vaildDate,String bankName,int payLogId) {
 		PayBankRecordModel payBankRecordModel = new PayBankRecordModel();
-		payBankRecordModel.setUserId(userId);
-		List<PayBankRecordModel> sList = payBankRecordMapper.listAllUserBank(payBankRecordModel);
-		PayBankRecordModel findModel = null;
-		for(int i = 0;i < sList.size();i++) {
-			PayBankRecordModel payBRModel = sList.get(i);
-			if(!StringUtils.isEmpty(accNo) && payBRModel.getBankCardNo().equals(accNo)) {
-				findModel = payBRModel;
-				break;
-			}
-		}
-		if(findModel == null) {
+//		payBankRecordModel.setUserId(userId);
+//		List<PayBankRecordModel> sList = payBankRecordMapper.listAllUserBank(payBankRecordModel);
+//		PayBankRecordModel findModel = null;
+//		for(int i = 0;i < sList.size();i++) {
+//			PayBankRecordModel payBRModel = sList.get(i);
+//			if(!StringUtils.isEmpty(accNo) && payBRModel.getBankCardNo().equals(accNo)) {
+//				findModel = payBRModel;
+//				break;
+//			}
+//		}
+//		if(findModel == null) {
 			payBankRecordModel = new PayBankRecordModel();
 			payBankRecordModel.setUserId(userId);
 			payBankRecordModel.setBankCardNo(accNo);
@@ -207,22 +207,22 @@ public class XianFengService {
 			payBankRecordModel.setBankName(bankName);
 			payBankRecordModel.setPayLogId(payLogId);
 			int cnt = payBankRecordMapper.insert(payBankRecordModel);
-			logger.info("[appPay]" + " payBankRecordMapper.insert cnt:" + cnt);
-		}else {
-			logger.info("[appPay]" + " payBankRecordMapper.updateInfo"+" id:" + findModel.getId() + " payLogId:" + findModel.getPayLogId() +" accNo:" +accNo);
-			findModel.setUserId(userId);
-			findModel.setBankCardNo(accNo);
-			findModel.setCertNo(certNo);
-			findModel.setPhone(mobileNo);
-			findModel.setUserName(accName);
-			findModel.setCvn2(cvn2);
-			findModel.setValidDate(vaildDate);
-			findModel.setLastTime(DateUtil.getCurrentTimeLong());
-			findModel.setPayLogId(payLogId);
-			findModel.setBankName(bankName);
-			int cnt = payBankRecordMapper.updateInfo(findModel);
-			logger.info("[appPay]" + " payBankRecordMapper.updateInfo cnt:" + cnt);
-		}
+			logger.info("[appPay] payLogId="+payLogId+"bankCardNo=" +accNo+" payBankRecordMapper.insert cnt:" + cnt);
+//		}else {
+//			logger.info("[appPay]" + " payBankRecordMapper.updateInfo"+" id:" + findModel.getId() + " payLogId:" + findModel.getPayLogId() +" accNo:" +accNo);
+//			findModel.setUserId(userId);
+//			findModel.setBankCardNo(accNo);
+//			findModel.setCertNo(certNo);
+//			findModel.setPhone(mobileNo);
+//			findModel.setUserName(accName);
+//			findModel.setCvn2(cvn2);
+//			findModel.setValidDate(vaildDate);
+//			findModel.setLastTime(DateUtil.getCurrentTimeLong());
+//			findModel.setPayLogId(payLogId);
+//			findModel.setBankName(bankName);
+//			int cnt = payBankRecordMapper.updateInfo(findModel);
+//			logger.info("[appPay]" + " payBankRecordMapper.updateInfo cnt:" + cnt);
+//		}
 	}
 	
 	/**
