@@ -50,7 +50,7 @@
 	 select * from dl_pay_bank_record where paylog_id = #{payLogId} limit 1
 	</select>
 	<update id="updatePayBankCardNoByPayLog" parameterType="com.dl.shop.payment.model.PayBankRecordModel">
-	 update dl_pay_bank_record set is_paid = -1 where bank_card_no = #{certNo} and is_paid = 1
+	 update dl_pay_bank_record set is_paid = -1 where bank_card_no = #{bankCardNo} and is_paid = 1
 	</update>
 	
 	
