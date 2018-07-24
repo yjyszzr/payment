@@ -563,7 +563,9 @@ public class PayMentService extends AbstractService<PayMent> {
 		if(findUnPayOrderPayLogs.size() > 0) {
 			for(PayLog paylog: findUnPayOrderPayLogs) {
 				try{
+					log.info("处理payuOrderSn={}开始",paylog.getPayOrderSn());
 					boolean succ = this.task(paylog);
+					log.info("处理payuOrderSn={}结束",paylog.getPayOrderSn());
 				}catch(Exception e){
 					logger.error("订单支付payOrderSn={}异常",paylog.getPayOrderSn(),e);
 				}

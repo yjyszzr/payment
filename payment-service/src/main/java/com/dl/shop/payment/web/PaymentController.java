@@ -879,6 +879,7 @@ public class PaymentController extends AbstractBaseController{
 		}
 		CHECKORDER_TASKRUN = Boolean.TRUE;
 		paymentService.timerOrderQueryScheduled();
+		logger.info("timerOrderQueryScheduled taskend");
 		CHECKORDER_TASKRUN = Boolean.FALSE;
 		return ResultGenerator.genSuccessResult("success");
 	}
