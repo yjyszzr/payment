@@ -101,6 +101,10 @@ public class XianFengService {
 			logger.info("查询PayLog失败");
 			return ResultGenerator.genFailResult("查询支付信息失败");
 		}
+		if(Integer.valueOf(3).equals(payLog.getIsPaid())){
+			logger.info("[getPaySms]" + "订单号pay_order_sn={},order_sn={}已失败,不能获取验证码",payLog.getPayOrderSn(),payLog.getOrderSn());
+			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_CANCEL_ERROR.getcode(),PayEnums.PAY_XIANFENG_CANCEL_ERROR.getMsg());
+		}
 		int payType = payLog.getPayType();
 		int userId = payLog.getUserId();
 		BigDecimal bigDecimal = payLog.getOrderAmount();
