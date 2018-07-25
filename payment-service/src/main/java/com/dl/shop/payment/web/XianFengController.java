@@ -231,7 +231,7 @@ public class XianFengController {
 			logger.info("[getPaySms]" + "订单号查询失败");
 			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_ORDER_BLANK.getcode(),PayEnums.PAY_XIANFENG_ORDER_BLANK.getMsg());	
 		}
-		if(payLog.getIsPaid()==Integer.valueOf(3)){
+		if(Integer.valueOf(3).equals(payLog.getIsPaid())){
 			logger.info("[getPaySms]" + "订单号pay_order_sn={},order_sn={}已失败,不能获取验证码",payLog.getPayOrderSn(),payLog.getOrderSn());
 			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_CANCEL_ERROR.getcode(),PayEnums.PAY_XIANFENG_CANCEL_ERROR.getMsg());
 		}
