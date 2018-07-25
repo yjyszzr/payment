@@ -293,13 +293,13 @@ public class XianFengService {
 	 * @param params
 	 * @return
 	 */
-	public BaseResult<XianFengApplyCfgDTO> appPayCfg(int userId,int payLogId){
+	public BaseResult<XianFengApplyCfgDTO> appPayCfg(int payLogId){
 		PayLog payLog = payLogService.findById(payLogId);
 		if(payLog == null) {
 			return ResultGenerator.genFailResult("订单查询失败 payLogId:" + payLogId);
 		}
 		BigDecimal bigAmt = payLog.getOrderAmount();
-		List<PayBankRecordDTO> mBankList = paymentService.listUserBanks(userId);
+		List<PayBankRecordDTO> mBankList = paymentService.listUserBanks(payLog.getUserId());
 		//按照时间先后排序
 		sortBankList(mBankList);
 		XianFengApplyCfgDTO xFApplyCfgDTO = new XianFengApplyCfgDTO();

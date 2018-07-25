@@ -145,12 +145,11 @@ public class XianFengController {
 	@PostMapping("/appCfg")
 	@ResponseBody
 	public BaseResult<XianFengApplyCfgDTO> appCfg(@RequestBody XianFengCfgParam cfgParam) {
-		int userId = SessionUtil.getUserId();
 		int payLogId = cfgParam.getPayLogId();
 		if(payLogId <= 0) {
 			return ResultGenerator.genFailResult("PayLogId不合法");
 		}
-		return xianFengService.appPayCfg(userId,payLogId);
+		return xianFengService.appPayCfg(payLogId);
 	}
 	
 	@ApiOperation(value="银行列表支付信息")
