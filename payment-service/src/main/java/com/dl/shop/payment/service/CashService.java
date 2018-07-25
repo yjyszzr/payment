@@ -131,13 +131,12 @@ public class CashService {
 		try {
 			totalAmount = Double.valueOf(strTotalAmount);
 		}catch(Exception ee) {
-			ee.printStackTrace();
+			log.error("提现金额转换异常",ee);
 		}
 		if(totalAmount == null || totalAmount <= 0) {
 			log.info(loggerId+"提现金额提供有误！");
 			return ResultGenerator.genResult(PayEnums.PAY_TOTAL_NOTRANGE.getcode(),PayEnums.PAY_TOTAL_NOTRANGE.getMsg());
 		}
-		
 		//是否小于3元钱
 		if(totalAmount < 3) {
 			log.info(loggerId+"最低提现金额大于3元~");
@@ -155,16 +154,6 @@ public class CashService {
 		String cardNo = userBankDTO.getCardNo();
 		SysConfigParam cfg = new SysConfigParam();
 		cfg.setBusinessId(8);//提现
-		BaseResult<SysConfigDTO> baseResult = userAccountService.queryBusinessLimit(cfg);
-		double limit = 100;	//默认100提现阈值数
-		boolean inReview = false;
-		if(baseResult.getData() != null) {
-			limit = baseResult.getData().getValue().doubleValue();
-		}
-		//如果提现金额大于阈值
-	    if(totalAmount > limit) {
-	    	inReview = true;
-	    }
 		log.info("[withdrawForApp]" + " 扣除用户余额成功:" + totalAmount);
 		StrParam strParam = new StrParam();
 		strParam.setStr("");
@@ -181,7 +170,7 @@ public class CashService {
 			try {
 				dMoney = Double.valueOf(strMoney);
 			}catch(Exception ee) {
-				ee.printStackTrace();
+				log.error("金额转换异常",ee);
 			}
 		}
 		if(dMoney == null) {
@@ -200,11 +189,7 @@ public class CashService {
 		userWithdrawParam.setAmount(BigDecimal.valueOf(totalAmount));
 		userWithdrawParam.setCardNo(cardNo);
 		userWithdrawParam.setRealName(realName);
-		if(inReview) {//大于阈值
-			userWithdrawParam.setStatus(ProjectConstant.STATUS_UNCOMPLETE);
-		}else {//小于阈值
-			userWithdrawParam.setStatus(ProjectConstant.STATUS_BANK_APPROVING);
-		}
+		userWithdrawParam.setStatus(ProjectConstant.STATUS_UNCOMPLETE);
 		userWithdrawParam.setWithDrawSn(withdrawalSn);
 		WithdrawalSnDTO withdrawalSnDTO = userWithdrawService.saveWithdraw(userWithdrawParam);
 		if(StringUtils.isEmpty(withdrawalSnDTO.getWithdrawalSn())) {
@@ -245,27 +230,32 @@ public class CashService {
 			log.info("扣除用户余额返回={}",withdrawRst==null?"":withdrawRst.getCode()+":"+withdrawRst.getMsg()+":"+withdrawRst.getData());
 			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_NOT_ENOUGH.getcode(),PayEnums.PAY_RONGBAO_NOT_ENOUGH.getMsg());
 		}
-		
 		userWithdrawLog = new UserWithdrawLog();
 		userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
 		userWithdrawLog.setLogName(CashEnums.CASH_REVIEWING.getMsg());
 		userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
 		userWithdrawLog.setWithdrawSn(widthDrawSn);
 		userWithdrawLogService.save(userWithdrawLog);
-		if(inReview) {
+		BaseResult<SysConfigDTO> baseResult = userAccountService.queryBusinessLimit(cfg);
+		double limit = 100;	//默认100提现阈值数
+		if(baseResult.getData() != null) {
+			limit = baseResult.getData().getValue().doubleValue();
+		}
+		if(totalAmount > limit) {
 			log.info("单号:"+widthDrawSn+"超出提现阈值,进入审核通道  系统阈值:" + limit);
 			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_APPLY_SUC.getcode(),PayEnums.PAY_WITHDRAW_APPLY_SUC.getMsg());
 		}else {
 			//先减少用户钱包余额
 			log.info("进入第三方提现流程...系统阈值:" + limit + " widthDrawSn:" + widthDrawSn);
+            UserWithdraw userWithdraw = new UserWithdraw();
+            userWithdraw.setWithdrawalSn(withdrawalSn);
+            userWithdrawMapper.updateUserWithdrawStatus0To3(userWithdraw);
 			RspSingleCashEntity rEntity = callThirdGetCash(widthDrawSn,totalAmount,cardNo,realName,mobile,bankCode);
 			long time3 = System.currentTimeMillis();
 			log.info("time3为："+time3);
 			log.info("提现所用时间为："+(time3-time1));
 			return operation(rEntity,widthDrawSn,userId,Boolean.TRUE);
 		}
-		
-
 	}
 	
 	/**
