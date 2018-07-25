@@ -471,7 +471,7 @@ public class PaymentController extends AbstractBaseController{
 			}
 		}else if("app_xianfeng".equals(paymentDto.getPayCode())){
 			PayReturnDTO rEntity = new PayReturnDTO();
-			rEntity.setPayUrl("");
+			rEntity.setPayUrl(xianFengUtil.getPayH5Url());
 			rEntity.setPayLogId(savePayLog.getLogId()+"");
 			rEntity.setOrderId(orderId);
 			payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
@@ -649,7 +649,7 @@ public class PaymentController extends AbstractBaseController{
 		}else if("app_xianfeng".equals(payCode)) {
 			logger.info("[rechargeForApp]" + " 先锋充值处理...");
 			PayReturnDTO rEntity = new PayReturnDTO();
-			rEntity.setPayUrl("");
+			rEntity.setPayUrl(xianFengUtil.getPayH5Url()+"?id="+savePayLog.getLogId());
 			rEntity.setPayLogId(savePayLog.getLogId()+"");
 			rEntity.setOrderId(orderSn);
 			payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);

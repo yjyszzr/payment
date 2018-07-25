@@ -13,6 +13,10 @@ public class Constants {
 	private Boolean IS_DEBUBG;
 	@Value("${xianfeng.testMode}")
 	private Boolean TESTMODE;
+//	http://39.106.18.39:9805/user/quickinfo?id=89348
+	@Value("${xianfeng.pay_h5_url}")
+	private String PayH5Url;
+	
 	
 //	public static String MER_ID = "M200000550";
 	@Value("${xianfeng.app_merid}")

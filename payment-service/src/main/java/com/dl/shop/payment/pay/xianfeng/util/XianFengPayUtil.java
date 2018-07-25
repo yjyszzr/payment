@@ -35,6 +35,9 @@ public class XianFengPayUtil {
 	@Resource
 	private Constants xFConstants;
 	
+	public String getPayH5Url(){
+		return xFConstants.getPayH5Url();
+	}
 	public XianFengPayUtil() throws Exception {
 		// TODO Auto-generated constructor stub
 		//支付申请
