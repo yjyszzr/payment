@@ -64,6 +64,13 @@ public class XianFengService {
 		RspApplyBaseEntity rspEntity = null;
 		try {
 			rspEntity = xFPayUtil.reqApplyCfg(code,payOrderSn);
+			RspOrderQueryEntity rspOrderQueryEntity = rspEntity.buildRspOrderQueryEntity("app_xianfeng");
+			int payType = payLog.getPayType();
+			if(0 == payType) {
+				paymentService.orderOptions(payLog,rspOrderQueryEntity);
+			} else if(1 == payType){
+				paymentService.rechargeOptions(payLog,rspOrderQueryEntity);
+			}
 		} catch (Exception e) {
 			logger.error("先锋支付失败",e);
 		}
