@@ -123,16 +123,16 @@ public class PayMentService extends AbstractService<PayMent> {
      */
     public List<PaymentDTO> findAllDto() {
     	UserDeviceInfo userDevice = SessionUtil.getUserDevice();
-    	final Boolean isH5 = userDevice!=null&&"h5".equalsIgnoreCase(userDevice.getChannel());
+//    	final Boolean isH5 = userDevice!=null&&"h5".equalsIgnoreCase(userDevice.getChannel());
 		List<PayMent> payments = super.findAll();
 		if(CollectionUtils.isEmpty(payments)) {
 			return new ArrayList<PaymentDTO>();
 		}
 		List<PaymentDTO> list = payments.stream().filter(payment->{
 			Boolean isEnable = payment.getIsEnable() == 1;
-			if(!isH5&&"app_xianfeng".equalsIgnoreCase(payment.getPayCode())){
-				isEnable = Boolean.FALSE;
-			}
+//			if(!isH5&&"app_xianfeng".equalsIgnoreCase(payment.getPayCode())){
+//				isEnable = Boolean.FALSE;
+//			}
 			return isEnable;
 		}).map(payment->{
 			PaymentDTO paymentDTO = new PaymentDTO();
