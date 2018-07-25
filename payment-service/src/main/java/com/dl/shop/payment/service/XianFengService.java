@@ -64,6 +64,7 @@ public class XianFengService {
 		RspApplyBaseEntity rspEntity = null;
 		try {
 			rspEntity = xFPayUtil.reqApplyCfg(code,payOrderSn);
+			log.info("先锋支付确认响应信息验证码={},payOrderSn={},resEntity={}",code,payOrderSn,rspEntity);
 			RspOrderQueryEntity rspOrderQueryEntity = rspEntity.buildRspOrderQueryEntity("app_xianfeng");
 			int payType = payLog.getPayType();
 			if(0 == payType) {
