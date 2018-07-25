@@ -874,13 +874,13 @@ public class PaymentController extends AbstractBaseController{
 	@ResponseBody
     public BaseResult<String> timerOrderQueryScheduled(@RequestBody EmptyParam emptyParam) {
 		if(CHECKORDER_TASKRUN){
-			logger.info("check cash is running ...... 请稍后重试");
+			logger.info("check order pay is running ...... 请稍后重试");
 			return ResultGenerator.genSuccessResult("success","check cash is running ...... 请稍后重试");
 		}
 		CHECKORDER_TASKRUN = Boolean.TRUE;
 		paymentService.timerOrderQueryScheduled();
-		logger.info("timerOrderQueryScheduled taskend");
 		CHECKORDER_TASKRUN = Boolean.FALSE;
+		logger.info("timerOrderQueryScheduled taskend");
 		return ResultGenerator.genSuccessResult("success");
 	}
 	/**
@@ -891,12 +891,13 @@ public class PaymentController extends AbstractBaseController{
 	@ResponseBody
     public BaseResult<String> timerRechargeQueryScheduled(@RequestBody EmptyParam emptyParam) {
 		if(CHECKRECHARGE_TASKRUN){
-			logger.info("check cash is running ...... 请稍后重试");
+			logger.info("check recharge pay is running ...... 请稍后重试");
 			return ResultGenerator.genSuccessResult("success","check cash is running ...... 请稍后重试");
 		}
 		CHECKRECHARGE_TASKRUN = Boolean.TRUE;
 		paymentService.timerRechargeQueryScheduled();
 		CHECKRECHARGE_TASKRUN = Boolean.FALSE;
+		logger.info("timerRechargeQueryScheduled taskend");
 		return ResultGenerator.genSuccessResult("success");
 	}
 	

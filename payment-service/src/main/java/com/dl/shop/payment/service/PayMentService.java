@@ -563,9 +563,9 @@ public class PayMentService extends AbstractService<PayMent> {
 		if(findUnPayOrderPayLogs.size() > 0) {
 			for(PayLog paylog: findUnPayOrderPayLogs) {
 				try{
-					log.info("处理payuOrderSn={}开始",paylog.getPayOrderSn());
+					log.info("check order 处理payuOrderSn={}开始",paylog.getPayOrderSn());
 					boolean succ = this.task(paylog);
-					log.info("处理payuOrderSn={}结束",paylog.getPayOrderSn());
+					log.info("check order  处理payuOrderSn={}结束",paylog.getPayOrderSn());
 				}catch(Exception e){
 					logger.error("订单支付payOrderSn={}异常",paylog.getPayOrderSn(),e);
 				}
@@ -580,7 +580,9 @@ public class PayMentService extends AbstractService<PayMent> {
 		if(findUnPayChargePayLogs.size() > 0) {
 			for(PayLog paylog: findUnPayChargePayLogs) {
 				try{
+					log.info("check recharge 处理payuOrderSn={}开始",paylog.getPayOrderSn());
 					boolean succ = this.task(paylog);
+					log.info("check recharge 处理payuOrderSn={}结束",paylog.getPayOrderSn());
 				}catch(Exception e){
 					logger.error("充值支付payOrderSn={}异常",paylog.getPayOrderSn(),e);
 				}
