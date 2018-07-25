@@ -113,29 +113,20 @@ public class XianFengService {
 			pName = "充值支付";
 			pInfo = "彩小秘充值服务";
 		}
-		//获取bankId
-		UserBankPurposeQueryParam queryParams = new UserBankPurposeQueryParam();
-		queryParams.setUserId(userId);
-		queryParams.setPurpose(1);
-		queryParams.setBankCardCode(accNo);
-		BaseResult<UserBankDTO> baseResult = userBankService.queryBankByPurpose(queryParams);
-		if(baseResult.getCode() != 0 || baseResult.getData() == null) {
-			log.info("[appPay]" + "查询银行卡为空...");
-			return ResultGenerator.genFailResult("查询银行卡为空");
+		BankCardParam bankCardParams = new BankCardParam();
+		bankCardParams.setBankCardNo(accNo);
+		BaseResult<BankDTO> baseResult = userBankService.queryUserBankType(bankCardParams);
+		if(baseResult==null||baseResult.getCode() != 0) {
+			logger.info("查询PayLog失败cardNo={},retCode={},retMsg={}",accNo,baseResult==null?"":baseResult.getCode(),baseResult==null?"":baseResult.getMsg());
+			return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_BANKTYPE_FAILURE.getcode(),PayEnums.PAY_XIANFENG_BANKTYPE_FAILURE.getMsg());
 		}
-		UserBankDTO userBankDTO = baseResult.getData();
-		String bankId = userBankDTO.getAbbreviation();
-		String bankName = userBankDTO.getBankName();
-		int type = userBankDTO.getType();
-		if(type == 1) {//信用卡|贷记卡
-			if(StringUtils.isEmpty(param.getCvn2()) || StringUtils.isEmpty(param.getValidDate())){
-				return ResultGenerator.genFailResult("信用卡cv2，有效期参数有误");
-			}else {
-				cvn2 = param.getCvn2();
-				validDate = param.getValidDate();
-			}
-			
-			logger.info("[appPay]" + "信用卡 cvn2 有效期校验成功...");
+		BankDTO bankDTO = baseResult.getData();
+		String bankId = bankDTO.getAbbreviation();
+		String bankName = bankDTO.getBankname();
+		String cardType = bankDTO.getCardtype();
+		Integer bankType = Integer.valueOf(0);
+		if("贷记卡".equals(cardType)) {
+			bankType = Integer.valueOf(1);
 		}
 		RspApplyBaseEntity rspEntity = null;
 		//请求第三方申请接口
@@ -163,7 +154,6 @@ public class XianFengService {
 				XianFengApplyDTO xFApplyDTO = new XianFengApplyDTO();
 				xFApplyDTO.setToken(token);
 				//验证码发送成功，bank信息入库
-				Integer bankType = userBankDTO.getType();
 				logger.info("[appPay saveBankInfo]" + " userId:" + userId + " bankType:" + bankType 
 						+ " accNo:" + accNo + " certNo:" + certNo + " mobileNo:" + mobileNo + " accName:" + accName);
                 saveBankInfo(userId,bankType,accNo,certNo,mobileNo,accName,cvn2,validDate,bankName,payLogId);
@@ -183,17 +173,6 @@ public class XianFengService {
 	
 	private void saveBankInfo(int userId,int bankType,String accNo,String certNo,String mobileNo,String accName,String cvn2,String vaildDate,String bankName,int payLogId) {
 		PayBankRecordModel payBankRecordModel = new PayBankRecordModel();
-//		payBankRecordModel.setUserId(userId);
-//		List<PayBankRecordModel> sList = payBankRecordMapper.listAllUserBank(payBankRecordModel);
-//		PayBankRecordModel findModel = null;
-//		for(int i = 0;i < sList.size();i++) {
-//			PayBankRecordModel payBRModel = sList.get(i);
-//			if(!StringUtils.isEmpty(accNo) && payBRModel.getBankCardNo().equals(accNo)) {
-//				findModel = payBRModel;
-//				break;
-//			}
-//		}
-//		if(findModel == null) {
 			payBankRecordModel = new PayBankRecordModel();
 			payBankRecordModel.setUserId(userId);
 			payBankRecordModel.setBankCardNo(accNo);
@@ -208,21 +187,6 @@ public class XianFengService {
 			payBankRecordModel.setPayLogId(payLogId);
 			int cnt = payBankRecordMapper.insert(payBankRecordModel);
 			logger.info("[appPay] payLogId="+payLogId+"bankCardNo=" +accNo+" payBankRecordMapper.insert cnt:" + cnt);
-//		}else {
-//			logger.info("[appPay]" + " payBankRecordMapper.updateInfo"+" id:" + findModel.getId() + " payLogId:" + findModel.getPayLogId() +" accNo:" +accNo);
-//			findModel.setUserId(userId);
-//			findModel.setBankCardNo(accNo);
-//			findModel.setCertNo(certNo);
-//			findModel.setPhone(mobileNo);
-//			findModel.setUserName(accName);
-//			findModel.setCvn2(cvn2);
-//			findModel.setValidDate(vaildDate);
-//			findModel.setLastTime(DateUtil.getCurrentTimeLong());
-//			findModel.setPayLogId(payLogId);
-//			findModel.setBankName(bankName);
-//			int cnt = payBankRecordMapper.updateInfo(findModel);
-//			logger.info("[appPay]" + " payBankRecordMapper.updateInfo cnt:" + cnt);
-//		}
 	}
 	
 	/**
@@ -234,30 +198,6 @@ public class XianFengService {
 		BankCardParam bankCardParams = new BankCardParam();
 		bankCardParams.setBankCardNo(bankCardNo);
 		BaseResult<BankDTO> baseResult = userBankService.queryUserBankType(bankCardParams);
-		if(baseResult.getCode() == 0) {
-			BankDTO bankDTO = baseResult.getData();
-			if(bankDTO != null) {
-				BankCardSaveParam param = new BankCardSaveParam();
-				param.setCardNo(bankDTO.getBankcard());
-				param.setBankLogo(bankDTO.getBanklogo());
-				param.setBankName(bankDTO.getBankname());
-				param.setCardType(bankDTO.getCardtype());
-				param.setAbbreviation(bankDTO.getAbbreviation());
-				int type = 0;
-				String cardType = bankDTO.getCardtype();
-				if("借记卡".equals(cardType)) {
-					type = 0;
-				}else if("贷记卡".equals(cardType)) {
-					type = 1;
-				}
-				param.setType(type);
-				param.setPurpose(1);
-				if(type == 0 || type == 1) {
-					logger.info("[queryBankType]" + " " + bankDTO.getBankcard() +" saveInfo...");
-					userBankService.saveBankInfo(param);
-				}
-			}
-		}
 		return baseResult;
 	}
 	
