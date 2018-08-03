@@ -304,6 +304,7 @@ public class PaymentController extends AbstractBaseController{
 		submitOrderParam.setTicketAmount(ticketAmount);
 		submitOrderParam.setSurplus(surplus);
 		submitOrderParam.setThirdPartyPaid(thirdPartyPaid);
+		submitOrderParam.setPayName(payName);
 		submitOrderParam.setUserBonusId(userBonusId);
 		submitOrderParam.setBonusAmount(bonusAmount);
 		submitOrderParam.setOrderFrom(dto.getRequestFrom());
