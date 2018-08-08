@@ -247,8 +247,10 @@ public class CashService {
 			limit = baseResult.getData().getValue().doubleValue();
 		}
 		boolean isCheck = false;
+		log.info("提现审请信息：userId="+userId+" totalAmount=" + totalAmount+ " limit="+limit);
 		if(totalAmount > limit) {
 			double maxLimit = this.getMaxNoCheckMoney();
+			log.info("提现审请信息：userId="+userId+" totalAmount=" + totalAmount+ " limit="+limit + " getMaxNoCheckMoney=" + maxLimit);
 			if(totalAmount > maxLimit) {
 				isCheck = true;
 			}else {
@@ -259,11 +261,13 @@ public class CashService {
 				GetUserMoneyDTO data = getUserMoneyPayRst.getData();
 				Double userMoneyPaid = data != null?data.getMoneyPaid():0.0;
 				Double userMoneyPaidForNoCheck = this.getUserMoneyPaidForNoCheck();
+				log.info("提现审请信息：userId="+userId+" totalAmount=" + totalAmount+ " limit="+limit + " getUserMoneyPaidForNoCheck=" + userMoneyPaidForNoCheck + " userMoneyPaid="+userMoneyPaid);
 				if(userMoneyPaidForNoCheck > userMoneyPaid) {
 					isCheck = true;
 				}
 			}
 		}
+		log.info("提现审请信息：userId="+userId+" totalAmount=" + totalAmount+ " limit="+limit + " isCheck="+isCheck);
 		if(isCheck) {
 			log.info("单号:"+widthDrawSn+"超出提现阈值,进入审核通道  系统阈值:" + limit);
 			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_APPLY_SUC.getcode(),PayEnums.PAY_WITHDRAW_APPLY_SUC.getMsg());
