@@ -95,5 +95,12 @@
   	select * from dl_user_withdraw where status = 3;
   </select>
   
+  <select id="getUserMoneyPaidForNoCheck" resultType="double">
+  	select value from dl_sys_config where business_id = 5
+  </select>
+  <select id="getMaxNoCheckMoney" resultType="double">
+  	select value from dl_user_withdraw where status = 6
+  </select>
+  
   
 </mapper>

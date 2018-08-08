@@ -49,6 +49,9 @@ import com.dl.member.param.UserBankQueryParam;
 import com.dl.member.param.UserIdParam;
 import com.dl.member.param.UserIdRealParam;
 import com.dl.member.param.WithDrawParam;
+import com.dl.order.api.IOrderService;
+import com.dl.order.dto.GetUserMoneyDTO;
+import com.dl.order.param.GetUserMoneyPayParam;
 import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dao.UserWithdrawMapper;
 import com.dl.shop.payment.dto.WithdrawalSnDTO;
@@ -73,6 +76,8 @@ import com.ucf.sdk.util.AESCoder;
 public class CashService {
 	@Resource
 	private IUserService userService;
+	@Resource
+	private IOrderService orderService;
 	@Autowired
 	private IUserBankService userBankService;
 	@Autowired
@@ -241,11 +246,28 @@ public class CashService {
 		if(baseResult.getData() != null) {
 			limit = baseResult.getData().getValue().doubleValue();
 		}
+		boolean isCheck = false;
 		if(totalAmount > limit) {
+			double maxLimit = this.getMaxNoCheckMoney();
+			if(totalAmount > maxLimit) {
+				isCheck = true;
+			}else {
+				//判断用户是否是购彩超过指定额度用户
+				GetUserMoneyPayParam getUserMoneyPayParam = new GetUserMoneyPayParam();
+				getUserMoneyPayParam.setUserId(userId);
+				BaseResult<GetUserMoneyDTO> getUserMoneyPayRst = orderService.getUserMoneyPay(getUserMoneyPayParam);
+				GetUserMoneyDTO data = getUserMoneyPayRst.getData();
+				Double userMoneyPaid = data != null?data.getMoneyPaid():0.0;
+				Double userMoneyPaidForNoCheck = this.getUserMoneyPaidForNoCheck();
+				if(userMoneyPaidForNoCheck > userMoneyPaid) {
+					isCheck = true;
+				}
+			}
+		}
+		if(isCheck) {
 			log.info("单号:"+widthDrawSn+"超出提现阈值,进入审核通道  系统阈值:" + limit);
 			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_APPLY_SUC.getcode(),PayEnums.PAY_WITHDRAW_APPLY_SUC.getMsg());
 		}else {
-			//先减少用户钱包余额
 			log.info("进入第三方提现流程...系统阈值:" + limit + " widthDrawSn:" + widthDrawSn);
             UserWithdraw userWithdraw = new UserWithdraw();
             userWithdraw.setWithdrawalSn(withdrawalSn);
@@ -256,6 +278,21 @@ public class CashService {
 			log.info("提现所用时间为："+(time3-time1));
 			return operation(rEntity,widthDrawSn,userId,Boolean.TRUE);
 		}
+	}
+	
+	private double getMaxNoCheckMoney() {
+		double maxNoCheckMoney = userWithdrawMapper.getMaxNoCheckMoney();
+		if(maxNoCheckMoney <= 0) {
+			return 10000;
+		}
+		return maxNoCheckMoney;
+	}
+	private double getUserMoneyPaidForNoCheck() {
+		double maxNoCheckMoney = userWithdrawMapper.getUserMoneyPaidForNoCheck();
+		if(maxNoCheckMoney <= 0) {
+			return 3000;
+		}
+		return maxNoCheckMoney;
 	}
 	
 	/**

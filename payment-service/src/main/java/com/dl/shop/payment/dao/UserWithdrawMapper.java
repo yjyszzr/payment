@@ -32,4 +32,9 @@ public interface UserWithdrawMapper extends Mapper<UserWithdraw> {
 	
 	int countUserWithdrawByUserId(@Param("userId") Integer userId);
 	
+	//获取提现免审用户的购彩实付金额阀值
+	double getUserMoneyPaidForNoCheck();
+	//获取提现免审用户的上限单笔金额
+	double getMaxNoCheckMoney();
+	
 }
