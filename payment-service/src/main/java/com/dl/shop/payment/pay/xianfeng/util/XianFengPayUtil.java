@@ -35,8 +35,8 @@ public class XianFengPayUtil {
 	@Resource
 	private Constants xFConstants;
 	
-	public String getPayH5Url(){
-		return xFConstants.getPayH5Url();
+	public String getPayH5Url(Integer payLogId){
+		return xFConstants.getPayH5Url()+"?id="+payLogId;
 	}
 	public XianFengPayUtil() throws Exception {
 		// TODO Auto-generated constructor stub

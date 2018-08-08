@@ -59,6 +59,7 @@ import com.dl.order.dto.OrderDTO;
 import com.dl.order.param.SubmitOrderParam;
 import com.dl.order.param.SubmitOrderParam.TicketDetail;
 import com.dl.order.param.UpdateOrderInfoParam;
+import com.dl.order.param.UpdateOrderPayStatusParam;
 import com.dl.shop.payment.dto.PayLogDTO;
 import com.dl.shop.payment.dto.PayLogDetailDTO;
 import com.dl.shop.payment.dto.PayReturnDTO;
@@ -304,6 +305,7 @@ public class PaymentController extends AbstractBaseController{
 		submitOrderParam.setTicketAmount(ticketAmount);
 		submitOrderParam.setSurplus(surplus);
 		submitOrderParam.setThirdPartyPaid(thirdPartyPaid);
+		submitOrderParam.setPayName(payName);
 		submitOrderParam.setUserBonusId(userBonusId);
 		submitOrderParam.setBonusAmount(bonusAmount);
 		submitOrderParam.setOrderFrom(dto.getRequestFrom());
@@ -377,39 +379,21 @@ public class PaymentController extends AbstractBaseController{
 			}
 			if(!hasThird) {
 				//回调order,更新支付状态,余额支付成功
-				UpdateOrderInfoParam param1 = new UpdateOrderInfoParam();
+				UpdateOrderPayStatusParam param1 = new UpdateOrderPayStatusParam();
 				param1.setPayStatus(1);
 				int currentTime = DateUtil.getCurrentTimeLong();
 				param1.setPayTime(currentTime);
-				param1.setOrderStatus(1);
 				param1.setOrderSn(orderSn);
-				BaseResult<String> baseResult = orderService.updateOrderInfo(param1);
-				logger.info(loggerId + " 订单成功状态更新回调返回结果：status=" + baseResult.getCode()+" , message="+baseResult.getMsg());
-				if(baseResult.getCode() != 0 && isSurplus) {
+				param1.setPayCode("");
+				param1.setPayName("");
+				param1.setPaySn("");
+				BaseResult<Integer> baseResult = orderService.updateOrderPayStatus(param1);
+				logger.info(loggerId + " 订单成功状态更新回调返回结果：status=" + baseResult.getCode()+" , message="+baseResult.getMsg()+"data="+baseResult.getData());
+				if(baseResult.getCode() != 0 && isSurplus&&!Integer.valueOf(1).equals(baseResult.getData())) {
 					BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
 					logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在订单成功状态更新回滚用户余额结束！ 订单回调返回结果：status=" + rollbackUserAccountChangeByPay.getCode()+" , message="+rollbackUserAccountChangeByPay.getMsg());
 					if(rollbackUserAccountChangeByPay.getCode() != 0) {
 						logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在订单成功状态更新回滚用户余额时出错！");
-					}
-					return ResultGenerator.genFailResult("支付失败！");
-				}
-				SaveLotteryPrintInfoParam saveLotteryPrintParam = new SaveLotteryPrintInfoParam();
-				saveLotteryPrintParam.setOrderSn(orderSn);
-				BaseResult<String> saveLotteryPrintInfo = lotteryPrintService.saveLotteryPrintInfo(saveLotteryPrintParam);
-				if(saveLotteryPrintInfo.getCode() != 0) {
-					UpdateOrderInfoParam updateOrderInfoParam1 = new UpdateOrderInfoParam();
-					updateOrderInfoParam1.setOrderStatus(2);
-					updateOrderInfoParam1.setOrderSn(orderSn);
-					BaseResult<String> baseResult1 = orderService.updateOrderInfo(updateOrderInfoParam1);
-					if(baseResult1.getCode() != 0) {
-						logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在预出票失败后，更改订单状态为出票失败时出错！订单回调返回结果：status=" + baseResult1.getCode()+" , message="+baseResult1.getMsg());
-					}
-					if(isSurplus) {
-						BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
-						logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在预出票失败更新回滚用户余额结束！ 订单回调返回结果：status=" + rollbackUserAccountChangeByPay.getCode()+" , message="+rollbackUserAccountChangeByPay.getMsg());
-						if(rollbackUserAccountChangeByPay.getCode() != 0) {
-							logger.info(loggerId + " orderSn="+orderSn+" , Surplus="+surplus.doubleValue()+" 在预出票失败更新回滚用户余额时出错！");
-						}
 					}
 					return ResultGenerator.genFailResult("支付失败！");
 				}
@@ -471,7 +455,7 @@ public class PaymentController extends AbstractBaseController{
 			}
 		}else if("app_xianfeng".equals(paymentDto.getPayCode())){
 			PayReturnDTO rEntity = new PayReturnDTO();
-			rEntity.setPayUrl(xianFengUtil.getPayH5Url());
+			rEntity.setPayUrl(xianFengUtil.getPayH5Url(savePayLog.getLogId()));
 			rEntity.setPayLogId(savePayLog.getLogId()+"");
 			rEntity.setOrderId(orderId);
 			payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
@@ -649,7 +633,7 @@ public class PaymentController extends AbstractBaseController{
 		}else if("app_xianfeng".equals(payCode)) {
 			logger.info("[rechargeForApp]" + " 先锋充值处理...");
 			PayReturnDTO rEntity = new PayReturnDTO();
-			rEntity.setPayUrl(xianFengUtil.getPayH5Url()+"?id="+savePayLog.getLogId());
+			rEntity.setPayUrl(xianFengUtil.getPayH5Url(savePayLog.getLogId()));
 			rEntity.setPayLogId(savePayLog.getLogId()+"");
 			rEntity.setOrderId(orderSn);
 			payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
@@ -790,8 +774,7 @@ public class PaymentController extends AbstractBaseController{
 					baseResult = ResultGenerator.genSuccessResult("succ",rspOrderQueryEntity);
 				}
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("先锋支付查询异常",e);
 			}
 		}
 		if(baseResult != null) {

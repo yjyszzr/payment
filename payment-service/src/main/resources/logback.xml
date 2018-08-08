@@ -10,7 +10,7 @@
 	<appender name="rollingFileINFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>${LOG_DIR}/payment-info.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${LOG_DIR}/payment-info.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<fileNamePattern>${LOG_DIR}/info/payment-info.%d{yyyy-MM-dd}.log</fileNamePattern>
 			<maxHistory>30</maxHistory>		
 		</rollingPolicy>
 		<encoder>
@@ -25,7 +25,7 @@
 	<appender name="rollingFileERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>${LOG_DIR}/payment-error.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${LOG_DIR}/payment-error.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<fileNamePattern>${LOG_DIR}/error/payment-error.%d{yyyy-MM-dd}.log</fileNamePattern>
 			<maxHistory>30</maxHistory>		
 		</rollingPolicy>
 		<encoder>

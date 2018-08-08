@@ -393,7 +393,7 @@ public class CashService {
 				userWithdrawLogService.save(userWithdrawLog);
 				return ResultGenerator.genResult(PayEnums.CASH_FAILURE.getcode(),"提现失败");
 			}else{
-				log.warn("withdrawSn={}",widthDrawSn);
+				log.warn("withdrawSn={},更新提现状态3to4失败",widthDrawSn);
 				return ResultGenerator.genResult(PayEnums.CASH_FAILURE.getcode(),"提现失败");
 			}
 		}else if(rEntity.isTradeDoing()){
@@ -446,7 +446,12 @@ public class CashService {
 	    	userWithdraw.setWithdrawalSn(sn);
 			int row = userWithdrawMapper.updateUserWithdrawStatus0To3(userWithdraw);
 			if(row==1){
-				return operation(rspSCashEntity,sn,userId,Boolean.TRUE);
+				BaseResult result = operation(rspSCashEntity,sn,userId,Boolean.TRUE);
+				log.info("操作提现withdrawSn={}结果 code={},msg={}",sn,result==null?"":result.getCode(),result==null?"":result.getMsg());
+				return ResultGenerator.genSuccessResult("已审核");
+			}else{
+				log.error("操作提现withdrawSn={},更新结果0to3失败,updateRow={}",sn,row);
+				return ResultGenerator.genFailResult("审核失败,数据已发生变动");
 			}
 		}else {
 			log.info("后台管理审核拒绝，提现单状态为失败...");
@@ -464,10 +469,12 @@ public class CashService {
 				userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
 				userWithdrawLog.setWithdrawSn(sn);
 				userWithdrawLogService.save(userWithdrawLog);
-				return ResultGenerator.genFailResult("后台管理审核拒绝成功...");
+				return ResultGenerator.genSuccessResult("后台管理审核拒绝成功...");
+			}else{
+				log.error("操作提现withdrawSn={},更新结果0to4失败,updateRow={}",sn,row);
+				return ResultGenerator.genFailResult("审核失败,数据已发生变动");
 			}
 		}
-		return ResultGenerator.genFailResult("已审核");
 	}
 	
 	public void withdrawNotify(HttpServletRequest request, HttpServletResponse response) throws IOException{

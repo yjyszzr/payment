@@ -55,6 +55,7 @@ public class HttpUtil {
 	                result += line + "\n";
 	            }
 	            in.close();
+	            logger.info("HttpUtil.sendMsg response={}",result);
 	            rspEntity.msg = result;
 	            rspEntity.isSucc = true;
 	            return rspEntity;
