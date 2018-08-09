@@ -251,7 +251,7 @@ public class CashService {
 		if(totalAmount > limit) {
 			double maxLimit = this.getMaxNoCheckMoney();
 			log.info("提现审请信息：userId="+userId+" totalAmount=" + totalAmount+ " limit="+limit + " getMaxNoCheckMoney=" + maxLimit);
-			if(totalAmount > maxLimit) {
+			if(totalAmount >= maxLimit) {
 				isCheck = true;
 			}else {
 				//判断用户是否是购彩超过指定额度用户
