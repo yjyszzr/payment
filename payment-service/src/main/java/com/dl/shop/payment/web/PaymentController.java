@@ -1,12 +1,11 @@
 package com.dl.shop.payment.web;
 
-import io.swagger.annotations.ApiOperation;
-
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +36,8 @@ import com.dl.base.util.SessionUtil;
 import com.dl.lottery.api.ILotteryPrintService;
 import com.dl.lottery.dto.DIZQUserBetCellInfoDTO;
 import com.dl.lottery.dto.DIZQUserBetInfoDTO;
-import com.dl.lottery.param.SaveLotteryPrintInfoParam;
+import com.dl.lotto.dto.DIZQUserBetLottoDTO;
+import com.dl.lotto.dto.LottoBetInfoDTO;
 import com.dl.member.api.IActivityService;
 import com.dl.member.api.IUserAccountService;
 import com.dl.member.api.IUserBankService;
@@ -98,6 +98,8 @@ import com.dl.shop.payment.service.PayMentService;
 import com.dl.shop.payment.service.UserRechargeService;
 import com.dl.shop.payment.service.UserWithdrawLogService;
 import com.dl.shop.payment.utils.WxpayUtil;
+
+import io.swagger.annotations.ApiOperation;
 
 @Controller
 @RequestMapping("/payment")
@@ -220,47 +222,129 @@ public class PaymentController extends AbstractBaseController{
 		//清除payToken
 		stringRedisTemplate.delete(payToken);
 		
-		DIZQUserBetInfoDTO dto = null;
-		try {
-			dto = JSONHelper.getSingleBean(jsonData, DIZQUserBetInfoDTO.class);
-		} catch (Exception e1) {
-			logger.error(loggerId + "支付信息转DIZQUserBetInfoDTO对象失败！", e1);
-			return ResultGenerator.genFailResult("支付信息异常，支付失败！");
-		}
-		if(null == dto) {
-			return ResultGenerator.genFailResult("支付信息异常，支付失败！");
+		Integer userId = null;
+		Integer userBonusId = null;
+		BigDecimal ticketAmount = null;
+		BigDecimal bonusAmount = null;
+		BigDecimal moneyPaid = null;
+		BigDecimal surplus = null;
+		BigDecimal thirdPartyPaid = null;
+		String requestFrom = null;
+		Integer ticketNum = null;
+		Integer lotteryClassifyId = null;
+		Integer lotteryPlayClassifyId = null;
+		Integer betNum = null;
+		Integer times = null;
+		String forecastMoney = "";
+		String issue = null;
+		String passType = "";
+		String playType = "";
+		Date matchTime = null;
+		List<TicketDetail> ticketDetails = null;
+		
+		if(payToken.startsWith("lotto_")) {
+			DIZQUserBetLottoDTO dto = null;
+			try {
+				dto = JSONHelper.getSingleBean(jsonData, DIZQUserBetLottoDTO.class);
+			} catch (Exception e1) {
+				logger.error(loggerId + "支付信息转DIZQUserBetLottoDTO对象失败！", e1);
+				return ResultGenerator.genFailResult("支付信息异常，支付失败！");
+			}
+			if(null == dto) {
+				return ResultGenerator.genFailResult("支付信息异常，支付失败！");
+			}
+			userId = dto.getUserId();
+			userBonusId = StringUtils.isBlank(dto.getBonusId())?0:Integer.valueOf(dto.getBonusId());//form paytoken
+			ticketAmount = BigDecimal.valueOf(dto.getMoney());//from paytoken
+			bonusAmount = BigDecimal.valueOf(dto.getBonusAmount());//from paytoken
+			moneyPaid = BigDecimal.valueOf(dto.getMoney() - dto.getBonusAmount());;//from paytoken
+			surplus = BigDecimal.valueOf(dto.getSurplus());//from paytoken
+			thirdPartyPaid = BigDecimal.valueOf(dto.getThirdPartyPaid());
+			requestFrom = dto.getRequestFrom();
+			ticketNum = dto.getTicketNum();
+			lotteryClassifyId = dto.getLotteryClassifyId();
+			lotteryPlayClassifyId = dto.getLotteryPlayClassifyId();
+			betNum = dto.getBetNum();
+			times = dto.getTimes();
+			issue = dto.getTermNum();
+			List<LottoBetInfoDTO> betInfos = dto.getBetInfos();
+			ticketDetails = new ArrayList<TicketDetail>(betInfos.size());
+			for(LottoBetInfoDTO betInfoDto: betInfos) {
+				TicketDetail ticketDetail = new TicketDetail();
+				ticketDetail.setMatch_id(0);
+				ticketDetail.setChangci("");
+				ticketDetail.setMatchTeam("");
+				ticketDetail.setLotteryClassifyId(lotteryClassifyId);
+				ticketDetail.setLotteryPlayClassifyId(lotteryPlayClassifyId);
+				ticketDetail.setTicketData(betInfoDto.getBetInfo());
+				ticketDetail.setIsDan(0);
+				ticketDetail.setIssue(issue);
+				ticketDetail.setFixedodds("");
+				ticketDetails.add(ticketDetail);
+			}
+		}else {
+			DIZQUserBetInfoDTO dto = null;
+			try {
+				dto = JSONHelper.getSingleBean(jsonData, DIZQUserBetInfoDTO.class);
+			} catch (Exception e1) {
+				logger.error(loggerId + "支付信息转DIZQUserBetInfoDTO对象失败！", e1);
+				return ResultGenerator.genFailResult("支付信息异常，支付失败！");
+			}
+			if(null == dto) {
+				return ResultGenerator.genFailResult("支付信息异常，支付失败！");
+			}
+			userId = dto.getUserId();
+			userBonusId = StringUtils.isBlank(dto.getBonusId())?0:Integer.valueOf(dto.getBonusId());//form paytoken
+			ticketAmount = BigDecimal.valueOf(dto.getMoney());//from paytoken
+			bonusAmount = BigDecimal.valueOf(dto.getBonusAmount());//from paytoken
+			moneyPaid = BigDecimal.valueOf(dto.getMoney() - dto.getBonusAmount());;//from paytoken
+			surplus = BigDecimal.valueOf(dto.getSurplus());//from paytoken
+			thirdPartyPaid = BigDecimal.valueOf(dto.getThirdPartyPaid());
+			requestFrom = dto.getRequestFrom();
+			ticketNum = dto.getTicketNum();
+			lotteryClassifyId = dto.getLotteryClassifyId();
+			lotteryPlayClassifyId = dto.getLotteryPlayClassifyId();
+			betNum = dto.getBetNum();
+			times = dto.getTimes();
+			forecastMoney = dto.getForecastMoney();
+			issue = dto.getIssue();
+			passType = dto.getBetType();
+			playType = dto.getPlayType();
+			
+			List<DIZQUserBetCellInfoDTO> userBetCellInfos = dto.getUserBetCellInfos();
+			ticketDetails = userBetCellInfos.stream().map(betCell->{
+				TicketDetail ticketDetail = new TicketDetail();
+				ticketDetail.setMatch_id(betCell.getMatchId());
+				ticketDetail.setChangci(betCell.getChangci());
+				int matchTime1 = betCell.getMatchTime();
+				if(matchTime1 > 0) {
+					ticketDetail.setMatchTime(Date.from(Instant.ofEpochSecond(matchTime1)));
+				}
+				ticketDetail.setMatchTeam(betCell.getMatchTeam());
+				ticketDetail.setLotteryClassifyId(betCell.getLotteryClassifyId());
+				ticketDetail.setLotteryPlayClassifyId(betCell.getLotteryPlayClassifyId());
+				ticketDetail.setTicketData(betCell.getTicketData());
+				ticketDetail.setIsDan(betCell.getIsDan());
+				ticketDetail.setIssue(betCell.getPlayCode());
+				ticketDetail.setFixedodds(betCell.getFixedodds());
+				return ticketDetail;
+			}).collect(Collectors.toList());
+			if(lotteryPlayClassifyId != 8 && lotteryClassifyId == 1) {
+				if(ticketDetails.size() > 1) {
+					Optional<TicketDetail> max = ticketDetails.stream().max((detail1, detail2)->detail1.getMatchTime().compareTo(detail2.getMatchTime()));
+					matchTime = max.get().getMatchTime();
+				}else {
+					matchTime = ticketDetails.get(0).getMatchTime();
+				}
+			}
 		}
 		
-		Integer userId = dto.getUserId();
+		
 		Integer currentId = SessionUtil.getUserId();
 		if(!userId.equals(currentId)) {
 			logger.info(loggerId + "支付信息不是当前用户的待支付彩票！");
 			return ResultGenerator.genFailResult("支付信息异常，支付失败！");
 		}
-		Integer userBonusId = StringUtils.isBlank(dto.getBonusId())?0:Integer.valueOf(dto.getBonusId());//form paytoken
-		BigDecimal ticketAmount = BigDecimal.valueOf(dto.getMoney());//from paytoken
-		BigDecimal bonusAmount = BigDecimal.valueOf(dto.getBonusAmount());//from paytoken
-		BigDecimal moneyPaid = BigDecimal.valueOf(dto.getMoney() - dto.getBonusAmount());;//from paytoken
-		BigDecimal surplus = BigDecimal.valueOf(dto.getSurplus());//from paytoken
-		BigDecimal thirdPartyPaid = BigDecimal.valueOf(dto.getThirdPartyPaid());
-		List<DIZQUserBetCellInfoDTO> userBetCellInfos = dto.getUserBetCellInfos();
-		List<TicketDetail> ticketDetails = userBetCellInfos.stream().map(betCell->{
-			TicketDetail ticketDetail = new TicketDetail();
-			ticketDetail.setMatch_id(betCell.getMatchId());
-			ticketDetail.setChangci(betCell.getChangci());
-			int matchTime = betCell.getMatchTime();
-			if(matchTime > 0) {
-				ticketDetail.setMatchTime(Date.from(Instant.ofEpochSecond(matchTime)));
-			}
-			ticketDetail.setMatchTeam(betCell.getMatchTeam());
-			ticketDetail.setLotteryClassifyId(betCell.getLotteryClassifyId());
-			ticketDetail.setLotteryPlayClassifyId(betCell.getLotteryPlayClassifyId());
-			ticketDetail.setTicketData(betCell.getTicketData());
-			ticketDetail.setIsDan(betCell.getIsDan());
-			ticketDetail.setIssue(betCell.getPlayCode());
-			ticketDetail.setFixedodds(betCell.getFixedodds());
-			return ticketDetail;
-		}).collect(Collectors.toList());
 		//余额支付
 		boolean hasSurplus = false;
 		if((surplus != null && surplus.doubleValue() > 0) || (bonusAmount != null && bonusAmount.doubleValue() > 0)) {
@@ -300,7 +384,7 @@ public class PaymentController extends AbstractBaseController{
 		}
 		//order生成
 		SubmitOrderParam submitOrderParam = new SubmitOrderParam();
-		submitOrderParam.setTicketNum(dto.getTicketNum());
+		submitOrderParam.setTicketNum(ticketNum);
 		submitOrderParam.setMoneyPaid(moneyPaid);
 		submitOrderParam.setTicketAmount(ticketAmount);
 		submitOrderParam.setSurplus(surplus);
@@ -308,26 +392,17 @@ public class PaymentController extends AbstractBaseController{
 		submitOrderParam.setPayName(payName);
 		submitOrderParam.setUserBonusId(userBonusId);
 		submitOrderParam.setBonusAmount(bonusAmount);
-		submitOrderParam.setOrderFrom(dto.getRequestFrom());
-		int lotteryClassifyId = dto.getLotteryClassifyId();
+		submitOrderParam.setOrderFrom(requestFrom);
 		submitOrderParam.setLotteryClassifyId(lotteryClassifyId);
-		int lotteryPlayClassifyId = dto.getLotteryPlayClassifyId();
 		submitOrderParam.setLotteryPlayClassifyId(lotteryPlayClassifyId);
-		submitOrderParam.setPassType(dto.getBetType());
-		submitOrderParam.setPlayType("0"+dto.getPlayType());
-		submitOrderParam.setBetNum(dto.getBetNum());
-		submitOrderParam.setCathectic(dto.getTimes());
-		if(lotteryPlayClassifyId != 8 && lotteryClassifyId == 1) {
-			if(ticketDetails.size() > 1) {
-				Optional<TicketDetail> max = ticketDetails.stream().max((detail1, detail2)->detail1.getMatchTime().compareTo(detail2.getMatchTime()));
-				submitOrderParam.setMatchTime(max.get().getMatchTime());
-			}else {
-				submitOrderParam.setMatchTime(ticketDetails.get(0).getMatchTime());
-			}
-		}
-		submitOrderParam.setForecastMoney(dto.getForecastMoney());
+		submitOrderParam.setPassType(passType);
+		submitOrderParam.setPlayType(playType);
+		submitOrderParam.setBetNum(betNum);
+		submitOrderParam.setCathectic(times);
+		submitOrderParam.setMatchTime(matchTime);
+		submitOrderParam.setForecastMoney(forecastMoney);
 		
-		submitOrderParam.setIssue(dto.getIssue());
+		submitOrderParam.setIssue(issue);
 		submitOrderParam.setTicketDetails(ticketDetails);
 		BaseResult<OrderDTO> createOrder = orderService.createOrder(submitOrderParam);
 		if(createOrder.getCode() != 0) {
