@@ -2,6 +2,8 @@ package com.dl.shop.payment.dao;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.dl.base.mapper.Mapper;
 import com.dl.shop.payment.model.PayBankRecordModel;
 
@@ -19,4 +21,5 @@ public interface PayBankRecordMapper extends Mapper<PayBankRecordModel>{
 
 	public PayBankRecordModel selectPayBankCardNoByPayLog(PayBankRecordModel payModel);
 	public int updatePayBankCardNoByPayLog(PayBankRecordModel payModel);
+	public PayBankRecordModel selectByBankCardAndPaySuccess(@Param("bankCardNo") String bankCardNo);
 }
