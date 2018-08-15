@@ -13,4 +13,6 @@ public class PayReturnDTO {
    private String payLogId;
    @ApiModelProperty(value="订单id")
    private String orderId;
+   @ApiModelProperty(value="彩票种类")
+   private String lotteryClassifyId;
 }
