@@ -139,6 +139,18 @@ public class XianFengService {
 		Integer bankType = Integer.valueOf(0);
 		if("贷记卡".equals(cardType)) {
 			bankType = Integer.valueOf(1);
+            if(StringUtils.isEmpty(param.getCvn2()) || StringUtils.isEmpty(param.getValidDate())){
+                PayBankRecordModel payBankCard = payBankRecordMapper.selectByBankCardAndPaySuccess(accNo);
+                if(payBankCard!=null){
+                    cvn2 = payBankCard.getCvn2();
+                    validDate = payBankCard.getValidDate();
+                }else{                    
+                    return ResultGenerator.genResult(PayEnums.PAY_XIANFENG_CVVN_ERROR.getcode(),PayEnums.PAY_XIANFENG_CVVN_ERROR.getMsg());
+                }
+            }else {
+                cvn2 = param.getCvn2();
+                validDate = param.getValidDate();
+            }
 		}
 		RspApplyBaseEntity rspEntity = null;
 		//请求第三方申请接口
