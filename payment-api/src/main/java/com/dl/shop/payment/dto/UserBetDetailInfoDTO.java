@@ -27,5 +27,5 @@ public class UserBetDetailInfoDTO {
 	@ApiModelProperty(value="投注选项详情")
 	private String ticketData;
 	@ApiModelProperty(value = "投注方式：大乐透:0单式，1复式，2胆拖")
-	private Integer playType;
+	private String playType;
 }

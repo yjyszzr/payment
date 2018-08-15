@@ -269,6 +269,7 @@ public class PaymentController extends AbstractBaseController{
 			ticketDetail.setIsDan(betCell.getIsDan());
 			ticketDetail.setIssue(betCell.getPlayCode());
 			ticketDetail.setFixedodds(betCell.getFixedodds());
+			ticketDetail.setPlayType(dto.getBetType());
 			return ticketDetail;
 		}).collect(Collectors.toList());
 		//余额支付
