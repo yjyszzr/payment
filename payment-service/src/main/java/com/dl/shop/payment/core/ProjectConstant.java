@@ -47,6 +47,8 @@ public class ProjectConstant {
 	public static final Integer NO_0 = 0;
 	public static final Integer YES_1 = 1;
 	
+	  //彩票信息的缓存时长,单位分
+    public final static long BET_INFO_EXPIRE_TIME = 10;
 	
 	
 	
