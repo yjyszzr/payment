@@ -396,7 +396,7 @@ public class PaymentController extends AbstractBaseController{
 		submitOrderParam.setLotteryClassifyId(lotteryClassifyId);
 		submitOrderParam.setLotteryPlayClassifyId(lotteryPlayClassifyId);
 		submitOrderParam.setPassType(passType);
-		submitOrderParam.setPlayType(playType);
+		submitOrderParam.setPlayType("0"+playType);
 		submitOrderParam.setBetNum(betNum);
 		submitOrderParam.setCathectic(times);
 		submitOrderParam.setMatchTime(matchTime);
