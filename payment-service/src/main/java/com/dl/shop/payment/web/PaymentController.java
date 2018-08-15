@@ -254,6 +254,7 @@ public class PaymentController extends AbstractBaseController{
 		BigDecimal surplus = BigDecimal.valueOf(dto.getSurplus());//from paytoken
 		BigDecimal thirdPartyPaid = BigDecimal.valueOf(dto.getThirdPartyPaid());
 		List<DIZQUserBetCellInfoDTO> userBetCellInfos = dto.getUserBetCellInfos();
+		final String betType =dto.getBetType();
 		List<TicketDetail> ticketDetails = userBetCellInfos.stream().map(betCell->{
 			TicketDetail ticketDetail = new TicketDetail();
 			ticketDetail.setMatch_id(betCell.getMatchId());
@@ -269,7 +270,7 @@ public class PaymentController extends AbstractBaseController{
 			ticketDetail.setIsDan(betCell.getIsDan());
 			ticketDetail.setIssue(betCell.getPlayCode());
 			ticketDetail.setFixedodds(betCell.getFixedodds());
-			ticketDetail.setPlayType(dto.getBetType());
+			ticketDetail.setPlayType(betType);
 			return ticketDetail;
 		}).collect(Collectors.toList());
 		//余额支付
