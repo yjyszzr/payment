@@ -501,9 +501,9 @@ public class PaymentController extends AbstractBaseController{
 ////				// TODO Auto-generated catch block
 ////				e.printStackTrace();
 ////			}
-			rYinHeEntity = payUtil.getWechatPayUrl(true,payIp,bigD.toString(),payOrderSn);
+//			rYinHeEntity = payUtil.getWechatPayUrl(true,payIp,bigD.toString(),payOrderSn);
 //		}else {
-//			rYinHeEntity = payUtil.getWechatPayUrl(false,payIp,bigD.toString(),payOrderSn);
+			rYinHeEntity = payUtil.getWechatPayUrl(false,payIp,bigD.toString(),payOrderSn);
 //		}
 		if(rYinHeEntity != null) {
 			if(rYinHeEntity.isSucc() && !TextUtils.isEmpty(rYinHeEntity.qrCode)) {
