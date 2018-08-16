@@ -490,51 +490,51 @@ public class PaymentController extends AbstractBaseController{
 		String payOrderSn = savePayLog.getPayOrderSn();
 		String payLogId = savePayLog.getLogId()+"";
 		RspYinHeEntity rYinHeEntity = null;
-		if(isInnerWeChat) {
-			//公共账号方式支付
-//			rYinHeEntity = new RspYinHeEntity();
-//			rYinHeEntity.returnCode = "0000";
-//			try {
-//				String redirect_uri = URLDecoder.decode("http://zf.caixiaomi.net/reapal-h5-api/wechat/reqcode.jsp","UTF-8");
-//				rYinHeEntity.qrCode = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx50d353a8b7b77225&redirect_uri="+redirect_uri+"&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect";
-//			} catch (UnsupportedEncodingException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+//		if(isInnerWeChat) {
+//			//公共账号方式支付
+////			rYinHeEntity = new RspYinHeEntity();
+////			rYinHeEntity.returnCode = "0000";
+////			try {
+////				String redirect_uri = URLDecoder.decode("http://zf.caixiaomi.net/reapal-h5-api/wechat/reqcode.jsp","UTF-8");
+////				rYinHeEntity.qrCode = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx50d353a8b7b77225&redirect_uri="+redirect_uri+"&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect";
+////			} catch (UnsupportedEncodingException e) {
+////				// TODO Auto-generated catch block
+////				e.printStackTrace();
+////			}
 			rYinHeEntity = payUtil.getWechatPayUrl(true,payIp,bigD.toString(),payOrderSn);
-		}else {
-			rYinHeEntity = payUtil.getWechatPayUrl(false,payIp,bigD.toString(),payOrderSn);
-		}
+//		}else {
+//			rYinHeEntity = payUtil.getWechatPayUrl(false,payIp,bigD.toString(),payOrderSn);
+//		}
 		if(rYinHeEntity != null) {
 			if(rYinHeEntity.isSucc() && !TextUtils.isEmpty(rYinHeEntity.qrCode)) {
 				PayReturnDTO rEntity = new PayReturnDTO();
 				String encodeUrl = null;
 				String redirectUri = null;
 				String url = null;
-				if(!isInnerWeChat) {
-					try {
-						String qrCode = rYinHeEntity.qrCode;
-						encodeUrl = URLEncoder.encode(qrCode,"UTF-8");
-						if("1".equals(isH5)) {
-							redirectUri = URLEncoder.encode(cfgPay.getURL_REDIRECT_H5()+"?payLogId="+payLogId,"UTF-8");
-						}else {
-							redirectUri = URLEncoder.encode(cfgPay.getURL_REDIRECT_APP()+"?payLogId="+payLogId,"UTF-8");
-						}
-					} catch (UnsupportedEncodingException e) {
-						logger.error("获取微信支付地址异常",e);
-					}
-					if(!TextUtils.isEmpty(encodeUrl)) {
-						if("1".equals(isH5)) {
-							url = cfgPay.getURL_PAY_WECHAT_H5()+"?data="+encodeUrl+"&redirect_uri=" + redirectUri;
-						}else {
-							url = cfgPay.getURL_PAY_WECHAT_APP()+"?data="+encodeUrl+"&redirect_uri=" + redirectUri;	
-						}
-					}else {
-						logger.info("encodeUrl失败~");
-					}
-				}else {
+//				if(!isInnerWeChat) {
+//					try {
+//						String qrCode = rYinHeEntity.qrCode;
+//						encodeUrl = URLEncoder.encode(qrCode,"UTF-8");
+//						if("1".equals(isH5)) {
+//							redirectUri = URLEncoder.encode(cfgPay.getURL_REDIRECT_H5()+"?payLogId="+payLogId,"UTF-8");
+//						}else {
+//							redirectUri = URLEncoder.encode(cfgPay.getURL_REDIRECT_APP()+"?payLogId="+payLogId,"UTF-8");
+//						}
+//					} catch (UnsupportedEncodingException e) {
+//						logger.error("获取微信支付地址异常",e);
+//					}
+//					if(!TextUtils.isEmpty(encodeUrl)) {
+//						if("1".equals(isH5)) {
+//							url = cfgPay.getURL_PAY_WECHAT_H5()+"?data="+encodeUrl+"&redirect_uri=" + redirectUri;
+//						}else {
+//							url = cfgPay.getURL_PAY_WECHAT_APP()+"?data="+encodeUrl+"&redirect_uri=" + redirectUri;	
+//						}
+//					}else {
+//						logger.info("encodeUrl失败~");
+//					}
+//				}else {
 					url = rYinHeEntity.qrCode;
-				}
+//				}
 				if(!TextUtils.isEmpty(url)) {
 					rEntity.setPayUrl(url);
 					rEntity.setPayLogId(savePayLog.getLogId()+"");
