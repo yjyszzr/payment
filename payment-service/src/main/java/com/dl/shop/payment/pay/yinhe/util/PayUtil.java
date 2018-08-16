@@ -69,7 +69,6 @@ public class PayUtil {
 	
 	/**
 	 * 获取微信支付url
-	 * @return
 	 */
 	public final RspYinHeEntity getWechatPayUrl(boolean isInnerWechat,String ip,String amount,String orderNo){
 		logger.info("调取微信支付订单orderSn={},amount={}",orderNo,amount);
@@ -128,7 +127,7 @@ public class PayUtil {
 			rspHttpEntity = HttpUtil.sendMsg(reqStr,cfgPay.getURL_PAY()+"/yinHePayPublic.action",true);
 		}else {
 			//发送  yinHePay.action  -> yinHePayH5.action
-			rspHttpEntity = HttpUtil.sendMsg(reqStr,cfgPay.getURL_PAY()+"/yinHePayH5.action",true);			
+			rspHttpEntity = HttpUtil.sendMsg(reqStr,cfgPay.getURL_PAY()+"/yinHePayPublic.action",true);			
 		}
 		logger.info("resultStr:" + rspHttpEntity.toString());
 		if(rspHttpEntity.isSucc) {
