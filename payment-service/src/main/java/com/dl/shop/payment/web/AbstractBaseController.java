@@ -33,7 +33,7 @@ public abstract class AbstractBaseController {
 		payLog.setUserId(userId);
 		payLog.setPayType(payType);
 		payLog.setPayName(payName);
-		payLog.setPayCode("app_weixin");
+		payLog.setPayCode(payCode);
 		payLog.setParentSn("");
 		payLog.setOrderSn(orderSn);
 		payLog.setOrderAmount(totalAmount);
