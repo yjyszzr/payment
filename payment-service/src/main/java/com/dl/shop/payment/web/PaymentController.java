@@ -1008,6 +1008,7 @@ public class PaymentController extends AbstractBaseController{
 		betPlayInfoDTO.setOrderMoney(orderMoney.toString());
 		betPlayInfoDTO.setSurplus(String.format("%.2f", surplus));
 		betPlayInfoDTO.setThirdPartyPaid(String.format("%.2f", thirdPartyPaid));
+		betPlayInfoDTO.setLotteryClassifyId(betDto.getLotteryClassifyId()+"");
 		
 		return ResultGenerator.genSuccessResult("success", betPlayInfoDTO);
 	}
@@ -1215,7 +1216,7 @@ public class PaymentController extends AbstractBaseController{
 				logger.info(loggerId + "订单没有需要第三方支付金额，完全余额支付成功！");
 				PayReturnDTO payReturnDTO = new PayReturnDTO();
 				payReturnDTO.setOrderId(orderId);
-				payReturnDTO.setLotteryClassifyId(lotteryClassifyIdStr);
+//				payReturnDTO.setLotteryClassifyId(lotteryClassifyIdStr);
 				return ResultGenerator.genSuccessResult("支付成功！", payReturnDTO);
 			}
 		}
@@ -1265,7 +1266,7 @@ public class PaymentController extends AbstractBaseController{
 				rEntity.setPayUrl(url);
 				rEntity.setPayLogId(savePayLog.getLogId()+"");
 				rEntity.setOrderId(orderId);
-				rEntity.setLotteryClassifyId(lotteryClassifyIdStr);
+//				rEntity.setLotteryClassifyId(lotteryClassifyIdStr);
 				payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
@@ -1276,7 +1277,7 @@ public class PaymentController extends AbstractBaseController{
 			rEntity.setPayLogId(savePayLog.getLogId()+"");
 			rEntity.setOrderId(orderId);
 			rEntity.setOrderId(orderId);
-			rEntity.setLotteryClassifyId(lotteryClassifyIdStr);
+//			rEntity.setLotteryClassifyId(lotteryClassifyIdStr);
 			payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
 		}
 		logger.info(loggerId + " result: code="+payBaseResult.getCode()+" , msg="+payBaseResult.getMsg());
