@@ -56,6 +56,9 @@
 	<update id="updatePayBankCardNoByPayLog" parameterType="com.dl.shop.payment.model.PayBankRecordModel">
 	 update dl_pay_bank_record set is_paid = -1 where bank_card_no = #{bankCardNo} and is_paid = 1
 	</update>
+	<update id="updateIspaidRemoveByCardNo" parameterType="com.dl.shop.payment.model.PayBankRecordModel">
+	 update dl_pay_bank_record set is_paid = -2 where bank_card_no = #{bankCardNo} and is_paid = 1
+	</update>
 	
 	
 	<select id="queryPayBankRecordModelById" parameterType="com.dl.shop.payment.model.PayBankRecordModel" resultMap="BaseResultMap">
@@ -64,5 +67,6 @@
 	  from dl_pay_bank_record
 	  where id = #{id}
 	</select>
+	
 	
 </mapper>

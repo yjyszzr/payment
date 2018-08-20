@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.enums.SNBusinessCodeEnum;
+import com.dl.base.param.EmptyParam;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.base.util.RegexUtil;
@@ -39,6 +40,7 @@ import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.PayBankRecordModel;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.param.XianFengBankListCfgParam;
+import com.dl.shop.payment.param.XianFengBankRemoveParam;
 import com.dl.shop.payment.param.XianFengBankTypeParam;
 import com.dl.shop.payment.param.XianFengCfgParam;
 import com.dl.shop.payment.param.XianFengPayConfirmParam;
@@ -82,6 +84,20 @@ public class XianFengController {
 	
 	private final String SIGN = "sign";
 	private final String SECID = "RSA";//签名算法
+	
+
+	
+	@ApiOperation(value="先锋支付请求")
+	@PostMapping("/bank/remove")
+	@ResponseBody
+	public BaseResult<XianFengApplyDTO> bankRemove(@RequestBody XianFengBankRemoveParam bankRemove) {
+		if(bankRemove==null||StringUtils.isEmpty(bankRemove.getRecordId())){
+			logger.error("先锋支付移除支付卡记录recordId is empty");
+			return ResultGenerator.genSuccessResult();
+		}
+		xianFengService.bankRemove(bankRemove.getRecordId());
+		return ResultGenerator.genSuccessResult();
+	}
 	
 	@ApiOperation(value="先锋支付请求")
 	@PostMapping("/app")

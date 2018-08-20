@@ -18,8 +18,13 @@ public interface PayBankRecordMapper extends Mapper<PayBankRecordModel>{
 	public int updateIsPaidInfo(PayBankRecordModel payModel);
 	
 	public List<PayBankRecordModel> queryPayBankRecordModelById(PayBankRecordModel payModel);
+	
+	public PayBankRecordModel queryPayBankRecordById(@Param("id")Integer id);
 
 	public PayBankRecordModel selectPayBankCardNoByPayLog(PayBankRecordModel payModel);
 	public int updatePayBankCardNoByPayLog(PayBankRecordModel payModel);
+	
 	public PayBankRecordModel selectByBankCardAndPaySuccess(@Param("bankCardNo") String bankCardNo);
+
+	public int updateIspaidRemoveByCardNo(@Param("bankCardNo") String bankCardNo);
 }

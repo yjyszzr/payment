@@ -10,6 +10,7 @@ import javax.annotation.Resource;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -370,5 +371,17 @@ public class XianFengService {
 			logger.error("[payNotify] payOrderSn=" +rspEntity.merchantNo+" 商户号，交易金额校验失败, amt:" + rspEntity.amount +" merchantId:" + rspEntity.merchantId);
 		}
 		return isSucc;
+	}
+	public void bankRemove(String recordId) {
+		PayBankRecordModel queryBank = new PayBankRecordModel();
+		queryBank.setId(Integer.parseInt(recordId));
+		List<PayBankRecordModel> payBankList = payBankRecordMapper.queryPayBankRecordModelById(queryBank);
+		if(!CollectionUtils.isEmpty(payBankList)){
+			String bankCardNo = payBankList.get(0).getBankCardNo();
+			log.info("移除客户卡号={}",bankCardNo);
+			payBankRecordMapper.updateIspaidRemoveByCardNo(bankCardNo);
+		}else{
+			log.info("移除客户dl_pay_bank_record 表id={}",recordId);
+		}
 	}
 }
