@@ -127,7 +127,7 @@ public class PayUtil {
 			rspHttpEntity = HttpUtil.sendMsg(reqStr,cfgPay.getURL_PAY()+"/yinHePayPublic.action",true);
 		}else {
 			//发送  yinHePay.action  -> yinHePayH5.action
-			rspHttpEntity = HttpUtil.sendMsg(reqStr,cfgPay.getURL_PAY()+"/yinHePayPublic.action",true);			
+			rspHttpEntity = HttpUtil.sendMsg(reqStr,cfgPay.getURL_PAY()+"/yinHePayH5.action",true);			
 		}
 		logger.info("resultStr:" + rspHttpEntity.toString());
 		if(rspHttpEntity.isSucc) {
