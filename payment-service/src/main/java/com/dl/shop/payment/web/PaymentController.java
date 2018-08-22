@@ -995,7 +995,7 @@ public class PaymentController extends AbstractBaseController{
 		betPlayInfoDTO.setBonusAmount(String.format("%.2f", bonusAmount));
 		betPlayInfoDTO.setBonusId(bonusId);
 		betPlayInfoDTO.setBonusList(userBonusList);
-		betPlayInfoDTO.setOrderMoney(orderMoney.toString());
+		betPlayInfoDTO.setOrderMoney(String.format("%.2f", orderMoney));
 		betPlayInfoDTO.setSurplus(String.format("%.2f", surplus));
 		betPlayInfoDTO.setThirdPartyPaid(String.format("%.2f", thirdPartyPaid));
 		betPlayInfoDTO.setLotteryClassifyId(betDto.getLotteryClassifyId()+"");
