@@ -4,10 +4,14 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.Map.Entry;
+
 import javax.annotation.Resource;
+
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.util.MD5Utils;
@@ -100,12 +104,7 @@ public class PayUtil {
 		}
 		//获取sign code 参数
 		String paraStr = getPayParams(treeMap);
-		String secret = null;
-		if(isInnerWechat) {
-			secret = cfgPay.getSECRET_PUBLIC();
-		}else {
-			secret = cfgPay.getSECRET_PUBLIC();
-		}
+		String secret = cfgPay.getSECRET_PUBLIC();
 		//生成signCode
 		String signCode = getSignCode(paraStr,secret);
 		signCode = signCode.toUpperCase();
@@ -132,6 +131,9 @@ public class PayUtil {
 		logger.info("resultStr:" + rspHttpEntity.toString());
 		if(rspHttpEntity.isSucc) {
 			rEntity = JSON.parseObject(rspHttpEntity.msg,RspYinHeEntity.class);
+			if(rEntity!=null&&StringUtils.isEmpty(rEntity.qrCode)&&!StringUtils.isEmpty(rEntity.qrcode)){
+				rEntity.qrCode=rEntity.qrcode;
+			}
 		}else {
 			rEntity = new RspYinHeEntity();
 			rEntity.returnMsg = rspHttpEntity.msg;
