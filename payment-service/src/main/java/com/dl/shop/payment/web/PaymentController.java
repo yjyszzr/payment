@@ -18,6 +18,7 @@ import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.util.TextUtils;
@@ -548,7 +549,8 @@ public class PaymentController extends AbstractBaseController{
 							ImageIO.write(bufferImage,"png",out);
 							byte[] imageB = out.toByteArray();
 							sun.misc.BASE64Encoder encoder = new sun.misc.BASE64Encoder();
-						    String qrBase64 = encoder.encode(imageB);
+//						    String qrBase64 = encoder.encode(imageB);
+						    String qrBase64 = Base64.encodeBase64String(imageB);
 						    logger.info("url={},base64={}",url,qrBase64);
 						    url = appH5QrUrl.replace("{qrBase64}",qrBase64);
 						} catch (Exception e) {
