@@ -550,9 +550,9 @@ public class PaymentController extends AbstractBaseController{
 							byte[] imageB = out.toByteArray();
 							sun.misc.BASE64Encoder encoder = new sun.misc.BASE64Encoder();
 //						    String qrBase64 = encoder.encode(imageB);
-						    String qrBase64 = Base64.encodeBase64String(imageB);
+						    String qrBase64 = "data:image/png;base64,"+Base64.encodeBase64String(imageB);
 						    logger.info("url={},base64={}",url,qrBase64);
-						    url = "data:image/png;base64,"+appH5QrUrl.replace("{qrBase64}",qrBase64);
+						    url = appH5QrUrl.replace("{qrBase64}",qrBase64);
 						} catch (Exception e) {
 							logger.error("微信转二维码异常",e);
 						}
