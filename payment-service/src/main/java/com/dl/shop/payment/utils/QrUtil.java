@@ -26,8 +26,8 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
   
 public class QrUtil {
-  private static final int IMAGE_WIDTH = 120;
-  private static final int IMAGE_HEIGHT = 120;
+  private static final int IMAGE_WIDTH = 130;
+  private static final int IMAGE_HEIGHT = 130;
   private static final int IMAGE_HALF_WIDTH = IMAGE_WIDTH / 2;
   private static final int FRAME_WIDTH = 1;
   private static MultiFormatWriter mutiWriter = new MultiFormatWriter();
@@ -189,7 +189,7 @@ public static void main(String[] args) throws WriterException, IOException {
 //    QrUtil.encode("http://www.baidu.com/", 520, 520,
 //        "", "D:\\tmp\\withLog.jpg");
     ByteArrayOutputStream  out = new ByteArrayOutputStream(); 
-    BufferedImage bufferImage = QrUtil.genBarcode("http://www.baidu.com/", 500, 500, "0.12");
+    BufferedImage bufferImage = QrUtil.genBarcode("http://www.baidu.com/", 520, 520, "￥99999.99");
     ImageIO.write(bufferImage,"png",out);
     Path path = Paths.get("D:\\tmp\\test.png");
     Files.write(path, out.toByteArray());
