@@ -175,9 +175,9 @@ private static BufferedImage scale(String logText, int height,
       //设置画笔的颜色
       g.setColor(Color.RED);
       //设置字体
-      Font font = new Font(null, 3, 25);
+//      Font font = Font.BOLD;
       //文字在图片中的坐标 这里设置在中间
-      g.setFont(font);
+//      g.setFont(font);
       g.drawString(logText, (9-logText.length())*IMAGE_WIDTH/18, 70);
       g.dispose();
       return image;
