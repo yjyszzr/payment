@@ -564,7 +564,7 @@ public class PaymentController extends AbstractBaseController{
 					if(openJianLian){
 						String amount="";
 						try {
-							amount = new String(amtDouble.toString().getBytes("gbk"),"utf-8");
+							amount = new String(amtDouble.toString().getBytes(),"utf-8");
 						} catch (Exception e1) {
 							logger.error("字符串编码格式转化异常",e1);
 						}
