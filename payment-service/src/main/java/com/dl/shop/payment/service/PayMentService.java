@@ -686,4 +686,15 @@ public class PayMentService extends AbstractService<PayMent> {
 		}
 		return msg;
 	}
+	/**
+	 * 间联是否打开
+	 * @return
+	 */
+	public Boolean getJianLianIsOpen() {
+		Integer jianlian = payMentMapper.selectJianLianConfig();
+		if(Integer.valueOf(1).equals(jianlian)){
+			return Boolean.TRUE;
+		}
+		return Boolean.FALSE;
+	}
 }

@@ -18,7 +18,12 @@
     </parent>
 
     <dependencies>
-    
+     <!-- 生成二维码相关包文件 -->
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.2.1</version>
+        </dependency>
     	<dependency>
             <groupId>com.ucf</groupId>
              <artifactId>ucf-java-sdk</artifactId>

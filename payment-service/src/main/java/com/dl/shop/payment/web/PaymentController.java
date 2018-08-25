@@ -1,5 +1,8 @@
 package com.dl.shop.payment.web;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -12,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -20,6 +24,7 @@ import org.apache.http.util.TextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -105,8 +110,11 @@ import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
 import com.dl.shop.payment.service.UserRechargeService;
 import com.dl.shop.payment.service.UserWithdrawLogService;
+import com.dl.shop.payment.utils.QrUtil;
 import com.dl.shop.payment.utils.WxpayUtil;
+import com.google.zxing.WriterException;
 
+import sun.misc.BASE64Encoder;
 import io.swagger.annotations.ApiOperation;
 
 @Controller
@@ -155,6 +163,8 @@ public class PaymentController extends AbstractBaseController{
 	private IActivityService activityService;
 	@Resource
 	private IUserBonusService userBonusService;
+	@Value("${yinhe.app_H5_qr_url}")
+	private String appH5QrUrl;
 	
 	@ApiOperation(value="系统可用第三方支付方式", notes="系统可用第三方支付方式")
 	@PostMapping("/allPayment")
@@ -419,6 +429,10 @@ public class PaymentController extends AbstractBaseController{
 		String payCode = paymentDto.getPayCode();
 		if("app_weixin".equals(payCode)) {
 			boolean isWechat = (param.getInnerWechat()==1);
+			Boolean openJianLian = paymentService.getJianLianIsOpen();
+			if(openJianLian){
+				isWechat=Boolean.TRUE;
+			}
 			if(isWechat) {
 				payCode = "app_weixin" + "_h5";
 			}
@@ -524,6 +538,22 @@ public class PaymentController extends AbstractBaseController{
 					}
 				}else {
 					url = rYinHeEntity.qrCode;
+					Boolean openJianLian = paymentService.getJianLianIsOpen();
+					if(openJianLian){
+						logger.info("间联开关打开,原url={}，生成二维码地址开始",url);
+						try {
+							ByteArrayOutputStream  out = new ByteArrayOutputStream(); 
+							BufferedImage bufferImage = QrUtil.genBarcode(url, 500, 500, "彩小秘");
+							ImageIO.write(bufferImage,"png",out);
+							byte[] imageB = out.toByteArray();
+							sun.misc.BASE64Encoder encoder = new sun.misc.BASE64Encoder();
+						    String qrBase64 = encoder.encode(imageB);
+						    logger.info("url={},base64={}",url,qrBase64);
+						    url = appH5QrUrl.replace("{qrBase64}",qrBase64);
+						} catch (Exception e) {
+							logger.error("微信转二维码异常",e);
+						}
+					}
 				}
 				if(!TextUtils.isEmpty(url)) {
 					rEntity.setPayUrl(url);
