@@ -22,8 +22,8 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
   
 public class QrUtil {
-  private static final int IMAGE_WIDTH = 126;
-  private static final int IMAGE_HEIGHT = 126;
+  private static final int IMAGE_WIDTH = 1;
+  private static final int IMAGE_HEIGHT = 1;
   private static final int IMAGE_HALF_WIDTH = IMAGE_WIDTH / 2;
   private static final int FRAME_WIDTH = 2;
   private static MultiFormatWriter mutiWriter = new MultiFormatWriter();
@@ -183,7 +183,7 @@ public static void main(String[] args) throws UnsupportedEncodingException {
     // 依次为内容(不支持中文),宽,长,中间图标路径,储存路径  
     long startTime = System.currentTimeMillis();
     QrUtil.encode("http://www.baidu.com/", 520, 520,
-        "A999-9999", "F:\\temp\\withLog.jpg");
+        "", "D:\\tmp\\withLog.jpg");
     System.out.println(System.currentTimeMillis()-startTime);
   }
 }
