@@ -9,7 +9,9 @@ import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.time.Instant;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -70,6 +72,7 @@ import com.dl.order.param.SubmitOrderParam.TicketDetail;
 import com.dl.order.param.UpdateOrderInfoParam;
 import com.dl.order.param.UpdateOrderPayStatusParam;
 import com.dl.shop.payment.core.ProjectConstant;
+import com.dl.shop.payment.dao.DlPayQrBase64Mapper;
 import com.dl.shop.payment.dto.PayLogDTO;
 import com.dl.shop.payment.dto.PayLogDetailDTO;
 import com.dl.shop.payment.dto.PayReturnDTO;
@@ -83,6 +86,7 @@ import com.dl.shop.payment.dto.UserBetPayInfoDTO;
 import com.dl.shop.payment.dto.UserGoPayInfoDTO;
 import com.dl.shop.payment.dto.ValidPayDTO;
 import com.dl.shop.payment.enums.PayEnums;
+import com.dl.shop.payment.model.DlPayQrBase64;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.UnifiedOrderParam;
 import com.dl.shop.payment.model.UserWithdrawLog;
@@ -95,6 +99,7 @@ import com.dl.shop.payment.param.RechargeParam;
 import com.dl.shop.payment.param.ReqOrderQueryParam;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
 import com.dl.shop.payment.param.RollbackThirdOrderAmountParam;
+import com.dl.shop.payment.param.UrlBase64Param;
 import com.dl.shop.payment.param.UserIdParam;
 import com.dl.shop.payment.param.WithdrawParam;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
@@ -164,6 +169,8 @@ public class PaymentController extends AbstractBaseController{
 	private IActivityService activityService;
 	@Resource
 	private IUserBonusService userBonusService;
+	@Resource
+	private DlPayQrBase64Mapper dlPayQrBase64Mapper;
 	@Value("${yinhe.app_H5_qr_url}")
 	private String appH5QrUrl;
 	
@@ -211,6 +218,19 @@ public class PaymentController extends AbstractBaseController{
 			return ResultGenerator.genFailResult("请传入合法订单号");
 		}
 		return paymentService.rollbackOrderAmount(param);
+	}
+	
+	@ApiOperation(value="获取支付base64", notes="")
+	@PostMapping("/urlBase64")
+	@ResponseBody
+	public BaseResult<?> urlBase64(@RequestBody UrlBase64Param param) {
+		if(param == null || param.getBase64Id()==null) {
+			return ResultGenerator.genFailResult("请传入合法base64Id");
+		}
+		DlPayQrBase64 dlPayQrBase64 = dlPayQrBase64Mapper.selectDlPayQrBase64ById(param.getBase64Id());
+		Map<String,Object> resultMap = new HashMap<String, Object>();
+		resultMap.put("base64Url", dlPayQrBase64.getBase64Content());
+		return ResultGenerator.genSuccessResult("", resultMap);
 	}
 	
 	@ApiOperation(value="手动操作第三方退款接口", notes="")
@@ -552,9 +572,13 @@ public class PaymentController extends AbstractBaseController{
 //						    String qrBase64 = encoder.encode(imageB);
 						    String qrBase64 = "data:image/png;base64,"+Base64.encodeBase64String(imageB);
 //						    logger.info("url={},base64={}",url,qrBase64);
-						    url = appH5QrUrl.replace("{qrBase64}",qrBase64);
+						    DlPayQrBase64 saveBean = new DlPayQrBase64();
+						    saveBean.setPayordersn(payOrderSn);
+						    saveBean.setBase64Content(qrBase64);
+						    Integer base64Id = dlPayQrBase64Mapper.saveDlPayQrBase64(saveBean);
+						    url = appH5QrUrl.replace("{qrBase64}",""+base64Id);
 						    url = URLEncoder.encode(url,"UTF-8");
-						    logger.info("url={},encode Url base64Url={}",url,qrBase64);
+						    logger.info("url={},base64Id={},encode Url base64Url={}",url,base64Id,qrBase64);
 						} catch (Exception e) {
 							logger.error("微信转二维码异常",e);
 						}
