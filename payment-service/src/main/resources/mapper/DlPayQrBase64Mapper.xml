@@ -10,10 +10,13 @@
     <result column="pay_order_sn" jdbcType="INTEGER" property="payOrderSn" />
     <result column="base64_content" jdbcType="LONGVARCHAR" property="base64Content" />
   </resultMap>
+  
   <insert id="saveDlPayQrBase64" keyProperty="id" useGeneratedKeys="true" parameterType="com.dl.shop.payment.model.DlPayQrBase64">
     insert into dl_pay_qr_base64(pay_order_sn,base64_content) values(#{payOrderSn},#{base64Content})
   </insert>
+  
   <select id="selectDlPayQrBase64ById" resultMap="BaseResultMap">
   select * from dl_pay_qr_base64 where id=#{id}
   </select>
+  
 </mapper>
