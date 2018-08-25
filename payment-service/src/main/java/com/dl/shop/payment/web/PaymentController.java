@@ -575,8 +575,8 @@ public class PaymentController extends AbstractBaseController{
 						    DlPayQrBase64 saveBean = new DlPayQrBase64();
 						    saveBean.setPayordersn(payOrderSn);
 						    saveBean.setBase64Content(qrBase64);
-						    Integer base64Id = dlPayQrBase64Mapper.saveDlPayQrBase64(saveBean);
-						    url = appH5QrUrl.replace("{qrBase64}",""+base64Id);
+						    Integer insertRow = dlPayQrBase64Mapper.saveDlPayQrBase64(saveBean);
+						    url = appH5QrUrl.replace("{qrBase64}",""+saveBean.getId());
 						    url = URLEncoder.encode(url,"UTF-8");
 						    logger.info("url={},base64Id={},encode Url base64Url={}",url,base64Id,qrBase64);
 						} catch (Exception e) {
