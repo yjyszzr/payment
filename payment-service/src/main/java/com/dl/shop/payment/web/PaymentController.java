@@ -578,7 +578,7 @@ public class PaymentController extends AbstractBaseController{
 						    Integer insertRow = dlPayQrBase64Mapper.saveDlPayQrBase64(saveBean);
 						    Integer base64Id = saveBean.getId();
 						    url = appH5QrUrl.replace("{qrBase64}",""+base64Id);
-						    url = URLEncoder.encode(url,"UTF-8");
+//						    url = URLEncoder.encode(url,"UTF-8");
 						    logger.info("url={},base64Id={},encode Url base64Url={}",url,base64Id,qrBase64);
 						} catch (Exception e) {
 							logger.error("微信转二维码异常",e);
