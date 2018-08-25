@@ -562,7 +562,7 @@ public class PaymentController extends AbstractBaseController{
 					url = rYinHeEntity.qrCode;
 					Boolean openJianLian = paymentService.getJianLianIsOpen();
 					if(openJianLian){
-						String amount=amtDouble.toString();
+						String amount="￥99999.99";//amtDouble.toString();
 						logger.info("间联开关打开,原url={}，生成二维码地址开始,amtDoubleStr={}",url,amount);
 						try {
 							ByteArrayOutputStream  out = new ByteArrayOutputStream(); 
