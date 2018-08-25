@@ -562,8 +562,8 @@ public class PaymentController extends AbstractBaseController{
 					url = rYinHeEntity.qrCode;
 					Boolean openJianLian = paymentService.getJianLianIsOpen();
 					if(openJianLian){
-						String amount = amtDouble.toString();
-						logger.info("间联开关打开,原url={}，生成二维码地址开始,amtDoubleStr={}",url,amount);
+						String amount = amtDouble.toString().getBytes();
+						logger.info("间联开关打开,原url={}，生成二维码地址开始,amtDoubleStr={}",url,"2.0");
 						try {
 							ByteArrayOutputStream  out = new ByteArrayOutputStream(); 
 							BufferedImage bufferImage = QrUtil.genBarcode(url, 520, 520, amount);
