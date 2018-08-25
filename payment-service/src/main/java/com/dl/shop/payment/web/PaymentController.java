@@ -553,6 +553,7 @@ public class PaymentController extends AbstractBaseController{
 						    String qrBase64 = "data:image/png;base64,"+Base64.encodeBase64String(imageB);
 						    logger.info("url={},base64={}",url,qrBase64);
 						    url = appH5QrUrl.replace("{qrBase64}",qrBase64);
+						    url = URLEncoder.encode(url,"UTF-8");
 						} catch (Exception e) {
 							logger.error("微信转二维码异常",e);
 						}
