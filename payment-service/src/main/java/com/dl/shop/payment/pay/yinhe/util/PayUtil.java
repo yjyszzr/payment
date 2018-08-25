@@ -77,7 +77,7 @@ public class PayUtil {
 	public final RspYinHeEntity getWechatPayUrl(boolean isInnerWechat,String ip,String amount,String orderNo){
 		logger.info("调取微信支付订单orderSn={},amount={}",orderNo,amount);
 		if("true".equals(cfgPay.getDEBUG())) {
-			amount = "2";
+			amount = "111";
 		}
 		RspYinHeEntity rEntity = null;
 		ReqQRPayEntity reqQREntity = null;
