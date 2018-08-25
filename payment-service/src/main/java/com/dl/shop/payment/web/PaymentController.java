@@ -615,6 +615,11 @@ public class PaymentController extends AbstractBaseController{
 		//payCode处理
 		if("app_weixin".equals(payCode)) {
 			boolean isWechat = (param.getInnerWechat()==1);
+			Boolean openJianLian = paymentService.getJianLianIsOpen();
+			if(openJianLian){
+				isWechat=Boolean.TRUE;
+				param.setInnerWechat(1);
+			}
 			if(isWechat) {
 				payCode = "app_weixin" + "_h5";
 			}
@@ -1245,6 +1250,11 @@ public class PaymentController extends AbstractBaseController{
 		String payCode = paymentDto.getPayCode();
 		if("app_weixin".equals(payCode)) {
 			boolean isWechat = (param.getInnerWechat()==1);
+			Boolean openJianLian = paymentService.getJianLianIsOpen();
+			if(openJianLian){
+				isWechat=Boolean.TRUE;
+				param.setInnerWechat(1);
+			}
 			if(isWechat) {
 				payCode = "app_weixin" + "_h5";
 			}
