@@ -6,9 +6,13 @@ import java.awt.Image;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,10 +26,10 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
   
 public class QrUtil {
-  private static final int IMAGE_WIDTH = 1;
-  private static final int IMAGE_HEIGHT = 1;
+  private static final int IMAGE_WIDTH = 120;
+  private static final int IMAGE_HEIGHT = 120;
   private static final int IMAGE_HALF_WIDTH = IMAGE_WIDTH / 2;
-  private static final int FRAME_WIDTH = 2;
+  private static final int FRAME_WIDTH = 1;
   private static MultiFormatWriter mutiWriter = new MultiFormatWriter();
   
   public static void encode(String contentUrl, int width, int height,
@@ -179,11 +183,17 @@ private static BufferedImage scale(String logText, int height,
       return image;
 }
 
-public static void main(String[] args) throws UnsupportedEncodingException {
+public static void main(String[] args) throws WriterException, IOException {
     // 依次为内容(不支持中文),宽,长,中间图标路径,储存路径  
     long startTime = System.currentTimeMillis();
-    QrUtil.encode("http://www.baidu.com/", 520, 520,
-        "", "D:\\tmp\\withLog.jpg");
-    System.out.println(System.currentTimeMillis()-startTime);
+//    QrUtil.encode("http://www.baidu.com/", 520, 520,
+//        "", "D:\\tmp\\withLog.jpg");
+    ByteArrayOutputStream  out = new ByteArrayOutputStream(); 
+    BufferedImage bufferImage = QrUtil.genBarcode("http://www.baidu.com/", 500, 500, "0.12");
+    ImageIO.write(bufferImage,"png",out);
+    Path path = Paths.get("D:\\tmp\\test.png");
+    Files.write(path, out.toByteArray());
+//    System.out.print(new String(out.toByteArray()));
+//    System.out.println(System.currentTimeMillis()-startTime);
   }
 }

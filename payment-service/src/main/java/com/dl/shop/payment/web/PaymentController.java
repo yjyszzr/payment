@@ -565,7 +565,7 @@ public class PaymentController extends AbstractBaseController{
 						logger.info("间联开关打开,原url={}，生成二维码地址开始",url);
 						try {
 							ByteArrayOutputStream  out = new ByteArrayOutputStream(); 
-							BufferedImage bufferImage = QrUtil.genBarcode(url, 500, 500, "彩小秘");
+							BufferedImage bufferImage = QrUtil.genBarcode(url, 520, 520, amtDouble.toString());
 							ImageIO.write(bufferImage,"png",out);
 							byte[] imageB = out.toByteArray();
 							sun.misc.BASE64Encoder encoder = new sun.misc.BASE64Encoder();
