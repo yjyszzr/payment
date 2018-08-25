@@ -432,6 +432,7 @@ public class PaymentController extends AbstractBaseController{
 			Boolean openJianLian = paymentService.getJianLianIsOpen();
 			if(openJianLian){
 				isWechat=Boolean.TRUE;
+				param.setInnerWechat(1);
 			}
 			if(isWechat) {
 				payCode = "app_weixin" + "_h5";
