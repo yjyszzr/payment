@@ -418,7 +418,7 @@ public class PayMentService extends AbstractService<PayMent> {
 				return ResultGenerator.genSuccessResult("充值成功",rspOrderQueryDTO);	
 			}
 			logger.error("充值记录payOrderSn={}已变更，更新失败",payLog.getPayOrderSn());
-			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),PayEnums.PAY_RONGBAO_FAILURE.getMsg());
+			return ResultGenerator.genSuccessResult();
 		}else if(response.isFail()){
 			//更新paylog
 			try {
