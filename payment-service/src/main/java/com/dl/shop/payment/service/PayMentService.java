@@ -404,7 +404,7 @@ public class PayMentService extends AbstractService<PayMent> {
 						logger.info("开始执行充值赠送红包逻辑");
 						com.dl.member.param.PayLogIdParam payLogIdParam = new com.dl.member.param.PayLogIdParam();
 						payLogIdParam.setPayLogId(String.valueOf(payLog.getLogId()));
-						BaseResult<DonationPriceDTO> donationPriceRst = userBonusService.reiceiveBonusAfterRecharge(payLogIdParam);
+						BaseResult<DonationPriceDTO> donationPriceRst = userBonusService.reiceiveBonusAfterRechargeNew(payLogIdParam);
 						logger.info("充值赠送红包结果："+ JSON.toJSONString(donationPriceRst));
 						if(donationPriceRst.getCode() == 0) {
 							logger.info("结束执行充值赠送红包逻辑");
