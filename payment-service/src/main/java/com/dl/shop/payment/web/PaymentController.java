@@ -559,7 +559,7 @@ public class PaymentController extends AbstractBaseController{
 						logger.info("encodeUrl失败~");
 					}
 				}else {
-					url = rYinHeEntity.qrCode;
+					url = rYinHeEntity.qrCode+"&redirect_uri=caixm://://caixiaomi.net";//
 					Boolean openJianLian = paymentService.getJianLianIsOpen();
 					if(openJianLian){
 						String amount="￥"+amtDouble.setScale(2,RoundingMode.HALF_EVEN).toString();
