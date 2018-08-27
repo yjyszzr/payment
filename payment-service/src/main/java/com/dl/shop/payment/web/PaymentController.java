@@ -559,9 +559,19 @@ public class PaymentController extends AbstractBaseController{
 						logger.info("encodeUrl失败~");
 					}
 				}else {
-					url = rYinHeEntity.qrCode+"&redirect_uri=caixm://://caixiaomi.net";//
+					url = rYinHeEntity.qrCode;
 					Boolean openJianLian = paymentService.getJianLianIsOpen();
 					if(openJianLian){
+						try {
+							if("1".equals(isH5)) {
+								redirectUri = URLEncoder.encode(cfgPay.getURL_REDIRECT_H5()+"?payLogId="+payLogId,"UTF-8");
+							}else {
+								redirectUri = "caixm://://caixiaomi.net";
+							}
+						} catch (UnsupportedEncodingException e) {
+							logger.error("获取微信支付地址异常",e);
+						}
+						url = url+"&redirect_uri="+redirectUri;
 						String amount="￥"+amtDouble.setScale(2,RoundingMode.HALF_EVEN).toString();
 						logger.info("间联开关打开,原url={}，生成二维码地址开始,amtDoubleStr={}",url,amount);
 						try {
