@@ -844,6 +844,10 @@ public class PaymentController extends AbstractBaseController{
 			baseResult = rongUtil.queryOrderInfo(payLog.getPayOrderSn());
 		}else if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)) {
 			boolean isInWeixin = "app_wexin_h5".equals(payCode);
+            Boolean openJianLian = paymentService.getJianLianIsOpen();
+            if(openJianLian){
+                isInWeixin=Boolean.TRUE;
+            }
 			baseResult = yinHeUtil.orderQuery(isInWeixin,payLog.getPayOrderSn());
 		}else if("app_xianfeng".equals(payCode)) {
 			RspApplyBaseEntity rspBaseEntity;
