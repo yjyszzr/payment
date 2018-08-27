@@ -566,7 +566,8 @@ public class PaymentController extends AbstractBaseController{
 							if("1".equals(isH5)) {
 								redirectUri = URLEncoder.encode(cfgPay.getURL_REDIRECT_H5()+"?payLogId="+payLogId,"UTF-8");
 							}else {
-								redirectUri = "caixm://://caixiaomi.net";
+//								redirectUri = "caixm://://caixiaomi.net";
+								redirectUri = URLEncoder.encode(cfgPay.getURL_REDIRECT_APP()+"?payLogId="+payLogId,"UTF-8");
 							}
 						} catch (UnsupportedEncodingException e) {
 							logger.error("获取微信支付地址异常",e);
