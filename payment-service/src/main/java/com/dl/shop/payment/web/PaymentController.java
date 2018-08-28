@@ -398,8 +398,9 @@ public class PaymentController extends AbstractBaseController{
 			surplusPayParam.setThirdPartPaid(BigDecimal.ZERO);
 			if(isSurplus) {
 				BaseResult<SurplusPaymentCallbackDTO> changeUserAccountByPay = userAccountService.changeUserAccountByPay(surplusPayParam);
+				logger.info("订单扣减用户余额orderSn={},返回信息code={}",orderSn,changeUserAccountByPay==null?"":changeUserAccountByPay.getCode());
 				if(changeUserAccountByPay.getCode() != 0) {
-					logger.info(loggerId + "用户余额扣减失败！");
+					logger.info(loggerId + "用户余额扣减失败！orderSn={}",orderSn);
 					return ResultGenerator.genFailResult("支付失败！");
 				}
 				//更新余额支付信息到订单
