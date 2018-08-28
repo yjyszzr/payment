@@ -562,7 +562,19 @@ public class PaymentController extends AbstractBaseController{
 					url = rYinHeEntity.qrCode;
 					Boolean openJianLian = paymentService.getJianLianIsOpen();
 					if(openJianLian){
-						String amount="￥"+amtDouble.toString();
+//						暂时第三方还不支持
+//						try {
+//							if("1".equals(isH5)) {
+//								redirectUri = URLEncoder.encode(cfgPay.getURL_REDIRECT_H5()+"?payLogId="+payLogId,"UTF-8");
+//							}else {
+////								redirectUri = "caixm://://caixiaomi.net";
+//								redirectUri = URLEncoder.encode(cfgPay.getURL_REDIRECT_APP()+"?payLogId="+payLogId,"UTF-8");
+//							}
+//						} catch (UnsupportedEncodingException e) {
+//							logger.error("获取微信支付地址异常",e);
+//						}
+//						url = url+"&redirect_uri="+redirectUri;
+						String amount="￥"+amtDouble.setScale(2,RoundingMode.HALF_EVEN).toString();
 						logger.info("间联开关打开,原url={}，生成二维码地址开始,amtDoubleStr={}",url,amount);
 						try {
 							ByteArrayOutputStream  out = new ByteArrayOutputStream(); 
@@ -580,7 +592,8 @@ public class PaymentController extends AbstractBaseController{
 						    Integer base64Id = saveBean.getId();
 						    url = appH5QrUrl.replace("{qrBase64}",""+base64Id);
 //						    url = URLEncoder.encode(url,"UTF-8");
-						    logger.info("url={},base64Id={},encode Url base64Url={}",url,base64Id,qrBase64);
+//						    logger.info("url={},base64Id={},encode Url base64Url={}",url,base64Id,qrBase64);
+						    logger.info("url={},base64Id={}",url,base64Id);
 						} catch (Exception e) {
 							logger.error("微信转二维码异常",e);
 						}
@@ -833,6 +846,10 @@ public class PaymentController extends AbstractBaseController{
 			baseResult = rongUtil.queryOrderInfo(payLog.getPayOrderSn());
 		}else if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)) {
 			boolean isInWeixin = "app_wexin_h5".equals(payCode);
+            Boolean openJianLian = paymentService.getJianLianIsOpen();
+            if(openJianLian){
+                isInWeixin=Boolean.TRUE;
+            }
 			baseResult = yinHeUtil.orderQuery(isInWeixin,payLog.getPayOrderSn());
 		}else if("app_xianfeng".equals(payCode)) {
 			RspApplyBaseEntity rspBaseEntity;

@@ -47,7 +47,8 @@ public class RspOrderQueryEntity implements Serializable{
 	}
 	public boolean isFail() {
 		if(!TextUtils.isEmpty(result_code) && type == TYPE_YINHE) {
-			return result_code.equals("104");
+			return Boolean.FALSE;
+//			return result_code.equals("104");
 		}else if(!TextUtils.isEmpty(result_code) && type == TYPE_XIANFENG) {
 			return !StringUtils.isEmpty(trade_status)&&"F".equalsIgnoreCase(trade_status);
 		}
