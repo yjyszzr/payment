@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -71,6 +72,7 @@ import com.dl.order.param.SubmitOrderParam;
 import com.dl.order.param.SubmitOrderParam.TicketDetail;
 import com.dl.order.param.UpdateOrderInfoParam;
 import com.dl.order.param.UpdateOrderPayStatusParam;
+import com.dl.order.param.UpdateOrderStatusByAnotherStatusParam;
 import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dao.DlPayQrBase64Mapper;
 import com.dl.shop.payment.dto.PayLogDTO;
@@ -399,8 +401,16 @@ public class PaymentController extends AbstractBaseController{
 			if(isSurplus) {
 				BaseResult<SurplusPaymentCallbackDTO> changeUserAccountByPay = userAccountService.changeUserAccountByPay(surplusPayParam);
 				logger.info("订单扣减用户余额orderSn={},返回信息code={}",orderSn,changeUserAccountByPay==null?"":changeUserAccountByPay.getCode());
-				if(changeUserAccountByPay.getCode() != 0) {
-					logger.info(loggerId + "用户余额扣减失败！orderSn={}",orderSn);
+				if(changeUserAccountByPay==null || changeUserAccountByPay.getCode() != 0) {
+					UpdateOrderStatusByAnotherStatusParam updateParams = new UpdateOrderStatusByAnotherStatusParam();
+					List<String> orderSnlist = new ArrayList<String>();
+					orderSnlist.add(orderSn);
+					updateParams.setOrderSnlist(orderSnlist);
+					updateParams.setOrderStatusAfter("8");
+					updateParams.setOrderStatusBefore("0");
+					BaseResult<Integer> updateOrder = orderService.updateOrderStatusAnother(updateParams);
+					
+					logger.info(loggerId + "用户余额扣减失败！orderSn={},订单由0更新为8响应code={}",orderSn,updateOrder==null?"":updateOrder.getCode());
 					return ResultGenerator.genFailResult("支付失败！");
 				}
 				//更新余额支付信息到订单
