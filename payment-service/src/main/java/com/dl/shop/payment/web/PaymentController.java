@@ -578,7 +578,7 @@ public class PaymentController extends AbstractBaseController{
 				}else {
 					url = rYinHeEntity.qrCode;
 					Boolean openJianLian = paymentService.getJianLianIsOpen();
-					if(!isZfb&&openJianLian){
+					if(openJianLian){
 //						暂时第三方还不支持
 //						try {
 //							if("1".equals(isH5)) {
