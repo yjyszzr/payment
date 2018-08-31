@@ -121,7 +121,7 @@ public class YinHeUtil {
 		reqEntity.setSignValue(signCode);
 		//signCode添加到请求参数中
 		String reqStr = JSON.toJSONString(reqEntity);
-		System.out.println(reqStr);
+		logger.info("orderQuery reqStr:{}",reqStr);
 		RspHttpEntity rspEntity = HttpUtil.sendMsg(reqStr,cfgPay.getURL_PAY()+"/queryPayInfo.action",true);
 		if(rspEntity.isSucc) {
 			String contents = rspEntity.msg;

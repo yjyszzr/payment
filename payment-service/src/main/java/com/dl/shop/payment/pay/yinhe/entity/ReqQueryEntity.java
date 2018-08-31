@@ -47,7 +47,7 @@ public class ReqQueryEntity {
 		reqEntity.payType = isZfb?PAY_TYPE_ZHIFUBAO:PAY_TYPE_WECHAT;
 		reqEntity.amt = "";
 		reqEntity.merId = cfgPay.getMERCHANT_NO();
-		if(isWechat) {
+		if(isZfb||isWechat) {
 			reqEntity.inWechat = "1";
 		}else {
 			reqEntity.inWechat = "0";
