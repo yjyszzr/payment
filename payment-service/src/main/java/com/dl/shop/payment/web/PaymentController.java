@@ -175,6 +175,8 @@ public class PaymentController extends AbstractBaseController{
 	private DlPayQrBase64Mapper dlPayQrBase64Mapper;
 	@Value("${yinhe.app_H5_qr_url}")
 	private String appH5QrUrl;
+	@Value("${yinhe.app_ZFB_H5_qr_url}")
+	private String appZFBH5QrUrl;
 	
 	@ApiOperation(value="系统可用第三方支付方式", notes="系统可用第三方支付方式")
 	@PostMapping("/allPayment")
@@ -607,7 +609,11 @@ public class PaymentController extends AbstractBaseController{
 						    saveBean.setBase64Content(qrBase64);
 						    Integer insertRow = dlPayQrBase64Mapper.saveDlPayQrBase64(saveBean);
 						    Integer base64Id = saveBean.getId();
-						    url = appH5QrUrl.replace("{qrBase64}",""+base64Id);
+						    if(isZfb){
+						    	url = appZFBH5QrUrl.replace("{qrBase64}",""+base64Id);
+						    }else{
+						    	url = appH5QrUrl.replace("{qrBase64}",""+base64Id);
+						    }
 //						    url = URLEncoder.encode(url,"UTF-8");
 //						    logger.info("url={},base64Id={},encode Url base64Url={}",url,base64Id,qrBase64);
 						    logger.info("payOrderSn={},支付方式={},url={},base64Id={}",payOrderSn,isZfb?"支付宝":"微信",url,base64Id);
