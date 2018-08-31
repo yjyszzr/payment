@@ -95,8 +95,8 @@ public class YinHeUtil {
 	 * @param orderNo
 	 * @return
 	 */
-	public BaseResult<RspOrderQueryEntity> orderQuery(boolean isInWechat,String orderNo){
-		ReqQueryEntity reqEntity = reqQueryEntity.buildReqQueryEntity(isInWechat,orderNo);
+	public BaseResult<RspOrderQueryEntity> orderQuery(boolean isZfb,boolean isInWechat,String orderNo){
+		ReqQueryEntity reqEntity = reqQueryEntity.buildReqQueryEntity(isZfb,isInWechat, orderNo);
 		ReqSignEntity signEntity = reqEntity.buildSignEntity();
 		String str = JSON.toJSONString(signEntity);
 		JSONObject jsonObj = JSON.parseObject(str,JSONObject.class);
@@ -121,7 +121,7 @@ public class YinHeUtil {
 		reqEntity.setSignValue(signCode);
 		//signCode添加到请求参数中
 		String reqStr = JSON.toJSONString(reqEntity);
-		System.out.println(reqStr);
+		logger.info("orderQuery reqStr:{}",reqStr);
 		RspHttpEntity rspEntity = HttpUtil.sendMsg(reqStr,cfgPay.getURL_PAY()+"/queryPayInfo.action",true);
 		if(rspEntity.isSucc) {
 			String contents = rspEntity.msg;

@@ -483,9 +483,13 @@ public class PaymentController extends AbstractBaseController{
 		//url下发后，服务器开始主动轮序订单状态
 		//PayManager.getInstance().addReqQueue(orderSn,savePayLog.getPayOrderSn(),paymentDto.getPayCode());
 		BaseResult payBaseResult = null;
-		if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)) {
+		if("app_zfb".equals(payCode)){
+			logger.info("支付宝支付url开始生成...isWechat:" + (param.getInnerWechat()==1) + " payOrderSn:" + savePayLog.getPayOrderSn());
+			payBaseResult = getWechatPayUrl(true,param.getInnerWechat()==1,param.getIsH5(),1,savePayLog, payIp, orderSn, "");
+			logger.info("支付宝支付url生成成功 code" + payBaseResult.getCode() +" data:" +payBaseResult.getData());
+		}else if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)) {
 			logger.info("生成微信支付url:" + "inWechat:" + (param.getInnerWechat()==1) + " payCode:" + savePayLog.getPayCode());
-			payBaseResult = getWechatPayUrl(param.getInnerWechat()==1,param.getIsH5(),0,savePayLog, payIp, orderId, "");
+			payBaseResult = getWechatPayUrl(false,param.getInnerWechat()==1,param.getIsH5(),0,savePayLog, payIp, orderId, "");
 			if(payBaseResult != null &&payBaseResult.getData() != null) {
 				String str = payBaseResult.getData()+"";
 				logger.info("生成支付url成功:" + str);
@@ -530,17 +534,19 @@ public class PaymentController extends AbstractBaseController{
 	 * @param payType 0->支付   1->充值  
 	 * @return
 	 */
-	private BaseResult<?> getWechatPayUrl(boolean isInnerWeChat,String isH5,int payType,PayLog savePayLog,String payIp,String orderId, String lotteryClassifyId) {
+	private BaseResult<?> getWechatPayUrl(Boolean isZfb,boolean isInnerWeChat,String isH5,int payType,PayLog savePayLog,String payIp,String orderId, String lotteryClassifyId) {
 		BaseResult<?> payBaseResult = null;
 		BigDecimal amtDouble = savePayLog.getOrderAmount();
 		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100)).setScale(0,RoundingMode.HALF_EVEN);
 		String payOrderSn = savePayLog.getPayOrderSn();
 		String payLogId = savePayLog.getLogId()+"";
 		RspYinHeEntity rYinHeEntity = null;
-		if(isInnerWeChat) {
-			rYinHeEntity = payUtil.getWechatPayUrl(true,payIp,bigD.toString(),payOrderSn);
+		if(isZfb){
+			rYinHeEntity = payUtil.getWechatPayUrl(true,true,payIp,bigD.toString(),payOrderSn);
+		}else if(isInnerWeChat) {
+			rYinHeEntity = payUtil.getWechatPayUrl(false,true,payIp,bigD.toString(),payOrderSn);
 		}else {
-			rYinHeEntity = payUtil.getWechatPayUrl(false,payIp,bigD.toString(),payOrderSn);
+			rYinHeEntity = payUtil.getWechatPayUrl(false,false,payIp,bigD.toString(),payOrderSn);
 		}
 		if(rYinHeEntity != null) {
 			if(rYinHeEntity.isSucc() && !TextUtils.isEmpty(rYinHeEntity.qrCode)) {
@@ -548,7 +554,7 @@ public class PaymentController extends AbstractBaseController{
 				String encodeUrl = null;
 				String redirectUri = null;
 				String url = null;
-				if(!isInnerWeChat) {
+				if(!isZfb&&!isInnerWeChat) {
 					try {
 						String qrCode = rYinHeEntity.qrCode;
 						encodeUrl = URLEncoder.encode(qrCode,"UTF-8");
@@ -604,7 +610,7 @@ public class PaymentController extends AbstractBaseController{
 						    url = appH5QrUrl.replace("{qrBase64}",""+base64Id);
 //						    url = URLEncoder.encode(url,"UTF-8");
 //						    logger.info("url={},base64Id={},encode Url base64Url={}",url,base64Id,qrBase64);
-						    logger.info("url={},base64Id={}",url,base64Id);
+						    logger.info("payOrderSn={},支付方式={},url={},base64Id={}",payOrderSn,isZfb?"支付宝":"微信",url,base64Id);
 						} catch (Exception e) {
 							logger.error("微信转二维码异常",e);
 						}
@@ -697,9 +703,13 @@ public class PaymentController extends AbstractBaseController{
 		//url下发后，服务器开始主动轮序订单状态
 		//PayManager.getInstance().addReqQueue(orderSn,savePayLog.getPayOrderSn(),payCode);
 		BaseResult payBaseResult = null;
-		if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)){
+		if("app_zfb".equals(payCode)){
+			logger.info("支付宝支付url开始生成...isWechat:" + (param.getInnerWechat()==1) + " payOrderSn:" + savePayLog.getPayOrderSn());
+			payBaseResult = getWechatPayUrl(true,param.getInnerWechat()==1,param.getIsH5(),1,savePayLog, payIp, orderSn, "");
+			logger.info("支付宝支付url生成成功 code" + payBaseResult.getCode() +" data:" +payBaseResult.getData());
+		}else if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)){
 			logger.info("微信支付url开始生成...isWechat:" + (param.getInnerWechat()==1) + " payOrderSn:" + savePayLog.getPayOrderSn());
-			payBaseResult = getWechatPayUrl(param.getInnerWechat()==1,param.getIsH5(),1,savePayLog, payIp, orderSn, "");
+			payBaseResult = getWechatPayUrl(false,param.getInnerWechat()==1,param.getIsH5(),1,savePayLog, payIp, orderSn, "");
 			logger.info("微信支付url生成成功 code" + payBaseResult.getCode() +" data:" +payBaseResult.getData());
 		}else if("app_rongbao".equals(payCode)) {
 			//生成支付链接信息
@@ -855,13 +865,15 @@ public class PaymentController extends AbstractBaseController{
 		
 		if("app_rongbao".equals(payCode)) {
 			baseResult = rongUtil.queryOrderInfo(payLog.getPayOrderSn());
+		}else if("app_zfb".equals(payCode)){
+			baseResult = yinHeUtil.orderQuery(true,false,payLog.getPayOrderSn());
 		}else if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)) {
 			boolean isInWeixin = "app_wexin_h5".equals(payCode);
             Boolean openJianLian = paymentService.getJianLianIsOpen();
             if(openJianLian){
                 isInWeixin=Boolean.TRUE;
             }
-			baseResult = yinHeUtil.orderQuery(isInWeixin,payLog.getPayOrderSn());
+			baseResult = yinHeUtil.orderQuery(false,isInWeixin,payLog.getPayOrderSn());
 		}else if("app_xianfeng".equals(payCode)) {
 			RspApplyBaseEntity rspBaseEntity;
 			try {
@@ -1327,9 +1339,13 @@ public class PaymentController extends AbstractBaseController{
 		//url下发后，服务器开始主动轮序订单状态
 		//PayManager.getInstance().addReqQueue(orderSn,savePayLog.getPayOrderSn(),paymentDto.getPayCode());
 		BaseResult payBaseResult = null;
-		if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)) {
+		if("app_zfb".equals(payCode)){
+			logger.info("支付宝支付url开始生成...isWechat:" + (param.getInnerWechat()==1) + " payOrderSn:" + savePayLog.getPayOrderSn());
+			payBaseResult = getWechatPayUrl(true,param.getInnerWechat()==1,param.getIsH5(),1,savePayLog, payIp, orderSn, "");
+			logger.info("支付宝支付url生成成功 code" + payBaseResult.getCode() +" data:" +payBaseResult.getData());
+		}else if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)) {
 			logger.info("生成微信支付url:" + "inWechat:" + (param.getInnerWechat()==1) + " payCode:" + savePayLog.getPayCode());
-			payBaseResult = getWechatPayUrl(param.getInnerWechat()==1,param.getIsH5(),0,savePayLog, payIp, orderId,lotteryClassifyIdStr);
+			payBaseResult = getWechatPayUrl(false,param.getInnerWechat()==1,param.getIsH5(),0,savePayLog, payIp, orderId,lotteryClassifyIdStr);
 			if(payBaseResult != null &&payBaseResult.getData() != null) {
 				String str = payBaseResult.getData()+"";
 				logger.info("生成支付url成功:" + str);
