@@ -50,6 +50,22 @@ public class ReqQRPayEntity {
 		reqEntity.inWechat = "1";
 		return reqEntity;
 	}
+	public final ReqQRPayEntity buildReqEntityZfb(String amount,String orderNo) {
+		ReqQRPayEntity reqEntity = new ReqQRPayEntity();
+		reqEntity.orgNo = cfgPay.getORG_NO();
+		reqEntity.charset = cfgPay.getCHAR_SET();
+		reqEntity.termNo = cfgPay.getDEVICE_NO();  //设备号
+		reqEntity.termType = "RQ";		//终端类型
+		reqEntity.txtTime = ConfigerPay.getPayTime(); //交易时间
+		reqEntity.signType = cfgPay.getSIGN_TYPE();		//签名信息
+		reqEntity.transNo = orderNo;	//交易号 唯一
+		reqEntity.merId = cfgPay.getMERCHANT_NO();//商户号
+		reqEntity.amt = amount;			//交易金额
+		reqEntity.backUrl = cfgPay.getURL_PAY_CALLBACK();	//异步回调接口
+		reqEntity.payType = ConfigerPay.PAY_TYPE_ZHIFUBAO;
+		reqEntity.inWechat = "0";
+		return reqEntity;
+	}
 	
 	public ReqSignEntity buildSignEntity() {
 		ReqSignEntity sEntity = new ReqSignEntity();

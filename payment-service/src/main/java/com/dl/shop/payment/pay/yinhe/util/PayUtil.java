@@ -74,7 +74,7 @@ public class PayUtil {
 	/**
 	 * 获取微信支付url
 	 */
-	public final RspYinHeEntity getWechatPayUrl(boolean isInnerWechat,String ip,String amount,String orderNo){
+	public final RspYinHeEntity getWechatPayUrl(boolean isZfb,boolean isInnerWechat,String ip,String amount,String orderNo){
 		logger.info("调取微信支付订单orderSn={},amount={}",orderNo,amount);
 		if("true".equals(cfgPay.getDEBUG())) {
 			amount = "2";
@@ -83,7 +83,10 @@ public class PayUtil {
 		ReqQRPayEntity reqQREntity = null;
 		ReqPayEntity reqH5Entity = null;
 		ReqSignEntity signEntity = null;
-		if(isInnerWechat) {
+		if(isZfb){
+			reqQREntity = reqQRPayEntity.buildReqEntityZfb(amount,orderNo);
+			signEntity = reqQREntity.buildSignEntity();
+		}else if(isInnerWechat) {
 			reqQREntity = reqQRPayEntity.buildReqEntity(amount,orderNo);
 			signEntity = reqQREntity.buildSignEntity();
 		}else {
@@ -111,7 +114,7 @@ public class PayUtil {
 		logger.info("sign code:" + signCode);
 		String reqStr = null;
 		//赋值signCode
-		if(isInnerWechat) {
+		if(isInnerWechat||isZfb) {
 			reqQREntity.setSignValue(signCode);
 			reqStr = JSON.toJSONString(reqQREntity);
 		}else {
@@ -122,7 +125,7 @@ public class PayUtil {
 		logger.info(reqStr);
 		RspHttpEntity rspHttpEntity = null;
 		logger.info("sign code params:" + paraStr + " secret:" + secret + " inwechat:" + isInnerWechat);
-		if(isInnerWechat) {	//yinHePay->动态二维码方式   yinHePayPublic
+		if(isInnerWechat||isZfb) {	//yinHePay->动态二维码方式   yinHePayPublic
 			rspHttpEntity = HttpUtil.sendMsg(reqStr,cfgPay.getURL_PAY()+"/yinHePayPublic.action",true);
 		}else {
 			//发送  yinHePay.action  -> yinHePayH5.action

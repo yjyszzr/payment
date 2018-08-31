@@ -602,7 +602,9 @@ public class PayMentService extends AbstractService<PayMent> {
 		}
 		String payCode = payLog.getPayCode();
 		String payOrderSn = payLog.getPayOrderSn();
-		if("app_rongbao".equals(payCode)) {
+		if("app_zfb".equals(payCode)){
+			baseResult = yinHeUtil.orderQuery(false,payOrderSn);
+		}else if("app_rongbao".equals(payCode)) {
 			baseResult = rongUtil.queryOrderInfo(payOrderSn);
 		}else if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)) {
 			boolean isInWeChat = "app_weixin_h5".equals(payCode);
