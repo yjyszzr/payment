@@ -905,16 +905,13 @@ public class PaymentController extends AbstractBaseController{
 	@ResponseBody
     public BaseResult<PriceDTO> queryMoneyInRedis(@RequestBody PayLogIdParam payLogIdParam){
 		PriceDTO donationPriceDTO = new PriceDTO();
-		donationPriceDTO.setPrice("0.04");
 		logger.info("前端传入："+String.valueOf(payLogIdParam.getPayLogId()));
 		String donationPrice = stringRedisTemplate.opsForValue().get(String.valueOf(payLogIdParam.getPayLogId()));
 		logger.info("redis 取出1："+donationPrice);
 		if(!StringUtils.isEmpty(donationPrice)) {
 			donationPriceDTO.setPrice(donationPrice);
 		}
-		
 		stringRedisTemplate.delete(String.valueOf(payLogIdParam.getPayLogId()));
-
 		logger.info("redis 取出2："+donationPrice);
 		return ResultGenerator.genSuccessResult("success", donationPriceDTO);
  	}

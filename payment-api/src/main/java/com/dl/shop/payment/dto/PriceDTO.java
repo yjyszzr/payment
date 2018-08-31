@@ -1,7 +1,5 @@
 package com.dl.shop.payment.dto;
 
-import java.math.BigDecimal;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -14,6 +12,6 @@ public class PriceDTO {
     private String  payLogId;
 	
 	@ApiModelProperty(value="")
-    private String  price;
+    private String  price = "0.00";
 	
 }
