@@ -380,7 +380,9 @@ public class PayMentService extends AbstractService<PayMent> {
 				recharegeParam.setAmount(payLog.getOrderAmount());
 				recharegeParam.setPayId(payLog.getPayOrderSn());//解决充值两次问题
 				String payCode = payLog.getPayCode();
-				if("app_weixin".equals(payCode)) {
+				if("app_zfb".equals(payCode)) {
+					recharegeParam.setThirdPartName("支付宝");
+				}else if("app_weixin".equals(payCode)) {
 					recharegeParam.setThirdPartName("微信");
 				}else if("app_rongbao".equals(payCode)){
 					recharegeParam.setThirdPartName("银行卡");
@@ -435,17 +437,18 @@ public class PayMentService extends AbstractService<PayMent> {
 		}else {
 			String payCode = payLog.getPayCode();
 			logger.info("payOrderSn={},payCode={},retCode={},retMsg={}",payLog.getPayOrderSn(),payCode,response.getResult_code(),response.getResult_msg());
-			if(RspOrderQueryEntity.PAY_CODE_RONGBAO.equals(payCode)) {
-				String code = response.getResult_code();
-				if(StringUtils.isBlank(code) || "3015".equals(code)) {//订单不存在
-					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
-				}else {
-					String tips = response.getResult_msg();
-					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),PayEnums.PAY_RONGBAO_FAILURE.getMsg());
-				}
-			}else {
-				return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
-			}
+			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),PayEnums.PAY_RONGBAO_FAILURE.getMsg());
+//			if(RspOrderQueryEntity.PAY_CODE_RONGBAO.equals(payCode)) {
+//				String code = response.getResult_code();
+//				if(StringUtils.isBlank(code) || "3015".equals(code)) {//订单不存在
+//					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
+//				}else {
+//					String tips = response.getResult_msg();
+//					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),PayEnums.PAY_RONGBAO_FAILURE.getMsg());
+//				}
+//			}else {
+//				return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),PayEnums.PAY_RONGBAO_FAILURE.getMsg());
+//			}
 		}
 	}
 	
@@ -511,8 +514,9 @@ public class PayMentService extends AbstractService<PayMent> {
 				updatePayLog.setPayMsg("支付失败");
 				payLogService.update(updatePayLog);
 			}
+			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),PayEnums.PAY_RONGBAO_FAILURE.getMsg());
 		}else {
-			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
+			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),PayEnums.PAY_RONGBAO_FAILURE.getMsg());
 //			//预扣款 的方案 这里什么也不做
 //			String payCode = payLog.getPayCode();
 //			//融宝处理
@@ -538,7 +542,6 @@ public class PayMentService extends AbstractService<PayMent> {
 //				
 //			}
 		}
-		return null;
 	}
 	private void updatePaybankRecord(Integer payLogId){
 		//先锋支付银行卡回写支付成功，该银行卡已生效
