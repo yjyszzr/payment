@@ -554,7 +554,7 @@ public class PaymentController extends AbstractBaseController{
 				String encodeUrl = null;
 				String redirectUri = null;
 				String url = null;
-				if(!isInnerWeChat) {
+				if(!isZfb&&!isInnerWeChat) {
 					try {
 						String qrCode = rYinHeEntity.qrCode;
 						encodeUrl = URLEncoder.encode(qrCode,"UTF-8");
