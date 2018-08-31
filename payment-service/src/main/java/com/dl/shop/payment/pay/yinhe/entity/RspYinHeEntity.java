@@ -21,7 +21,8 @@ public class RspYinHeEntity {
 	}
 
 	public boolean isFailure() {
-		return "104".equals(returnCode);
+		return Boolean.FALSE;
+//		return "104".equals(returnCode);
 	}
 	
 	public boolean isWaitPay() {

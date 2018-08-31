@@ -419,7 +419,7 @@ public class PayMentService extends AbstractService<PayMent> {
 				return ResultGenerator.genSuccessResult("充值成功",rspOrderQueryDTO);	
 			}
 			logger.error("充值记录payOrderSn={}已变更，更新失败",payLog.getPayOrderSn());
-			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),PayEnums.PAY_RONGBAO_FAILURE.getMsg());
+			return ResultGenerator.genSuccessResult();
 		}else if(response.isFail()){
 			//更新paylog
 			try {
@@ -444,13 +444,7 @@ public class PayMentService extends AbstractService<PayMent> {
 					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),PayEnums.PAY_RONGBAO_FAILURE.getMsg());
 				}
 			}else {
-				String code = response.getResult_code(); //104 -> 未支付  404 -> 订单不存在
-				if(StringUtils.isBlank(code) || response.isYinHeWeChatNotPay()) {
-					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
-				}else {
-					String tips = response.getResult_msg();
-					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),PayEnums.PAY_RONGBAO_FAILURE.getMsg());	
-				}
+				return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
 			}
 		}
 	}
@@ -518,30 +512,31 @@ public class PayMentService extends AbstractService<PayMent> {
 				payLogService.update(updatePayLog);
 			}
 		}else {
-			//预扣款 的方案 这里什么也不做
-			String payCode = payLog.getPayCode();
-			//融宝处理
-			if(RspOrderQueryEntity.PAY_CODE_RONGBAO.equals(payCode)) {
-				String code = response.getResult_code();
-				if(StringUtils.isBlank(code) || "3015".equals(code)) {//订单不存在
-					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
-				}else {
-					String tips = response.getResult_msg();
-					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"融宝服务返回[" + tips +"]");
-				}
-			//微信处理	
-			}else if(RspOrderQueryEntity.PAY_CODE_WECHAT.startsWith(payCode)){//wechat pay
-				String code = response.getResult_code();
-				String tips = response.getResult_msg();
-				if(StringUtils.isBlank(code) || response.isYinHeWeChatNotPay()) {
-					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
-				}else {
-					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"微信支付失败["+tips+"]");	
-				}
-			//先锋错误码处理
-			}else if(RspOrderQueryEntity.PAY_CODE_XIANFENG.equals(payCode)){
-				
-			}
+			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
+//			//预扣款 的方案 这里什么也不做
+//			String payCode = payLog.getPayCode();
+//			//融宝处理
+//			if(RspOrderQueryEntity.PAY_CODE_RONGBAO.equals(payCode)) {
+//				String code = response.getResult_code();
+//				if(StringUtils.isBlank(code) || "3015".equals(code)) {//订单不存在
+//					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
+//				}else {
+//					String tips = response.getResult_msg();
+//					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"融宝服务返回[" + tips +"]");
+//				}
+//			//微信处理	
+//			}else if(RspOrderQueryEntity.PAY_CODE_WECHAT.startsWith(payCode)){//wechat pay
+//				String code = response.getResult_code();
+//				String tips = response.getResult_msg();
+//				if(StringUtils.isBlank(code) || response.isYinHeWeChatNotPay()) {
+//					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
+//				}else {
+//					return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),"微信支付失败["+tips+"]");	
+//				}
+//			//先锋错误码处理
+//			}else if(RspOrderQueryEntity.PAY_CODE_XIANFENG.equals(payCode)){
+//				
+//			}
 		}
 		return null;
 	}

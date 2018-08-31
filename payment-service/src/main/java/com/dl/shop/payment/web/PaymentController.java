@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -71,6 +72,7 @@ import com.dl.order.param.SubmitOrderParam;
 import com.dl.order.param.SubmitOrderParam.TicketDetail;
 import com.dl.order.param.UpdateOrderInfoParam;
 import com.dl.order.param.UpdateOrderPayStatusParam;
+import com.dl.order.param.UpdateOrderStatusByAnotherStatusParam;
 import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dao.DlPayQrBase64Mapper;
 import com.dl.shop.payment.dto.PayLogDTO;
@@ -398,8 +400,17 @@ public class PaymentController extends AbstractBaseController{
 			surplusPayParam.setThirdPartPaid(BigDecimal.ZERO);
 			if(isSurplus) {
 				BaseResult<SurplusPaymentCallbackDTO> changeUserAccountByPay = userAccountService.changeUserAccountByPay(surplusPayParam);
-				if(changeUserAccountByPay.getCode() != 0) {
-					logger.info(loggerId + "用户余额扣减失败！");
+				logger.info("订单扣减用户余额orderSn={},返回信息code={}",orderSn,changeUserAccountByPay==null?"":changeUserAccountByPay.getCode());
+				if(changeUserAccountByPay==null || changeUserAccountByPay.getCode() != 0) {
+					UpdateOrderStatusByAnotherStatusParam updateParams = new UpdateOrderStatusByAnotherStatusParam();
+					List<String> orderSnlist = new ArrayList<String>();
+					orderSnlist.add(orderSn);
+					updateParams.setOrderSnlist(orderSnlist);
+					updateParams.setOrderStatusAfter("8");
+					updateParams.setOrderStatusBefore("0");
+					BaseResult<Integer> updateOrder = orderService.updateOrderStatusAnother(updateParams);
+					
+					logger.info(loggerId + "用户余额扣减失败！orderSn={},订单由0更新为8响应code={}",orderSn,updateOrder==null?"":updateOrder.getCode());
 					return ResultGenerator.genFailResult("支付失败！");
 				}
 				//更新余额支付信息到订单
@@ -562,7 +573,19 @@ public class PaymentController extends AbstractBaseController{
 					url = rYinHeEntity.qrCode;
 					Boolean openJianLian = paymentService.getJianLianIsOpen();
 					if(openJianLian){
-						String amount="￥"+amtDouble.toString();
+//						暂时第三方还不支持
+//						try {
+//							if("1".equals(isH5)) {
+//								redirectUri = URLEncoder.encode(cfgPay.getURL_REDIRECT_H5()+"?payLogId="+payLogId,"UTF-8");
+//							}else {
+////								redirectUri = "caixm://://caixiaomi.net";
+//								redirectUri = URLEncoder.encode(cfgPay.getURL_REDIRECT_APP()+"?payLogId="+payLogId,"UTF-8");
+//							}
+//						} catch (UnsupportedEncodingException e) {
+//							logger.error("获取微信支付地址异常",e);
+//						}
+//						url = url+"&redirect_uri="+redirectUri;
+						String amount="￥"+amtDouble.setScale(2,RoundingMode.HALF_EVEN).toString();
 						logger.info("间联开关打开,原url={}，生成二维码地址开始,amtDoubleStr={}",url,amount);
 						try {
 							ByteArrayOutputStream  out = new ByteArrayOutputStream(); 
@@ -580,7 +603,8 @@ public class PaymentController extends AbstractBaseController{
 						    Integer base64Id = saveBean.getId();
 						    url = appH5QrUrl.replace("{qrBase64}",""+base64Id);
 //						    url = URLEncoder.encode(url,"UTF-8");
-						    logger.info("url={},base64Id={},encode Url base64Url={}",url,base64Id,qrBase64);
+//						    logger.info("url={},base64Id={},encode Url base64Url={}",url,base64Id,qrBase64);
+						    logger.info("url={},base64Id={}",url,base64Id);
 						} catch (Exception e) {
 							logger.error("微信转二维码异常",e);
 						}
@@ -833,6 +857,10 @@ public class PaymentController extends AbstractBaseController{
 			baseResult = rongUtil.queryOrderInfo(payLog.getPayOrderSn());
 		}else if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)) {
 			boolean isInWeixin = "app_wexin_h5".equals(payCode);
+            Boolean openJianLian = paymentService.getJianLianIsOpen();
+            if(openJianLian){
+                isInWeixin=Boolean.TRUE;
+            }
 			baseResult = yinHeUtil.orderQuery(isInWeixin,payLog.getPayOrderSn());
 		}else if("app_xianfeng".equals(payCode)) {
 			RspApplyBaseEntity rspBaseEntity;
