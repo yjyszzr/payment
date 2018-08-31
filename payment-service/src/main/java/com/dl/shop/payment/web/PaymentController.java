@@ -610,7 +610,7 @@ public class PaymentController extends AbstractBaseController{
 						    url = appH5QrUrl.replace("{qrBase64}",""+base64Id);
 //						    url = URLEncoder.encode(url,"UTF-8");
 //						    logger.info("url={},base64Id={},encode Url base64Url={}",url,base64Id,qrBase64);
-						    logger.info("url={},base64Id={}",url,base64Id);
+						    logger.info("payOrderSn={},支付方式={},url={},base64Id={}",payOrderSn,isZfb?"支付宝":"微信",url,base64Id);
 						} catch (Exception e) {
 							logger.error("微信转二维码异常",e);
 						}
