@@ -95,8 +95,8 @@ public class YinHeUtil {
 	 * @param orderNo
 	 * @return
 	 */
-	public BaseResult<RspOrderQueryEntity> orderQuery(boolean isInWechat,String orderNo){
-		ReqQueryEntity reqEntity = reqQueryEntity.buildReqQueryEntity(isInWechat,orderNo);
+	public BaseResult<RspOrderQueryEntity> orderQuery(boolean isZfb,boolean isInWechat,String orderNo){
+		ReqQueryEntity reqEntity = reqQueryEntity.buildReqQueryEntity(isZfb,isInWechat, orderNo);
 		ReqSignEntity signEntity = reqEntity.buildSignEntity();
 		String str = JSON.toJSONString(signEntity);
 		JSONObject jsonObj = JSON.parseObject(str,JSONObject.class);

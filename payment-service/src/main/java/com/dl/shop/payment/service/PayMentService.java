@@ -603,12 +603,12 @@ public class PayMentService extends AbstractService<PayMent> {
 		String payCode = payLog.getPayCode();
 		String payOrderSn = payLog.getPayOrderSn();
 		if("app_zfb".equals(payCode)){
-			baseResult = yinHeUtil.orderQuery(false,payOrderSn);
+			baseResult = yinHeUtil.orderQuery(true,false,payOrderSn);
 		}else if("app_rongbao".equals(payCode)) {
 			baseResult = rongUtil.queryOrderInfo(payOrderSn);
 		}else if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)) {
 			boolean isInWeChat = "app_weixin_h5".equals(payCode);
-			baseResult = yinHeUtil.orderQuery(isInWeChat,payOrderSn);
+			baseResult = yinHeUtil.orderQuery(false,isInWeChat,payOrderSn);
 		}else if("app_xianfeng".equals(payCode)) {
 			try {
 				RspApplyBaseEntity rspBaseEntity = xFengPayUtil.queryPayByOrderNo(payOrderSn);

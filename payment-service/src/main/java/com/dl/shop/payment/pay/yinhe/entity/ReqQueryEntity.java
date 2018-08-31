@@ -35,7 +35,7 @@ public class ReqQueryEntity {
 	public static final String PAY_TYPE_ZHIFUBAO = "2";
 	
 	
-	public ReqQueryEntity buildReqQueryEntity(boolean isWechat,String orderNo) {
+	public ReqQueryEntity buildReqQueryEntity(boolean isZfb,boolean isWechat,String orderNo) {
 		ReqQueryEntity reqEntity = new ReqQueryEntity();
 		reqEntity.orgNo = cfgPay.getORG_NO();
 		reqEntity.charset = cfgPay.getCHAR_SET();
@@ -44,7 +44,7 @@ public class ReqQueryEntity {
 		reqEntity.txtTime = getPayTime(); //交易时间，暂时写死
 		reqEntity.signType = cfgPay.getSIGN_TYPE();		//签名信息
 		reqEntity.transNo = orderNo;	//交易号 唯一
-		reqEntity.payType = PAY_TYPE_WECHAT;
+		reqEntity.payType = isZfb?PAY_TYPE_ZHIFUBAO:PAY_TYPE_WECHAT;
 		reqEntity.amt = "";
 		reqEntity.merId = cfgPay.getMERCHANT_NO();
 		if(isWechat) {
