@@ -20,5 +20,13 @@
   <select id="selectJianLianConfig" resultType="java.lang.Integer">
     select value from dl_sys_config where business_id=11
   </select>
+  <select id="selectRedirectInfo" resultType="com.dl.shop.payment.dto.PayFinishRedirectUrlTDTO">
+    select 
+    app.app_name as appName,
+    app.scheme_url as schemeUrl
+    from dl_phone_channel phoneChannel 
+    left join dl_app app on phoneChannel.app_code_name=app.app_code_name
+    where phoneChannel.channel=#{channelId}
+  </select>
   
 </mapper>

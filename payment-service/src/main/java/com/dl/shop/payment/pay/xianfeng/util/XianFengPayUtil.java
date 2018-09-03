@@ -10,10 +10,13 @@ import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.dl.base.model.UserDeviceInfo;
+import com.dl.base.util.SessionUtil;
 import com.dl.shop.payment.pay.common.HttpUtil;
 import com.dl.shop.payment.pay.common.RspHttpEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.config.Constants;
@@ -26,6 +29,8 @@ import com.dl.shop.payment.pay.xianfeng.entity.ReqApplyQueryEntity;
 import com.dl.shop.payment.pay.xianfeng.entity.ReqApplySmsEntity;
 import com.dl.shop.payment.pay.xianfeng.entity.RspApplyBaseEntity;
 import com.dl.shop.payment.pay.yinhe.util.PayKeyComparator;
+import com.dl.shop.payment.service.PayLogService;
+import com.dl.shop.payment.service.PayMentService;
 import com.ucf.sdk.UcfForOnline;
 import com.ucf.sdk.util.AESCoder;
 
@@ -34,9 +39,12 @@ public class XianFengPayUtil {
 	private final static Logger logger = LoggerFactory.getLogger(XianFengPayUtil.class);
 	@Resource
 	private Constants xFConstants;
+	@Autowired
+	private PayMentService paymentService;
 	
 	public String getPayH5Url(Integer payLogId){
-		return xFConstants.getPayH5Url()+"?id="+payLogId;
+		String payFinishRedirectURL = paymentService.payFinishRedirectUrlPlusParams(xFConstants.getPayH5Url()+"?id="+payLogId+"&");
+		return payFinishRedirectURL;
 	}
 	public XianFengPayUtil() throws Exception {
 		// TODO Auto-generated constructor stub

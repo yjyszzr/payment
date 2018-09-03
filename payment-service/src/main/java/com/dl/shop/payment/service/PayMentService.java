@@ -51,6 +51,7 @@ import com.dl.shop.payment.dao.PayLogMapper;
 import com.dl.shop.payment.dao.PayMentMapper;
 import com.dl.shop.payment.dao.RollBackLogMapper;
 import com.dl.shop.payment.dto.PayBankRecordDTO;
+import com.dl.shop.payment.dto.PayFinishRedirectUrlTDTO;
 import com.dl.shop.payment.dto.PaymentDTO;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.enums.PayEnums;
@@ -123,17 +124,12 @@ public class PayMentService extends AbstractService<PayMent> {
      * @return
      */
     public List<PaymentDTO> findAllDto() {
-    	UserDeviceInfo userDevice = SessionUtil.getUserDevice();
-//    	final Boolean isH5 = userDevice!=null&&"h5".equalsIgnoreCase(userDevice.getChannel());
 		List<PayMent> payments = super.findAll();
 		if(CollectionUtils.isEmpty(payments)) {
 			return new ArrayList<PaymentDTO>();
 		}
 		List<PaymentDTO> list = payments.stream().filter(payment->{
 			Boolean isEnable = payment.getIsEnable() == 1;
-//			if(!isH5&&"app_xianfeng".equalsIgnoreCase(payment.getPayCode())){
-//				isEnable = Boolean.FALSE;
-//			}
 			return isEnable;
 		}).map(payment->{
 			PaymentDTO paymentDTO = new PaymentDTO();
@@ -698,5 +694,20 @@ public class PayMentService extends AbstractService<PayMent> {
 			return Boolean.TRUE;
 		}
 		return Boolean.FALSE;
+	}
+	/**
+	 * 拼接支付完成跳转地址公共参数信息
+	 * @param redirectUrl
+	 * @param channelId
+	 * @return
+	 */
+	public String payFinishRedirectUrlPlusParams(String redirectUrl){
+		String channelId = "";
+		UserDeviceInfo userDevice = SessionUtil.getUserDevice();
+		if(userDevice!=null&&!"h5".equalsIgnoreCase(userDevice.getChannel())){
+			channelId = userDevice.getChannel();
+		}
+		PayFinishRedirectUrlTDTO finishRedirectDto = payMentMapper.selectRedirectInfo(channelId);
+		return redirectUrl+"appName="+finishRedirectDto.getAppName()+"&schemeUrl="+finishRedirectDto.getSchemeUrl();
 	}
 }

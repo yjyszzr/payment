@@ -31,10 +31,11 @@ public class ReqQRPayEntity {
 	private String amt;
 	private String subject;
 	private String backUrl;
+	private String frontUrl;
 	private String payType;
 	private String inWechat;	//等于0外部浏览器打开支付  1微信内部打开支付链接
 	
-	public final ReqQRPayEntity buildReqEntity(String amount,String orderNo) {
+	public final ReqQRPayEntity buildReqEntity(String frontUrl,String amount,String orderNo) {
 		ReqQRPayEntity reqEntity = new ReqQRPayEntity();
 		reqEntity.orgNo = cfgPay.getORG_NO();
 		reqEntity.charset = cfgPay.getCHAR_SET();
@@ -48,9 +49,10 @@ public class ReqQRPayEntity {
 		reqEntity.backUrl = cfgPay.getURL_PAY_CALLBACK();	//异步回调接口
 		reqEntity.payType = ConfigerPay.PAY_TYPE_WECHAT;
 		reqEntity.inWechat = "1";
+		reqEntity.frontUrl = frontUrl;
 		return reqEntity;
 	}
-	public final ReqQRPayEntity buildReqEntityZfb(String amount,String orderNo) {
+	public final ReqQRPayEntity buildReqEntityZfb(String frontUrl,String amount,String orderNo) {
 		ReqQRPayEntity reqEntity = new ReqQRPayEntity();
 		reqEntity.orgNo = cfgPay.getORG_NO();
 		reqEntity.charset = cfgPay.getCHAR_SET();
@@ -63,7 +65,8 @@ public class ReqQRPayEntity {
 		reqEntity.amt = amount;			//交易金额
 		reqEntity.backUrl = cfgPay.getURL_PAY_CALLBACK();	//异步回调接口
 		reqEntity.payType = ConfigerPay.PAY_TYPE_ZHIFUBAO;
-		reqEntity.inWechat = "0";
+		reqEntity.inWechat = "1";
+		reqEntity.frontUrl = frontUrl;
 		return reqEntity;
 	}
 	

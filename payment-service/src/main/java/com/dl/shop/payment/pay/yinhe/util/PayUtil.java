@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.util.MD5Utils;
+import com.dl.shop.payment.dao.PayMentMapper;
+import com.dl.shop.payment.dto.PayFinishRedirectUrlTDTO;
 import com.dl.shop.payment.pay.common.HttpUtil;
 import com.dl.shop.payment.pay.common.RspHttpEntity;
 import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
@@ -22,6 +24,7 @@ import com.dl.shop.payment.pay.yinhe.entity.ReqPayEntity;
 import com.dl.shop.payment.pay.yinhe.entity.ReqQRPayEntity;
 import com.dl.shop.payment.pay.yinhe.entity.ReqSignEntity;
 import com.dl.shop.payment.pay.yinhe.entity.RspYinHeEntity;
+import com.dl.shop.payment.service.PayMentService;
 import com.dl.shop.payment.web.PaymentController;
 
 @Component
@@ -34,7 +37,8 @@ public class PayUtil {
 	private ReqQRPayEntity reqQRPayEntity;
 	@Resource 
 	private ReqPayEntity reqPayEntity;
-	
+	@Resource
+	private PayMentService payMentService;
 	/**
 	 * 获取请求参数
 	 * @param treeMap
@@ -74,7 +78,7 @@ public class PayUtil {
 	/**
 	 * 获取微信支付url
 	 */
-	public final RspYinHeEntity getWechatPayUrl(boolean isZfb,boolean isInnerWechat,String ip,String amount,String orderNo){
+	public final RspYinHeEntity getWechatPayUrl(String payFinishRedirectURL,boolean isZfb,boolean isInnerWechat,String ip,String amount,String orderNo){
 		logger.info("调取微信支付订单orderSn={},amount={}",orderNo,amount);
 		if("true".equals(cfgPay.getDEBUG())) {
 			amount = "2";
@@ -84,10 +88,10 @@ public class PayUtil {
 		ReqPayEntity reqH5Entity = null;
 		ReqSignEntity signEntity = null;
 		if(isZfb){
-			reqQREntity = reqQRPayEntity.buildReqEntityZfb(amount,orderNo);
+			reqQREntity = reqQRPayEntity.buildReqEntityZfb(payFinishRedirectURL,amount,orderNo);
 			signEntity = reqQREntity.buildSignEntity();
 		}else if(isInnerWechat) {
-			reqQREntity = reqQRPayEntity.buildReqEntity(amount,orderNo);
+			reqQREntity = reqQRPayEntity.buildReqEntity(payFinishRedirectURL,amount,orderNo);
 			signEntity = reqQREntity.buildSignEntity();
 		}else {
 			reqH5Entity = reqPayEntity.buildReqEntity(ip, amount, orderNo);			

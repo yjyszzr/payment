@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.dl.base.model.UserDeviceInfo;
 import com.dl.base.param.EmptyParam;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -537,6 +538,7 @@ public class PaymentController extends AbstractBaseController{
 	 * @return
 	 */
 	private BaseResult<?> getWechatPayUrl(Boolean isZfb,boolean isInnerWeChat,String isH5,int payType,PayLog savePayLog,String payIp,String orderId, String lotteryClassifyId) {
+		String payFinishRedirectURL = paymentService.payFinishRedirectUrlPlusParams(cfgPay.getURL_REDIRECT_APP());
 		BaseResult<?> payBaseResult = null;
 		BigDecimal amtDouble = savePayLog.getOrderAmount();
 		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100)).setScale(0,RoundingMode.HALF_EVEN);
@@ -544,11 +546,11 @@ public class PaymentController extends AbstractBaseController{
 		String payLogId = savePayLog.getLogId()+"";
 		RspYinHeEntity rYinHeEntity = null;
 		if(isZfb){
-			rYinHeEntity = payUtil.getWechatPayUrl(true,true,payIp,bigD.toString(),payOrderSn);
+			rYinHeEntity = payUtil.getWechatPayUrl(payFinishRedirectURL,true,true,payIp,bigD.toString(),payOrderSn);
 		}else if(isInnerWeChat) {
-			rYinHeEntity = payUtil.getWechatPayUrl(false,true,payIp,bigD.toString(),payOrderSn);
+			rYinHeEntity = payUtil.getWechatPayUrl(payFinishRedirectURL,false,true,payIp,bigD.toString(),payOrderSn);
 		}else {
-			rYinHeEntity = payUtil.getWechatPayUrl(false,false,payIp,bigD.toString(),payOrderSn);
+			rYinHeEntity = payUtil.getWechatPayUrl(payFinishRedirectURL,false,false,payIp,bigD.toString(),payOrderSn);
 		}
 		if(rYinHeEntity != null) {
 			if(rYinHeEntity.isSucc() && !TextUtils.isEmpty(rYinHeEntity.qrCode)) {
@@ -581,18 +583,6 @@ public class PaymentController extends AbstractBaseController{
 					url = rYinHeEntity.qrCode;
 					Boolean openJianLian = paymentService.getJianLianIsOpen();
 					if(openJianLian){
-//						暂时第三方还不支持
-//						try {
-//							if("1".equals(isH5)) {
-//								redirectUri = URLEncoder.encode(cfgPay.getURL_REDIRECT_H5()+"?payLogId="+payLogId,"UTF-8");
-//							}else {
-////								redirectUri = "caixm://://caixiaomi.net";
-//								redirectUri = URLEncoder.encode(cfgPay.getURL_REDIRECT_APP()+"?payLogId="+payLogId,"UTF-8");
-//							}
-//						} catch (UnsupportedEncodingException e) {
-//							logger.error("获取微信支付地址异常",e);
-//						}
-//						url = url+"&redirect_uri="+redirectUri;
 						String amount="￥"+amtDouble.setScale(2,RoundingMode.HALF_EVEN).toString();
 						logger.info("间联开关打开,原url={}，生成二维码地址开始,amtDoubleStr={}",url,amount);
 						try {
@@ -601,9 +591,7 @@ public class PaymentController extends AbstractBaseController{
 							ImageIO.write(bufferImage,"png",out);
 							byte[] imageB = out.toByteArray();
 							sun.misc.BASE64Encoder encoder = new sun.misc.BASE64Encoder();
-//						    String qrBase64 = encoder.encode(imageB);
 						    String qrBase64 = "data:image/png;base64,"+Base64.encodeBase64String(imageB);
-//						    logger.info("url={},base64={}",url,qrBase64);
 						    DlPayQrBase64 saveBean = new DlPayQrBase64();
 						    saveBean.setPayordersn(payOrderSn);
 						    saveBean.setBase64Content(qrBase64);
