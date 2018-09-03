@@ -708,6 +708,8 @@ public class PayMentService extends AbstractService<PayMent> {
 			channelId = userDevice.getChannel();
 		}
 		PayFinishRedirectUrlTDTO finishRedirectDto = payMentMapper.selectRedirectInfo(channelId);
-		return redirectUrl+"appName="+finishRedirectDto.getAppName()+"&schemeUrl="+finishRedirectDto.getSchemeUrl();
+		String payFinishRedirectUrl = redirectUrl+"appName="+finishRedirectDto.getAppName()+"&schemeUrl="+finishRedirectDto.getSchemeUrl();
+		logger.info("支付完成跳转地址redirectUrl={},转换后地址payFinishRedirectUrl={}",redirectUrl,payFinishRedirectUrl);
+		return payFinishRedirectUrl;
 	}
 }
