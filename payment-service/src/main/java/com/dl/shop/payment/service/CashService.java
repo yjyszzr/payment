@@ -612,6 +612,16 @@ public class CashService {
 		if(userWithdraw == null) {
 			return ResultGenerator.genFailResult("该订单不存在...sn:" + withDrawSn);
 		}
+		Boolean withDrawByPersonOprateOpen = userWithdrawService.queryWithDrawPersonOpen();
+		if(withDrawByPersonOprateOpen){
+			if(Integer.valueOf(1).equals(userWithdraw.getStatus())){
+				return ResultGenerator.genSuccessResult();
+			}else if(Integer.valueOf(2).equals(userWithdraw.getStatus())){
+				return ResultGenerator.genResult(PayEnums.CASH_FAILURE.getcode(),"提现失败");
+			}else{
+				return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_APPLY_SUC.getcode(),PayEnums.PAY_WITHDRAW_APPLY_SUC.getMsg());
+			}
+		}
 		int userId = userWithdraw.getUserId();
 		String cardNo = userWithdraw.getCardNo();
 		UserIdRealParam userIdPara = new UserIdRealParam();
