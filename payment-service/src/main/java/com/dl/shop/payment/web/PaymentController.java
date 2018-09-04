@@ -538,7 +538,7 @@ public class PaymentController extends AbstractBaseController{
 	 * @return
 	 */
 	private BaseResult<?> getWechatPayUrl(Boolean isZfb,boolean isInnerWeChat,String isH5,int payType,PayLog savePayLog,String payIp,String orderId, String lotteryClassifyId) {
-		String payFinishRedirectURL = paymentService.payFinishRedirectUrlPlusParams(cfgPay.getURL_REDIRECT_APP());
+//		String payFinishRedirectURL = paymentService.payFinishRedirectUrlPlusParams(cfgPay.getURL_REDIRECT_APP());
 		BaseResult<?> payBaseResult = null;
 		BigDecimal amtDouble = savePayLog.getOrderAmount();
 		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100)).setScale(0,RoundingMode.HALF_EVEN);

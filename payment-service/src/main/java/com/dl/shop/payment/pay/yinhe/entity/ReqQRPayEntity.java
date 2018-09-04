@@ -31,7 +31,7 @@ public class ReqQRPayEntity {
 	private String amt;
 	private String subject;
 	private String backUrl;
-	private String frontUrl;
+//	private String frontUrl;
 	private String payType;
 	private String inWechat;	//等于0外部浏览器打开支付  1微信内部打开支付链接
 	
@@ -49,7 +49,7 @@ public class ReqQRPayEntity {
 		reqEntity.backUrl = cfgPay.getURL_PAY_CALLBACK();	//异步回调接口
 		reqEntity.payType = ConfigerPay.PAY_TYPE_WECHAT;
 		reqEntity.inWechat = "1";
-		reqEntity.frontUrl = frontUrl;
+//		reqEntity.frontUrl = frontUrl;
 		return reqEntity;
 	}
 	public final ReqQRPayEntity buildReqEntityZfb(String frontUrl,String amount,String orderNo) {
@@ -66,7 +66,7 @@ public class ReqQRPayEntity {
 		reqEntity.backUrl = cfgPay.getURL_PAY_CALLBACK();	//异步回调接口
 		reqEntity.payType = ConfigerPay.PAY_TYPE_ZHIFUBAO;
 		reqEntity.inWechat = "1";
-		reqEntity.frontUrl = frontUrl;
+//		reqEntity.frontUrl = frontUrl;
 		return reqEntity;
 	}
 	

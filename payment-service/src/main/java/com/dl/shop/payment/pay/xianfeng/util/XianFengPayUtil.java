@@ -43,8 +43,10 @@ public class XianFengPayUtil {
 	private PayMentService paymentService;
 	
 	public String getPayH5Url(Integer payLogId){
-		String payFinishRedirectURL = paymentService.payFinishRedirectUrlPlusParams(xFConstants.getPayH5Url()+"?id="+payLogId+"&");
-		return payFinishRedirectURL;
+		String payBankUrl = xFConstants.getPayH5Url()+"?id="+payLogId;
+		return payBankUrl;
+//		String payFinishRedirectURL = paymentService.payFinishRedirectUrlPlusParams(payBankUrl+"&");
+//		return payFinishRedirectURL;
 	}
 	public XianFengPayUtil() throws Exception {
 		// TODO Auto-generated constructor stub
