@@ -272,9 +272,8 @@ public class CashService {
 				GetUserMoneyPayParam getUserMoneyPayParam = new GetUserMoneyPayParam();
 				getUserMoneyPayParam.setUserId(userId);
 				BaseResult<GetUserMoneyDTO> getUserMoneyPayRst = orderService.getUserMoneyPay(getUserMoneyPayParam);
-				log.info("查询用户消费返回={}",getUserMoneyPayRst==null|getUserMoneyPayRst.getData()==null?"":JSONHelper.bean2json(getUserMoneyPayRst.getData()));
 				GetUserMoneyDTO data = getUserMoneyPayRst.getData();
-				Double userMoneyPaid = data != null?data.getMoneyPaid():0.0;
+				Double userMoneyPaid = data != null&&data.getMoneyPaid()!=null?data.getMoneyPaid():0.0;
 				Double userMoneyPaidForNoCheck = this.getUserMoneyPaidForNoCheck();
 				log.info("提现审请信息：userId="+userId+" totalAmount=" + totalAmount+ " limit="+limit + " getUserMoneyPaidForNoCheck=" + userMoneyPaidForNoCheck + " userMoneyPaid="+userMoneyPaid);
 				if(userMoneyPaidForNoCheck > userMoneyPaid) {
