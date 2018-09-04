@@ -182,7 +182,7 @@ private static BufferedImage scale(String logText, int height,
       if(logTextArr.length==1){
     	  g.drawString(logTextArr[0], (9-logTextArr[0].length())*IMAGE_WIDTH/18, 70);
       }else if(logTextArr.length==2){
-    	  g.drawString(logTextArr[0], (9-logTextArr[0].length())*IMAGE_WIDTH/18, 45);
+    	  g.drawString(logTextArr[0], (8-logTextArr[0].length())*IMAGE_WIDTH/18, 45);
     	  g.drawString(logTextArr[1], (9-logTextArr[1].length())*IMAGE_WIDTH/18, 90);  
       }
       g.dispose();
