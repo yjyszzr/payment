@@ -33,6 +33,7 @@ import com.dl.base.model.UserDeviceInfo;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.base.util.DateUtil;
+import com.dl.base.util.JSONHelper;
 import com.dl.base.util.SNGenerator;
 import com.dl.base.util.SessionUtil;
 import com.dl.member.api.IUserAccountService;
@@ -271,6 +272,7 @@ public class CashService {
 				GetUserMoneyPayParam getUserMoneyPayParam = new GetUserMoneyPayParam();
 				getUserMoneyPayParam.setUserId(userId);
 				BaseResult<GetUserMoneyDTO> getUserMoneyPayRst = orderService.getUserMoneyPay(getUserMoneyPayParam);
+				log.info("查询用户消费返回={}",getUserMoneyPayRst==null|getUserMoneyPayRst.getData()==null?"":JSONHelper.bean2json(getUserMoneyPayRst.getData()));
 				GetUserMoneyDTO data = getUserMoneyPayRst.getData();
 				Double userMoneyPaid = data != null?data.getMoneyPaid():0.0;
 				Double userMoneyPaidForNoCheck = this.getUserMoneyPaidForNoCheck();
