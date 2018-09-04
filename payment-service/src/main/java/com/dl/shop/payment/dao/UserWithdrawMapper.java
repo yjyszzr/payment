@@ -36,5 +36,11 @@ public interface UserWithdrawMapper extends Mapper<UserWithdraw> {
 	double getUserMoneyPaidForNoCheck();
 	//获取提现免审用户的上限单笔金额
 	double getMaxNoCheckMoney();
+
+	Integer queryWithDarwPersonOpen();
+	
+	int batchUpdateUserWithDrawSuccess(@Param("userWithdrawSns") List<String> successPersonWithDraw);
+
+	int batchUpdateUserWithDrawFail(@Param("userWithdrawSns") List<String> failPersonWithDraw);
 	
 }

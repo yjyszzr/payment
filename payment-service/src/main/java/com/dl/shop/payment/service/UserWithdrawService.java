@@ -167,5 +167,16 @@ public class UserWithdrawService extends AbstractService<UserWithdraw> {
     	int countUserWithdraw = userWithdrawMapper.countUserWithdrawByUserId(userId);
 		return countUserWithdraw;
     }
+
+
+
+	public Boolean queryWithDrawPersonOpen() {
+		Integer withDarwPersonOpen = userWithdrawMapper.queryWithDarwPersonOpen();
+		logger.info("提现审核人工打款开关={}",withDarwPersonOpen);
+		if(Integer.valueOf(1).equals(withDarwPersonOpen)){
+			return Boolean.TRUE;
+		}
+		return Boolean.FALSE;
+	}
     
 }

@@ -1,5 +1,7 @@
 package com.dl.shop.payment.param;
 
+import java.util.List;
+
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 

@@ -3,6 +3,7 @@ package com.dl.shop.payment.web;
 import io.swagger.annotations.ApiOperation;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -10,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,6 +27,7 @@ import com.dl.member.api.IUserService;
 import com.dl.shop.payment.model.UserWithdraw;
 import com.dl.shop.payment.param.CashGetParam;
 import com.dl.shop.payment.param.CashReqParam;
+import com.dl.shop.payment.param.UserWithDarwPersonOpenParam;
 import com.dl.shop.payment.param.WithdrawParam;
 import com.dl.shop.payment.pay.xianfeng.cash.util.XianFengCashUtil;
 import com.dl.shop.payment.service.CashService;
@@ -88,6 +91,20 @@ public class CashController {
 			return ResultGenerator.genFailResult("未找到对应的提现单号信息",null);
 		}
 		return cashService.getCash(userWithDraw,param.isPass());
+	}
+	
+	@ApiOperation(value="后台管理提现调用", notes="")
+	@PostMapping("/userWithDrawPersonOpen")
+	@ResponseBody
+	public BaseResult<Object> userWithDrawPersonOpen(@RequestBody UserWithDarwPersonOpenParam param){
+		Boolean withDrawByPersonOprateOpen = userWithdrawService.queryWithDrawPersonOpen();
+		if(!withDrawByPersonOprateOpen){
+			log.error("提现人工打款方式开关关闭,此接口不能处理业务");
+			return ResultGenerator.genFailResult("提现人工打款方式开关关闭,此接口不能处理业务",null);
+		}
+		cashService.userWithDrawPersonSuccess(param.getSucessPersonWithdrawSns());
+		cashService.userWithDrawPersonFail(param.getFailPersonWithdrawSns());
+		return ResultGenerator.genSuccessResult("",null);
 	}
 	
 	@ApiOperation(value="app提现调用", notes="")

@@ -51,6 +51,17 @@
   <update id="updateUserWithdrawStatus0To4" parameterType="com.dl.shop.payment.model.UserWithdraw">
    	 UPDATE dl_user_withdraw set status = 4,pay_time=#{payTime} WHERE withdrawal_sn = #{withdrawalSn} and status=0 
   </update>
+  <update id="batchUpdateUserWithDrawSuccess">
+  	 <foreach collection="userWithdrawSns" separator=";" item="userWithDrawsn">
+   	 UPDATE dl_user_withdraw set status = 1,pay_time=UNIX_TIMESTAMP(now()) WHERE withdrawal_sn = #{userWithDrawsn} and status=0 
+   	 </foreach>
+  </update>
+  <update id="batchUpdateUserWithDrawFail">
+  	 <foreach collection="userWithdrawSns" separator=";" item="userWithDrawsn">
+   	 UPDATE dl_user_withdraw set status = 4,pay_time=UNIX_TIMESTAMP(now()) WHERE withdrawal_sn = #{userWithDrawsn} and status=0 
+   	 </foreach>
+  </update>
+  
   
   
   
@@ -101,6 +112,8 @@
   <select id="getMaxNoCheckMoney" resultType="double">
   	select value from dl_sys_config where business_id = 6
   </select>
-  
+  <select id="queryWithDarwPersonOpen" resultType="java.lang.Integer">
+    select value from dl_sys_config where business_id=12
+  </select>
   
 </mapper>

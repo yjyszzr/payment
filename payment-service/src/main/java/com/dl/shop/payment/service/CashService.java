@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.http.util.TextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -54,6 +55,7 @@ import com.dl.order.api.IOrderService;
 import com.dl.order.dto.GetUserMoneyDTO;
 import com.dl.order.param.GetUserMoneyPayParam;
 import com.dl.shop.payment.core.ProjectConstant;
+import com.dl.shop.payment.dao.UserWithdrawLogMapper;
 import com.dl.shop.payment.dao.UserWithdrawMapper;
 import com.dl.shop.payment.dto.WithdrawalSnDTO;
 import com.dl.shop.payment.enums.CashEnums;
@@ -87,6 +89,8 @@ public class CashService {
 	private UserWithdrawService userWithdrawService;
 	@Resource
 	private UserWithdrawLogService userWithdrawLogService;
+	@Resource
+	private UserWithdrawLogMapper userWithdrawLogMapper;
 	@Resource
 	private IUserMessageService userMessageService;
 	@Resource
@@ -275,6 +279,10 @@ public class CashService {
 					isCheck = true;
 				}
 			}
+		}
+		Boolean withDrawByPersonOprateOpen = userWithdrawService.queryWithDrawPersonOpen();
+		if(withDrawByPersonOprateOpen){
+			isCheck=true;//人工打款打开时所有提现均走人工提现
 		}
 		log.info("提现审请信息：userId="+userId+" totalAmount=" + totalAmount+ " limit="+limit + " isCheck="+isCheck);
 		if(isCheck) {
@@ -473,7 +481,7 @@ public class CashService {
 			userWithdraw.setWithdrawalSn(sn);
 			userWithdraw.setPayTime(DateUtil.getCurrentTimeLong());
 			int row=userWithdrawMapper.updateUserWithdrawStatus0To4(userWithdraw);
-			if(row==1){				
+			if(row==1){
 				//增加提现流水为失敗
 				log.info("后台管理审核拒绝，增加提现单log日志...");
 				UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
@@ -652,6 +660,34 @@ public class CashService {
 		if(rspEntity != null) {
 			this.operation(rspEntity,withDrawSn, userId,Boolean.FALSE);
 		}
+	}
+
+	/**
+	 * 人工提现成功
+	 * @param successPersonWithDraw
+	 */
+	public void userWithDrawPersonSuccess(List<String> successPersonWithDraw) {
+		if(CollectionUtils.isEmpty(successPersonWithDraw)){
+			return;
+		}
+		log.info("批量处理提现单号成功，处理size={},userWithDrawSns={}",successPersonWithDraw.size(),successPersonWithDraw);
+		int updateRow = userWithdrawMapper.batchUpdateUserWithDrawSuccess(successPersonWithDraw);
+		userWithdrawLogMapper.batchInsertUserWithDrawLogsSuccess(successPersonWithDraw);
+		log.info("批量处理提现单号成功，处理完成updateRow={}",updateRow);
+	}
+
+	/**
+	 * 人工提现失败
+	 * @param failPersonWithDraw
+	 */
+	public void userWithDrawPersonFail(List<String> failPersonWithDraw) {
+		if(CollectionUtils.isEmpty(failPersonWithDraw)){
+			return ;
+		}
+		log.info("批量处理提现单号失败，处理size={},userWithDrawSns={}",failPersonWithDraw.size(),failPersonWithDraw);
+		int updateRow = userWithdrawMapper.batchUpdateUserWithDrawFail(failPersonWithDraw);
+		userWithdrawLogMapper.batchInsertUserWithDrawLogsFail(failPersonWithDraw);
+		log.info("批量处理提现单号失败，处理完成updateRow={}",updateRow);
 	}
 	
 }
