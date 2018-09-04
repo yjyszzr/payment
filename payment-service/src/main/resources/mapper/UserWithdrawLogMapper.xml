@@ -19,7 +19,7 @@
    <foreach collection="userWithdrawSns" separator=";" item="userWithDrawsn">
    	  INSERT INTO `dl_user_withdraw_log`(`withdraw_sn`, `log_time`, `log_code`, `log_name`) 
    	  select #{userWithDrawsn}, UNIX_TIMESTAMP(now()), 3, '提现成功'
-   	  from dl_user_withdraw_log where not exists 
+   	  from DUAL where not exists 
       (select 1 from dl_user_withdraw_log where withdraw_sn=#{userWithDrawsn} and log_code=3)
    </foreach>
   </insert>
@@ -27,7 +27,7 @@
    <foreach collection="userWithdrawSns" separator=";" item="userWithDrawsn">
    	 INSERT INTO `dl_user_withdraw_log`(`withdraw_sn`, `log_time`, `log_code`, `log_name`) 
    	 select #{userWithDrawsn}, UNIX_TIMESTAMP(now()), 4, '提现失败' 
-   	 from dl_user_withdraw_log where not exists 
+   	 from DUAL where not exists 
      (select 1 from dl_user_withdraw_log where withdraw_sn=#{userWithDrawsn} and log_code=4)
    </foreach>
   </insert>
