@@ -178,7 +178,13 @@ private static BufferedImage scale(String logText, int height,
       Font font = new Font("宋体",3,25);
       //文字在图片中的坐标 这里设置在中间
       g.setFont(font);
-      g.drawString(logText, (9-logText.length())*IMAGE_WIDTH/18, 70);
+      String[] logTextArr = logText.split(";");
+      if(logTextArr.length==1){
+    	  g.drawString(logTextArr[0], (9-logTextArr[0].length())*IMAGE_WIDTH/18, 70);
+      }else if(logTextArr.length==2){
+    	  g.drawString(logTextArr[0], (9-logTextArr[0].length())*IMAGE_WIDTH/18, 45);
+    	  g.drawString(logTextArr[1], (9-logTextArr[1].length())*IMAGE_WIDTH/18, 90);  
+      }
       g.dispose();
       return image;
 }
@@ -189,7 +195,7 @@ public static void main(String[] args) throws WriterException, IOException {
 //    QrUtil.encode("http://www.baidu.com/", 520, 520,
 //        "", "D:\\tmp\\withLog.jpg");
     ByteArrayOutputStream  out = new ByteArrayOutputStream(); 
-    BufferedImage bufferImage = QrUtil.genBarcode("http://www.baidu.com/", 520, 520, "￥9.99");
+    BufferedImage bufferImage = QrUtil.genBarcode("http://www.baidu.com/", 520, 520, "支付宝;￥9.99");
     ImageIO.write(bufferImage,"png",out);
     Path path = Paths.get("D:\\tmp\\test.png");
     Files.write(path, out.toByteArray());
