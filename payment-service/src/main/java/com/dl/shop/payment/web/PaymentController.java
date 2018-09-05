@@ -488,7 +488,7 @@ public class PaymentController extends AbstractBaseController{
 		BaseResult payBaseResult = null;
 		if("app_zfb".equals(payCode)){
 			logger.info("支付宝支付url开始生成...isWechat:" + (param.getInnerWechat()==1) + " payOrderSn:" + savePayLog.getPayOrderSn());
-			payBaseResult = getWechatPayUrl(true,param.getInnerWechat()==1,param.getIsH5(),1,savePayLog, payIp, orderId, "");
+			payBaseResult = getWechatPayUrl(true,param.getInnerWechat()==1,param.getIsH5(),0,savePayLog, payIp, orderId, "");
 			logger.info("支付宝支付url生成成功 code" + payBaseResult.getCode() +" data:" +payBaseResult.getData());
 		}else if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)) {
 			logger.info("生成微信支付url:" + "inWechat:" + (param.getInnerWechat()==1) + " payCode:" + savePayLog.getPayCode());
@@ -1339,7 +1339,7 @@ public class PaymentController extends AbstractBaseController{
 		BaseResult payBaseResult = null;
 		if("app_zfb".equals(payCode)){
 			logger.info("支付宝支付url开始生成...isWechat:" + (param.getInnerWechat()==1) + " payOrderSn:" + savePayLog.getPayOrderSn());
-			payBaseResult = getWechatPayUrl(true,param.getInnerWechat()==1,param.getIsH5(),1,savePayLog, payIp, orderId, "");
+			payBaseResult = getWechatPayUrl(true,param.getInnerWechat()==1,param.getIsH5(),0,savePayLog, payIp, orderId, "");
 			logger.info("支付宝支付url生成成功 code" + payBaseResult.getCode() +" data:" +payBaseResult.getData());
 		}else if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)) {
 			logger.info("生成微信支付url:" + "inWechat:" + (param.getInnerWechat()==1) + " payCode:" + savePayLog.getPayCode());
