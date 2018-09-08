@@ -692,7 +692,7 @@ public class PayMentService extends AbstractService<PayMent> {
 	public BaseResult<?> getYFTPayUrl(PayLog savePayLog,String orderId, String lotteryClassifyId) {
 		BaseResult<?> payBaseResult = null;
 		BigDecimal amtDouble = savePayLog.getOrderAmount();
-		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100)).setScale(0,RoundingMode.HALF_EVEN);
+		BigDecimal bigD = amtDouble.setScale(0,RoundingMode.HALF_EVEN);
 		String payOrderSn = savePayLog.getPayOrderSn();
 		RspYFTEntity rspEntity = null;
 		rspEntity = payYFTUtil.getYFTPayUrl(bigD.toString(),payOrderSn);
