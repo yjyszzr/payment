@@ -48,6 +48,7 @@ public class RspYFTEntity {
 		public String payUrl;
 		public String price;
 		public String realPrice;
+		public String ts;
 		public String sign;
 	}
 }

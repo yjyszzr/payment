@@ -592,6 +592,8 @@ public class PayMentService extends AbstractService<PayMent> {
 			} catch (Exception e) {
 				logger.error("先锋支付报错payOrderSn={}",payOrderSn,e);
 			}
+		}else if("app_yifutong".equals(payCode)) {
+			baseResult = payYFTUtil.queryPayResult(payCode, payOrderSn);
 		}
 		if(baseResult == null || baseResult.getCode() != 0) {
 			if(baseResult != null) {
@@ -693,7 +695,7 @@ public class PayMentService extends AbstractService<PayMent> {
 		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100)).setScale(0,RoundingMode.HALF_EVEN);
 		String payOrderSn = savePayLog.getPayOrderSn();
 		RspYFTEntity rspEntity = null;
-		rspEntity = payYFTUtil.getWechatPayUrl(bigD.toString(),payOrderSn);
+		rspEntity = payYFTUtil.getYFTPayUrl(bigD.toString(),payOrderSn);
 		if(rspEntity != null) {
 			if(rspEntity.isSucc()) {
 				PayReturnDTO rEntity = new PayReturnDTO();

@@ -14,15 +14,19 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.dl.base.result.BaseResult;
+import com.dl.base.result.ResultGenerator;
 import com.dl.base.util.MD5Utils;
 import com.dl.shop.payment.dao.PayMentMapper;
 import com.dl.shop.payment.dto.PayFinishRedirectUrlTDTO;
 import com.dl.shop.payment.pay.common.HttpUtil;
 import com.dl.shop.payment.pay.common.RspHttpEntity;
+import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.yifutong.config.ConfigerYFTPay;
 import com.dl.shop.payment.pay.yifutong.entity.ReqYFTPayEntity;
 import com.dl.shop.payment.pay.yifutong.entity.ReqYFTSignEntity;
 import com.dl.shop.payment.pay.yifutong.entity.RespYFTnotifyEntity;
+import com.dl.shop.payment.pay.yifutong.entity.RspQueryYFTEntity;
 import com.dl.shop.payment.pay.yifutong.entity.RspYFTEntity;
 import com.dl.shop.payment.pay.yifutong.entity.RspYFTEntity.ResultYFTData;
 import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
@@ -39,12 +43,8 @@ public class PayYFTUtil {
 
 	@Resource
 	private ConfigerYFTPay cfgPay;
-//	@Resource
-	private ReqYFTPayEntity reqYFTPayEntity;
-	@Resource 
-	private ReqPayEntity reqPayEntity;
 	@Resource
-	private PayMentService payMentService;
+	private ReqYFTPayEntity reqYFTPayEntity;
 	/**
 	 * 获取请求参数
 	 * @param treeMap
@@ -86,26 +86,24 @@ public class PayYFTUtil {
 		}
 		return true;
 	}
-	public static void main(String[] args) {
-		String str = "mchNo=1536317691tXgyQz&notifyUrl=http://39.106.18.39:7076/cash/notify&orderCode=1236668&price=0.01&succPage=https://www.baidu.com&ts=1536379050935&type=1&token=afef76a5aed6ba63a0c010c40e104cd4d156cd6e";
-		System.out.println(str+"&sign="+ MD5Utils.MD5(str));
-	}
 	 
 	/**
-	 * 获取微信支付url
+	 * 获取支付url
 	 */
-	public final RspYFTEntity getWechatPayUrl(String amount,String payOrderSn){
-		logger.info("调取易富通支付宝支付订单payOrderSn={},amount={}",payOrderSn,amount);
+	public final RspYFTEntity getYFTPayUrl(String amount,String payOrderSn){
+		logger.info("调取易富通支付宝支付payOrderSn={},amount={}",payOrderSn,amount);
+		if("true".equals(cfgPay.getDEBUG())) {
+			amount = "0.01";
+		}
 		RspYFTEntity rEntity = null;
 		ReqYFTPayEntity reqEntity = null;
-		ReqYFTPayEntity req = new ReqYFTPayEntity();
-		reqEntity = req.buildReqEntity(amount,payOrderSn);
+		reqEntity = reqYFTPayEntity.buildReqEntity(amount,payOrderSn);
 		
 		//获取拼接参数
 		String paraStr = getPayParams(reqEntity);
 	 
 		RspHttpEntity rspHttpEntity = null;
-		rspHttpEntity = HttpUtil.sendMsg(paraStr,"http://www.lanjunshop.com/api/getQrcode",false);
+		rspHttpEntity = HttpUtil.sendMsg(paraStr,cfgPay.getPAY_URL(),false);
 		logger.info("易富通支付请求返回信息:" + rspHttpEntity.toString());
 		if(rspHttpEntity.isSucc) {
 			rEntity = JSON.parseObject(rspHttpEntity.msg,RspYFTEntity.class);
@@ -122,6 +120,35 @@ public class PayYFTUtil {
 		}
 		return rEntity;
 	}
+	
+	/**
+	 * 易富通订单支付查询接口
+	 */
+	public BaseResult<RspOrderQueryEntity> queryPayResult(String payCode, String orderNo) {
+		logger.info("调取易富通查询订单支付结果orderNo={}",orderNo);
+		RspOrderQueryEntity rspOrderQueryEntity = null;
+		RspQueryYFTEntity rEntity = null;
+		RspHttpEntity rspHttpEntity = null;
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("mchNo="+cfgPay.getAPP_MCHNO()+"&");
+		buffer.append("orderCode="+orderNo+"&");
+		buffer.append("ts="+cfgPay.getPayTime()+"&");
+		buffer.append("token="+cfgPay.getAPP_TOKEN());
+		String sign = MD5Utils.MD5(buffer.toString());
+		buffer.append("&sign="+sign);
+		rspHttpEntity = HttpUtil.sendMsg(buffer.toString(),cfgPay.getQUERY_URL(),false);
+		logger.info("易富通查询请求返回信息:" + rspHttpEntity.toString());
+		if(rspHttpEntity.isSucc) {
+			rEntity = JSON.parseObject(rspHttpEntity.msg,RspQueryYFTEntity.class);
+			rspOrderQueryEntity.setResult_code(rEntity.data.status);
+			rspOrderQueryEntity.setPayCode(payCode);
+			rspOrderQueryEntity.setTrade_no(rEntity.data.tradeNo);
+			return ResultGenerator.genSuccessResult("succ",rspOrderQueryEntity);
+		}else {
+			return ResultGenerator.genFailResult("请求易富通支付回调失败[" + rspHttpEntity.msg + "]");
+		}
+	}
+	
 	/**
 	 * 验证回调参数是否合法
 	 * @param yftNotify

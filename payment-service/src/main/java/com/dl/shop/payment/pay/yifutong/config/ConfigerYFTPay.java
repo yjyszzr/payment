@@ -12,6 +12,9 @@ import lombok.Data;
 @Configuration
 public class ConfigerYFTPay {
 	
+	@Value("${yifutong.app.debug}")
+	private String DEBUG;
+	
 	@Value("${yifutong.app_mchNo}")
 	private String APP_MCHNO;
 	
@@ -26,6 +29,12 @@ public class ConfigerYFTPay {
 	
 	@Value("${yifutong.app_token}")
 	private String APP_TOKEN;
+	
+	@Value("${yifutong.pay_url}")
+	private String PAY_URL;
+	
+	@Value("${yifutong.query_url}")
+	private String QUERY_URL;
 	
 //	public static final String PAY_TYPE_WECHAT = "1";
 	public static final String PAY_TYPE_ZHIFUBAO = "1";
