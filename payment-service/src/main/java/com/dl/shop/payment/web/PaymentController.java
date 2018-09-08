@@ -525,6 +525,15 @@ public class PaymentController extends AbstractBaseController{
 			rEntity.setPayLogId(savePayLog.getLogId()+"");
 			rEntity.setOrderId(orderId);
 			payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
+		}else if("app_yifutong".equals(paymentDto.getPayCode())) {
+			logger.info("生成易富通支付宝支付url:" + " payCode:" + savePayLog.getPayCode());
+			payBaseResult = paymentService.getYFTPayUrl(savePayLog, orderId, "");
+			if(payBaseResult != null &&payBaseResult.getData() != null) {
+				String str = payBaseResult.getData()+"";
+				logger.info("生成易富通支付url成功:" + str);
+			}else {
+				logger.info("生成易富通支付url失败");
+			}
 		}
 		logger.info(loggerId + " result: code="+payBaseResult.getCode()+" , msg="+payBaseResult.getMsg());
 		return payBaseResult;
@@ -739,6 +748,15 @@ public class PaymentController extends AbstractBaseController{
 			rEntity.setOrderId(orderSn);
 			payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
 			logger.info("[rechargeForApp]" + " 先锋充值处理结束:" + payBaseResult);
+		}else if("app_yifutong".equals(payCode)) {
+			logger.info("生成易富通支付宝支付url:" + " payCode:" + savePayLog.getPayCode());
+			payBaseResult = paymentService.getYFTPayUrl(savePayLog, orderSn, "");
+			if(payBaseResult != null &&payBaseResult.getData() != null) {
+				String str = payBaseResult.getData()+"";
+				logger.info("生成易富通支付url成功:" + str);
+			}else {
+				logger.info("生成易富通支付url失败");
+			}
 		}
 		//处理支付失败的情况
 		if(null == payBaseResult || payBaseResult.getCode() != 0) {
@@ -1383,9 +1401,9 @@ public class PaymentController extends AbstractBaseController{
 			payBaseResult = paymentService.getYFTPayUrl(savePayLog, orderId, lotteryClassifyIdStr);
 			if(payBaseResult != null &&payBaseResult.getData() != null) {
 				String str = payBaseResult.getData()+"";
-				logger.info("生成支付url成功:" + str);
+				logger.info("生成易富通支付url成功:" + str);
 			}else {
-				logger.info("生成支付url失败");
+				logger.info("生成易富通支付url失败");
 			}
 		}
 		logger.info(loggerId + " result: code="+payBaseResult.getCode()+" , msg="+payBaseResult.getMsg());
