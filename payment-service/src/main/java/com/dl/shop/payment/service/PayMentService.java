@@ -1,6 +1,7 @@
 package com.dl.shop.payment.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.util.TextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -52,6 +54,7 @@ import com.dl.shop.payment.dao.PayMentMapper;
 import com.dl.shop.payment.dao.RollBackLogMapper;
 import com.dl.shop.payment.dto.PayBankRecordDTO;
 import com.dl.shop.payment.dto.PayFinishRedirectUrlTDTO;
+import com.dl.shop.payment.dto.PayReturnDTO;
 import com.dl.shop.payment.dto.PaymentDTO;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.enums.PayEnums;
@@ -67,6 +70,9 @@ import com.dl.shop.payment.pay.rongbao.entity.ReqRefundEntity;
 import com.dl.shop.payment.pay.rongbao.entity.RspRefundEntity;
 import com.dl.shop.payment.pay.xianfeng.entity.RspApplyBaseEntity;
 import com.dl.shop.payment.pay.xianfeng.util.XianFengPayUtil;
+import com.dl.shop.payment.pay.yifutong.entity.RspYFTEntity;
+import com.dl.shop.payment.pay.yifutong.util.PayYFTUtil;
+import com.dl.shop.payment.pay.yinhe.util.PayUtil;
 import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
 import com.dl.shop.payment.web.PaymentController;
 
@@ -95,6 +101,9 @@ public class PayMentService extends AbstractService<PayMent> {
 	@Resource
 	private YinHeUtil yinHeUtil;
 
+	@Resource
+	private PayYFTUtil payYFTUtil;
+	
 	@Resource
 	private RongUtil rongUtil;
 	
@@ -711,5 +720,39 @@ public class PayMentService extends AbstractService<PayMent> {
 		String payFinishRedirectUrl = redirectUrl+"appName="+finishRedirectDto.getAppName()+"&schemeUrl="+finishRedirectDto.getSchemeUrl();
 		logger.info("支付完成跳转地址redirectUrl={},转换后地址payFinishRedirectUrl={}",redirectUrl,payFinishRedirectUrl);
 		return payFinishRedirectUrl;
+	}
+	
+	public BaseResult<?> getYFTPayUrl(Boolean isZfb,String isH5,int payType,PayLog savePayLog,String payIp,String orderId, String lotteryClassifyId) {
+		BaseResult<?> payBaseResult = null;
+		BigDecimal amtDouble = savePayLog.getOrderAmount();
+		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100)).setScale(0,RoundingMode.HALF_EVEN);
+		String payOrderSn = savePayLog.getPayOrderSn();
+		RspYFTEntity rspEntity = null;
+		rspEntity = payYFTUtil.getWechatPayUrl(isZfb,payIp,bigD.toString(),payOrderSn);
+		if(rspEntity != null) {
+			if(rspEntity.isSucc()) {
+				PayReturnDTO rEntity = new PayReturnDTO();
+				String url = rspEntity.data.payUrl;
+				
+				
+				//生成二维码url
+				
+				if(!TextUtils.isEmpty(url)) {
+					rEntity.setPayUrl(url);
+					rEntity.setPayLogId(savePayLog.getLogId()+"");
+					rEntity.setOrderId(orderId);
+					rEntity.setLotteryClassifyId(lotteryClassifyId);
+					logger.info("client jump url:" + url +" payLogId:" +savePayLog.getLogId() +" orderId:" + orderId );
+					payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
+				}else {
+					payBaseResult = ResultGenerator.genFailResult("url decode失败",null);
+				}
+			}else {
+				payBaseResult = ResultGenerator.genResult(PayEnums.PAY_YIFUTONG_INNER_ERROR.getcode(),PayEnums.PAY_YIFUTONG_INNER_ERROR.getMsg()+"[" + rspEntity.msg+"]");	
+			}
+		}else {
+			payBaseResult = ResultGenerator.genFailResult("易富通支付返回数据有误");
+		}
+		return payBaseResult;
 	}
 }
