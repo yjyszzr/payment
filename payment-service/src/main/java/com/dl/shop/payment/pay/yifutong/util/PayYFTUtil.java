@@ -141,6 +141,7 @@ public class PayYFTUtil {
 			rEntity = JSON.parseObject(rspHttpEntity.msg,RspQueryYFTEntity.class);
 			rspOrderQueryEntity.setResult_code(rEntity.data.status);
 			rspOrderQueryEntity.setPayCode(payCode);
+			rspOrderQueryEntity.setType(RspOrderQueryEntity.TYPE_YIFUTONG);
 			rspOrderQueryEntity.setTrade_no(rEntity.data.tradeNo);
 			return ResultGenerator.genSuccessResult("succ",rspOrderQueryEntity);
 		}else {
