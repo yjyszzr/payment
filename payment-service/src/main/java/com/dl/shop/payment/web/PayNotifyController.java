@@ -63,7 +63,7 @@ public class PayNotifyController {
         }
         Boolean checkSignIsTure = payYFTUtil.booleanCheckSign(yftNotify);
         if(!checkSignIsTure){
-			log.error("易富通支付回调通知延签失败payOrderSn={}",payOrderfSn);
+			log.error("易富通支付回调通知验签失败payOrderSn={}",payOrderfSn);
 			return ;
 		}
         PayLog payLog = payLogService.findPayLogByOrderSign(payOrderfSn);

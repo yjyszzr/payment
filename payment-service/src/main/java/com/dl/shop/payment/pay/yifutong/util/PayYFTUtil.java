@@ -165,8 +165,10 @@ public class PayYFTUtil {
 		signStrBuffer.append("&");
 		signStrBuffer.append("tradeNo="+yftNotify.getTradeNo());
 		signStrBuffer.append("&");
-		signStrBuffer.append("remarks="+yftNotify.getRemarks());
-		signStrBuffer.append("&");
+		if(StringUtils.isNotBlank(yftNotify.getRemarks())){			
+			signStrBuffer.append("remarks="+yftNotify.getRemarks());
+			signStrBuffer.append("&");
+		}
 		signStrBuffer.append("ts="+yftNotify.getTs());
 		signStrBuffer.append("&token="+cfgPay.getAPP_TOKEN());
 		String sign = MD5Utils.MD5(signStrBuffer.toString());
@@ -175,10 +177,5 @@ public class PayYFTUtil {
 		}else{
 			return Boolean.FALSE;
 		}
-	}
-	
-	public static void main(String[] args) {
-		String s="account=noRP2M&mchNo=1536317691tXgyQz&orderCode=20180908162630610360005&payUrl=http://www.lanjunshop.com/pay2.html?payId=eddc856fb34011e8b19900163e0e5530&price=0.01&price=0.01&realPrice=0.01&token=afef76a5aed6ba63a0c010c40e104cd4d156cd6e";
-		System.out.println(MD5Utils.MD5(s));
 	}
 }
