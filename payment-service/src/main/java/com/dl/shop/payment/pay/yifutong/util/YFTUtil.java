@@ -3,11 +3,13 @@ package com.dl.shop.payment.pay.yifutong.util;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
+
 import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.result.BaseResult;
@@ -16,6 +18,7 @@ import com.dl.shop.payment.pay.common.HttpUtil;
 import com.dl.shop.payment.pay.common.RspHttpEntity;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.rongbao.entity.RspRefundEntity;
+import com.dl.shop.payment.pay.yifutong.config.ConfigerYFTPay;
 import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
 import com.dl.shop.payment.pay.yinhe.entity.ReqQueryEntity;
 import com.dl.shop.payment.pay.yinhe.entity.ReqRefundOrderEntity;
@@ -31,9 +34,9 @@ public class YFTUtil {
 	private final static Logger logger = LoggerFactory.getLogger(YFTUtil.class);
 	
 	@Resource
-	private ConfigerPay cfgPay;
+	private ConfigerYFTPay configerYFTPay;
 	@Resource
-	private PayYFTUtil payUtil;
+	private PayYFTUtil payYFTUtil;
 	@Resource
 	private ReqRefundOrderEntity reqRefundOrderEntity;
 	@Resource
