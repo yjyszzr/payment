@@ -18,9 +18,6 @@ public class ConfigerYFTPay {
 	@Value("${yifutong.app_mchNo}")
 	private String APP_MCHNO;
 	
-	@Value("${yifutong.app_account}")
-	private String APP_ACCOUNT;
-	
 	@Value("${yifutong.app_notifyUrl}")
 	private String APP_NOTIFYURL;
 	

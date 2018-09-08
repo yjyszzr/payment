@@ -46,7 +46,7 @@ public class ReqYFTPayEntity implements Serializable {
 		ReqYFTPayEntity reqEntity = new ReqYFTPayEntity();
 		reqEntity.remarks = "";
 		reqEntity.succPage = cfgPay.getAPP_SUCCPAGE();
-		reqEntity.account = cfgPay.getAPP_ACCOUNT();
+		reqEntity.account = "";
 		reqEntity.ts = ConfigerYFTPay.getPayTime(); 
 		reqEntity.orderCode = orderNo; 
 		reqEntity.mchNo = cfgPay.getAPP_MCHNO();
