@@ -12,19 +12,19 @@ import lombok.Data;
 @Configuration
 public class ConfigerYFTPay {
 	
-	@Value("${yizhi.app_mchNo}")
+	@Value("${yifutong.app_mchNo}")
 	private String APP_MCHNO;
 	
-	@Value("${yizhi.app_account}")
+	@Value("${yifutong.app_account}")
 	private String APP_ACCOUNT;
 	
-	@Value("${yizhi.app_notifyUrl}")
+	@Value("${yifutong.app_notifyUrl}")
 	private String APP_NOTIFYURL;
 	
-	@Value("${yizhi.app_succPage}")
+	@Value("${yifutong.app_succPage}")
 	private String APP_SUCCPAGE;
 	
-	@Value("${yizhi.app_token}")
+	@Value("${yifutong.app_token}")
 	private String APP_TOKEN;
 	
 //	public static final String PAY_TYPE_WECHAT = "1";
