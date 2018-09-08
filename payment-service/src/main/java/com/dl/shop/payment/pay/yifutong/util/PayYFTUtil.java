@@ -51,7 +51,7 @@ public class PayYFTUtil {
 	 * @return
 	 */
 	public final String getPayParams(ReqYFTPayEntity reqEntity) {
-		logger.info("请求参数拼接前:reqEntity={}",reqEntity);
+		logger.info("易富通请求参数拼接前:reqEntity={}",reqEntity);
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("mchNo="+reqEntity.getMchNo()+"&");
 		buffer.append("notifyUrl="+reqEntity.getNotifyUrl()+"&");
@@ -62,7 +62,7 @@ public class PayYFTUtil {
 		buffer.append("type="+reqEntity.getType());
 		String sign = MD5Utils.MD5(buffer.toString()+"&token="+cfgPay.getAPP_TOKEN());
 		buffer.append("&sign="+sign);
-		logger.info("请求参数拼接结果:patam={}",buffer.toString());
+		logger.info("易富通请求参数拼接结果:patam={}",buffer.toString());
 		return buffer.toString();
 	}
 	/**
