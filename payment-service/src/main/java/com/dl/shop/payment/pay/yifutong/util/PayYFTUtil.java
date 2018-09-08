@@ -22,6 +22,7 @@ import com.dl.shop.payment.pay.common.RspHttpEntity;
 import com.dl.shop.payment.pay.yifutong.config.ConfigerYFTPay;
 import com.dl.shop.payment.pay.yifutong.entity.ReqYFTPayEntity;
 import com.dl.shop.payment.pay.yifutong.entity.ReqYFTSignEntity;
+import com.dl.shop.payment.pay.yifutong.entity.RespYFTnotifyEntity;
 import com.dl.shop.payment.pay.yifutong.entity.RspYFTEntity;
 import com.dl.shop.payment.pay.yifutong.entity.RspYFTEntity.ResultYFTData;
 import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
@@ -120,5 +121,33 @@ public class PayYFTUtil {
 			rEntity.msg = rspHttpEntity.msg;
 		}
 		return rEntity;
+	}
+	/**
+	 * 验证回调参数是否合法
+	 * @param yftNotify
+	 * @return
+	 */
+	public Boolean booleanCheckSign(RespYFTnotifyEntity yftNotify) {
+		StringBuffer signStrBuffer = new StringBuffer();
+		signStrBuffer.append("mchNo="+yftNotify.getMchNo());
+		signStrBuffer.append("&");
+		signStrBuffer.append("orderCode="+yftNotify.getOrderCode());
+		signStrBuffer.append("&");
+		signStrBuffer.append("price="+yftNotify.getPrice());
+		signStrBuffer.append("&");
+		signStrBuffer.append("realPrice="+yftNotify.getRealPrice());
+		signStrBuffer.append("&");
+		signStrBuffer.append("tradeNo="+yftNotify.getTradeNo());
+		signStrBuffer.append("&");
+		signStrBuffer.append("remarks="+yftNotify.getRemarks());
+		signStrBuffer.append("&");
+		signStrBuffer.append("ts="+yftNotify.getTs());
+		signStrBuffer.append("&token="+cfgPay.getAPP_TOKEN());
+		String sign = MD5Utils.MD5(signStrBuffer.toString());
+		if(sign.equals(yftNotify.getSign())){
+			return Boolean.TRUE;
+		}else{
+			return Boolean.FALSE;
+		}
 	}
 }

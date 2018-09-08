@@ -28,12 +28,15 @@ public class RspOrderQueryEntity implements Serializable{
 	private int type;
 	public static final int TYPE_YINHE = 0;
 	public static final int TYPE_XIANFENG = 1;
+	public static final int TYPE_YIFUTONG = 2;
 	
 	public boolean isSucc() {
 		if(!TextUtils.isEmpty(result_code) && type == TYPE_YINHE) {
 			return result_code.equals("0000");
 		}else if(!TextUtils.isEmpty(result_code) && type == TYPE_XIANFENG) {
 			return !StringUtils.isEmpty(trade_status)&&"S".equalsIgnoreCase(trade_status);
+		}else if(!TextUtils.isEmpty(result_code) && type == TYPE_YIFUTONG) {
+			return !StringUtils.isEmpty(result_code)&&("2".equalsIgnoreCase(result_code)||"3".equalsIgnoreCase(result_code));
 		}
 		return false;
 	}
@@ -42,6 +45,8 @@ public class RspOrderQueryEntity implements Serializable{
 			return result_code.equals("106");
 		}else if(!TextUtils.isEmpty(result_code) && type == TYPE_XIANFENG) {
 			return StringUtils.isEmpty(trade_status)||"I".equalsIgnoreCase(trade_status);
+		}else if(!TextUtils.isEmpty(result_code) && type == TYPE_YIFUTONG) {
+			return StringUtils.isEmpty(result_code)||"1".equalsIgnoreCase(result_code);
 		}
 		return false;
 	}
@@ -51,6 +56,8 @@ public class RspOrderQueryEntity implements Serializable{
 //			return result_code.equals("104");
 		}else if(!TextUtils.isEmpty(result_code) && type == TYPE_XIANFENG) {
 			return !StringUtils.isEmpty(trade_status)&&"F".equalsIgnoreCase(trade_status);
+		}else if(!TextUtils.isEmpty(result_code) && type == TYPE_YIFUTONG) {
+			return !StringUtils.isEmpty(result_code)&&"0".equalsIgnoreCase(result_code);
 		}
 		return false;
 	}
