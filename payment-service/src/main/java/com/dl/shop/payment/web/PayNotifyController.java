@@ -44,7 +44,7 @@ public class PayNotifyController {
 	@ApiOperation(value="易富通支付回调")
 	@PostMapping("/YFTNotify")
 	@ResponseBody
-	public String payNotify(RespYFTnotifyEntity yftNotify,HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+	public void payNotify(RespYFTnotifyEntity yftNotify,HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		response.setHeader("Content-type","text/html;charset=UTF-8");
@@ -61,22 +61,26 @@ public class PayNotifyController {
         String payOrderfSn=yftNotify.getOrderCode();
         if(StringUtils.isEmpty(payOrderfSn)){
         	log.error("易富通支付返回payOrderSn is null");
-        	return "success";
+        	writeSuccess(response);
+    		return;
         }
         Boolean checkSignIsTure = payYFTUtil.booleanCheckSign(yftNotify);
         if(!checkSignIsTure){
 			log.error("易富通支付回调通知验签失败payOrderSn={}",payOrderfSn);
-			return "success";
+			writeSuccess(response);
+			return;
 		}
         PayLog payLog = payLogService.findPayLogByOrderSign(payOrderfSn);
 		if(payLog == null) {
 			log.info("[payNotify]"+"该支付订单查询失败 payLogSn:" + payOrderfSn);
-			return "success";
+			writeSuccess(response);
+			return;
 		}
 		int isPaid = payLog.getIsPaid();
 		if(isPaid == 1) {
 			log.info("[payNotify] payOrderSn={}订单已支付...",payOrderfSn);
-			return "success";
+			writeSuccess(response);
+			return;
 		}
 		int payType = payLog.getPayType();
 		String payCode = payLog.getPayCode();
@@ -91,6 +95,20 @@ public class PayNotifyController {
 		}else {
 			paymentService.rechargeOptions(payLog,rspOrderEntikty);
 		}
-		return "success";
+		writeSuccess(response);
+		return;
+	}
+	private void writeSuccess(HttpServletResponse response){
+        //通知先锋成功
+        PrintWriter writer;
+        try {
+            writer = response.getWriter();
+            writer.write("SUCCESS");
+            writer.flush();
+            log.error("易富通支付回调写成功内容");
+        } catch (Exception e) {
+            log.error("易富通支付回调通知响应异常",e);
+        }
+
 	}
 }
