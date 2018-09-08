@@ -722,18 +722,17 @@ public class PayMentService extends AbstractService<PayMent> {
 		return payFinishRedirectUrl;
 	}
 	
-	public BaseResult<?> getYFTPayUrl(Boolean isZfb,String isH5,int payType,PayLog savePayLog,String payIp,String orderId, String lotteryClassifyId) {
+	public BaseResult<?> getYFTPayUrl(PayLog savePayLog,String orderId, String lotteryClassifyId) {
 		BaseResult<?> payBaseResult = null;
 		BigDecimal amtDouble = savePayLog.getOrderAmount();
 		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100)).setScale(0,RoundingMode.HALF_EVEN);
 		String payOrderSn = savePayLog.getPayOrderSn();
 		RspYFTEntity rspEntity = null;
-		rspEntity = payYFTUtil.getWechatPayUrl(isZfb,payIp,bigD.toString(),payOrderSn);
+		rspEntity = payYFTUtil.getWechatPayUrl(bigD.toString(),payOrderSn);
 		if(rspEntity != null) {
 			if(rspEntity.isSucc()) {
 				PayReturnDTO rEntity = new PayReturnDTO();
 				String url = rspEntity.data.payUrl;
-				
 				
 				//生成二维码url
 				
@@ -742,13 +741,13 @@ public class PayMentService extends AbstractService<PayMent> {
 					rEntity.setPayLogId(savePayLog.getLogId()+"");
 					rEntity.setOrderId(orderId);
 					rEntity.setLotteryClassifyId(lotteryClassifyId);
-					logger.info("client jump url:" + url +" payLogId:" +savePayLog.getLogId() +" orderId:" + orderId );
+					logger.info("YFTclient jump url:" + url +" payLogId:" +savePayLog.getLogId() +" orderId:" + orderId );
 					payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
 				}else {
 					payBaseResult = ResultGenerator.genFailResult("url decode失败",null);
 				}
 			}else {
-				payBaseResult = ResultGenerator.genResult(PayEnums.PAY_YIFUTONG_INNER_ERROR.getcode(),PayEnums.PAY_YIFUTONG_INNER_ERROR.getMsg()+"[" + rspEntity.msg+"]");	
+				payBaseResult = ResultGenerator.genResult(PayEnums.PAY_YIFUTONG_INNER_ERROR.getcode(),PayEnums.PAY_YIFUTONG_INNER_ERROR.getMsg()+"[" +rspEntity.msg +"]");	
 			}
 		}else {
 			payBaseResult = ResultGenerator.genFailResult("易富通支付返回数据有误");

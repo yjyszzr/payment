@@ -44,16 +44,24 @@ public class ReqYFTPayEntity implements Serializable {
 
 	public final ReqYFTPayEntity buildReqEntity(String amount, String orderNo) {
 		ReqYFTPayEntity reqEntity = new ReqYFTPayEntity();
-		reqEntity.remarks = "";
-		reqEntity.succPage = cfgPay.getAPP_SUCCPAGE();
-		reqEntity.account = cfgPay.getAPP_ACCOUNT();
+		reqEntity.succPage = "https://www.baidu.com";
 		reqEntity.ts = ConfigerYFTPay.getPayTime(); 
-		reqEntity.orderCode = orderNo; 
-		reqEntity.mchNo = cfgPay.getAPP_MCHNO();
-		reqEntity.price = amount; 
-		reqEntity.notifyUrl = cfgPay.getAPP_NOTIFYURL(); 
-		reqEntity.token = cfgPay.getAPP_TOKEN(); 
-		reqEntity.type = ConfigerYFTPay.PAY_TYPE_ZHIFUBAO;
+		reqEntity.orderCode = "1234368"; 
+		reqEntity.mchNo = "1536317691tXgyQz";
+		reqEntity.price = "10.00"; 
+		reqEntity.notifyUrl = "http://39.106.18.39:7076/cash/notify"; 
+		reqEntity.token = "afef76a5aed6ba63a0c010c40e104cd4d156cd6e"; 
+		reqEntity.type = "1";
+//		reqEntity.remarks = "";
+//		reqEntity.succPage = cfgPay.getAPP_SUCCPAGE();
+//		reqEntity.account = cfgPay.getAPP_ACCOUNT();
+//		reqEntity.ts = ConfigerYFTPay.getPayTime(); 
+//		reqEntity.orderCode = orderNo; 
+//		reqEntity.mchNo = cfgPay.getAPP_MCHNO();
+//		reqEntity.price = amount; 
+//		reqEntity.notifyUrl = cfgPay.getAPP_NOTIFYURL(); 
+//		reqEntity.token = cfgPay.getAPP_TOKEN(); 
+//		reqEntity.type = ConfigerYFTPay.PAY_TYPE_ZHIFUBAO;
 		return reqEntity;
 	}
 }

@@ -1380,7 +1380,7 @@ public class PaymentController extends AbstractBaseController{
 			payBaseResult = ResultGenerator.genSuccessResult("succ",rEntity);
 		}else if("app_yifutong".equals(paymentDto.getPayCode())) {
 			logger.info("生成易富通支付宝支付url:" + " payCode:" + savePayLog.getPayCode());
-			payBaseResult = paymentService.getYFTPayUrl(true, param.getIsH5(), 0, savePayLog, payIp, orderId, lotteryClassifyIdStr);
+			payBaseResult = paymentService.getYFTPayUrl(savePayLog, orderId, lotteryClassifyIdStr);
 			if(payBaseResult != null &&payBaseResult.getData() != null) {
 				String str = payBaseResult.getData()+"";
 				logger.info("生成支付url成功:" + str);
