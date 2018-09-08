@@ -19,6 +19,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.util.JSONHelper;
@@ -42,6 +43,7 @@ public class PayNotifyController {
 	
 	@ApiOperation(value="易富通支付回调")
 	@PostMapping("/YFTNotify")
+	@ResponseBody
 	public String payNotify(RespYFTnotifyEntity yftNotify,HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
