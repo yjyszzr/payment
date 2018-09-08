@@ -42,7 +42,7 @@ public class PayNotifyController {
 	
 	@ApiOperation(value="易富通支付回调")
 	@PostMapping("/YFTNotify")
-	public void payNotify(RespYFTnotifyEntity yftNotify,HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+	public String payNotify(RespYFTnotifyEntity yftNotify,HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		response.setHeader("Content-type","text/html;charset=UTF-8");
@@ -59,31 +59,22 @@ public class PayNotifyController {
         String payOrderfSn=yftNotify.getOrderCode();
         if(StringUtils.isEmpty(payOrderfSn)){
         	log.error("易富通支付返回payOrderSn is null");
-        	return;
+        	return "success";
         }
         Boolean checkSignIsTure = payYFTUtil.booleanCheckSign(yftNotify);
         if(!checkSignIsTure){
 			log.error("易富通支付回调通知验签失败payOrderSn={}",payOrderfSn);
-			return ;
+			return "success";
 		}
         PayLog payLog = payLogService.findPayLogByOrderSign(payOrderfSn);
 		if(payLog == null) {
 			log.info("[payNotify]"+"该支付订单查询失败 payLogSn:" + payOrderfSn);
-			return;
+			return "success";
 		}
 		int isPaid = payLog.getIsPaid();
 		if(isPaid == 1) {
 			log.info("[payNotify] payOrderSn={}订单已支付...",payOrderfSn);
-			//通知先锋成功
-			PrintWriter writer;
-			try {
-				writer = response.getWriter();
-				writer.write("SUCCESS");
-				writer.flush();
-			} catch (Exception e) {
-				log.error("易富通支付回调通知响应异常",e);
-			}
-			return;
+			return "success";
 		}
 		int payType = payLog.getPayType();
 		String payCode = payLog.getPayCode();
@@ -98,5 +89,6 @@ public class PayNotifyController {
 		}else {
 			paymentService.rechargeOptions(payLog,rspOrderEntikty);
 		}
+		return "success";
 	}
 }
