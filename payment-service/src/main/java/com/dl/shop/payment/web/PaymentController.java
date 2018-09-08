@@ -876,61 +876,7 @@ public class PaymentController extends AbstractBaseController{
 				return ResultGenerator.genSuccessResult("充值成功",payRQDTO);
 			}
 		}
-		BaseResult<RspOrderQueryEntity> baseResult = null;
-		logger.info("调用第三方订单查询接口 payCode:" + payCode + " payOrderSn:" + payLog.getPayOrderSn());
-		
-		if("app_rongbao".equals(payCode)) {
-			baseResult = rongUtil.queryOrderInfo(payLog.getPayOrderSn());
-		}else if("app_zfb".equals(payCode)){
-			baseResult = yinHeUtil.orderQuery(true,false,payLog.getPayOrderSn());
-		}else if("app_weixin".equals(payCode) || "app_weixin_h5".equals(payCode)) {
-			boolean isInWeixin = "app_wexin_h5".equals(payCode);
-            Boolean openJianLian = paymentService.getJianLianIsOpen();
-            if(openJianLian){
-                isInWeixin=Boolean.TRUE;
-            }
-			baseResult = yinHeUtil.orderQuery(false,isInWeixin,payLog.getPayOrderSn());
-		}else if("app_xianfeng".equals(payCode)) {
-			RspApplyBaseEntity rspBaseEntity;
-			try {
-				rspBaseEntity = xianFengUtil.queryPayByOrderNo(payLog.getPayOrderSn());
-				if(rspBaseEntity != null) {
-					RspOrderQueryEntity rspOrderQueryEntity = rspBaseEntity.buildRspOrderQueryEntity(payCode);	
-					baseResult = ResultGenerator.genSuccessResult("succ",rspOrderQueryEntity);
-				}
-			} catch (Exception e) {
-				logger.error("先锋支付查询异常",e);
-			}
-		}
-		if(baseResult != null) {
-			if(baseResult.getCode() != 0) {
-				logger.info(loggerId+" 订单查询请求异常"+baseResult.getMsg());
-				return ResultGenerator.genFailResult("请求异常！",null);
-			}
-			payType = payLog.getPayType();
-			RspOrderQueryEntity response = baseResult.getData();
-			logger.info("调用第三方订单查询接口 返回成功" + 
-			response.getResult_msg() +" payType:" +payType + " isSucc:" + response.isSucc() + 
-			"resultCode:"+response.getResult_code());
-			BaseResult<RspOrderQueryDTO> bResult = null;
-			if(0 == payType) {
-				bResult = paymentService.orderOptions(payLog, response);
-			}else if(1 == payType){
-				bResult = paymentService.rechargeOptions(payLog, response);
-			}
-			if(bResult == null) {
-				return ResultGenerator.genFailResult("查询失败", null);
-			}else {
-				RspOrderQueryDTO rspOrderQuery = bResult.getData();
-				if(rspOrderQuery != null) {
-					rspOrderQuery.setPayCode(payCode);
-					rspOrderQuery.setPayType(payType);
-				}
-				return bResult;
-			}
-		}else {
-			return ResultGenerator.genFailResult("未获取到订单信息，开发中...", null);
-		}
+		return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),PayEnums.PAY_RONGBAO_FAILURE.getMsg());
 	}
 	
 	/**
