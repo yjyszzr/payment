@@ -126,7 +126,7 @@ public class PayYFTUtil {
 	 */
 	public BaseResult<RspOrderQueryEntity> queryPayResult(String payCode, String orderNo) {
 		logger.info("调取易富通查询订单支付结果orderNo={}",orderNo);
-		RspOrderQueryEntity rspOrderQueryEntity = null;
+		RspOrderQueryEntity rspOrderQueryEntity = new RspOrderQueryEntity();
 		RspQueryYFTEntity rEntity = null;
 		RspHttpEntity rspHttpEntity = null;
 		StringBuffer buffer = new StringBuffer();
