@@ -59,9 +59,8 @@ public class PayYFTUtil {
 		buffer.append("price="+reqEntity.getPrice()+"&");
 		buffer.append("succPage="+reqEntity.getSuccPage()+"&");
 		buffer.append("ts="+reqEntity.getTs()+"&");
-		buffer.append("type="+reqEntity.getType()+"&");
-		buffer.append("token="+reqEntity.getToken());
-		String sign = MD5Utils.MD5(buffer.toString());
+		buffer.append("type="+reqEntity.getType());
+		String sign = MD5Utils.MD5(buffer.toString()+"&token="+cfgPay.getAPP_TOKEN());
 		buffer.append("&sign="+sign);
 		logger.info("请求参数拼接结果:patam={}",buffer.toString());
 		return buffer.toString();
@@ -78,7 +77,8 @@ public class PayYFTUtil {
 		buffer.append("orderCode="+data.orderCode+"&");
 		buffer.append("payUrl="+data.payUrl+"&");
 		buffer.append("price="+data.price+"&");
-		buffer.append("realPrice="+data.realPrice);
+		buffer.append("realPrice="+data.realPrice+"&");
+		buffer.append("token="+cfgPay.getAPP_TOKEN());
 		String sign = MD5Utils.MD5(buffer.toString());
 		if(!sign.equals(data.sign)) {
 			logger.info("易富通支付请求返回签名错误patam={},sign={}",buffer.toString(),sign);
@@ -132,9 +132,8 @@ public class PayYFTUtil {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("mchNo="+cfgPay.getAPP_MCHNO()+"&");
 		buffer.append("orderCode="+orderNo+"&");
-		buffer.append("ts="+cfgPay.getPayTime()+"&");
-		buffer.append("token="+cfgPay.getAPP_TOKEN());
-		String sign = MD5Utils.MD5(buffer.toString());
+		buffer.append("ts="+cfgPay.getPayTime());
+		String sign = MD5Utils.MD5(buffer.toString()+"&token="+cfgPay.getAPP_TOKEN());
 		buffer.append("&sign="+sign);
 		rspHttpEntity = HttpUtil.sendMsg(buffer.toString(),cfgPay.getQUERY_URL(),false);
 		logger.info("易富通查询请求返回信息:" + rspHttpEntity.toString());
@@ -176,5 +175,10 @@ public class PayYFTUtil {
 		}else{
 			return Boolean.FALSE;
 		}
+	}
+	
+	public static void main(String[] args) {
+		String s="account=noRP2M&mchNo=1536317691tXgyQz&orderCode=20180908162630610360005&payUrl=http://www.lanjunshop.com/pay2.html?payId=eddc856fb34011e8b19900163e0e5530&price=0.01&price=0.01&realPrice=0.01&token=afef76a5aed6ba63a0c010c40e104cd4d156cd6e";
+		System.out.println(MD5Utils.MD5(s));
 	}
 }
