@@ -876,7 +876,7 @@ public class PaymentController extends AbstractBaseController{
 				return ResultGenerator.genSuccessResult("充值成功",payRQDTO);
 			}
 		}
-		return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),PayEnums.PAY_RONGBAO_FAILURE.getMsg());
+		return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
 	}
 	
 	/**
