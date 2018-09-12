@@ -442,7 +442,7 @@ public class PayMentService extends AbstractService<PayMent> {
 		}else {
 			String payCode = payLog.getPayCode();
 			logger.info("payOrderSn={},payCode={},retCode={},retMsg={}",payLog.getPayOrderSn(),payCode,response.getResult_code(),response.getResult_msg());
-			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),PayEnums.PAY_RONGBAO_FAILURE.getMsg());
+			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
 		}
 	}
 	
@@ -510,7 +510,7 @@ public class PayMentService extends AbstractService<PayMent> {
 			}
 			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),PayEnums.PAY_RONGBAO_FAILURE.getMsg());
 		}else {
-			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(),PayEnums.PAY_RONGBAO_FAILURE.getMsg());
+			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_EMPTY.getcode(),PayEnums.PAY_RONGBAO_EMPTY.getMsg());
 		}
 	}
 	private void updatePaybankRecord(Integer payLogId){
