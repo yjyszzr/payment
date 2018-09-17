@@ -533,7 +533,7 @@ public class PaymentController extends AbstractBaseController {
 			}
 		} else if ("app_tianxia_scan".equals(paymentDto.getPayCode())) {
 			logger.info("生成天下支付银联二维码url:" + " payCode:" + savePayLog.getPayCode());
-			payBaseResult = paymentService.getTXScanPayUrl(savePayLog, orderId, "");
+			payBaseResult = paymentService.getTXScanPayUrl(savePayLog, orderSn, "", payIp);
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
 				logger.info("生成天下支付银联二维码url成功:" + str);
@@ -768,7 +768,7 @@ public class PaymentController extends AbstractBaseController {
 			}
 		} else if ("app_tianxia_scan".equals(payCode)) {
 			logger.info("生成天下支付银联二维码url:" + " payCode:" + savePayLog.getPayCode());
-			payBaseResult = paymentService.getTXScanPayUrl(savePayLog, orderSn, "");
+			payBaseResult = paymentService.getTXScanPayUrl(savePayLog, orderSn, "", payIp);
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
 				logger.info("生成天下支付银联二维码url成功:" + str);
@@ -1372,6 +1372,15 @@ public class PaymentController extends AbstractBaseController {
 				logger.info("生成易富通支付url成功:" + str);
 			} else {
 				logger.info("生成易富通支付url失败");
+			}
+		} else if ("app_tianxia_scan".equals(paymentDto.getPayCode())) {
+			logger.info("生成天下支付银联二维码url:" + " payCode:" + savePayLog.getPayCode());
+			payBaseResult = paymentService.getTXScanPayUrl(savePayLog, orderSn, "", payIp);
+			if (payBaseResult != null && payBaseResult.getData() != null) {
+				String str = payBaseResult.getData() + "";
+				logger.info("生成天下支付银联二维码url成功:" + str);
+			} else {
+				logger.info("生成天下支付银联二维码url失败");
 			}
 		}
 		logger.info(loggerId + " result: code=" + payBaseResult.getCode() + " , msg=" + payBaseResult.getMsg());

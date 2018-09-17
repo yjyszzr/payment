@@ -68,6 +68,10 @@ import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
 import com.dl.shop.payment.pay.rongbao.entity.ReqRefundEntity;
 import com.dl.shop.payment.pay.rongbao.entity.RspRefundEntity;
+import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestOrderQuery;
+import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestPay;
+import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanResponsePay;
+import com.dl.shop.payment.pay.tianxia.tianxiaScan.util.TXScanPay;
 import com.dl.shop.payment.pay.xianfeng.entity.RspApplyBaseEntity;
 import com.dl.shop.payment.pay.xianfeng.util.XianFengPayUtil;
 import com.dl.shop.payment.pay.yifutong.entity.RspYFTEntity;
@@ -102,6 +106,9 @@ public class PayMentService extends AbstractService<PayMent> {
 
 	@Resource
 	private PayYFTUtil payYFTUtil;
+
+	@Resource
+	private TXScanPay txScanPay;
 
 	@Resource
 	private RongUtil rongUtil;
@@ -598,7 +605,10 @@ public class PayMentService extends AbstractService<PayMent> {
 		} else if ("app_yifutong".equals(payCode)) {
 			baseResult = payYFTUtil.queryPayResult(payCode, payOrderSn);
 		} else if ("app_tianxia_scan".equals(payCode)) {
-			baseResult = payYFTUtil.queryPayResult(payCode, payOrderSn);
+			TXScanRequestOrderQuery txScanRequestOrderQuery = new TXScanRequestOrderQuery();
+			txScanRequestOrderQuery.setOrderId(payOrderSn);
+			txScanRequestOrderQuery.setTranDate(DateUtil.getTimeString(payLog.getPayTime(), DateUtil.yyyyMMdd));
+			baseResult = txScanPay.txScanOrderQuery(txScanRequestOrderQuery, payCode);
 		}
 		if (baseResult == null || baseResult.getCode() != 0) {
 			if (baseResult != null) {
@@ -730,17 +740,23 @@ public class PayMentService extends AbstractService<PayMent> {
 		return payBaseResult;
 	}
 
-	public BaseResult<?> getTXScanPayUrl(PayLog savePayLog, String orderId, String lotteryClassifyId) {
+	public BaseResult<?> getTXScanPayUrl(PayLog savePayLog, String orderId, String lotteryClassifyId, String payIp) {
 		BaseResult<?> payBaseResult = null;
 		BigDecimal amtDouble = savePayLog.getOrderAmount();
-		BigDecimal bigD = amtDouble.setScale(2, RoundingMode.HALF_EVEN);
+		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_EVEN);// 金额转换成分
 		String payOrderSn = savePayLog.getPayOrderSn();
-		RspYFTEntity rspEntity = null;
-		rspEntity = payYFTUtil.getYFTPayUrl(bigD.toString(), payOrderSn);
+		TXScanResponsePay rspEntity = null;
+		TXScanRequestPay txScanRequestPay = new TXScanRequestPay();
+		txScanRequestPay.setGoodsName(savePayLog.getPayOrderSn());// 支付订单编号作为商品名称
+		txScanRequestPay.setOrderId(payOrderSn);
+		txScanRequestPay.setOrderAmt(bigD.toString());
+		txScanRequestPay.setTermIp(payIp);
+		txScanRequestPay.setStlType("T0");// T0 结算至已入账账户 T1 结算至未结算账户
+		rspEntity = txScanPay.txScanPay(txScanRequestPay);
 		if (rspEntity != null) {
 			if (rspEntity.isSucc()) {
 				PayReturnDTO rEntity = new PayReturnDTO();
-				String url = rspEntity.data.payUrl;
+				String url = rspEntity.getCodeUrl();
 				// 生成二维码url
 				if (!TextUtils.isEmpty(url)) {
 					rEntity.setPayUrl(url);
@@ -753,7 +769,7 @@ public class PayMentService extends AbstractService<PayMent> {
 					payBaseResult = ResultGenerator.genFailResult("url decode失败", null);
 				}
 			} else {
-				payBaseResult = ResultGenerator.genResult(PayEnums.PAY_YINLIAN_SCAN_INNER_ERROR.getcode(), PayEnums.PAY_YINLIAN_SCAN_INNER_ERROR.getMsg() + "[" + rspEntity.msg + "]");
+				payBaseResult = ResultGenerator.genResult(PayEnums.PAY_YINLIAN_SCAN_INNER_ERROR.getcode(), PayEnums.PAY_YINLIAN_SCAN_INNER_ERROR.getMsg() + "[" + rspEntity.getRepCodeMsgDetail() + "]");
 			}
 		} else {
 			payBaseResult = ResultGenerator.genFailResult("天下支付返回数据有误");

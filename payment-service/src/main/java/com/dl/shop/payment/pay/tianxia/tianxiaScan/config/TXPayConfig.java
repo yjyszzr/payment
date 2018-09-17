@@ -20,6 +20,8 @@ public class TXPayConfig {
 	// static String MERID = "1809019662";// 商户编号
 	public static String REQ_URL = "http://47.75.108.4:8343/webwt/pay/gateway.do";
 
-	public static String CALLBACK_URL = "https://api.caixiaomi.net/api/payment/payment/notify/TXCallBack";
+	// public static String CALLBACK_URL =
+	// "https://api.caixiaomi.net/api/payment/payment/notify/TXCallBack";
+	public static String CALLBACK_URL = "http://39.106.18.39:8765/api/payment/payment/notify/TXCallBack";
 
 }

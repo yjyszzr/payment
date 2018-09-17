@@ -7,6 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.dl.base.result.BaseResult;
+import com.dl.base.result.ResultGenerator;
+import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.config.TXPayConfig;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestBaseEntity;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestCallback;
@@ -40,12 +43,12 @@ public class TXScanPay {
 		data.put("tranCode", TranCodeEnum.PAYSCAN);
 		data.put("orderAmt", txScanRequestPay.getOrderAmt());
 		data.put("orderId", txScanRequestPay.getOrderId());
-		data.put("notifyUrl", txScanRequestPay.getNotifyUrl());
+		data.put("notifyUrl", TXPayConfig.CALLBACK_URL);
 		data.put("goodsName", TdExpBasicFunctions.STR2HEX(txScanRequestPay.getGoodsName()));
 		// String detail = txScanRequestPay.getGoodsDetail();
 		// data.put("goodsDetail", TdExpBasicFunctions.STR2HEX(detail));
 		data.put("stlType", txScanRequestPay.getStlType());// 结算类型
-		data.put("payChannel", PayChannelEnum.CPPAY);// 支付类型 银联H5
+		data.put("payChannel", PayChannelEnum.CPPAY);// 支付类型 银联二维码
 		data.put("termIp", txScanRequestPay.getTermIp());
 		Map<String, Object> rmap = toRequestTXPay(data);
 		Map<String, Object> _body = (Map<String, Object>) rmap.get("REP_BODY");
@@ -82,40 +85,40 @@ public class TXScanPay {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public TXScanResponseOrderQuery txScanOrderQuery(TXScanRequestOrderQuery txScanRequestOrderQuery) {
-		logger.info("请求参数为:={}", txScanRequestOrderQuery);
+	public BaseResult<RspOrderQueryEntity> txScanOrderQuery(TXScanRequestOrderQuery txScanRequestOrderQuery, String payCode) {
+		RspOrderQueryEntity rspOrderQueryEntity = new RspOrderQueryEntity();
+		logger.info("天下支付订单查询请求参数为:={}", txScanRequestOrderQuery);
 		TXScanResponseOrderQuery txScanOrderQuery = new TXScanResponseOrderQuery();
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("tranCode", TranCodeEnum.ORDERQUERY);
-		data.put("tranDate", txScanRequestOrderQuery);
+		data.put("tranDate", txScanRequestOrderQuery.getTranDate());
 		data.put("orderId", txScanRequestOrderQuery.getOrderId());// 订单Id和交易流水号(二选一)
 		data.put("tranSeqId", txScanRequestOrderQuery.getTranSeqId());// 交易流水号和订单Id(二选一)
 		Map<String, Object> rmap = toRequestTXPay(data);
-		Map<String, Object> _body = (Map<String, Object>) rmap.get("REP_BODY");
+		Map<String, Object> txPayResponseBody = (Map<String, Object>) rmap.get("REP_BODY");
 		Map<String, Object> _head = (Map<String, Object>) rmap.get("REP_HEAD");
-		String vsign = HttpApi.getSign(_body, TXPayConfig.MD5KEY);
+		String vsign = HttpApi.getSign(txPayResponseBody, TXPayConfig.MD5KEY);
 		String _sign = _head.get("sign").toString();
-		logger.info("解析签名:" + _sign);
+		logger.info("天下支付解析签名:" + _sign);
 		try {
 			boolean flag = SecurityUtil.verify(vsign, _sign, TXPayConfig.PUBKEY, true);
-			logger.info("验证签名状态:", flag);
-			txScanOrderQuery.setRspcode(_body.get("rspcode").toString());// 响应码
-			txScanOrderQuery.setRspmsg(TdExpBasicFunctions.HEX2STR(_body.get("rspmsg").toString()));// 响应信息,16进制解密成字符串
+			logger.info("天下支付验证签名状态:", flag);
+			txScanOrderQuery.setRspcode(txPayResponseBody.get("rspcode").toString());// 响应码
 			if (flag) {
-				txScanOrderQuery.setAgtId(_body.get("agtId").toString());// 机构号
-				txScanOrderQuery.setOrderTime(_body.get("orderTime").toString());// yyyyMMddHHmmss
-				txScanOrderQuery.setOrderState(_body.get("orderState").toString());// 订单状态
-				txScanOrderQuery.setSettleState(_body.get("settleState").toString());// 清算状态
-				txScanOrderQuery.setSettleMsg(TdExpBasicFunctions.HEX2STR(_body.get("settleMsg").toString()));// 清算信息
-				txScanOrderQuery.setOrderId(_body.get("orderId").toString());// 订单Id
-				txScanOrderQuery.setTranSeqId(_body.get("tranSeqId").toString());// 交易流水号
-				txScanOrderQuery.setOrderAmt(_body.get("orderAmt").toString());// 订单金额
-				txScanOrderQuery.setSign(_sign);
+				if (txScanOrderQuery.isSucc()) {
+					rspOrderQueryEntity.setResult_code(txPayResponseBody.get("orderState").toString());
+					rspOrderQueryEntity.setPayCode(payCode);
+					rspOrderQueryEntity.setType(RspOrderQueryEntity.TYPE_TIANXIA_SCAN);
+					rspOrderQueryEntity.setTrade_no(txPayResponseBody.get("tranSeqId").toString());
+					return ResultGenerator.genSuccessResult("succ", rspOrderQueryEntity);
+				} else {
+					logger.info("天下支付轮询响应信息", txScanOrderQuery.getRepCodeMsgDetail());
+				}
 			}
 		} catch (Exception e) {
-			logger.error("签名解析异常,异常信息为", e);
+			logger.error("天下支付签名解析异常,异常信息为", e);
 		}
-		return txScanOrderQuery;
+		return ResultGenerator.genFailResult("请求天下支付回调失败");
 	}
 
 	/**
@@ -230,7 +233,7 @@ public class TXScanPay {
 				txScanBalanceQuery.setAcT1(_body.get("acT1").toString());
 			}
 		} catch (Exception e) {
-			logger.error("签名解析异常,异常信息为", e);
+			logger.error("天下支付签名解析异常,异常信息为", e);
 		}
 		return txScanBalanceQuery;
 	}
@@ -241,25 +244,25 @@ public class TXScanPay {
 		data.put("nonceStr", TdExpBasicFunctions.RANDOM(16, "0"));
 		HttpApi http = new HttpApi(TXPayConfig.REQ_URL, HttpApi.POST);
 		Map<String, Object> hdata = new HashMap<String, Object>();
-		logger.info("组装成map串={}", data);
+		logger.info("天下支付组装成map串={}", data);
 		String sign = HttpApi.getSign(data, TXPayConfig.MD5KEY);
 		try {
 			sign = SecurityUtil.sign(sign, TXPayConfig.PRVKEY, true);
-			logger.info("加密签名={}", sign);
+			logger.info("天下支付加密签名={}", sign);
 		} catch (Exception e) {
-			logger.error("签名加密异常,异常信息为", e);
+			logger.error("天下支付签名加密异常,异常信息为", e);
 		}
 		hdata.put("sign", sign);
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("REQ_BODY", data);
 		map.put("REQ_HEAD", hdata);
 		String mapStr = JUtil.toJsonString(map);
-		logger.info("封装好的map串:={}", mapStr);
+		logger.info("天下支付封装好的map串:={}", mapStr);
 		logger.info("===============================请求开始===============================");
 		String rdata = http.post(mapStr);
 		logger.info("===============================请求结束===============================");
 		Map<String, Object> rmap = JUtil.toMap(rdata);
-		logger.info("请求返回的map串:" + rmap);
+		logger.info("天下支付请求返回的map串:" + rmap);
 		return rmap;
 	}
 
@@ -273,12 +276,12 @@ public class TXScanPay {
 		String sign = HttpApi.getSign(data, TXPayConfig.MD5KEY);
 		boolean flag = false;
 		try {
-			logger.info("响应报文中的sign={}", callback.getSign());
-			logger.info("本地参数加密后的sign={}", sign);
+			logger.info("天下支付响应报文中的sign={}", callback.getSign());
+			logger.info("天下支付本地参数加密后的sign={}", sign);
 			flag = SecurityUtil.verify(sign, callback.getSign(), TXPayConfig.PUBKEY, true);
-			logger.info("验证签名状态:" + flag);
+			logger.info("天下支付验证签名状态:" + flag);
 		} catch (Exception e) {
-			logger.error("签名解析异常,异常信息为", e);
+			logger.error("天下支付签名解析异常,异常信息为", e);
 		}
 		return flag;
 	}
