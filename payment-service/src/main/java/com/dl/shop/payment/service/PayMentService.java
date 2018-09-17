@@ -32,10 +32,13 @@ import com.dl.lottery.api.ILotteryPrintService;
 import com.dl.member.api.IActivityService;
 import com.dl.member.api.IUserAccountService;
 import com.dl.member.api.IUserBonusService;
+import com.dl.member.api.IUserQualificationService;
 import com.dl.member.dto.DonationPriceDTO;
+import com.dl.member.dto.QFDTO;
 import com.dl.member.dto.RechargeDataActivityDTO;
 import com.dl.member.dto.SurplusPaymentCallbackDTO;
 import com.dl.member.param.MemRollParam;
+import com.dl.member.param.QFParam;
 import com.dl.member.param.RecharegeParam;
 import com.dl.member.param.StrParam;
 import com.dl.member.param.SurplusPayParam;
@@ -133,6 +136,9 @@ public class PayMentService extends AbstractService<PayMent> {
 
 	@Resource
 	private PayBankRecordMapper payBankRecordMapper;
+	
+	@Resource
+	private IUserQualificationService iUserQualificationService;
 
 	/**
 	 * 查询所有可用的支付方式
@@ -410,24 +416,36 @@ public class PayMentService extends AbstractService<PayMent> {
 				RspOrderQueryDTO rspOrderQueryDTO = new RspOrderQueryDTO();
 				rspOrderQueryDTO.setIsHaveRechargeAct(0);
 				rspOrderQueryDTO.setDonationPrice("");
-				StrParam strParam = new StrParam();
-				strParam.setStr("");
-				BaseResult<RechargeDataActivityDTO> rechargeDataAct = activityService.queryValidRechargeActivity(strParam);
-				if (rechargeDataAct.getCode() == 0) {
-					RechargeDataActivityDTO rechargeDataActivityDTO = rechargeDataAct.getData();
-					rspOrderQueryDTO.setIsHaveRechargeAct(rechargeDataActivityDTO.getIsHaveRechargeAct());
-					if (1 == rechargeDataActivityDTO.getIsHaveRechargeAct()) {
-						logger.info("开始执行充值赠送红包逻辑");
-						com.dl.member.param.PayLogIdParam payLogIdParam = new com.dl.member.param.PayLogIdParam();
-						payLogIdParam.setPayLogId(String.valueOf(payLog.getLogId()));
-						BaseResult<DonationPriceDTO> donationPriceRst = userBonusService.reiceiveBonusAfterRechargeNew(payLogIdParam);
-						logger.info("充值赠送红包结果：" + JSON.toJSONString(donationPriceRst));
-						if (donationPriceRst.getCode() == 0) {
-							logger.info("结束执行充值赠送红包逻辑");
-							rspOrderQueryDTO.setDonationPrice(donationPriceRst.getData().getDonationPrice());
+
+				QFParam qfParam = new QFParam();
+				qfParam.setAct_type("1");
+				qfParam.setAct_id("3");
+				BaseResult<QFDTO> qfRst = iUserQualificationService.queryActQF(qfParam);
+				if(0 == qfRst.getCode()) {
+					QFDTO qfDto = qfRst.getData();
+					if(1 == qfDto.getQfRst()) {//有资格
+						StrParam strParam = new StrParam();
+						strParam.setStr("");
+						BaseResult<RechargeDataActivityDTO> rechargeDataAct = activityService.queryValidRechargeActivity(strParam);
+						if(rechargeDataAct.getCode() == 0) {
+							RechargeDataActivityDTO  rechargeDataActivityDTO  = rechargeDataAct.getData();
+							rspOrderQueryDTO.setIsHaveRechargeAct(rechargeDataActivityDTO.getIsHaveRechargeAct());
+							if(1 == rechargeDataActivityDTO.getIsHaveRechargeAct()) {
+								logger.info("开始执行充值赠送红包逻辑");
+								com.dl.member.param.PayLogIdParam payLogIdParam = new com.dl.member.param.PayLogIdParam();
+								payLogIdParam.setPayLogId(String.valueOf(payLog.getLogId()));
+								BaseResult<DonationPriceDTO> donationPriceRst = userBonusService.reiceiveBonusAfterRechargeNew(payLogIdParam);
+								logger.info("充值赠送红包结果："+ JSON.toJSONString(donationPriceRst));
+								if(donationPriceRst.getCode() == 0) {
+									logger.info("结束执行充值赠送红包逻辑");
+									rspOrderQueryDTO.setDonationPrice(donationPriceRst.getData().getDonationPrice());
+								}
+							}
 						}
 					}
 				}
+				
+				
 				log.info("放入redis：" + String.valueOf(payLog.getLogId()) + "-----------" + rspOrderQueryDTO.getDonationPrice());
 				stringRedisTemplate.opsForValue().set(String.valueOf(payLog.getLogId()), rspOrderQueryDTO.getDonationPrice(), 180, TimeUnit.SECONDS);
 				logger.info("充值成功后返回的信息：" + rspOrderQueryDTO.getIsHaveRechargeAct() + "-----" + rspOrderQueryDTO.getDonationPrice());
