@@ -29,7 +29,7 @@ public class RspOrderQueryEntity implements Serializable {
 	public static final int TYPE_YINHE = 0;
 	public static final int TYPE_XIANFENG = 1;
 	public static final int TYPE_YIFUTONG = 2;
-	public static final int TYPE_YINLIAN_SCAN = 3;// 银联扫码
+	public static final int TYPE_TIANXIA_SCAN = 3;// 天下银联扫码
 
 	public boolean isSucc() {
 		if (!TextUtils.isEmpty(result_code) && type == TYPE_YINHE) {
@@ -38,6 +38,8 @@ public class RspOrderQueryEntity implements Serializable {
 			return !StringUtils.isEmpty(trade_status) && "S".equalsIgnoreCase(trade_status);
 		} else if (!TextUtils.isEmpty(result_code) && type == TYPE_YIFUTONG) {
 			return !StringUtils.isEmpty(result_code) && ("2".equalsIgnoreCase(result_code) || "3".equalsIgnoreCase(result_code));
+		} else if (!TextUtils.isEmpty(result_code) && type == TYPE_TIANXIA_SCAN) {
+			return !StringUtils.isEmpty(result_code) && ("01".equalsIgnoreCase(result_code));// 成功
 		}
 		return false;
 	}
@@ -49,6 +51,8 @@ public class RspOrderQueryEntity implements Serializable {
 			return StringUtils.isEmpty(trade_status) || "I".equalsIgnoreCase(trade_status);
 		} else if (!TextUtils.isEmpty(result_code) && type == TYPE_YIFUTONG) {
 			return StringUtils.isEmpty(result_code) || "1".equalsIgnoreCase(result_code);
+		} else if (!TextUtils.isEmpty(result_code) && type == TYPE_TIANXIA_SCAN) {
+			return StringUtils.isEmpty(result_code) || "00".equalsIgnoreCase(result_code);// 未支付
 		}
 		return false;
 	}
@@ -61,6 +65,8 @@ public class RspOrderQueryEntity implements Serializable {
 			return !StringUtils.isEmpty(trade_status) && "F".equalsIgnoreCase(trade_status);
 		} else if (!TextUtils.isEmpty(result_code) && type == TYPE_YIFUTONG) {
 			return !StringUtils.isEmpty(result_code) && "0".equalsIgnoreCase(result_code);
+		} else if (!TextUtils.isEmpty(result_code) && type == TYPE_TIANXIA_SCAN) {
+			return !StringUtils.isEmpty(result_code) && "02".equalsIgnoreCase(result_code);// 失败
 		}
 		return false;
 	}

@@ -25,7 +25,7 @@ public class TXScanRequestPay extends TXScanRequestBaseEntity {
 	private String goodsName;
 
 	/**
-	 * URL地址 N 1…100 支付成功后服务器回调该地址
+	 * URL地址1…100 支付成功后服务器回调该地址
 	 */
 	private String notifyUrl;
 
@@ -36,13 +36,13 @@ public class TXScanRequestPay extends TXScanRequestBaseEntity {
 	private String goodsDetail;
 
 	/**
-	 * 结算类型 N 2 T0 结算至已入账账户 T1 结算至未结算账户
+	 * 结算类型:T0 结算至已入账账户 T1 结算至未结算账户
 	 */
 	private String stlType;
 
 	/**
-	 * 支付渠道; 支付渠道: WXPAY 微信支付 ALIPAY 支付宝 ALIWAPPAY 支付宝 H5 QQPAY qq钱包 WXWAPPAY
-	 * 微信H5 CPPAY 银联二维码 CPPAYLARGE 银联二维码大额 JDPAY 京东支付 JDWAPPAY 京东wap支付
+	 * 支付渠道: WXPAY 微信支付 ALIPAY 支付宝 ALIWAPPAY 支付宝 H5 QQPAY qq钱包 WXWAPPAY 微信H5
+	 * CPPAY 银联二维码 CPPAYLARGE 银联二维码大额 JDPAY 京东支付 JDWAPPAY 京东wap支付
 	 */
 	private String payChannel;
 	/**

@@ -597,7 +597,7 @@ public class PayMentService extends AbstractService<PayMent> {
 			}
 		} else if ("app_yifutong".equals(payCode)) {
 			baseResult = payYFTUtil.queryPayResult(payCode, payOrderSn);
-		} else if ("app_yinlian_scan".equals(payCode)) {
+		} else if ("app_tianxia_scan".equals(payCode)) {
 			baseResult = payYFTUtil.queryPayResult(payCode, payOrderSn);
 		}
 		if (baseResult == null || baseResult.getCode() != 0) {
@@ -747,7 +747,7 @@ public class PayMentService extends AbstractService<PayMent> {
 					rEntity.setPayLogId(savePayLog.getLogId() + "");
 					rEntity.setOrderId(orderId);
 					rEntity.setLotteryClassifyId(lotteryClassifyId);
-					logger.info("YLScanclient jump url:" + url + " payLogId:" + savePayLog.getLogId() + " orderId:" + orderId);
+					logger.info("天下支付扫码客户端url:" + url + " payLogId:" + savePayLog.getLogId() + " orderId:" + orderId);
 					payBaseResult = ResultGenerator.genSuccessResult("succ", rEntity);
 				} else {
 					payBaseResult = ResultGenerator.genFailResult("url decode失败", null);
@@ -756,7 +756,7 @@ public class PayMentService extends AbstractService<PayMent> {
 				payBaseResult = ResultGenerator.genResult(PayEnums.PAY_YINLIAN_SCAN_INNER_ERROR.getcode(), PayEnums.PAY_YINLIAN_SCAN_INNER_ERROR.getMsg() + "[" + rspEntity.msg + "]");
 			}
 		} else {
-			payBaseResult = ResultGenerator.genFailResult("易富通支付返回数据有误");
+			payBaseResult = ResultGenerator.genFailResult("天下支付返回数据有误");
 		}
 		return payBaseResult;
 	}
