@@ -3,6 +3,8 @@ package com.dl.shop.payment.pay.tianxia.tianxiaScan.util;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -28,6 +30,8 @@ import com.dl.shop.payment.pay.tianxia.tianxiaScan.enums.TranCodeEnum;
 @Component
 public class TXScanPay {
 	private final static Logger logger = LoggerFactory.getLogger(TXScanPay.class);
+	@Resource
+	private TXPayConfig txPayConfig;
 
 	/**
 	 * 扫码支付接口
@@ -37,13 +41,19 @@ public class TXScanPay {
 	 */
 	@SuppressWarnings("unchecked")
 	public TXScanResponsePay txScanPay(TXScanRequestPay txScanRequestPay) {
+		String amount = txScanRequestPay.getOrderAmt();
 		logger.info("请求参数为:={}", txScanRequestPay);
+		if ("true".equals(txPayConfig.getDEBUG())) {
+			logger.info("请求金额为:={}分", amount);
+			amount = "1";
+			logger.info("测试环境请求金额置为:={}分", amount);
+		}
 		TXScanResponsePay txScanResponsePay = new TXScanResponsePay();
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("tranCode", TranCodeEnum.PAYSCAN);
-		data.put("orderAmt", txScanRequestPay.getOrderAmt());
+		data.put("orderAmt", amount);
 		data.put("orderId", txScanRequestPay.getOrderId());
-		data.put("notifyUrl", TXPayConfig.CALLBACK_URL);
+		data.put("notifyUrl", txPayConfig.getCALLBACK_URL());
 		data.put("goodsName", TdExpBasicFunctions.STR2HEX(txScanRequestPay.getGoodsName()));
 		// String detail = txScanRequestPay.getGoodsDetail();
 		// data.put("goodsDetail", TdExpBasicFunctions.STR2HEX(detail));
@@ -53,13 +63,13 @@ public class TXScanPay {
 		Map<String, Object> rmap = toRequestTXPay(data);
 		Map<String, Object> _body = (Map<String, Object>) rmap.get("REP_BODY");
 		Map<String, Object> _head = (Map<String, Object>) rmap.get("REP_HEAD");
-		String vsign = HttpApi.getSign(_body, TXPayConfig.MD5KEY);
+		String vsign = HttpApi.getSign(_body, txPayConfig.getMD5KEY());
 		logger.info("获取签名:" + vsign);
 		String _sign = _head.get("sign").toString();
 		try {
 			txScanResponsePay.setRspcode(_body.get("rspcode").toString());// 响应吗
 			txScanResponsePay.setRspmsg(TdExpBasicFunctions.HEX2STR(_body.get("rspmsg").toString()));// 响应信息,16进制解密成字符串
-			boolean flag = SecurityUtil.verify(vsign, _sign, TXPayConfig.PUBKEY, true);
+			boolean flag = SecurityUtil.verify(vsign, _sign, txPayConfig.getTXPUBKEY(), true);
 			logger.info("验证签名状态:" + flag);
 			if (flag) {
 				if (_body.containsKey("codeUrl")) {
@@ -97,11 +107,11 @@ public class TXScanPay {
 		Map<String, Object> rmap = toRequestTXPay(data);
 		Map<String, Object> txPayResponseBody = (Map<String, Object>) rmap.get("REP_BODY");
 		Map<String, Object> _head = (Map<String, Object>) rmap.get("REP_HEAD");
-		String vsign = HttpApi.getSign(txPayResponseBody, TXPayConfig.MD5KEY);
+		String vsign = HttpApi.getSign(txPayResponseBody, txPayConfig.getMD5KEY());
 		String _sign = _head.get("sign").toString();
 		logger.info("天下支付解析签名:" + _sign);
 		try {
-			boolean flag = SecurityUtil.verify(vsign, _sign, TXPayConfig.PUBKEY, true);
+			boolean flag = SecurityUtil.verify(vsign, _sign, txPayConfig.getTXPUBKEY(), true);
 			logger.info("天下支付验证签名状态:", flag);
 			txScanOrderQuery.setRspcode(txPayResponseBody.get("rspcode").toString());// 响应码
 			if (flag) {
@@ -130,12 +140,18 @@ public class TXScanPay {
 	@SuppressWarnings("unchecked")
 	public TXScanResponsePaidByOthers txScanPayFor(TXScanRequestPaidByOthers txScanRequestPaidByOthers) {
 		logger.info("请求参数={}", txScanRequestPaidByOthers);
+		String amount = txScanRequestPaidByOthers.getTxnAmt();
+		if ("true".equals(txPayConfig.getDEBUG())) {
+			logger.info("请求金额为:={}分", amount);
+			amount = "1";
+			logger.info("测试环境请求金额置为:={}分", amount);
+		}
 		TXScanResponsePaidByOthers txScanResponsePaidByOthers = new TXScanResponsePaidByOthers();
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("tranCode", TranCodeEnum.BALANCEPAYFOR);
 		data.put("tranDate", txScanRequestPaidByOthers.getTranDate());
 		data.put("orderId", txScanRequestPaidByOthers.getOrderId());
-		data.put("txnAmt", txScanRequestPaidByOthers.getTxnAmt());
+		data.put("txnAmt", amount);
 		data.put("accountNo", txScanRequestPaidByOthers.getAccountNo());// 卡号
 		data.put("certNum", txScanRequestPaidByOthers.getCertNum());// 身份证号
 		data.put("bankCode", txScanRequestPaidByOthers.getBankCode());// 银行编码
@@ -150,11 +166,11 @@ public class TXScanPay {
 		Map<String, Object> rmap = toRequestTXPay(data);
 		Map<String, Object> _body = (Map<String, Object>) rmap.get("REP_BODY");
 		Map<String, Object> _head = (Map<String, Object>) rmap.get("REP_HEAD");
-		String vsign = HttpApi.getSign(_body, TXPayConfig.MD5KEY);
+		String vsign = HttpApi.getSign(_body, txPayConfig.getMD5KEY());
 		String _sign = _head.get("sign").toString();
 		logger.info("解析签名:" + _sign);
 		try {
-			boolean flag = SecurityUtil.verify(vsign, _sign, TXPayConfig.PUBKEY, true);
+			boolean flag = SecurityUtil.verify(vsign, _sign, txPayConfig.getTXPUBKEY(), true);
 			logger.info("验证签名状态:" + flag);
 			txScanResponsePaidByOthers.setRspcode(_body.get("rspcode").toString());// 响应码
 			txScanResponsePaidByOthers.setRspmsg(TdExpBasicFunctions.HEX2STR(_body.get("rspmsg").toString()));// 响应信息,16进制解密成字符串
@@ -187,11 +203,11 @@ public class TXScanPay {
 		Map<String, Object> rmap = toRequestTXPay(data);
 		Map<String, Object> _body = (Map<String, Object>) rmap.get("REP_BODY");
 		Map<String, Object> _head = (Map<String, Object>) rmap.get("REP_HEAD");
-		String vsign = HttpApi.getSign(_body, TXPayConfig.MD5KEY);
+		String vsign = HttpApi.getSign(_body, txPayConfig.getMD5KEY());
 		String _sign = _head.get("sign").toString();
 		logger.info("解析签名:" + _sign);
 		try {
-			boolean flag = SecurityUtil.verify(vsign, _sign, TXPayConfig.PUBKEY, true);
+			boolean flag = SecurityUtil.verify(vsign, _sign, txPayConfig.getTXPUBKEY(), true);
 			logger.info("验证签名状态:" + flag);
 			txScanPayForRespBalanceQuery.setRspcode(_body.get("rspcode").toString());// 响应码
 			txScanPayForRespBalanceQuery.setRspmsg(TdExpBasicFunctions.HEX2STR(_body.get("rspmsg").toString()));// 响应信息,16进制解密成字符串
@@ -219,11 +235,11 @@ public class TXScanPay {
 		logger.info("请求返回的map串:" + rmap);
 		Map<String, Object> _head = (Map<String, Object>) rmap.get("REP_HEAD");
 		Map<String, Object> _body = (Map<String, Object>) rmap.get("REP_BODY");
-		String vsign = HttpApi.getSign(_body, TXPayConfig.MD5KEY);
+		String vsign = HttpApi.getSign(_body, txPayConfig.getMD5KEY());
 		String _sign = _head.get("sign").toString();
 		logger.info("解析签名:" + _sign);
 		try {
-			boolean flag = SecurityUtil.verify(vsign, _sign, TXPayConfig.PUBKEY, true);
+			boolean flag = SecurityUtil.verify(vsign, _sign, txPayConfig.getTXPUBKEY(), true);
 			logger.info("验证签名状态:" + flag);
 			txScanBalanceQuery.setRspcode(_body.get("rspcode").toString());// 响应码
 			txScanBalanceQuery.setRspmsg(TdExpBasicFunctions.HEX2STR(_body.get("rspmsg").toString()));// 响应信息,16进制解密成字符串
@@ -239,15 +255,15 @@ public class TXScanPay {
 	}
 
 	private Map<String, Object> toRequestTXPay(Map<String, Object> data) {
-		data.put("agtId", TXPayConfig.AGTID);
-		data.put("merId", TXPayConfig.MERID);
+		data.put("agtId", txPayConfig.getAGTID());
+		data.put("merId", txPayConfig.getMERID());
 		data.put("nonceStr", TdExpBasicFunctions.RANDOM(16, "0"));
-		HttpApi http = new HttpApi(TXPayConfig.REQ_URL, HttpApi.POST);
+		HttpApi http = new HttpApi(txPayConfig.getREQ_URL(), HttpApi.POST);
 		Map<String, Object> hdata = new HashMap<String, Object>();
 		logger.info("天下支付组装成map串={}", data);
-		String sign = HttpApi.getSign(data, TXPayConfig.MD5KEY);
+		String sign = HttpApi.getSign(data, txPayConfig.getMD5KEY());
 		try {
-			sign = SecurityUtil.sign(sign, TXPayConfig.PRVKEY, true);
+			sign = SecurityUtil.sign(sign, txPayConfig.getPRVKEY(), true);
 			logger.info("天下支付加密签名={}", sign);
 		} catch (Exception e) {
 			logger.error("天下支付签名加密异常,异常信息为", e);
@@ -273,12 +289,12 @@ public class TXScanPay {
 		data.put("orderId", callback.getOrderId());
 		data.put("payTime", callback.getPayTime());
 		data.put("orderAmt", callback.getOrderAmt());
-		String sign = HttpApi.getSign(data, TXPayConfig.MD5KEY);
+		String sign = HttpApi.getSign(data, txPayConfig.getMD5KEY());
 		boolean flag = false;
 		try {
 			logger.info("天下支付响应报文中的sign={}", callback.getSign());
 			logger.info("天下支付本地参数加密后的sign={}", sign);
-			flag = SecurityUtil.verify(sign, callback.getSign(), TXPayConfig.PUBKEY, true);
+			flag = SecurityUtil.verify(sign, callback.getSign(), txPayConfig.getTXPUBKEY(), true);
 			logger.info("天下支付验证签名状态:" + flag);
 		} catch (Exception e) {
 			logger.error("天下支付签名解析异常,异常信息为", e);
