@@ -1,4 +1,4 @@
-﻿package com.dl.shop.payment.pay.tianxia.tianxiaScan.util;
+package com.dl.shop.payment.pay.tianxia.tianxiaScan.util;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -9,7 +9,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
-
 import org.apache.http.Consts;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
