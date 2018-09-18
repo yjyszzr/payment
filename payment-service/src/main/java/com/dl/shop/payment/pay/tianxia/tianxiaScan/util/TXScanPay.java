@@ -51,7 +51,7 @@ public class TXScanPay {
 		}
 		TXScanResponsePay txScanResponsePay = new TXScanResponsePay();
 		Map<String, Object> data = new HashMap<String, Object>();
-		data.put("tranCode", TranCodeEnum.PAYSCAN);
+		data.put("tranCode", TranCodeEnum.PAYSCAN.getcode());
 		data.put("orderAmt", amount);
 		data.put("orderId", txScanRequestPay.getOrderId());
 		data.put("notifyUrl", txPayConfig.getCALLBACK_URL(merchantStr));
@@ -101,7 +101,7 @@ public class TXScanPay {
 		logger.info("天下支付订单查询请求参数为:={}", txScanRequestOrderQuery);
 		TXScanResponseOrderQuery txScanOrderQuery = new TXScanResponseOrderQuery();
 		Map<String, Object> data = new HashMap<String, Object>();
-		data.put("tranCode", TranCodeEnum.ORDERQUERY);
+		data.put("tranCode", TranCodeEnum.ORDERQUERY.getcode());
 		data.put("tranDate", txScanRequestOrderQuery.getTranDate());
 		data.put("orderId", txScanRequestOrderQuery.getOrderId());// 订单Id和交易流水号(二选一)
 		data.put("tranSeqId", txScanRequestOrderQuery.getTranSeqId());// 交易流水号和订单Id(二选一)
@@ -149,7 +149,7 @@ public class TXScanPay {
 		}
 		TXScanResponsePaidByOthers txScanResponsePaidByOthers = new TXScanResponsePaidByOthers();
 		Map<String, Object> data = new HashMap<String, Object>();
-		data.put("tranCode", TranCodeEnum.BALANCEPAYFOR);
+		data.put("tranCode", TranCodeEnum.BALANCEPAYFOR.getcode());
 		data.put("tranDate", txScanRequestPaidByOthers.getTranDate());
 		data.put("orderId", txScanRequestPaidByOthers.getOrderId());
 		data.put("txnAmt", amount);
@@ -198,7 +198,7 @@ public class TXScanPay {
 		logger.info("请求参数={}", txScanPayForBalanceQuery);
 		TXScanResponsePaidByOthersBalanceQuery txScanPayForRespBalanceQuery = new TXScanResponsePaidByOthersBalanceQuery();
 		Map<String, Object> data = new HashMap<String, Object>();
-		data.put("tranCode", TranCodeEnum.BALANCEPAYFOEQUERY);
+		data.put("tranCode", TranCodeEnum.BALANCEPAYFOEQUERY.getcode());
 		data.put("orderId", txScanPayForBalanceQuery.getOrderId());
 		data.put("tranDate", txScanPayForBalanceQuery.getTranDate());
 		Map<String, Object> rmap = toRequestTXPay(data, merchantStr);
@@ -231,7 +231,7 @@ public class TXScanPay {
 	private TXScanResponseBalanceQuery queryAccount(TXScanRequestBaseEntity txScanQueryEntity, String merchantStr) {
 		TXScanResponseBalanceQuery txScanBalanceQuery = new TXScanResponseBalanceQuery();
 		Map<String, Object> data = new HashMap<String, Object>();
-		data.put("tranCode", TranCodeEnum.BALANCEQUERY);
+		data.put("tranCode", TranCodeEnum.BALANCEQUERY.getcode());
 		Map<String, Object> rmap = toRequestTXPay(data, merchantStr);
 		logger.info("请求返回的map串:" + rmap);
 		Map<String, Object> _head = (Map<String, Object>) rmap.get("REP_HEAD");
