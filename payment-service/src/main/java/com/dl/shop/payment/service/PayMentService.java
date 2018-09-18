@@ -424,6 +424,7 @@ public class PayMentService extends AbstractService<PayMent> {
 				if(0 == qfRst.getCode()) {
 					QFDTO qfDto = qfRst.getData();
 					if(1 == qfDto.getQfRst()) {//有资格
+						log.info("有活动资格");
 						StrParam strParam = new StrParam();
 						strParam.setStr("");
 						BaseResult<RechargeDataActivityDTO> rechargeDataAct = activityService.queryValidRechargeActivity(strParam);
@@ -444,7 +445,7 @@ public class PayMentService extends AbstractService<PayMent> {
 						}
 					}
 				}
-				
+				log.info("无活动资格");
 				
 				log.info("放入redis：" + String.valueOf(payLog.getLogId()) + "-----------" + rspOrderQueryDTO.getDonationPrice());
 				stringRedisTemplate.opsForValue().set(String.valueOf(payLog.getLogId()), rspOrderQueryDTO.getDonationPrice(), 180, TimeUnit.SECONDS);
