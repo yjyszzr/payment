@@ -212,7 +212,7 @@ public class HttpApi {
 			sb.append(arrayToSort[i]);
 		}
 		String result = sb.toString() + "key=" + key;
-		logger.info(result);
+		logger.info("排序后加密前的签名={}", result);
 		result = MD5.encryption(result).toUpperCase();
 		return result;
 	}
