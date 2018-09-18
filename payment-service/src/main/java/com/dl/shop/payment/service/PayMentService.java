@@ -797,4 +797,14 @@ public class PayMentService extends AbstractService<PayMent> {
 		}
 		return payBaseResult;
 	}
+
+	public BaseResult getKuaijiePayQqQianBaoUrl(PayLog savePayLog, String orderSn) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public BaseResult getKuaijiePayJingDongUrl(PayLog savePayLog, String orderSn) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
