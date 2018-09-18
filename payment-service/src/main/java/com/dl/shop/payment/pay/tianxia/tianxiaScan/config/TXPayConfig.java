@@ -5,12 +5,9 @@ import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-
 @Slf4j
-@Configuration
-@ConfigurationProperties(prefix = "pay.tianxia")
+// @Configuration
+// @ConfigurationProperties(prefix = "pay.tianxia")
 public class TXPayConfig {
 
 	private Map<String, String> merchant = new HashMap<String, String>();
