@@ -1,20 +1,19 @@
 package com.dl.shop.payment.pay.tianxia.tianxiaScan.config;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 
 @Slf4j
 @Configuration
-@PropertySource({ "classpath:application-dev.properties", "classpath:application-prod.properties" })
 @ConfigurationProperties(prefix = "pay.tianxia")
 public class TXPayConfig {
 	// @Value("${pay.tianxia}")
-	private Map<String, String> merchant;
+	private Map<String, String> merchant = new HashMap<String, String>();
 
 	private String DEBUG;
 	// 私钥
