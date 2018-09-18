@@ -230,11 +230,11 @@ public class PayNotifyController {
 		String payCode = payLog.getPayCode();
 		int payType = payLog.getPayType();
 		RspOrderQueryEntity rspOrderEntikty = new RspOrderQueryEntity();
-		rspOrderEntikty.setResult_code("01");
+		rspOrderEntikty.setResult_code(callback.getOrderState());
 		rspOrderEntikty.setTrade_no(payOrderId);
 		rspOrderEntikty.setPayCode(payCode);
 		rspOrderEntikty.setType(RspOrderQueryEntity.TYPE_TIANXIA_SCAN);
-		rspOrderEntikty.setTrade_status("01");
+		rspOrderEntikty.setTrade_status(callback.getOrderState());
 		if (payType == 0) {
 			paymentService.orderOptions(payLog, rspOrderEntikty);
 		} else {
