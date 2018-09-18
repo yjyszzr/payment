@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.dl.base.util.JSONHelper;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
+import com.dl.shop.payment.pay.kuaijie.entity.KuaiJiePayNotifyEntity;
+import com.dl.shop.payment.pay.kuaijie.util.KuaiJiePayUtil;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestCallback;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.util.TXScanPay;
 import com.dl.shop.payment.pay.yifutong.entity.RespYFTnotifyEntity;
@@ -43,6 +45,8 @@ public class PayNotifyController {
 	@Resource
 	private PayYFTUtil payYFTUtil;
 
+	@Resource
+	private KuaiJiePayUtil kuaiJiePayUtil;
 	@Resource
 	private TXScanPay txScanPay;
 
@@ -66,7 +70,7 @@ public class PayNotifyController {
 		String payOrderfSn = yftNotify.getOrderCode();
 		if (StringUtils.isEmpty(payOrderfSn)) {
 			log.error("易富通支付返回payOrderSn is null");
-			writeSuccess(response);
+			writeUppercaseSuccess(response);
 			return;
 		}
 		Boolean checkSignIsTure = payYFTUtil.booleanCheckSign(yftNotify);
@@ -78,13 +82,13 @@ public class PayNotifyController {
 		PayLog payLog = payLogService.findPayLogByOrderSign(payOrderfSn);
 		if (payLog == null) {
 			log.info("[payNotify]" + "该支付订单查询失败 payLogSn:" + payOrderfSn);
-			writeSuccess(response);
+			writeUppercaseSuccess(response);
 			return;
 		}
 		int isPaid = payLog.getIsPaid();
 		if (isPaid == 1) {
 			log.info("[payNotify] payOrderSn={}订单已支付...", payOrderfSn);
-			writeSuccess(response);
+			writeUppercaseSuccess(response);
 			return;
 		}
 		int payType = payLog.getPayType();
@@ -100,33 +104,93 @@ public class PayNotifyController {
 		} else {
 			paymentService.rechargeOptions(payLog, rspOrderEntikty);
 		}
-		writeSuccess(response);
+		writeUppercaseSuccess(response);
 		return;
 	}
 
-	private void writeSuccess(HttpServletResponse response) {
+	@ApiOperation(value = "快接支付支付回调")
+	@PostMapping("/KJPayNotify")
+	@ResponseBody
+	public void KJPayNotify(@RequestBody KuaiJiePayNotifyEntity kuaiJiePayNotifyEntity, HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+		request.setCharacterEncoding("UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		response.setHeader("Content-type", "text/html;charset=UTF-8");
+		Map<?, ?> parameters = request.getParameterMap();// 保存request请求参数的临时变量
+		log.info("快接支付通知消息yftNotify={}", JSONHelper.bean2json(kuaiJiePayNotifyEntity));
+		// 打印先锋支付返回值
+		log.info("快接支付服务器端通知-接收到快接支付返回报文：");
+		Iterator<?> paiter = parameters.keySet().iterator();
+		while (paiter.hasNext()) {
+			String key = paiter.next().toString();
+			String[] values = (String[]) parameters.get(key);
+			log.info(key + "-------------" + values[0]);
+		}
+		String payOrderfSn = kuaiJiePayNotifyEntity.getMerchant_order_no();
+		if (StringUtils.isEmpty(payOrderfSn)) {
+			log.error("快接支付返回payOrderSn is null");
+			writeLowerSuccess(response);
+			return;
+		}
+		Boolean checkSignIsTure = kuaiJiePayUtil.booleanCheckSign(kuaiJiePayNotifyEntity);
+		if (!checkSignIsTure) {
+			log.error("快接支付回调通知验签失败payOrderSn={}", payOrderfSn);
+			return;
+		}
+		PayLog payLog = payLogService.findPayLogByOrderSign(payOrderfSn);
+		if (payLog == null) {
+			log.info("快接支付[payNotify]该支付订单查询失败 payLogSn:" + payOrderfSn);
+			writeLowerSuccess(response);
+			return;
+		}
+		int isPaid = payLog.getIsPaid();
+		if (isPaid == 1) {
+			log.info("快接支付[payNotify] payOrderSn={}订单已支付...", payOrderfSn);
+			writeLowerSuccess(response);
+			return;
+		}
+		int payType = payLog.getPayType();
+		String payCode = payLog.getPayCode();
+		RspOrderQueryEntity rspOrderEntikty = new RspOrderQueryEntity();
+		rspOrderEntikty.setResult_code(kuaiJiePayNotifyEntity.getStatus());
+		rspOrderEntikty.setTrade_no(kuaiJiePayNotifyEntity.getTrade_no());
+		rspOrderEntikty.setPayCode(payCode);
+		rspOrderEntikty.setType(RspOrderQueryEntity.TYPE_YIFUTONG);
+		rspOrderEntikty.setTrade_status(kuaiJiePayNotifyEntity.getStatus());
+		if (payType == 0) {
+			paymentService.orderOptions(payLog, rspOrderEntikty);
+		} else {
+			paymentService.rechargeOptions(payLog, rspOrderEntikty);
+		}
+		writeLowerSuccess(response);
+		return;
+	}
+	private void writeUppercaseSuccess(HttpServletResponse response) {
 		// 通知先锋成功
 		PrintWriter writer;
 		try {
 			writer = response.getWriter();
 			writer.write("SUCCESS");
 			writer.flush();
-			log.error("易富通支付回调写成功内容");
+			log.error("回调响应成功,返回信息成功,返回信息为'SUCCESS'");
 		} catch (Exception e) {
-			log.error("易富通支付回调通知响应异常", e);
+			log.error("回调通知响应异常", e);
 		}
 
 	}
 
-	private void successCallback(HttpServletResponse response) {
+	/**
+	 * 回写小写字母success
+	 * @param response
+	 */
+	private void writeLowerSuccess(HttpServletResponse response) {
 		PrintWriter writer;
 		try {
 			writer = response.getWriter();
 			writer.write("success");
 			writer.flush();
-			log.error("天下支付回调响应成功,返回信息成功,返回信息为'success'");
+			log.error("回调响应成功,返回信息成功,返回信息为'success'");
 		} catch (Exception e) {
-			log.error("天下通支付回调响应异常", e);
+			log.error("支付回调响应异常", e);
 		}
 
 	}
@@ -140,7 +204,7 @@ public class PayNotifyController {
 		String payOrderId = callback.getOrderId();
 		if (StringUtils.isEmpty(payOrderId)) {
 			log.error("天下支付返回订单号为空");
-			successCallback(response);
+			writeLowerSuccess(response);
 			return;
 		}
 		Boolean checkSignIsTure = txScanPay.checkSign(callback);
@@ -151,13 +215,13 @@ public class PayNotifyController {
 		PayLog payLog = payLogService.findPayLogByOrderSign(payOrderId);
 		if (payLog == null) {
 			log.info("[payNotify]" + "该支付订单查询失败 payOrderSn:" + payOrderId);
-			successCallback(response);
+			writeLowerSuccess(response);
 			return;
 		}
 		int isPaid = payLog.getIsPaid();
 		if (isPaid == 1) {
 			log.info("[payNotify] payOrderSn={}订单已支付...", payOrderId);
-			successCallback(response);
+			writeLowerSuccess(response);
 			return;
 		}
 		String payCode = payLog.getPayCode();
@@ -173,7 +237,7 @@ public class PayNotifyController {
 		} else {
 			paymentService.rechargeOptions(payLog, rspOrderEntikty);
 		}
-		successCallback(response);
+		writeLowerSuccess(response);
 		return;
 	}
 
