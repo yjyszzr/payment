@@ -3,14 +3,12 @@ package com.dl.shop.payment.pay.tianxia.tianxiaScan.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Slf4j
-@Data
 @Configuration
 @ConfigurationProperties(prefix = "pay.tianxia")
 public class TXPayConfig {
@@ -33,8 +31,8 @@ public class TXPayConfig {
 	// 回调函数
 	private String CALLBACK_URL;
 
-	public void setMerchents(Map<String, String> merchents) {
-		this.merchant = merchents;
+	public void setMerchent(Map<String, String> merchent) {
+		this.merchant = merchent;
 	}
 
 	public String getDEBUG(String merchentNo) {
