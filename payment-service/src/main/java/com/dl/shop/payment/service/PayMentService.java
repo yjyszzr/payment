@@ -420,6 +420,7 @@ public class PayMentService extends AbstractService<PayMent> {
 				QFParam qfParam = new QFParam();
 				qfParam.setAct_type("1");
 				qfParam.setAct_id("3");
+				qfParam.setUser_id(String.valueOf(payLog.getUserId());
 				BaseResult<QFDTO> qfRst = iUserQualificationService.queryActQF(qfParam);
 				if(0 == qfRst.getCode()) {
 					QFDTO qfDto = qfRst.getData();
