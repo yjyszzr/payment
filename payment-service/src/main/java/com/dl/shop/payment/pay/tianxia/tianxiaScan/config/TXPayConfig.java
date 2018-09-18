@@ -3,12 +3,14 @@ package com.dl.shop.payment.pay.tianxia.tianxiaScan.config;
 import java.util.HashMap;
 import java.util.Map;
 
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Slf4j
+@Data
 @Configuration
 @ConfigurationProperties(prefix = "pay.tianxia")
 public class TXPayConfig {
