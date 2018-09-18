@@ -6,10 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 
-@Configuration
-@ConfigurationProperties(prefix = "pay.tianxia")
 @Slf4j
+@Configuration
+@PropertySource({ "classpath:application-dev.properties", "classpath:application-prod.properties" })
+@ConfigurationProperties(prefix = "pay.tianxia")
 public class TXPayConfig {
 	// @Value("${pay.tianxia}")
 	private Map<String, String> merchant;
