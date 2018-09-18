@@ -164,6 +164,7 @@ public class PayNotifyController {
 		writeLowerSuccess(response);
 		return;
 	}
+
 	private void writeUppercaseSuccess(HttpServletResponse response) {
 		// 通知先锋成功
 		PrintWriter writer;
@@ -180,6 +181,7 @@ public class PayNotifyController {
 
 	/**
 	 * 回写小写字母success
+	 * 
 	 * @param response
 	 */
 	private void writeLowerSuccess(HttpServletResponse response) {
@@ -207,15 +209,16 @@ public class PayNotifyController {
 			writeLowerSuccess(response);
 			return;
 		}
-		Boolean checkSignIsTure = txScanPay.checkSign(callback);
-		if (!checkSignIsTure) {
-			log.error("天下支付回调通知验签失败payOrderSn={}", payOrderId);
-			return;
-		}
 		PayLog payLog = payLogService.findPayLogByOrderSign(payOrderId);
 		if (payLog == null) {
 			log.info("[payNotify]" + "该支付订单查询失败 payOrderSn:" + payOrderId);
 			writeLowerSuccess(response);
+			return;
+		}
+		String[] merchentArr = payLog.getPayCode().split("_");
+		Boolean checkSignIsTure = txScanPay.checkSign(callback, merchentArr[merchentArr.length - 1]);
+		if (!checkSignIsTure) {
+			log.error("天下支付回调通知验签失败payOrderSn={}", payOrderId);
 			return;
 		}
 		int isPaid = payLog.getIsPaid();
@@ -240,5 +243,4 @@ public class PayNotifyController {
 		writeLowerSuccess(response);
 		return;
 	}
-
 }

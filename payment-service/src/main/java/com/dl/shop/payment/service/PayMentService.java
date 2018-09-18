@@ -136,7 +136,7 @@ public class PayMentService extends AbstractService<PayMent> {
 
 	@Resource
 	private PayBankRecordMapper payBankRecordMapper;
-	
+
 	@Resource
 	private IUserQualificationService iUserQualificationService;
 
@@ -422,23 +422,23 @@ public class PayMentService extends AbstractService<PayMent> {
 				qfParam.setAct_id("3");
 				qfParam.setUser_id(String.valueOf(payLog.getUserId()));
 				BaseResult<QFDTO> qfRst = iUserQualificationService.queryActQF(qfParam);
-				if(0 == qfRst.getCode()) {
+				if (0 == qfRst.getCode()) {
 					QFDTO qfDto = qfRst.getData();
-					if(1 == qfDto.getQfRst()) {//有资格
+					if (1 == qfDto.getQfRst()) {// 有资格
 						log.info("有活动资格");
 						StrParam strParam = new StrParam();
 						strParam.setStr("");
 						BaseResult<RechargeDataActivityDTO> rechargeDataAct = activityService.queryValidRechargeActivity(strParam);
-						if(rechargeDataAct.getCode() == 0) {
-							RechargeDataActivityDTO  rechargeDataActivityDTO  = rechargeDataAct.getData();
+						if (rechargeDataAct.getCode() == 0) {
+							RechargeDataActivityDTO rechargeDataActivityDTO = rechargeDataAct.getData();
 							rspOrderQueryDTO.setIsHaveRechargeAct(rechargeDataActivityDTO.getIsHaveRechargeAct());
-							if(1 == rechargeDataActivityDTO.getIsHaveRechargeAct()) {
+							if (1 == rechargeDataActivityDTO.getIsHaveRechargeAct()) {
 								logger.info("开始执行充值赠送红包逻辑");
 								com.dl.member.param.PayLogIdParam payLogIdParam = new com.dl.member.param.PayLogIdParam();
 								payLogIdParam.setPayLogId(String.valueOf(payLog.getLogId()));
 								BaseResult<DonationPriceDTO> donationPriceRst = userBonusService.reiceiveBonusAfterRechargeNew(payLogIdParam);
-								logger.info("充值赠送红包结果："+ JSON.toJSONString(donationPriceRst));
-								if(donationPriceRst.getCode() == 0) {
+								logger.info("充值赠送红包结果：" + JSON.toJSONString(donationPriceRst));
+								if (donationPriceRst.getCode() == 0) {
 									logger.info("结束执行充值赠送红包逻辑");
 									rspOrderQueryDTO.setDonationPrice(donationPriceRst.getData().getDonationPrice());
 								}
@@ -447,7 +447,7 @@ public class PayMentService extends AbstractService<PayMent> {
 					}
 				}
 				log.info("无活动资格");
-				
+
 				log.info("放入redis：" + String.valueOf(payLog.getLogId()) + "-----------" + rspOrderQueryDTO.getDonationPrice());
 				stringRedisTemplate.opsForValue().set(String.valueOf(payLog.getLogId()), rspOrderQueryDTO.getDonationPrice(), 180, TimeUnit.SECONDS);
 				logger.info("充值成功后返回的信息：" + rspOrderQueryDTO.getIsHaveRechargeAct() + "-----" + rspOrderQueryDTO.getDonationPrice());
@@ -624,11 +624,12 @@ public class PayMentService extends AbstractService<PayMent> {
 			}
 		} else if ("app_yifutong".equals(payCode)) {
 			baseResult = payYFTUtil.queryPayResult(payCode, payOrderSn);
-		} else if ("app_tianxia_scan".equals(payCode)) {
+		} else if (payCode.startsWith("app_tianxia_scan")) {
+			String[] merchentArr = payCode.split("_");
 			TXScanRequestOrderQuery txScanRequestOrderQuery = new TXScanRequestOrderQuery();
 			txScanRequestOrderQuery.setOrderId(payOrderSn);
 			txScanRequestOrderQuery.setTranDate(DateUtil.getTimeString(payLog.getPayTime(), DateUtil.yyyyMMdd));
-			baseResult = txScanPay.txScanOrderQuery(txScanRequestOrderQuery, payCode);
+			baseResult = txScanPay.txScanOrderQuery(txScanRequestOrderQuery, payCode, merchentArr[merchentArr.length - 1]);
 		}
 		if (baseResult == null || baseResult.getCode() != 0) {
 			if (baseResult != null) {
@@ -760,7 +761,7 @@ public class PayMentService extends AbstractService<PayMent> {
 		return payBaseResult;
 	}
 
-	public BaseResult<?> getTXScanPayUrl(PayLog savePayLog, String orderId, String lotteryClassifyId, String payIp) {
+	public BaseResult<?> getTXScanPayUrl(PayLog savePayLog, String orderId, String payIp, String merchentStr) {
 		BaseResult<?> payBaseResult = null;
 		BigDecimal amtDouble = savePayLog.getOrderAmount();
 		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_EVEN);// 金额转换成分
@@ -772,7 +773,7 @@ public class PayMentService extends AbstractService<PayMent> {
 		txScanRequestPay.setOrderAmt(bigD.toString());
 		txScanRequestPay.setTermIp(payIp);
 		txScanRequestPay.setStlType("T0");// T0 结算至已入账账户 T1 结算至未结算账户
-		rspEntity = txScanPay.txScanPay(txScanRequestPay);
+		rspEntity = txScanPay.txScanPay(txScanRequestPay, merchentStr);
 		if (rspEntity != null) {
 			if (rspEntity.isSucc()) {
 				PayReturnDTO rEntity = new PayReturnDTO();
@@ -782,7 +783,7 @@ public class PayMentService extends AbstractService<PayMent> {
 					rEntity.setPayUrl(url);
 					rEntity.setPayLogId(savePayLog.getLogId() + "");
 					rEntity.setOrderId(orderId);
-					rEntity.setLotteryClassifyId(lotteryClassifyId);
+					// rEntity.setLotteryClassifyId(lotteryClassifyId);
 					logger.info("天下支付扫码客户端url:" + url + " payLogId:" + savePayLog.getLogId() + " orderId:" + orderId);
 					payBaseResult = ResultGenerator.genSuccessResult("succ", rEntity);
 				} else {

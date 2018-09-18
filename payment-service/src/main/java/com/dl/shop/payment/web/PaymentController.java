@@ -531,9 +531,10 @@ public class PaymentController extends AbstractBaseController {
 			} else {
 				logger.info("生成易富通支付url失败");
 			}
-		} else if ("app_tianxia_scan".equals(paymentDto.getPayCode())) {
+		} else if (paymentDto.getPayCode().startsWith("app_tianxia_scan")) {
+			String[] merchentArr = paymentDto.getPayCode().split("_");
 			logger.info("生成天下支付银联二维码url:" + " payCode:" + savePayLog.getPayCode());
-			payBaseResult = paymentService.getTXScanPayUrl(savePayLog, orderSn, "", payIp);
+			payBaseResult = paymentService.getTXScanPayUrl(savePayLog, orderSn, payIp, merchentArr[merchentArr.length - 1]);
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
 				logger.info("生成天下支付银联二维码url成功:" + str);
@@ -766,9 +767,10 @@ public class PaymentController extends AbstractBaseController {
 			} else {
 				logger.info("生成易富通支付url失败");
 			}
-		} else if ("app_tianxia_scan".equals(payCode)) {
+		} else if (payCode.startsWith("app_tianxia_scan")) {
+			String[] merchentArr = payCode.split("_");
 			logger.info("生成天下支付银联二维码url:" + " payCode:" + savePayLog.getPayCode());
-			payBaseResult = paymentService.getTXScanPayUrl(savePayLog, orderSn, "", payIp);
+			payBaseResult = paymentService.getTXScanPayUrl(savePayLog, orderSn, payIp, merchentArr[merchentArr.length - 1]);
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
 				logger.info("生成天下支付银联二维码url成功:" + str);
@@ -1373,9 +1375,10 @@ public class PaymentController extends AbstractBaseController {
 			} else {
 				logger.info("生成易富通支付url失败");
 			}
-		} else if ("app_tianxia_scan".equals(paymentDto.getPayCode())) {
+		} else if (paymentDto.getPayCode().startsWith("app_tianxia_scan")) {
+			String[] merchentArr = paymentDto.getPayCode().split("_");
 			logger.info("生成天下支付银联二维码url:" + " payCode:" + savePayLog.getPayCode());
-			payBaseResult = paymentService.getTXScanPayUrl(savePayLog, orderSn, "", payIp);
+			payBaseResult = paymentService.getTXScanPayUrl(savePayLog, orderSn, payIp, merchentArr[merchentArr.length - 1]);
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
 				logger.info("生成天下支付银联二维码url成功:" + str);

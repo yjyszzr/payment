@@ -9,6 +9,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
+
 import org.apache.http.Consts;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -22,10 +23,12 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("all")
 public class HttpApi {
-
+	private final static Logger logger = LoggerFactory.getLogger(HttpApi.class);
 	// 接口地址
 	private String apiURL;
 	private HttpClient httpClient = null;
@@ -89,8 +92,8 @@ public class HttpApi {
 			endTime = System.currentTimeMillis();
 			int statusCode = response.getStatusLine().getStatusCode();
 
-			System.out.println("HTTP响应码:" + statusCode);
-			System.out.println("调用API 花费时间(单位：毫秒)：" + (endTime - startTime));
+			logger.info("HTTP响应码:" + statusCode);
+			logger.info("调用API 花费时间(单位：毫秒)：" + (endTime - startTime));
 
 			// 若状态值为200，则ok
 			if (statusCode == HttpStatus.SC_OK) {
@@ -106,7 +109,7 @@ public class HttpApi {
 			}
 		} catch (Exception e) {
 			// 其他异常同样读取assets目录中的"local_stream.xml"文件
-			System.out.println("HttpClient post 数据异常");
+			logger.info("HttpClient post 数据异常");
 			e.printStackTrace();
 			return null;
 		} finally {
@@ -126,7 +129,7 @@ public class HttpApi {
 			} catch (Exception e) {
 			}
 		}
-		System.out.println("PostData:" + sb.toString());
+		logger.info("PostData:" + sb.toString());
 		return sb.toString();
 	}
 
@@ -153,8 +156,8 @@ public class HttpApi {
 			endTime = System.currentTimeMillis();
 			int statusCode = response.getStatusLine().getStatusCode();
 
-			System.out.println("HTTP响应码:" + statusCode);
-			System.out.println("调用API 花费时间(单位：毫秒)：" + (endTime - startTime));
+			logger.info("HTTP响应码:" + statusCode);
+			logger.info("调用API 花费时间(单位：毫秒)：" + (endTime - startTime));
 
 			// 若状态值为200，则ok
 			if (statusCode == HttpStatus.SC_OK) {
@@ -170,7 +173,7 @@ public class HttpApi {
 			}
 		} catch (Exception e) {
 			// 其他异常同样读取assets目录中的"local_stream.xml"文件
-			System.out.println("HttpClient post 数据异常");
+			logger.info("HttpClient post 数据异常");
 			e.printStackTrace();
 			return null;
 		} finally {
@@ -190,7 +193,7 @@ public class HttpApi {
 			} catch (Exception e) {
 			}
 		}
-		System.out.println("PostData:" + sb.toString());
+		logger.info("PostData:" + sb.toString());
 		return sb.toString();
 	}
 
@@ -209,7 +212,7 @@ public class HttpApi {
 			sb.append(arrayToSort[i]);
 		}
 		String result = sb.toString() + "key=" + key;
-		System.out.println(result);
+		logger.info(result);
 		result = MD5.encryption(result).toUpperCase();
 		return result;
 	}
