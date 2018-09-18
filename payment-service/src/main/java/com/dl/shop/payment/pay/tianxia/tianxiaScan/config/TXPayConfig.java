@@ -2,13 +2,17 @@ package com.dl.shop.payment.pay.tianxia.tianxiaScan.config;
 
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Value;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@ConfigurationProperties(prefix = "pay.tianxia")
+@Slf4j
 public class TXPayConfig {
-	@Value("${pay_tianxia_merchent}")
-	private Map<String, String> merchents;
+	// @Value("${pay.tianxia}")
+	private Map<String, String> merchant;
 
 	private String DEBUG;
 	// 私钥
@@ -27,39 +31,45 @@ public class TXPayConfig {
 	private String CALLBACK_URL;
 
 	public void setMerchents(Map<String, String> merchents) {
-		this.merchents = merchents;
+		this.merchant = merchents;
 	}
 
 	public String getDEBUG(String merchentNo) {
-		return merchents.get(merchentNo + "debug");
+		log.info("天下支付配置信息打印:={}", merchant);
+		return merchant.get(merchentNo + "debug");
 	}
 
 	public String getPRVKEY(String merchentNo) {
-		return merchents.get(merchentNo + "prvkey");
+		return merchant.get(merchentNo + "prvkey");
 	}
 
 	public String getTXPUBKEY(String merchentNo) {
-		return merchents.get(merchentNo + "txpubkey");
+		return merchant.get(merchentNo + "txpubkey");
 	}
 
 	public String getMD5KEY(String merchentNo) {
-		return merchents.get(merchentNo + "md5key");
+		log.info("天下支付配置信息打印:={}", merchant);
+		return merchant.get(merchentNo + "md5key");
 	}
 
 	public String getAGTID(String merchentNo) {
-		return merchents.get(merchentNo + "agtid");
+		log.info("天下支付配置信息打印:={}", merchant);
+		return merchant.get(merchentNo + "agtid");
 	}
 
 	public String getMERID(String merchentNo) {
-		return merchents.get(merchentNo + "merid");
+		log.info("天下支付配置信息打印:={}", merchant);
+		return merchant.get(merchentNo + "merid");
 	}
 
 	public String getREQ_URL(String merchentNo) {
-		return merchents.get(merchentNo + "req_url");
+		log.info("天下支付配置信息打印:={}", merchant);
+		return merchant.get(merchentNo + "req_url");
 	}
 
 	public String getCALLBACK_URL(String merchentNo) {
-		return merchents.get(merchentNo + "callback_url");
+		log.info("天下支付配置信息打印:={}", merchant);
+		return merchant.get(merchentNo + "callback_url");
 	}
 
 }
