@@ -31,8 +31,8 @@ public class TXPayConfig {
 	// 回调函数
 	private String CALLBACK_URL;
 
-	public void setMerchent(Map<String, String> merchent) {
-		this.merchant = merchent;
+	public void setMerchant(Map<String, String> merchant) {
+		this.merchant = merchant;
 	}
 
 	public String getDEBUG(String merchentNo) {
