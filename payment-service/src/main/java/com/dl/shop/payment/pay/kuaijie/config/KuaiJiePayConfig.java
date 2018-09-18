@@ -1,10 +1,12 @@
 package com.dl.shop.payment.pay.kuaijie.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import lombok.Data;
 
 @Data
+@Component
 public class KuaiJiePayConfig {
 	@Value("${kauijie.pay.url}")
 	private String apiUrl;
