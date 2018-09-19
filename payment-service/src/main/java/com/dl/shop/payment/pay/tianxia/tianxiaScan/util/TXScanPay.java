@@ -310,7 +310,7 @@ public class TXScanPay {
 
 	@SuppressWarnings("unchecked")
 	public RspSingleCashEntity payforQuery1(TXScanRequestPaidByOthersBalanceQuery txScanPayForBalanceQuery, String merchantStr) {
-		logger.info("请求参数={}", txScanPayForBalanceQuery);
+		logger.info("天下支付代付查询请求参数={}", txScanPayForBalanceQuery);
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("tranCode", TranCodeEnum.BALANCEPAYFOEQUERY.getcode());
 		data.put("orderId", txScanPayForBalanceQuery.getOrderId());
@@ -320,11 +320,11 @@ public class TXScanPay {
 		Map<String, Object> _head = (Map<String, Object>) rmap.get("REP_HEAD");
 		String vsign = HttpApi.getSign(_body, txPayConfig.getMD5KEY(merchantStr));
 		String _sign = _head.get("sign").toString();
-		logger.info("解析签名:" + _sign);
+		logger.info("天下支付代付查询解析签名:" + _sign);
 		RspSingleCashEntity rspEntity = new RspSingleCashEntity();
 		try {
 			boolean flag = SecurityUtil.verify(vsign, _sign, txPayConfig.getTXPUBKEY(merchantStr), true);
-			logger.info("验证签名状态:" + flag);
+			logger.info("天下支付代付查询验证签名状态:" + flag);
 			rspEntity.resMessage = TdExpBasicFunctions.HEX2STR(_body.get("rspmsg").toString());
 			if (flag) {
 				if (_body.get("subcode").toString().equals("0000")) {
@@ -346,12 +346,12 @@ public class TXScanPay {
 	}
 
 	public RspSingleCashEntity txScanPayFor1(TXScanRequestPaidByOthers txScanRequestPaidByOthers, String merchantStr) {
-		logger.info("请求参数={}", txScanRequestPaidByOthers);
+		logger.info("天下支付代付请求参数={}", txScanRequestPaidByOthers);
 		String amount = txScanRequestPaidByOthers.getTxnAmt();
 		if ("true".equals(txPayConfig.getDEBUG(merchantStr))) {
-			logger.info("请求金额为:={}分", amount);
+			logger.info("天下支付代付请求金额为:={}分", amount);
 			amount = "200";
-			logger.info("测试环境请求金额置为:={}分", amount);
+			logger.info("天下支付代付测试环境请求金额置为:={}分", amount);
 		}
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("tranCode", TranCodeEnum.BALANCEPAYFOR.getcode());
@@ -374,11 +374,11 @@ public class TXScanPay {
 		Map<String, Object> _head = (Map<String, Object>) rmap.get("REP_HEAD");
 		String vsign = HttpApi.getSign(_body, txPayConfig.getMD5KEY(merchantStr));
 		String _sign = _head.get("sign").toString();
-		logger.info("解析签名:" + _sign);
+		logger.info("天下支付代付解析签名:" + _sign);
 		RspSingleCashEntity rspEntity = new RspSingleCashEntity();
 		try {
 			boolean flag = SecurityUtil.verify(vsign, _sign, txPayConfig.getTXPUBKEY(merchantStr), true);
-			logger.info("验证签名状态:" + flag);
+			logger.info("天下支付代付验证签名状态:" + flag);
 			rspEntity.resMessage = TdExpBasicFunctions.HEX2STR(_body.get("rspmsg").toString());
 			if (flag) {
 				if (_body.get("subcode").toString().equals("0000")) {
@@ -394,7 +394,7 @@ public class TXScanPay {
 				// txScanResponsePaidByOthers.setTranId(_body.get("tranId").toString());
 			}
 		} catch (Exception e) {
-			logger.error("签名解析异常,异常信息为={}", e);
+			logger.error("天下支付代付签名解析异常,异常信息为={}", e);
 		}
 		return rspEntity;
 	}
