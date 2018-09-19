@@ -15,6 +15,8 @@ import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.config.TXPayConfig;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestBaseEntity;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestCallback;
+import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestCallback.TXCallback;
+import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestCallback.TXSign;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestOrderQuery;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestPaidByOthers;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestPaidByOthersBalanceQuery;
@@ -284,18 +286,20 @@ public class TXScanPay {
 	}
 
 	public Boolean checkSign(TXScanRequestCallback callback, String merchantStr) {
+		TXCallback txcallbackBody = callback.getREP_BODY();
+		TXSign txSign = callback.getREP_HEAD();
 		Map<String, Object> data = new HashMap<>();
-		data.put("orderState", callback.getOrderState());
-		data.put("tranSeqId", callback.getTranSeqId());
-		data.put("orderId", callback.getOrderId());
-		data.put("payTime", callback.getPayTime());
-		data.put("orderAmt", callback.getOrderAmt());
+		data.put("orderState", txcallbackBody.getOrderState());
+		data.put("tranSeqId", txcallbackBody.getTranSeqId());
+		data.put("orderId", txcallbackBody.getOrderId());
+		data.put("payTime", txcallbackBody.getPayTime());
+		data.put("orderAmt", txcallbackBody.getOrderAmt());
 		String sign = HttpApi.getSign(data, txPayConfig.getMD5KEY(merchantStr));
 		boolean flag = false;
 		try {
-			logger.info("天下支付响应报文中的sign={}", callback.getSign());
+			logger.info("天下支付响应报文中的sign={}", txSign.getSign());
 			logger.info("天下支付本地参数加密后的sign={}", sign);
-			flag = SecurityUtil.verify(sign, callback.getSign(), txPayConfig.getTXPUBKEY(merchantStr), true);
+			flag = SecurityUtil.verify(sign, txSign.getSign(), txPayConfig.getTXPUBKEY(merchantStr), true);
 			logger.info("天下支付验证签名状态:" + flag);
 		} catch (Exception e) {
 			logger.error("天下支付签名解析异常,异常信息为", e);

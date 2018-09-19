@@ -26,6 +26,7 @@ import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.kuaijie.entity.KuaiJiePayNotifyEntity;
 import com.dl.shop.payment.pay.kuaijie.util.KuaiJiePayUtil;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestCallback;
+import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestCallback.TXCallback;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.util.TXScanPay;
 import com.dl.shop.payment.pay.yifutong.entity.RespYFTnotifyEntity;
 import com.dl.shop.payment.pay.yifutong.util.PayYFTUtil;
@@ -203,7 +204,8 @@ public class PayNotifyController {
 	public void TXPayCallBack(@RequestBody TXScanRequestCallback callback, HttpServletResponse response) throws UnsupportedEncodingException {
 		log.info("接收到天下支付返回报文：={}", callback);
 		// 验证签名
-		String payOrderId = callback.getOrderId();
+		TXCallback txcallbackBody = callback.getREP_BODY();
+		String payOrderId = txcallbackBody.getOrderId();
 		if (StringUtils.isEmpty(payOrderId)) {
 			log.error("天下支付返回订单号为空");
 			writeLowerSuccess(response);
@@ -227,14 +229,15 @@ public class PayNotifyController {
 			writeLowerSuccess(response);
 			return;
 		}
+
 		String payCode = payLog.getPayCode();
 		int payType = payLog.getPayType();
 		RspOrderQueryEntity rspOrderEntikty = new RspOrderQueryEntity();
-		rspOrderEntikty.setResult_code(callback.getOrderState());
+		rspOrderEntikty.setResult_code(txcallbackBody.getOrderState());
 		rspOrderEntikty.setTrade_no(payOrderId);
 		rspOrderEntikty.setPayCode(payCode);
 		rspOrderEntikty.setType(RspOrderQueryEntity.TYPE_TIANXIA_SCAN);
-		rspOrderEntikty.setTrade_status(callback.getOrderState());
+		rspOrderEntikty.setTrade_status(txcallbackBody.getOrderState());
 		if (payType == 0) {
 			paymentService.orderOptions(payLog, rspOrderEntikty);
 		} else {
