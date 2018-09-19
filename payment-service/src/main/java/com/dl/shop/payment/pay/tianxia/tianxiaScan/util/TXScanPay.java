@@ -342,6 +342,7 @@ public class TXScanPay {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		logger.info("天下支付代付查询返回rspEntity:{}" + rspEntity);
 		return rspEntity;
 	}
 
@@ -396,6 +397,7 @@ public class TXScanPay {
 		} catch (Exception e) {
 			logger.error("天下支付代付签名解析异常,异常信息为={}", e);
 		}
+		logger.info("天下支付代付=====================返回rspEntity:{}" + rspEntity);
 		return rspEntity;
 	}
 }
