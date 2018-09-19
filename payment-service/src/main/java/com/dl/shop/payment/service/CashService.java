@@ -365,6 +365,7 @@ public class CashService {
 		String tips = null;
 		try {
 			Integer thirdPayForType = userWithdrawMapper.getThirdPayForType();
+			log.info("第三方支付公司Code=============={}", thirdPayForType);
 			TXScanRequestPaidByOthers txScanRequestPaidByOthers = new TXScanRequestPaidByOthers();
 			txScanRequestPaidByOthers.setAccountName(accName);
 			txScanRequestPaidByOthers.setAccountNo(accNo);
@@ -379,10 +380,14 @@ public class CashService {
 			txScanRequestPaidByOthers.setStlType("T0");
 			txScanRequestPaidByOthers.setAccountType("1");
 			if (null == thirdPayForType || PayForCompanyEnum.XF_PAYFOR.getCode() == thirdPayForType) {
+				log.info("走先锋通道提现============================");
 				rEntity = xianfengUtil.reqCash(orderSn, bigFen.intValue() + "", accNo, accName, phone, bankNo);
 			} else if (PayForCompanyEnum.TX_PAYFOR1.getCode() == thirdPayForType || PayForCompanyEnum.TX_PAYFOR2.getCode() == thirdPayForType) {// 天下支付代付
+				log.info("走天下支付通道提现============================");
 				String merchantStr = thirdPayForType.toString();
 				rEntity = txScanPay.txScanPayFor1(txScanRequestPaidByOthers, merchantStr);
+			} else {
+				log.info("空通道,未匹配到提现通道============================");
 			}
 			log.info("RspCashEntity->" + rEntity);
 		} catch (Exception e) {
@@ -718,14 +723,19 @@ public class CashService {
 		Integer userId = userWithdraw.getUserId();
 		Integer companyCode = userWithdraw.getPayForCode();
 		RspSingleCashEntity rspEntity = null;
+		log.info("companyCode====================={}", companyCode);
 		if (null == companyCode || companyCode == PayForCompanyEnum.XF_PAYFOR.getCode()) {
+			log.info("走先锋支付通道轮询============");
 			rspEntity = xianfengUtil.queryCash(withDrawSn);
 		} else if (companyCode == PayForCompanyEnum.TX_PAYFOR1.getCode() || companyCode == PayForCompanyEnum.TX_PAYFOR2.getCode()) {
+			log.info("走先天下支付通道轮询============");
 			TXScanRequestPaidByOthersBalanceQuery txScanPayForBalanceQuery = new TXScanRequestPaidByOthersBalanceQuery();
 			txScanPayForBalanceQuery.setOrderId(userWithdraw.getWithdrawalSn());
 			txScanPayForBalanceQuery.setTranDate(TdExpBasicFunctions.GETDATE());
 			String merchantStr = companyCode.toString();
 			rspEntity = txScanPay.payforQuery1(txScanPayForBalanceQuery, merchantStr);
+		} else {
+			log.info("未匹配到通道轮询==============");
 		}
 		if (rspEntity != null) {
 			this.operation(rspEntity, withDrawSn, userId, Boolean.FALSE);
