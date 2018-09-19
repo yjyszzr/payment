@@ -379,10 +379,10 @@ public class CashService {
 			txScanRequestPaidByOthers.setTxnAmt(bigFen.toString());
 			txScanRequestPaidByOthers.setStlType("T0");
 			txScanRequestPaidByOthers.setAccountType("1");
-			if (null == thirdPayForType || PayForCompanyEnum.XF_PAYFOR.getCode() == thirdPayForType) {
+			if (null == thirdPayForType || PayForCompanyEnum.XF_PAYFOR.getCode().equals(thirdPayForType)) {
 				log.info("走先锋通道提现============================");
 				rEntity = xianfengUtil.reqCash(orderSn, bigFen.intValue() + "", accNo, accName, phone, bankNo);
-			} else if (PayForCompanyEnum.TX_PAYFOR1.getCode() == thirdPayForType || PayForCompanyEnum.TX_PAYFOR2.getCode() == thirdPayForType) {// 天下支付代付
+			} else if (PayForCompanyEnum.TX_PAYFOR1.getCode().equals(thirdPayForType) || PayForCompanyEnum.TX_PAYFOR2.getCode().equals(thirdPayForType)) {// 天下支付代付
 				log.info("走天下支付通道提现============================");
 				String merchantStr = thirdPayForType.toString();
 				rEntity = txScanPay.txScanPayFor1(txScanRequestPaidByOthers, merchantStr);
@@ -724,10 +724,10 @@ public class CashService {
 		Integer companyCode = userWithdraw.getPayForCode();
 		RspSingleCashEntity rspEntity = null;
 		log.info("companyCode====================={}", companyCode);
-		if (null == companyCode || companyCode == PayForCompanyEnum.XF_PAYFOR.getCode()) {
+		if (null == companyCode || companyCode.equals(PayForCompanyEnum.XF_PAYFOR.getCode())) {
 			log.info("走先锋支付通道轮询============");
 			rspEntity = xianfengUtil.queryCash(withDrawSn);
-		} else if (companyCode == PayForCompanyEnum.TX_PAYFOR1.getCode() || companyCode == PayForCompanyEnum.TX_PAYFOR2.getCode()) {
+		} else if (companyCode.equals(PayForCompanyEnum.TX_PAYFOR1.getCode()) || companyCode.equals(PayForCompanyEnum.TX_PAYFOR2.getCode())) {
 			log.info("走先天下支付通道轮询============");
 			TXScanRequestPaidByOthersBalanceQuery txScanPayForBalanceQuery = new TXScanRequestPaidByOthersBalanceQuery();
 			txScanPayForBalanceQuery.setOrderId(userWithdraw.getWithdrawalSn());
