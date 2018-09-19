@@ -17,6 +17,7 @@
     <result column="pay_time" jdbcType="INTEGER" property="payTime" />
     <result column="payment_id" jdbcType="VARCHAR" property="paymentId" />
     <result column="bank_name" jdbcType="VARCHAR" property="bankName" />
+    <result column="pay_for_code" jdbcType="INTEGER" property="payForCode" />
     
     
   </resultMap>
@@ -46,7 +47,7 @@
    	 UPDATE dl_user_withdraw set status = 2,pay_time=#{payTime} WHERE withdrawal_sn = #{withdrawalSn} and status=0 
   </update>
   <update id="updateUserWithdrawStatus0To3" parameterType="com.dl.shop.payment.model.UserWithdraw">
-   	 UPDATE dl_user_withdraw set status = 3  WHERE withdrawal_sn = #{withdrawalSn} and status=0 
+   	 UPDATE dl_user_withdraw set status = 3 ,pay_for_code =#{payForCode}  WHERE withdrawal_sn = #{withdrawalSn} and status=0 
   </update>
   <update id="updateUserWithdrawStatus0To4" parameterType="com.dl.shop.payment.model.UserWithdraw">
    	 UPDATE dl_user_withdraw set status = 4,pay_time=#{payTime} WHERE withdrawal_sn = #{withdrawalSn} and status=0 
@@ -111,6 +112,9 @@
   </select>
   <select id="getMaxNoCheckMoney" resultType="double">
   	select value from dl_sys_config where business_id = 6
+  </select>
+  <select id="getThirdPayForType" resultType="Integer">
+  	select value from dl_sys_config where business_id = 15
   </select>
   <select id="queryWithDarwPersonOpen" resultType="java.lang.Integer">
     select value from dl_sys_config where business_id=12
