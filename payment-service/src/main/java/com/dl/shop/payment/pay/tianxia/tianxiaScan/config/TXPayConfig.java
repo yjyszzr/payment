@@ -37,27 +37,22 @@ public class TXPayConfig {
 	}
 
 	public String getMD5KEY(String merchentNo) {
-		log.info("天下支付配置信息打印:={}", merchant);
 		return merchant.get(merchentNo + "md5key");
 	}
 
 	public String getAGTID(String merchentNo) {
-		log.info("天下支付配置信息打印:={}", merchant);
 		return merchant.get(merchentNo + "agtid");
 	}
 
 	public String getMERID(String merchentNo) {
-		log.info("天下支付配置信息打印:={}", merchant);
 		return merchant.get(merchentNo + "merid");
 	}
 
 	public String getREQ_URL(String merchentNo) {
-		log.info("天下支付配置信息打印:={}", merchant);
 		return merchant.get(merchentNo + "req_url");
 	}
 
 	public String getCALLBACK_URL(String merchentNo) {
-		log.info("天下支付配置信息打印:={}", merchant);
 		return merchant.get(merchentNo + "callback_url");
 	}
 
