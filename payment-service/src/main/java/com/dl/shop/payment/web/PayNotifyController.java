@@ -200,7 +200,7 @@ public class PayNotifyController {
 	@ApiOperation(value = "天下支付回调")
 	@PostMapping("/TXCallBack")
 	@ResponseBody
-	public void TXPayCallback(@RequestBody TXScanRequestCallback callback, HttpServletResponse response) throws UnsupportedEncodingException {
+	public void TXPayCallBack(@RequestBody TXScanRequestCallback callback, HttpServletResponse response) throws UnsupportedEncodingException {
 		log.info("接收到天下支付返回报文：={}", callback);
 		// 验证签名
 		String payOrderId = callback.getOrderId();
