@@ -187,6 +187,7 @@ public class CashService {
 		String bankCode = userBankDTO.getAbbreviation();
 		String realName = userBankDTO.getRealName();
 		String cardNo = userBankDTO.getCardNo();
+		String bankName = userBankDTO.getBankName();
 		SysConfigParam cfg = new SysConfigParam();
 		cfg.setBusinessId(8);// 提现
 		log.info("[withdrawForApp]" + " 扣除用户余额成功:" + totalAmount);
@@ -312,7 +313,7 @@ public class CashService {
 			Integer thirdPayForType = userWithdrawMapper.getThirdPayForType();
 			userWithdraw.setPayForCode(thirdPayForType);
 			userWithdrawMapper.updateUserWithdrawStatus0To3(userWithdraw);
-			RspSingleCashEntity rEntity = callThirdGetCash(widthDrawSn, totalAmount, cardNo, realName, mobile, bankCode, userId);
+			RspSingleCashEntity rEntity = callThirdGetCash(widthDrawSn, totalAmount, cardNo, bankName, realName, mobile, bankCode, userId);
 			long time3 = System.currentTimeMillis();
 			log.info("time3为：" + time3);
 			log.info("提现所用时间为：" + (time3 - time1));
@@ -343,12 +344,7 @@ public class CashService {
 	 * @param totalAmount
 	 * @return
 	 */
-	private RspSingleCashEntity callThirdGetCash(String orderSn, double totalAmount, String accNo, String accName, String phone, String bankNo, Integer userId) {
-		UserBankQueryParam userBankQueryParam = new UserBankQueryParam();
-		userBankQueryParam.setBankCardCode(bankNo);
-		userBankQueryParam.setUserId(userId);
-		BaseResult<UserBankDTO> userBank = userBankService.queryUserBankByCondition(userBankQueryParam);
-
+	private RspSingleCashEntity callThirdGetCash(String orderSn, double totalAmount, String accNo, String bankName, String accName, String phone, String bankNo, Integer userId) {
 		DlUserReal userReal = dlUserRealService.findByUserId(userId);
 		log.info("=====callThirdGetCash======");
 		log.info("orderSn:" + orderSn + " total:" + totalAmount + " accNo:" + accNo + " accName:" + accName + " phone:" + phone + " bankNo:" + bankNo);
@@ -375,7 +371,7 @@ public class CashService {
 			txScanRequestPaidByOthers.setTxnAmt(bigFen.toString());
 			txScanRequestPaidByOthers.setBankProv("000000");
 			txScanRequestPaidByOthers.setBankCity("000000");
-			txScanRequestPaidByOthers.setBankName(userBank.getData().getBankName());
+			txScanRequestPaidByOthers.setBankName(bankName);
 			txScanRequestPaidByOthers.setTxnAmt(bigFen.toString());
 			txScanRequestPaidByOthers.setStlType("T0");
 			txScanRequestPaidByOthers.setAccountType("1");
@@ -483,6 +479,7 @@ public class CashService {
 			int userId = userWithDraw.getUserId();
 			String realName = userWithDraw.getRealName();
 			String cardNo = userWithDraw.getCardNo();
+			String bankName = userWithDraw.getBankName();
 			UserIdRealParam params = new UserIdRealParam();
 			params.setUserId(userId);
 			// 通过UserService查询到手机号码
@@ -515,7 +512,7 @@ public class CashService {
 			log.info("=================后台管理审核通过====================");
 			log.info("进入到第三方提现流程，金额:" + amt.doubleValue() + " 用户名:" + userWithDraw.getUserId() + " sn:" + sn + " realName:" + realName + " phone:" + phone + " amt:" + amt + " bankCode:" + bankCode);
 			log.info("=================后台管理审核通过====================");
-			RspSingleCashEntity rspSCashEntity = callThirdGetCash(sn, amt.doubleValue(), cardNo, realName, phone, bankCode, userId);
+			RspSingleCashEntity rspSCashEntity = callThirdGetCash(sn, amt.doubleValue(), cardNo, bankName, realName, phone, bankCode, userId);
 			// 后台点击的都变为提现审核中
 			UserWithdraw userWithdraw = new UserWithdraw();
 			userWithdraw.setWithdrawalSn(sn);
