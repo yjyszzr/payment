@@ -198,7 +198,7 @@ public class PayNotifyController {
 	}
 
 	@ApiOperation(value = "天下支付回调")
-	@PostMapping("/TXCallback")
+	@PostMapping("/TXCallBack")
 	@ResponseBody
 	public void TXPayCallback(@RequestBody TXScanRequestCallback callback, HttpServletResponse response) throws UnsupportedEncodingException {
 		log.info("接收到天下支付返回报文：={}", callback);

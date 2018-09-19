@@ -1,5 +1,7 @@
 package com.dl.shop.payment.service;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -9,14 +11,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
+import javax.imageio.ImageIO;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.util.TextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +56,7 @@ import com.dl.order.param.OrderSnParam;
 import com.dl.order.param.UpdateOrderInfoParam;
 import com.dl.order.param.UpdateOrderPayStatusParam;
 import com.dl.shop.payment.core.ProjectConstant;
+import com.dl.shop.payment.dao.DlPayQrBase64Mapper;
 import com.dl.shop.payment.dao.PayBankRecordMapper;
 import com.dl.shop.payment.dao.PayLogMapper;
 import com.dl.shop.payment.dao.PayMentMapper;
@@ -61,6 +67,7 @@ import com.dl.shop.payment.dto.PayReturnDTO;
 import com.dl.shop.payment.dto.PaymentDTO;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.enums.PayEnums;
+import com.dl.shop.payment.model.DlPayQrBase64;
 import com.dl.shop.payment.model.PayBankRecordModel;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.PayMent;
@@ -80,6 +87,7 @@ import com.dl.shop.payment.pay.xianfeng.util.XianFengPayUtil;
 import com.dl.shop.payment.pay.yifutong.entity.RspYFTEntity;
 import com.dl.shop.payment.pay.yifutong.util.PayYFTUtil;
 import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
+import com.dl.shop.payment.utils.QrUtil;
 import com.dl.shop.payment.web.PaymentController;
 
 @Service
@@ -139,6 +147,12 @@ public class PayMentService extends AbstractService<PayMent> {
 
 	@Resource
 	private IUserQualificationService iUserQualificationService;
+
+	@Resource
+	private DlPayQrBase64Mapper dlPayQrBase64Mapper;
+
+	@Value("${tianxiapay.app_TXPay_H5_qr_url}")
+	private String appTXPayH5QrUrl;
 
 	/**
 	 * 查询所有可用的支付方式
@@ -778,6 +792,24 @@ public class PayMentService extends AbstractService<PayMent> {
 			if (rspEntity.isSucc()) {
 				PayReturnDTO rEntity = new PayReturnDTO();
 				String url = rspEntity.getCodeUrl();
+				String amount = "￥" + amtDouble.setScale(2, RoundingMode.HALF_EVEN).toString();
+				logger.info("原url={}，生成二维码地址开始,amtDoubleStr={}", url, amount);
+				try {
+					ByteArrayOutputStream out = new ByteArrayOutputStream();
+					BufferedImage bufferImage = QrUtil.genBarcode(url, 520, 520, amount);
+					ImageIO.write(bufferImage, "png", out);
+					byte[] imageB = out.toByteArray();
+					String qrBase64 = "data:image/png;base64," + Base64.encodeBase64String(imageB);
+					DlPayQrBase64 saveBean = new DlPayQrBase64();
+					saveBean.setPayordersn(payOrderSn);
+					saveBean.setBase64Content(qrBase64);
+					Integer insertRow = dlPayQrBase64Mapper.saveDlPayQrBase64(saveBean);
+					Integer base64Id = saveBean.getId();
+					url = appTXPayH5QrUrl.replace("{qrBase64}", "" + base64Id);
+					logger.info("payOrderSn={},支付方式={},url={},base64Id={}", payOrderSn, "银联天下支付扫码", url, base64Id);
+				} catch (Exception e) {
+					logger.error("微信转二维码异常", e);
+				}
 				// 生成二维码url
 				if (!TextUtils.isEmpty(url)) {
 					rEntity.setPayUrl(url);
