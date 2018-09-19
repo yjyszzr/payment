@@ -367,7 +367,7 @@ public class TXScanPay {
 		data.put("bankProv", txScanRequestPaidByOthers.getBankProv());// 开户省
 		data.put("bankCity", txScanRequestPaidByOthers.getBankCity());// 开户市
 		data.put("cnaps", txScanRequestPaidByOthers.getCnaps());// 联行号
-		data.put("bankBranch", TdExpBasicFunctions.STR2HEX(txScanRequestPaidByOthers.getBankBranch()));// 支行
+		data.put("bankBranch", "");// 支行
 		data.put("accountType", txScanRequestPaidByOthers.getAccountType());
 		data.put("mobile", txScanRequestPaidByOthers.getMobile());
 		Map<String, Object> rmap = toRequestTXPay(data, merchantStr);
