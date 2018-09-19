@@ -605,6 +605,7 @@ public class PayMentService extends AbstractService<PayMent> {
 
 	// 主动查询支付状态
 	private boolean task(PayLog payLog) {
+		logger.info("[task]payLog==========================={}", payLog);
 		boolean succ = false;
 		BaseResult<RspOrderQueryEntity> baseResult = null;
 		// http request
