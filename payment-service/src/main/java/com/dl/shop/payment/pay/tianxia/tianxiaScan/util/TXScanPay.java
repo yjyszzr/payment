@@ -47,7 +47,7 @@ public class TXScanPay {
 		logger.info("请求参数为:={}", txScanRequestPay);
 		if ("true".equals(txPayConfig.getDEBUG(merchantStr))) {
 			logger.info("请求金额为:={}分", amount);
-			amount = "200";
+			amount = "1";
 			logger.info("测试环境请求金额置为:={}分,要求不能低于2块", amount);
 		}
 		TXScanResponsePay txScanResponsePay = new TXScanResponsePay();
