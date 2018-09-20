@@ -93,5 +93,7 @@
 	<select id="countValidPayLogByUserId" resultType="java.lang.Integer">
 	  select count(1) from dl_pay_log  where user_id = #{userId} and is_paid = 1
 	</select>
-	
+	<update id="updatePayLogTradeNoByPayOrderSn">
+	update dl_pay_log set trade_no=#{tradeNo}  where pay_order_sn = #{payOrderSn}
+	</update>
 </mapper>

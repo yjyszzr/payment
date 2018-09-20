@@ -6,6 +6,7 @@ import java.util.TreeMap;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
@@ -86,7 +87,7 @@ public class KuaiJiePayUtil {
 	 */
 	private boolean checkParamSign(String signParam,String sign) {
 		String signNew = MD5Utils.MD5(signParam+"&key="+kuaiJiePayConfig.getSecret());
-		if(sign.equals(signNew)){
+		if(signNew.equals(sign)){
 			return true;
 		}
 		return false;
