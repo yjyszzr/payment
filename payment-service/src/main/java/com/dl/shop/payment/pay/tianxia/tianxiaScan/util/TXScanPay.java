@@ -349,8 +349,8 @@ public class TXScanPay {
 		String amount = txScanRequestPaidByOthers.getTxnAmt();
 		if ("true".equals(txPayConfig.getDEBUG(merchantStr))) {
 			logger.info("天下支付代付请求金额为:={}分", amount);
-			amount = "200";
-			logger.info("天下支付代付测试环境请求金额置为:={}分", amount);
+			amount = "300";
+			logger.info("天下支付代付最低代付金额为3元,测试环境请求金额置为:={}分", amount);
 		}
 		logger.info("天下支付代付请求参数接口识别Code={}", TranCodeEnum.BALANCEPAYFOR.getcode());
 		Map<String, Object> data = new HashMap<String, Object>();
