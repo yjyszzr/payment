@@ -375,6 +375,7 @@ public class CashService {
 			txScanRequestPaidByOthers.setTxnAmt(bigFen.toString());
 			txScanRequestPaidByOthers.setStlType("T0");
 			txScanRequestPaidByOthers.setAccountType("1");
+			txScanRequestPaidByOthers.setOrderId(orderSn);
 			if (null == thirdPayForType || PayForCompanyEnum.XF_PAYFOR.getCode().equals(thirdPayForType)) {
 				log.info("走先锋通道提现============================");
 				rEntity = xianfengUtil.reqCash(orderSn, bigFen.intValue() + "", accNo, accName, phone, bankNo);
