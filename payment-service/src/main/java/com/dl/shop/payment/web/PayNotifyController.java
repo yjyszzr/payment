@@ -203,11 +203,6 @@ public class PayNotifyController {
 	@ResponseBody
 	public void TXPayCallBack(@RequestBody TXScanRequestCallback callback, HttpServletResponse response) throws UnsupportedEncodingException {
 		log.info("接收到天下支付返回报文：={}", callback);
-		if (true) {
-			log.error("天下支付返回订单号为空");
-			writeLowerSuccess(response);
-			return;
-		}
 		// 验证签名
 		TXCallback txcallbackBody = callback.getREP_BODY();
 		String payOrderId = txcallbackBody.getOrderId();
