@@ -87,5 +87,6 @@ public interface PayLogMapper extends Mapper<PayLog> {
 	int countValidPayLogByUserId(@Param("userId")Integer userId);
 	int updatePayLogFail0To3(PayLog updatePayLog);
 	int updatePayLogSuccess0To1(PayLog updatePayLog);
+	int updatePayLogTradeNoByPayOrderSn(String payOrderSn, String tradeNo);
 	
 }

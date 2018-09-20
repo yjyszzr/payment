@@ -864,6 +864,7 @@ public class PayMentService extends AbstractService<PayMent> {
 					rEntity.setOrderId(orderId);
 					rEntity.setLotteryClassifyId(lotteryClassifyId);
 					logger.info("kauijie qqqianbao client  jump url:" + url + " payLogId:" + savePayLog.getLogId() + " orderId:" + orderId);
+					updatePayLogTradeNo(savePayLog.getPayOrderSn(),rspEntity.getData().getTrade_no());
 					payBaseResult = ResultGenerator.genSuccessResult("succ", rEntity);
 					return payBaseResult;
 				}
@@ -894,6 +895,7 @@ public class PayMentService extends AbstractService<PayMent> {
 					rEntity.setOrderId(orderId);
 					rEntity.setLotteryClassifyId(lotteryClassifyId);
 					logger.info("kauijie Jingdong client jump url:" + url + " payLogId:" + savePayLog.getLogId() + " orderId:" + orderId);
+					updatePayLogTradeNo(savePayLog.getPayOrderSn(),rspEntity.getData().getTrade_no());
 					payBaseResult = ResultGenerator.genSuccessResult("succ", rEntity);
 					return payBaseResult;
 				}
@@ -902,5 +904,9 @@ public class PayMentService extends AbstractService<PayMent> {
 		log.info("快接jingdong钱包支付失败，payOrderSn={}",payOrderSn);
 		payBaseResult = ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(), PayEnums.PAY_RONGBAO_FAILURE.getMsg());
 		return payBaseResult;
+	}
+	private void updatePayLogTradeNo(String payOrderSn,String tradeNo){
+		int updateRow = payLogMapper.updatePayLogTradeNoByPayOrderSn(payOrderSn,tradeNo);
+		log.info("更新支付log的tradeNo={},payOrderSn={},updateRow={}",tradeNo,payOrderSn,updateRow);
 	}
 }
