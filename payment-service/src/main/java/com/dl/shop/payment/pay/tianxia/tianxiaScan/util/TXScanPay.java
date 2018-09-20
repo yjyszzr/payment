@@ -264,7 +264,7 @@ public class TXScanPay {
 		data.put("nonceStr", TdExpBasicFunctions.RANDOM(16, "0"));
 		HttpApi http = new HttpApi(txPayConfig.getREQ_URL(merchantStr), HttpApi.POST);
 		Map<String, Object> hdata = new HashMap<String, Object>();
-		logger.info("天下支付组装成map串={}", data);
+		logger.info("天下支付组装成map串加密之前={}", data);
 		String sign = HttpApi.getSign(data, txPayConfig.getMD5KEY(merchantStr));
 		try {
 			sign = SecurityUtil.sign(sign, txPayConfig.getPRVKEY(merchantStr), true);

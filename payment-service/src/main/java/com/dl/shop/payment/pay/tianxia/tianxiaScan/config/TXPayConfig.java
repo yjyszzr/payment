@@ -24,7 +24,6 @@ public class TXPayConfig {
 	}
 
 	public String getDEBUG(String merchentNo) {
-		log.info("天下支付配置信息打印:={}", merchant);
 		return merchant.get(merchentNo + "debug");
 	}
 
