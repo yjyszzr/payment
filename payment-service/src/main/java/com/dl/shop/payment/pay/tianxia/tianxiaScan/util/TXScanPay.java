@@ -23,8 +23,6 @@ import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestPaidByOth
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestPay;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanResponseBalanceQuery;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanResponseOrderQuery;
-import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanResponsePaidByOthers;
-import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanResponsePaidByOthersBalanceQuery;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanResponsePay;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.enums.PayChannelEnum;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.enums.TranCodeEnum;
@@ -141,92 +139,92 @@ public class TXScanPay {
 	 * @param txScanRequestPaidByOthers
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
-	public TXScanResponsePaidByOthers txScanPayFor(TXScanRequestPaidByOthers txScanRequestPaidByOthers, String merchantStr) {
-		logger.info("请求参数={}", txScanRequestPaidByOthers);
-		String amount = txScanRequestPaidByOthers.getTxnAmt();
-		if ("true".equals(txPayConfig.getDEBUG(merchantStr))) {
-			logger.info("请求金额为:={}分", amount);
-			amount = "1";
-			logger.info("测试环境请求金额置为:={}分", amount);
-		}
-		TXScanResponsePaidByOthers txScanResponsePaidByOthers = new TXScanResponsePaidByOthers();
-		Map<String, Object> data = new HashMap<String, Object>();
-		data.put("tranCode", TranCodeEnum.BALANCEPAYFOR.getcode());
-		data.put("tranDate", txScanRequestPaidByOthers.getTranDate());
-		data.put("orderId", txScanRequestPaidByOthers.getOrderId());
-		data.put("txnAmt", amount);
-		data.put("accountNo", txScanRequestPaidByOthers.getAccountNo());// 卡号
-		data.put("certNum", txScanRequestPaidByOthers.getCertNum());// 身份证号
-		data.put("bankCode", txScanRequestPaidByOthers.getBankCode());// 银行编码
-		data.put("bankName", TdExpBasicFunctions.STR2HEX(txScanRequestPaidByOthers.getBankName()));// 银行名称
-		data.put("accountName", TdExpBasicFunctions.STR2HEX(txScanRequestPaidByOthers.getAccountName()));// 持卡人
-		data.put("bankProv", txScanRequestPaidByOthers.getBankProv());// 开户省
-		data.put("bankCity", txScanRequestPaidByOthers.getBankCity());// 开户市
-		data.put("cnaps", txScanRequestPaidByOthers.getCnaps());// 联行号
-		data.put("bankBranch", TdExpBasicFunctions.STR2HEX(txScanRequestPaidByOthers.getBankBranch()));// 支行
-		data.put("accountType", txScanRequestPaidByOthers.getAccountType());
-		data.put("mobile", txScanRequestPaidByOthers.getMobile());
-		Map<String, Object> rmap = toRequestTXPay(data, merchantStr);
-		Map<String, Object> _body = (Map<String, Object>) rmap.get("REP_BODY");
-		Map<String, Object> _head = (Map<String, Object>) rmap.get("REP_HEAD");
-		String vsign = HttpApi.getSign(_body, txPayConfig.getMD5KEY(merchantStr));
-		String _sign = _head.get("sign").toString();
-		logger.info("解析签名:" + _sign);
-		try {
-			boolean flag = SecurityUtil.verify(vsign, _sign, txPayConfig.getTXPUBKEY(merchantStr), true);
-			logger.info("验证签名状态:" + flag);
-			txScanResponsePaidByOthers.setRspcode(_body.get("rspcode").toString());// 响应码
-			txScanResponsePaidByOthers.setRspmsg(TdExpBasicFunctions.HEX2STR(_body.get("rspmsg").toString()));// 响应信息,16进制解密成字符串
-			if (flag) {
-				txScanResponsePaidByOthers.setOrderId(_body.get("orderId").toString());
-				txScanResponsePaidByOthers.setSubcode(_body.get("subcode").toString());
-				txScanResponsePaidByOthers.setSubmsg(TdExpBasicFunctions.HEX2STR(_body.get("submsg").toString()));
-				txScanResponsePaidByOthers.setTranId(_body.get("tranId").toString());
-			}
-		} catch (Exception e) {
-			logger.error("签名解析异常,异常信息为={}", e);
-		}
-		return txScanResponsePaidByOthers;
-	}
-
+	/*
+	 * @SuppressWarnings("unchecked") public TXScanResponsePaidByOthers
+	 * txScanPayFor(TXScanRequestPaidByOthers txScanRequestPaidByOthers, String
+	 * merchantStr) { logger.info("请求参数={}", txScanRequestPaidByOthers); String
+	 * amount = txScanRequestPaidByOthers.getTxnAmt(); if
+	 * ("true".equals(txPayConfig.getDEBUG(merchantStr))) {
+	 * logger.info("请求金额为:={}分", amount); amount = "1";
+	 * logger.info("测试环境请求金额置为:={}分", amount); } TXScanResponsePaidByOthers
+	 * txScanResponsePaidByOthers = new TXScanResponsePaidByOthers();
+	 * Map<String, Object> data = new HashMap<String, Object>();
+	 * data.put("tranCode", TranCodeEnum.BALANCEPAYFOR.getcode());
+	 * data.put("tranDate", txScanRequestPaidByOthers.getTranDate());
+	 * data.put("orderId", txScanRequestPaidByOthers.getOrderId());
+	 * data.put("txnAmt", amount); data.put("accountNo",
+	 * txScanRequestPaidByOthers.getAccountNo());// 卡号 data.put("certNum",
+	 * txScanRequestPaidByOthers.getCertNum());// 身份证号 data.put("bankCode",
+	 * txScanRequestPaidByOthers.getBankCode());// 银行编码 data.put("bankName",
+	 * TdExpBasicFunctions.STR2HEX(txScanRequestPaidByOthers.getBankName()));//
+	 * 银行名称 data.put("accountName",
+	 * TdExpBasicFunctions.STR2HEX(txScanRequestPaidByOthers
+	 * .getAccountName()));// 持卡人 data.put("bankProv",
+	 * txScanRequestPaidByOthers.getBankProv());// 开户省 data.put("bankCity",
+	 * txScanRequestPaidByOthers.getBankCity());// 开户市 data.put("cnaps",
+	 * txScanRequestPaidByOthers.getCnaps());// 联行号 data.put("bankBranch",
+	 * TdExpBasicFunctions
+	 * .STR2HEX(txScanRequestPaidByOthers.getBankBranch()));// 支行
+	 * data.put("accountType", txScanRequestPaidByOthers.getAccountType());
+	 * data.put("mobile", txScanRequestPaidByOthers.getMobile()); Map<String,
+	 * Object> rmap = toRequestTXPay(data, merchantStr); Map<String, Object>
+	 * _body = (Map<String, Object>) rmap.get("REP_BODY"); Map<String, Object>
+	 * _head = (Map<String, Object>) rmap.get("REP_HEAD"); String vsign =
+	 * HttpApi.getSign(_body, txPayConfig.getMD5KEY(merchantStr)); String _sign
+	 * = _head.get("sign").toString(); logger.info("解析签名:" + _sign); try {
+	 * boolean flag = SecurityUtil.verify(vsign, _sign,
+	 * txPayConfig.getTXPUBKEY(merchantStr), true); logger.info("验证签名状态:" +
+	 * flag);
+	 * txScanResponsePaidByOthers.setRspcode(_body.get("rspcode").toString());//
+	 * 响应码
+	 * txScanResponsePaidByOthers.setRspmsg(TdExpBasicFunctions.HEX2STR(_body
+	 * .get("rspmsg").toString()));// 响应信息,16进制解密成字符串 if (flag) {
+	 * txScanResponsePaidByOthers.setOrderId(_body.get("orderId").toString());
+	 * txScanResponsePaidByOthers.setSubcode(_body.get("subcode").toString());
+	 * txScanResponsePaidByOthers
+	 * .setSubmsg(TdExpBasicFunctions.HEX2STR(_body.get("submsg").toString()));
+	 * txScanResponsePaidByOthers.setTranId(_body.get("tranId").toString()); } }
+	 * catch (Exception e) { logger.error("签名解析异常,异常信息为={}", e); } return
+	 * txScanResponsePaidByOthers; }
+	 */
 	/**
 	 * 代付查询
 	 * 
 	 * @param txScanPayForBalanceQuery
 	 * @return
 	 */
-	@SuppressWarnings({ "unchecked", "unused" })
-	public TXScanResponsePaidByOthersBalanceQuery payforQuery(TXScanRequestPaidByOthersBalanceQuery txScanPayForBalanceQuery, String merchantStr) {
-		logger.info("请求参数={}", txScanPayForBalanceQuery);
-		TXScanResponsePaidByOthersBalanceQuery txScanPayForRespBalanceQuery = new TXScanResponsePaidByOthersBalanceQuery();
-		Map<String, Object> data = new HashMap<String, Object>();
-		data.put("tranCode", TranCodeEnum.BALANCEPAYFOEQUERY.getcode());
-		data.put("orderId", txScanPayForBalanceQuery.getOrderId());
-		data.put("tranDate", txScanPayForBalanceQuery.getTranDate());
-		Map<String, Object> rmap = toRequestTXPay(data, merchantStr);
-		Map<String, Object> _body = (Map<String, Object>) rmap.get("REP_BODY");
-		Map<String, Object> _head = (Map<String, Object>) rmap.get("REP_HEAD");
-		String vsign = HttpApi.getSign(_body, txPayConfig.getMD5KEY(merchantStr));
-		String _sign = _head.get("sign").toString();
-		logger.info("解析签名:" + _sign);
-		try {
-			boolean flag = SecurityUtil.verify(vsign, _sign, txPayConfig.getTXPUBKEY(merchantStr), true);
-			logger.info("验证签名状态:" + flag);
-			txScanPayForRespBalanceQuery.setRspcode(_body.get("rspcode").toString());// 响应码
-			txScanPayForRespBalanceQuery.setRspmsg(TdExpBasicFunctions.HEX2STR(_body.get("rspmsg").toString()));// 响应信息,16进制解密成字符串
-			if (flag) {
-				txScanPayForRespBalanceQuery.setOrderId(_body.get("orderId").toString());
-				txScanPayForRespBalanceQuery.setSubcode(_body.get("subcode").toString());
-				txScanPayForRespBalanceQuery.setSubmsg(TdExpBasicFunctions.HEX2STR(_body.get("submsg").toString()));
-				txScanPayForRespBalanceQuery.setTranId(_body.get("tranId").toString());
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return txScanPayForRespBalanceQuery;
-	}
-
+	/*
+	 * @SuppressWarnings({ "unchecked", "unused" }) public
+	 * TXScanResponsePaidByOthersBalanceQuery
+	 * payforQuery(TXScanRequestPaidByOthersBalanceQuery
+	 * txScanPayForBalanceQuery, String merchantStr) { logger.info("请求参数={}",
+	 * txScanPayForBalanceQuery); TXScanResponsePaidByOthersBalanceQuery
+	 * txScanPayForRespBalanceQuery = new
+	 * TXScanResponsePaidByOthersBalanceQuery(); Map<String, Object> data = new
+	 * HashMap<String, Object>(); data.put("tranCode",
+	 * TranCodeEnum.BALANCEPAYFOEQUERY.getcode()); data.put("orderId",
+	 * txScanPayForBalanceQuery.getOrderId()); data.put("tranDate",
+	 * txScanPayForBalanceQuery.getTranDate()); Map<String, Object> rmap =
+	 * toRequestTXPay(data, merchantStr); Map<String, Object> _body =
+	 * (Map<String, Object>) rmap.get("REP_BODY"); Map<String, Object> _head =
+	 * (Map<String, Object>) rmap.get("REP_HEAD"); String vsign =
+	 * HttpApi.getSign(_body, txPayConfig.getMD5KEY(merchantStr)); String _sign
+	 * = _head.get("sign").toString(); logger.info("解析签名:" + _sign); try {
+	 * boolean flag = SecurityUtil.verify(vsign, _sign,
+	 * txPayConfig.getTXPUBKEY(merchantStr), true); logger.info("验证签名状态:" +
+	 * flag);
+	 * txScanPayForRespBalanceQuery.setRspcode(_body.get("rspcode").toString
+	 * ());// 响应码
+	 * txScanPayForRespBalanceQuery.setRspmsg(TdExpBasicFunctions.HEX2STR
+	 * (_body.get("rspmsg").toString()));// 响应信息,16进制解密成字符串 if (flag) {
+	 * txScanPayForRespBalanceQuery.setOrderId(_body.get("orderId").toString());
+	 * txScanPayForRespBalanceQuery.setSubcode(_body.get("subcode").toString());
+	 * txScanPayForRespBalanceQuery
+	 * .setSubmsg(TdExpBasicFunctions.HEX2STR(_body.get("submsg").toString()));
+	 * txScanPayForRespBalanceQuery.setTranId(_body.get("tranId").toString()); }
+	 * } catch (Exception e) { e.printStackTrace(); } return
+	 * txScanPayForRespBalanceQuery; }
+	 */
 	/**
 	 * 查询账户余额
 	 */
@@ -354,6 +352,7 @@ public class TXScanPay {
 			amount = "200";
 			logger.info("天下支付代付测试环境请求金额置为:={}分", amount);
 		}
+		logger.info("天下支付代付请求参数接口识别Code={}", TranCodeEnum.BALANCEPAYFOR.getcode());
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("tranCode", TranCodeEnum.BALANCEPAYFOR.getcode());
 		data.put("tranDate", txScanRequestPaidByOthers.getTranDate());
