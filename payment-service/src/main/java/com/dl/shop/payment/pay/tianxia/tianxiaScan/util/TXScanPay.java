@@ -355,7 +355,7 @@ public class TXScanPay {
 		logger.info("天下支付代付请求参数接口识别Code={}", TranCodeEnum.BALANCEPAYFOR.getcode());
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("tranCode", TranCodeEnum.BALANCEPAYFOR.getcode());
-		data.put("tranDate", txScanRequestPaidByOthers.getTranDate());
+		data.put("tranDate", TdExpBasicFunctions.GETDATE());
 		data.put("orderId", txScanRequestPaidByOthers.getOrderId());
 		data.put("txnAmt", amount);
 		data.put("accountNo", txScanRequestPaidByOthers.getAccountNo());// 卡号
