@@ -1,5 +1,7 @@
 package com.dl.shop.payment.pay.kuaijie.util;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.TreeMap;
 
 import javax.annotation.Resource;
@@ -130,7 +132,8 @@ public class KuaiJiePayUtil {
 		paramsTreeMap.put("merchant_no", kuaiJiePayConfig.getMerchant());
 		paramsTreeMap.put("merchant_order_no",payOrderSn);
 		paramsTreeMap.put("notify_url",kuaiJiePayConfig.getNotifyUrl());
-		paramsTreeMap.put("start_time",DateUtil.getCurrentTime(DateUtil.yyyymmddhhmmss));
+		 SimpleDateFormat sdf =   new SimpleDateFormat("yyyyMMddHHmmss"); 
+		paramsTreeMap.put("start_time",sdf.format(new Date()));
 		paramsTreeMap.put("trade_amount",amount);
 		paramsTreeMap.put("goods_name",payOrderSn);
 		paramsTreeMap.put("goods_desc",kuaiJiePayConfig.getGoodDesc());
@@ -141,7 +144,7 @@ public class KuaiJiePayUtil {
 		params.deleteCharAt(params.length()-1);
 		return addParamSignInfo(params.toString());
 	}
-
+	
 	public BaseResult<RspOrderQueryEntity> queryOrderStatusQQqianBao(String qqQianBaoTradeNo) {
 		return commonOrderQueryKuaiJie(qqQianBaoTradeNo,kuaiJiePayConfig.getApiUrl()+kuaiJiePayConfig.getQqQueryPayUrl());
 	}
