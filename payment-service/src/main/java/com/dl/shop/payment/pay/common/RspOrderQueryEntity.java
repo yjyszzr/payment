@@ -30,7 +30,8 @@ public class RspOrderQueryEntity implements Serializable {
 	public static final int TYPE_XIANFENG = 1;
 	public static final int TYPE_YIFUTONG = 2;
 	public static final int TYPE_TIANXIA_SCAN = 3;// 天下银联扫码
-
+	public static final int TYPE_KUAIJIE_PAY = 4;// 天下银联扫码
+	
 	public boolean isSucc() {
 		if (!TextUtils.isEmpty(result_code) && type == TYPE_YINHE) {
 			return result_code.equals("0000");
@@ -40,6 +41,8 @@ public class RspOrderQueryEntity implements Serializable {
 			return !StringUtils.isEmpty(result_code) && ("2".equalsIgnoreCase(result_code) || "3".equalsIgnoreCase(result_code));
 		} else if (!TextUtils.isEmpty(result_code) && type == TYPE_TIANXIA_SCAN) {
 			return !StringUtils.isEmpty(result_code) && ("01".equalsIgnoreCase(result_code));// 成功
+		} else if (!TextUtils.isEmpty(result_code) && type == TYPE_KUAIJIE_PAY) {
+			return !StringUtils.isEmpty(result_code) && ("Success".equalsIgnoreCase(result_code)||"RefundSuccess".equalsIgnoreCase(result_code));// 成功
 		}
 		return false;
 	}
@@ -53,6 +56,9 @@ public class RspOrderQueryEntity implements Serializable {
 			return StringUtils.isEmpty(result_code) || "1".equalsIgnoreCase(result_code);
 		} else if (!TextUtils.isEmpty(result_code) && type == TYPE_TIANXIA_SCAN) {
 			return StringUtils.isEmpty(result_code) || "00".equalsIgnoreCase(result_code);// 未支付
+		} else if (!TextUtils.isEmpty(result_code) && type == TYPE_KUAIJIE_PAY) {
+			return !StringUtils.isEmpty(result_code) && ("Init".equalsIgnoreCase(result_code)||"Process".equalsIgnoreCase(result_code)
+					||"Wait".equalsIgnoreCase(result_code));// 成功
 		}
 		return false;
 	}
@@ -67,6 +73,8 @@ public class RspOrderQueryEntity implements Serializable {
 			return !StringUtils.isEmpty(result_code) && "0".equalsIgnoreCase(result_code);
 		} else if (!TextUtils.isEmpty(result_code) && type == TYPE_TIANXIA_SCAN) {
 			return !StringUtils.isEmpty(result_code) && "02".equalsIgnoreCase(result_code);// 失败
+		} else if (!TextUtils.isEmpty(result_code) && type == TYPE_KUAIJIE_PAY) {
+			return !StringUtils.isEmpty(result_code) && ("Fail".equalsIgnoreCase(result_code)||"RefundFail".equalsIgnoreCase(result_code));// 成功
 		}
 		return false;
 	}

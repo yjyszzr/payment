@@ -75,6 +75,9 @@ import com.dl.shop.payment.model.RollBackLog;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
 import com.dl.shop.payment.param.RollbackThirdOrderAmountParam;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
+import com.dl.shop.payment.pay.kuaijie.entity.KuaiJieJdPayOrderCreateResponse;
+import com.dl.shop.payment.pay.kuaijie.entity.KuaiJieQqPayOrderCreateResponse;
+import com.dl.shop.payment.pay.kuaijie.util.KuaiJiePayUtil;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
 import com.dl.shop.payment.pay.rongbao.entity.ReqRefundEntity;
 import com.dl.shop.payment.pay.rongbao.entity.RspRefundEntity;
@@ -153,6 +156,8 @@ public class PayMentService extends AbstractService<PayMent> {
 
 	@Value("${tianxiapay.app_TXPay_H5_qr_url}")
 	private String appTXPayH5QrUrl;
+	@Resource
+	private KuaiJiePayUtil kuaiJiePayUtil;
 
 	/**
 	 * 查询所有可用的支付方式
@@ -645,6 +650,10 @@ public class PayMentService extends AbstractService<PayMent> {
 			txScanRequestOrderQuery.setOrderId(payOrderSn);
 			txScanRequestOrderQuery.setTranDate(DateUtil.getTimeString(payLog.getPayTime(), DateUtil.yyyyMMdd));
 			baseResult = txScanPay.txScanOrderQuery(txScanRequestOrderQuery, payCode, merchentArr[merchentArr.length - 1]);
+		}else if("app_kuaijie_pay_qqqianbao".equals(payCode)){
+			baseResult=kuaiJiePayUtil.queryOrderStatusQQqianBao(payLog.getTradeNo());
+		}else if("app_kuaijie_pay_jd".equals(payCode)){
+			baseResult=kuaiJiePayUtil.queryOrderStatusJd(payLog.getTradeNo());
 		}
 		if (baseResult == null || baseResult.getCode() != 0) {
 			if (baseResult != null) {
@@ -831,13 +840,67 @@ public class PayMentService extends AbstractService<PayMent> {
 		return payBaseResult;
 	}
 
-	public BaseResult getKuaijiePayQqQianBaoUrl(PayLog savePayLog, String orderSn) {
-		// TODO Auto-generated method stub
-		return null;
+	/**
+	 * QQ钱包支付
+	 * @param savePayLog
+	 * @param orderId
+	 * @param lotteryClassifyId
+	 * @return
+	 */
+	public BaseResult getKuaijiePayQqQianBaoUrl(PayLog savePayLog, String orderId,String lotteryClassifyId) {
+		BaseResult<?> payBaseResult = null;
+		BigDecimal amtDouble = savePayLog.getOrderAmount();
+		BigDecimal bigD = amtDouble.setScale(2, RoundingMode.HALF_EVEN);
+		String payOrderSn = savePayLog.getPayOrderSn();
+		KuaiJieQqPayOrderCreateResponse rspEntity = null;
+		rspEntity = kuaiJiePayUtil.getKuaijiePayQqQianBaoUrl(bigD.toString(), payOrderSn);
+		if (rspEntity != null) {
+			if ("1".equals(rspEntity.getStatus())) {
+				PayReturnDTO rEntity = new PayReturnDTO();
+				String url = rspEntity.getData().getPay_url();
+				if (!TextUtils.isEmpty(url)) {
+					rEntity.setPayUrl(url);
+					rEntity.setPayLogId(savePayLog.getLogId() + "");
+					rEntity.setOrderId(orderId);
+					rEntity.setLotteryClassifyId(lotteryClassifyId);
+					logger.info("kauijie qqqianbao client  jump url:" + url + " payLogId:" + savePayLog.getLogId() + " orderId:" + orderId);
+					payBaseResult = ResultGenerator.genSuccessResult("succ", rEntity);
+					return payBaseResult;
+				}
+			}
+		}
+		log.info("快接qq钱包支付失败，payOrderSn={}",payOrderSn);
+		payBaseResult = ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(), PayEnums.PAY_RONGBAO_FAILURE.getMsg());
+		return payBaseResult;
 	}
 
-	public BaseResult getKuaijiePayJingDongUrl(PayLog savePayLog, String orderSn) {
-		// TODO Auto-generated method stub
-		return null;
+	/**
+	 * 快接京东支付
+	 */
+	public BaseResult getKuaijiePayJingDongUrl(PayLog savePayLog, String orderId,String lotteryClassifyId) {
+		BaseResult<?> payBaseResult = null;
+		BigDecimal amtDouble = savePayLog.getOrderAmount();
+		BigDecimal bigD = amtDouble.setScale(2, RoundingMode.HALF_EVEN);
+		String payOrderSn = savePayLog.getPayOrderSn();
+		KuaiJieJdPayOrderCreateResponse rspEntity = null;
+		rspEntity = kuaiJiePayUtil.getKuaijiePayJingDongUrl(bigD.toString(), payOrderSn);
+		if (rspEntity != null) {
+			if ("1".equals(rspEntity.getStatus())) {
+				PayReturnDTO rEntity = new PayReturnDTO();
+				String url = rspEntity.getData().getPay_url();
+				if (!TextUtils.isEmpty(url)) {
+					rEntity.setPayUrl(url);
+					rEntity.setPayLogId(savePayLog.getLogId() + "");
+					rEntity.setOrderId(orderId);
+					rEntity.setLotteryClassifyId(lotteryClassifyId);
+					logger.info("kauijie Jingdong client jump url:" + url + " payLogId:" + savePayLog.getLogId() + " orderId:" + orderId);
+					payBaseResult = ResultGenerator.genSuccessResult("succ", rEntity);
+					return payBaseResult;
+				}
+			}
+		}
+		log.info("快接jingdong钱包支付失败，payOrderSn={}",payOrderSn);
+		payBaseResult = ResultGenerator.genResult(PayEnums.PAY_RONGBAO_FAILURE.getcode(), PayEnums.PAY_RONGBAO_FAILURE.getMsg());
+		return payBaseResult;
 	}
 }

@@ -9,7 +9,7 @@ public class KuaiJiePayNotifyEntity {
 	private String amount;
 	private String merchant_order_no;
 	private String trade_no;
-	private String paymenty_time;
+	private String payment_time;
 	private String pay_channel;
 	private String pay_channel_name;
 	private String attach;

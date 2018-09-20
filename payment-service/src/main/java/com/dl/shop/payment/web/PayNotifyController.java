@@ -155,7 +155,7 @@ public class PayNotifyController {
 		rspOrderEntikty.setResult_code(kuaiJiePayNotifyEntity.getStatus());
 		rspOrderEntikty.setTrade_no(kuaiJiePayNotifyEntity.getTrade_no());
 		rspOrderEntikty.setPayCode(payCode);
-		rspOrderEntikty.setType(RspOrderQueryEntity.TYPE_YIFUTONG);
+		rspOrderEntikty.setType(RspOrderQueryEntity.TYPE_KUAIJIE_PAY);
 		rspOrderEntikty.setTrade_status(kuaiJiePayNotifyEntity.getStatus());
 		if (payType == 0) {
 			paymentService.orderOptions(payLog, rspOrderEntikty);
