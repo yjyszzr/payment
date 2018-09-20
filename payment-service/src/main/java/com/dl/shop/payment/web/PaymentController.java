@@ -105,7 +105,6 @@ import com.dl.shop.payment.param.RollbackThirdOrderAmountParam;
 import com.dl.shop.payment.param.UrlBase64Param;
 import com.dl.shop.payment.param.UserIdParam;
 import com.dl.shop.payment.param.WithdrawParam;
-import com.dl.shop.payment.pay.kuaijie.util.KuaiJiePayUtil;
 import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
 import com.dl.shop.payment.pay.rongbao.entity.ReqRongEntity;
@@ -173,7 +172,7 @@ public class PaymentController extends AbstractBaseController {
 	private String appH5QrUrl;
 	@Value("${yinhe.app_ZFB_H5_qr_url}")
 	private String appZFBH5QrUrl;
-	
+
 	@ApiOperation(value = "系统可用第三方支付方式", notes = "系统可用第三方支付方式")
 	@PostMapping("/allPayment")
 	@ResponseBody
@@ -535,7 +534,7 @@ public class PaymentController extends AbstractBaseController {
 		} else if (paymentDto.getPayCode().startsWith("app_tianxia_scan")) {
 			String[] merchentArr = paymentDto.getPayCode().split("_");
 			logger.info("生成天下支付银联二维码url:" + " payCode:" + savePayLog.getPayCode());
-			payBaseResult = paymentService.getTXScanPayUrl(savePayLog, orderSn, payIp, merchentArr[merchentArr.length - 1]);
+			payBaseResult = paymentService.getTXScanPayUrl(savePayLog, orderId, payIp, merchentArr[merchentArr.length - 1]);
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
 				logger.info("生成天下支付银联二维码url成功:" + str);
@@ -547,18 +546,18 @@ public class PaymentController extends AbstractBaseController {
 			payBaseResult = paymentService.getKuaijiePayQqQianBaoUrl(savePayLog, orderSn);
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
-				logger.info("生成快接支付qq钱包支付payOrderSn={},url成功url={}:",orderSn,str);
+				logger.info("生成快接支付qq钱包支付payOrderSn={},url成功url={}:", orderSn, str);
 			} else {
-				logger.info("生成快接支付qq钱包支付payOrderSn={},url失败",orderSn);
+				logger.info("生成快接支付qq钱包支付payOrderSn={},url失败", orderSn);
 			}
 		} else if ("app_kuaijie_pay_jd".equalsIgnoreCase(payCode)) {
 			logger.info("生成快接支付url:payCode:" + savePayLog.getPayCode());
 			payBaseResult = paymentService.getKuaijiePayJingDongUrl(savePayLog, orderSn);
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
-				logger.info("生成快接支付payOrderSn={},url成功 url={}:",orderSn,str);
+				logger.info("生成快接支付payOrderSn={},url成功 url={}:", orderSn, str);
 			} else {
-				logger.info("生成快接支付payOrderSn={},url失败",orderSn);
+				logger.info("生成快接支付payOrderSn={},url失败", orderSn);
 			}
 		}
 		logger.info(loggerId + " result: code=" + payBaseResult.getCode() + " , msg=" + payBaseResult.getMsg());
@@ -782,9 +781,9 @@ public class PaymentController extends AbstractBaseController {
 			payBaseResult = paymentService.getYFTPayUrl(savePayLog, orderSn, "");
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
-				logger.info("生成易富通支付payOrderSn={},url成功:url={}",orderSn, str);
+				logger.info("生成易富通支付payOrderSn={},url成功:url={}", orderSn, str);
 			} else {
-				logger.info("生成易富通支付payOrderSn={},url失败",orderSn);
+				logger.info("生成易富通支付payOrderSn={},url失败", orderSn);
 			}
 		} else if (payCode.startsWith("app_tianxia_scan")) {
 			String[] merchentArr = payCode.split("_");
@@ -792,27 +791,27 @@ public class PaymentController extends AbstractBaseController {
 			payBaseResult = paymentService.getTXScanPayUrl(savePayLog, orderSn, payIp, merchentArr[merchentArr.length - 1]);
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
-				logger.info("生成天下支付银联二维码payOrderSn={},url成功:url={}" ,orderSn, str);
+				logger.info("生成天下支付银联二维码payOrderSn={},url成功:url={}", orderSn, str);
 			} else {
-				logger.info("生成天下支付银联二维码payOrderSn={},url失败",orderSn);
+				logger.info("生成天下支付银联二维码payOrderSn={},url失败", orderSn);
 			}
 		} else if ("app_kuaijie_pay_qqaianbao".equalsIgnoreCase(payCode)) {
 			logger.info("生成快接支付qq钱包支付 payCode:" + savePayLog.getPayCode());
 			payBaseResult = paymentService.getKuaijiePayQqQianBaoUrl(savePayLog, orderSn);
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
-				logger.info("生成快接支付qq钱包支付payOrderSn={},url成功url={}:",orderSn,str);
+				logger.info("生成快接支付qq钱包支付payOrderSn={},url成功url={}:", orderSn, str);
 			} else {
-				logger.info("生成快接支付qq钱包支付payOrderSn={},url失败",orderSn);
+				logger.info("生成快接支付qq钱包支付payOrderSn={},url失败", orderSn);
 			}
 		} else if ("app_kuaijie_pay_jd".equalsIgnoreCase(payCode)) {
 			logger.info("生成快接支付url:payCode:" + savePayLog.getPayCode());
 			payBaseResult = paymentService.getKuaijiePayJingDongUrl(savePayLog, orderSn);
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
-				logger.info("生成快接支付payOrderSn={},url成功 url={}:",orderSn,str);
+				logger.info("生成快接支付payOrderSn={},url成功 url={}:", orderSn, str);
 			} else {
-				logger.info("生成快接支付payOrderSn={},url失败",orderSn);
+				logger.info("生成快接支付payOrderSn={},url失败", orderSn);
 			}
 		}
 		// 处理支付失败的情况
@@ -1415,7 +1414,7 @@ public class PaymentController extends AbstractBaseController {
 		} else if (paymentDto.getPayCode().startsWith("app_tianxia_scan")) {
 			String[] merchentArr = paymentDto.getPayCode().split("_");
 			logger.info("生成天下支付银联二维码url:" + " payCode:" + savePayLog.getPayCode());
-			payBaseResult = paymentService.getTXScanPayUrl(savePayLog, orderSn, payIp, merchentArr[merchentArr.length - 1]);
+			payBaseResult = paymentService.getTXScanPayUrl(savePayLog, orderId, payIp, merchentArr[merchentArr.length - 1]);
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
 				logger.info("生成天下支付银联二维码url成功:" + str);
@@ -1427,18 +1426,18 @@ public class PaymentController extends AbstractBaseController {
 			payBaseResult = paymentService.getKuaijiePayQqQianBaoUrl(savePayLog, orderSn);
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
-				logger.info("生成快接支付qq钱包支付payOrderSn={},url成功url={}:",orderSn,str);
+				logger.info("生成快接支付qq钱包支付payOrderSn={},url成功url={}:", orderSn, str);
 			} else {
-				logger.info("生成快接支付qq钱包支付payOrderSn={},url失败",orderSn);
+				logger.info("生成快接支付qq钱包支付payOrderSn={},url失败", orderSn);
 			}
 		} else if ("app_kuaijie_pay_jd".equalsIgnoreCase(payCode)) {
 			logger.info("生成快接支付url:payCode:" + savePayLog.getPayCode());
 			payBaseResult = paymentService.getKuaijiePayJingDongUrl(savePayLog, orderSn);
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
-				logger.info("生成快接支付payOrderSn={},url成功 url={}:",orderSn,str);
+				logger.info("生成快接支付payOrderSn={},url成功 url={}:", orderSn, str);
 			} else {
-				logger.info("生成快接支付payOrderSn={},url失败",orderSn);
+				logger.info("生成快接支付payOrderSn={},url失败", orderSn);
 			}
 		}
 		logger.info(loggerId + " result: code=" + payBaseResult.getCode() + " , msg=" + payBaseResult.getMsg());
