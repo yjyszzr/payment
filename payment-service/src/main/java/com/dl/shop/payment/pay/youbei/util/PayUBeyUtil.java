@@ -39,10 +39,10 @@ public class PayUBeyUtil {
 	public final FormUBeyEntity getUBeyPayUrl(String amount,String orderId,String banktype)  {
 		logger.info("getYBPayUrl调取优贝科技支付orderId={},amount={}",orderId,amount);
 		if("true".equals(cfgPay.getDEBUG())) {
-			amount = "0.01";
+			amount = "1";
 		}
 		try {
-			FormUBeyEntity rEntity = null;
+			FormUBeyEntity rEntity = new FormUBeyEntity();
 			JSONObject jsonYB = new JSONObject(new TreeMap<String, Object>());
 			jsonYB.put("account", cfgPay.getAPP_ACCOUNT());
 			jsonYB.put("amount", amount);

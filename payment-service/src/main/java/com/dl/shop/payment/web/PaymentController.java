@@ -259,6 +259,13 @@ public class PaymentController extends AbstractBaseController {
 			logger.info(loggerId + "支付信息获取为空！");
 			return ResultGenerator.genResult(PayEnums.PAY_TOKEN_EXPRIED.getcode(), PayEnums.PAY_TOKEN_EXPRIED.getMsg());
 		}
+		//ubey检验最小金额
+		if("app_ubey".equals(param.getPayCode())) {
+			boolean check = ubeyPayService.checkAmount(jsonData);
+			if(check) {
+				return ResultGenerator.genFailResult("该支付方式最低消费1元 ");
+			}
+		}
 		// 清除payToken
 		stringRedisTemplate.delete(payToken);
 
@@ -1162,10 +1169,11 @@ public class PaymentController extends AbstractBaseController {
 			logger.info(loggerId + "支付信息获取为空！");
 			return ResultGenerator.genResult(PayEnums.PAY_TOKEN_EXPRIED.getcode(), PayEnums.PAY_TOKEN_EXPRIED.getMsg());
 		}
+		//ubey检验最小金额
 		if("app_ubey".equals(param.getPayCode())) {
 			boolean check = ubeyPayService.checkAmount(jsonData);
 			if(check) {
-				return ResultGenerator.genFailResult("");
+				return ResultGenerator.genFailResult("该支付方式最低消费1元 ");
 			}
 		}
 		// 清除payToken
