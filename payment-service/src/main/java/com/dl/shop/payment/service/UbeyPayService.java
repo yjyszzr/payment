@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.shop.payment.dao.BankUbeyCodeMapper;
@@ -74,7 +75,7 @@ public class UbeyPayService {
 		logger.info("查询Ubey直连网银银行列表getUBeyBank..........");
 		BaseResult<?> payBaseResult = null;
 		PayReturnDTO rEntity = new PayReturnDTO();
-		rEntity.setPayUrl(cfgPay.getBANK_URL()+"?payLogId="+savePayLog.getLogId());
+		rEntity.setPayUrl(cfgPay.getBANK_URL()+"?payLogId="+savePayLog.getLogId()+"&orderId="+orderId);
 		rEntity.setPayLogId(savePayLog.getLogId() + "");
 		rEntity.setOrderId(orderId);
 		logger.info("Ubeyclient jump url:" + cfgPay.getBANK_URL() + " payLogId:" + savePayLog.getLogId() + " orderId:" + orderId);
@@ -99,5 +100,15 @@ public class UbeyPayService {
 		bankUbeyDTO.setUrl(cfgPay.getUBEYAPI_URL());
 		logger.info("Ubey银行列表页面参数BankUbeyCodeDTO={}",bankUbeyDTO);
 		return ResultGenerator.genSuccessResult("succ", bankUbeyDTO);
+	}
+	
+	public boolean checkAmount(String payToken) {
+		JSONObject josn = (JSONObject) JSONObject.parse(payToken);
+		BigDecimal thirdPartyPaid = new BigDecimal(josn.getString("thirdPartyPaid"));
+		int paid = thirdPartyPaid.intValue();
+		if(paid<1) {
+			return true;
+		}
+		return false;
 	}
 }

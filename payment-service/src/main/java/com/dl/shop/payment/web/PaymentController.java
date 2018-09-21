@@ -1162,6 +1162,12 @@ public class PaymentController extends AbstractBaseController {
 			logger.info(loggerId + "支付信息获取为空！");
 			return ResultGenerator.genResult(PayEnums.PAY_TOKEN_EXPRIED.getcode(), PayEnums.PAY_TOKEN_EXPRIED.getMsg());
 		}
+		if("app_ubey".equals(param.getPayCode())) {
+			boolean check = ubeyPayService.checkAmount(jsonData);
+			if(check) {
+				return ResultGenerator.genFailResult("");
+			}
+		}
 		// 清除payToken
 		stringRedisTemplate.delete(payToken);
 

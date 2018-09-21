@@ -33,6 +33,7 @@ import com.dl.shop.payment.pay.tianxia.tianxiaScan.util.TXScanPay;
 import com.dl.shop.payment.pay.yifutong.entity.RespYFTnotifyEntity;
 import com.dl.shop.payment.pay.yifutong.util.PayYFTUtil;
 import com.dl.shop.payment.pay.youbei.entity.RespUBeyNotifyEntity;
+import com.dl.shop.payment.pay.youbei.entity.RespUBeyRSAEntity;
 import com.dl.shop.payment.pay.youbei.util.PayUBeyUtil;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
@@ -260,10 +261,10 @@ public class PayNotifyController {
 	@ApiOperation(value = "优贝支付回调")
 	@PostMapping("/UbeyCallBack")
 	@ResponseBody
-	public void payNotifyUbey(JSONObject resultJson, HttpServletRequest request, HttpServletResponse response) {
-		String data = payUBeyUtil.checkDataSign(resultJson);
+	public void payNotifyUbey(RespUBeyRSAEntity rsa, HttpServletRequest request, HttpServletResponse response) {
+		String data = payUBeyUtil.checkDataSign(rsa);
 		if(data==null) {
-			log.error("优贝支付回调通知验签失败resultJson={}", resultJson);
+			log.error("优贝支付回调通知验签失败RespUBeyRSAEntity={}", rsa);
 		}
 		RespUBeyNotifyEntity respEntity = new RespUBeyNotifyEntity();
 		respEntity = JSONObject.parseObject(data, RespUBeyNotifyEntity.class);
