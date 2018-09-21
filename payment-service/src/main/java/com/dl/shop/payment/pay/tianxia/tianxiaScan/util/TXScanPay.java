@@ -8,6 +8,7 @@ import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -111,6 +112,9 @@ public class TXScanPay {
 		Map<String, Object> _head = (Map<String, Object>) rmap.get("REP_HEAD");
 		String vsign = HttpApi.getSign(txPayResponseBody, txPayConfig.getMD5KEY(merchantStr));
 		String _sign = _head.get("sign").toString();
+		if (StringUtils.isEmpty(_sign)) {
+			return ResultGenerator.genFailResult("该订单不存在!!!!");
+		}
 		logger.info("天下支付解析签名:" + _sign);
 		try {
 			boolean flag = SecurityUtil.verify(vsign, _sign, txPayConfig.getTXPUBKEY(merchantStr), true);
