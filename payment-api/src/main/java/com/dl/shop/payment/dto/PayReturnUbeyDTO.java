@@ -4,7 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-@Api("支付成功返回信息")
+@Api("返回ubey直连网银请求信息")
 @Data
 public class PayReturnUbeyDTO {
 	   @ApiModelProperty

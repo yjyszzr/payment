@@ -564,7 +564,7 @@ public class PaymentController extends AbstractBaseController {
 			}
 		}else if ("app_ubey".equals(paymentDto.getPayCode())) {
 			logger.info("ubey支付url:" + " payCode:" + savePayLog.getPayCode());
-			payBaseResult = ubeyPayService.getUBeyBank(savePayLog, orderId);
+			payBaseResult = ubeyPayService.getUBeyBankUrl(savePayLog, orderId);
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
 				logger.info("获取Ubey银行列表成功:" + str);
@@ -827,7 +827,7 @@ public class PaymentController extends AbstractBaseController {
 			}
 		}else if ("app_ubey".equals(payCode)) {
 			logger.info("ubey支付url:" + " payCode:" + savePayLog.getPayCode());
-			payBaseResult = ubeyPayService.getUBeyBank(savePayLog, orderSn);
+			payBaseResult = ubeyPayService.getUBeyBankUrl(savePayLog, orderSn);
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
 				logger.info("获取Ubey银行列表成功:" + str);
@@ -1462,7 +1462,7 @@ public class PaymentController extends AbstractBaseController {
 			}
 		}else if ("app_ubey".equals(paymentDto.getPayCode())) {
 			logger.info("ubey支付url:" + " payCode:" + savePayLog.getPayCode());
-			payBaseResult = ubeyPayService.getUBeyBank(savePayLog, orderId);
+			payBaseResult = ubeyPayService.getUBeyBankUrl(savePayLog, orderId);
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
 				logger.info("获取Ubey银行列表成功:" + str);

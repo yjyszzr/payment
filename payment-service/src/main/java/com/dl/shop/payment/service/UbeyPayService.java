@@ -16,6 +16,7 @@ import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.shop.payment.dao.BankUbeyCodeMapper;
 import com.dl.shop.payment.dto.BankUbeyCodeDTO;
+import com.dl.shop.payment.dto.PayReturnDTO;
 import com.dl.shop.payment.dto.BankUbeyCodeDTO.BankCode;
 import com.dl.shop.payment.dto.PayReturnUbeyDTO;
 import com.dl.shop.payment.model.BankUbeyCodeModel;
@@ -69,7 +70,19 @@ public class UbeyPayService {
 		return payBaseResult;
 	}
 	
-	public BaseResult<?> getUBeyBank(PayLog savePayLog, String orderId) {
+	public BaseResult<?> getUBeyBankUrl(PayLog savePayLog, String orderId) {
+		logger.info("查询Ubey直连网银银行列表getUBeyBank..........");
+		BaseResult<?> payBaseResult = null;
+		PayReturnDTO rEntity = new PayReturnDTO();
+		rEntity.setPayUrl(cfgPay.getBANK_URL()+"?payLogId="+savePayLog.getLogId());
+		rEntity.setPayLogId(savePayLog.getLogId() + "");
+		rEntity.setOrderId(orderId);
+		logger.info("Ubeyclient jump url:" + cfgPay.getBANK_URL() + " payLogId:" + savePayLog.getLogId() + " orderId:" + orderId);
+		payBaseResult = ResultGenerator.genSuccessResult("succ", rEntity);
+		return payBaseResult;
+	}
+	
+	public BaseResult<BankUbeyCodeDTO> getUBeyBank() {
 		logger.info("查询Ubey直连网银银行列表getUBeyBank..........");
 		BaseResult<?> payBaseResult = null;
 		List<BankUbeyCodeModel> bankUbey = bankUbeyCodeMapper.listUbeyBank(1);
@@ -83,10 +96,7 @@ public class UbeyPayService {
 			bankList.add(code);
 		});
 		bankUbeyDTO.setBank(bankList);
-		bankUbeyDTO.setBankUrl(cfgPay.getBANK_URL());
 		bankUbeyDTO.setUrl(cfgPay.getUBEYAPI_URL());
-		bankUbeyDTO.setOrderId(orderId);
-		bankUbeyDTO.setPayLogId(savePayLog.getLogId());
 		logger.info("Ubey银行列表页面参数BankUbeyCodeDTO={}",bankUbeyDTO);
 		return ResultGenerator.genSuccessResult("succ", bankUbeyDTO);
 	}
