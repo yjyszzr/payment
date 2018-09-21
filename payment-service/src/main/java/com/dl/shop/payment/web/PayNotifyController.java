@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiOperation;
 
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -112,31 +113,34 @@ public class PayNotifyController {
 	@ApiOperation(value = "快接支付支付回调")
 	@PostMapping("/KJPayNotify")
 	@ResponseBody
-	public void KJPayNotify(@RequestBody KuaiJiePayNotifyEntity kuaiJiePayNotifyEntity, HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+	public void KJPayNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		response.setHeader("Content-type", "text/html;charset=UTF-8");
 		Map<?, ?> parameters = request.getParameterMap();// 保存request请求参数的临时变量
-		log.info("快接支付通知消息yftNotify={}", JSONHelper.bean2json(kuaiJiePayNotifyEntity));
+		log.info("快接支付通知消息yftNotify={}", parameters);
+		Map<String,String> realMap = new HashMap<String, String>();
 		// 打印先锋支付返回值
 		log.info("快接支付服务器端通知-接收到快接支付返回报文：");
 		Iterator<?> paiter = parameters.keySet().iterator();
 		while (paiter.hasNext()) {
 			String key = paiter.next().toString();
 			String[] values = (String[]) parameters.get(key);
-			log.info(key + "-------------" + values[0]);
+			log.info(key + "-------------" + values);
+			realMap.put(key, values[0]);
 		}
-		String payOrderfSn = kuaiJiePayNotifyEntity.getMerchant_order_no();
+		String payOrderfSn = realMap.get("merchant_order_no");
+		String status=realMap.get("status");
 		if (StringUtils.isEmpty(payOrderfSn)) {
 			log.error("快接支付返回payOrderSn is null");
 			writeLowerSuccess(response);
 			return;
 		}
-		Boolean checkSignIsTure = kuaiJiePayUtil.booleanCheckSign(kuaiJiePayNotifyEntity);
-		if (!checkSignIsTure) {
-			log.error("快接支付回调通知验签失败payOrderSn={}", payOrderfSn);
-			return;
-		}
+//		Boolean checkSignIsTure = kuaiJiePayUtil.booleanCheckSign(kuaiJiePayNotifyEntity);
+//		if (!checkSignIsTure) {
+//			log.error("快接支付回调通知验签失败payOrderSn={}", payOrderfSn);
+//			return;
+//		}
 		PayLog payLog = payLogService.findPayLogByOrderSign(payOrderfSn);
 		if (payLog == null) {
 			log.info("快接支付[payNotify]该支付订单查询失败 payLogSn:" + payOrderfSn);
@@ -152,11 +156,11 @@ public class PayNotifyController {
 		int payType = payLog.getPayType();
 		String payCode = payLog.getPayCode();
 		RspOrderQueryEntity rspOrderEntikty = new RspOrderQueryEntity();
-		rspOrderEntikty.setResult_code(kuaiJiePayNotifyEntity.getStatus());
-		rspOrderEntikty.setTrade_no(kuaiJiePayNotifyEntity.getTrade_no());
+		rspOrderEntikty.setResult_code(status);
+//		rspOrderEntikty.setTrade_no(kuaiJiePayNotifyEntity.getTrade_no());
 		rspOrderEntikty.setPayCode(payCode);
 		rspOrderEntikty.setType(RspOrderQueryEntity.TYPE_KUAIJIE_PAY);
-		rspOrderEntikty.setTrade_status(kuaiJiePayNotifyEntity.getStatus());
+		rspOrderEntikty.setTrade_status(status);
 		if (payType == 0) {
 			paymentService.orderOptions(payLog, rspOrderEntikty);
 		} else {
