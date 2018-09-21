@@ -115,6 +115,7 @@ import com.dl.shop.payment.pay.yinhe.util.PayUtil;
 import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
+import com.dl.shop.payment.service.UbeyPayService;
 import com.dl.shop.payment.service.UserRechargeService;
 import com.dl.shop.payment.service.UserWithdrawLogService;
 import com.dl.shop.payment.utils.QrUtil;
@@ -130,6 +131,8 @@ public class PaymentController extends AbstractBaseController {
 	private PayLogService payLogService;
 	@Resource
 	private PayMentService paymentService;
+	@Resource
+	private UbeyPayService ubeyPayService;
 	@Resource
 	private WxpayUtil wxpayUtil;
 	@Resource
@@ -559,6 +562,15 @@ public class PaymentController extends AbstractBaseController {
 			} else {
 				logger.info("生成快接支付payOrderSn={},url失败", orderSn);
 			}
+		}else if ("app_ubey".equals(paymentDto.getPayCode())) {
+			logger.info("ubey支付url:" + " payCode:" + savePayLog.getPayCode());
+			payBaseResult = ubeyPayService.getUBeyBank(savePayLog, orderId);
+			if (payBaseResult != null && payBaseResult.getData() != null) {
+				String str = payBaseResult.getData() + "";
+				logger.info("获取Ubey银行列表成功:" + str);
+			} else {
+				logger.info("获取Ubey银行列表失败");
+			}
 		}
 		logger.info(loggerId + " result: code=" + payBaseResult.getCode() + " , msg=" + payBaseResult.getMsg());
 		return payBaseResult;
@@ -812,6 +824,15 @@ public class PaymentController extends AbstractBaseController {
 				logger.info("生成快接支付payOrderSn={},url成功 url={}:", orderSn, str);
 			} else {
 				logger.info("生成快接支付payOrderSn={},url失败", orderSn);
+			}
+		}else if ("app_ubey".equals(payCode)) {
+			logger.info("ubey支付url:" + " payCode:" + savePayLog.getPayCode());
+			payBaseResult = ubeyPayService.getUBeyBank(savePayLog, orderSn);
+			if (payBaseResult != null && payBaseResult.getData() != null) {
+				String str = payBaseResult.getData() + "";
+				logger.info("获取Ubey银行列表成功:" + str);
+			} else {
+				logger.info("获取Ubey银行列表失败");
 			}
 		}
 		// 处理支付失败的情况
@@ -1438,6 +1459,15 @@ public class PaymentController extends AbstractBaseController {
 				logger.info("生成快接支付payOrderSn={},url成功 url={}:", orderSn, str);
 			} else {
 				logger.info("生成快接支付payOrderSn={},url失败", orderSn);
+			}
+		}else if ("app_ubey".equals(paymentDto.getPayCode())) {
+			logger.info("ubey支付url:" + " payCode:" + savePayLog.getPayCode());
+			payBaseResult = ubeyPayService.getUBeyBank(savePayLog, orderId);
+			if (payBaseResult != null && payBaseResult.getData() != null) {
+				String str = payBaseResult.getData() + "";
+				logger.info("获取Ubey银行列表成功:" + str);
+			} else {
+				logger.info("获取Ubey银行列表失败");
 			}
 		}
 		logger.info(loggerId + " result: code=" + payBaseResult.getCode() + " , msg=" + payBaseResult.getMsg());

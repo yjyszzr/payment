@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSONObject;
 import com.dl.base.util.JSONHelper;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
@@ -31,6 +32,8 @@ import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestCallback.
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.util.TXScanPay;
 import com.dl.shop.payment.pay.yifutong.entity.RespYFTnotifyEntity;
 import com.dl.shop.payment.pay.yifutong.util.PayYFTUtil;
+import com.dl.shop.payment.pay.youbei.entity.RespUBeyNotifyEntity;
+import com.dl.shop.payment.pay.youbei.util.PayUBeyUtil;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
 
@@ -46,6 +49,9 @@ public class PayNotifyController {
 
 	@Resource
 	private PayYFTUtil payYFTUtil;
+	
+	@Resource
+	private PayUBeyUtil payUBeyUtil;
 
 	@Resource
 	private KuaiJiePayUtil kuaiJiePayUtil;
@@ -249,5 +255,51 @@ public class PayNotifyController {
 		}
 		writeLowerSuccess(response);
 		return;
+	}
+	
+	@ApiOperation(value = "优贝支付回调")
+	@PostMapping("/UbeyCallBack")
+	@ResponseBody
+	public void payNotifyUbey(JSONObject resultJson, HttpServletRequest request, HttpServletResponse response) {
+		String data = payUBeyUtil.checkDataSign(resultJson);
+		if(data==null) {
+			log.error("优贝支付回调通知验签失败resultJson={}", resultJson);
+		}
+		RespUBeyNotifyEntity respEntity = new RespUBeyNotifyEntity();
+		respEntity = JSONObject.parseObject(data, RespUBeyNotifyEntity.class);
+		if(!respEntity.getRespCode().equals("0000")) {
+			String payOrderfSn = respEntity.getOrderId();
+			if (StringUtils.isEmpty(payOrderfSn)) {
+				log.error("优贝支付返回payOrderSn is null");
+				writeUppercaseSuccess(response);
+				return;
+			}
+			PayLog payLog = payLogService.findPayLogByOrderSign(payOrderfSn);
+			if (payLog == null) {
+				log.info("[payNotify]" + "该支付订单查询失败 payLogSn:" + payOrderfSn);
+				writeUppercaseSuccess(response);
+				return;
+			}
+			int isPaid = payLog.getIsPaid();
+			if (isPaid == 1) {
+				log.info("[payNotify] payOrderSn={}订单已支付...", payOrderfSn);
+				writeUppercaseSuccess(response);
+				return;
+			}
+			int payType = payLog.getPayType();
+			String payCode = payLog.getPayCode();
+			RspOrderQueryEntity rspOrderEntikty = new RspOrderQueryEntity();
+			rspOrderEntikty.setResult_code("3");
+			rspOrderEntikty.setTrade_no("");
+			rspOrderEntikty.setPayCode(payCode);
+			rspOrderEntikty.setType(RspOrderQueryEntity.TYPE_UBEY);
+			rspOrderEntikty.setTrade_status("3");
+			if (payType == 0) {
+				paymentService.orderOptions(payLog, rspOrderEntikty);
+			} else {
+				paymentService.rechargeOptions(payLog, rspOrderEntikty);
+			}
+			writeUppercaseSuccess(response);
+		}
 	}
 }
