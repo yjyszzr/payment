@@ -117,7 +117,7 @@ public class PayUBeyUtil {
 			 byte[] data=RSAUtil.encryptData(text.getBytes(), publicKey);
 			 byte[] sign = RSAUtil.privatesign((text),privateKey);
 			 JSONObject jsonPost = new JSONObject();
-			 jsonPost.put("date", Base64Utils.encode(data));
+			 jsonPost.put("data", Base64Utils.encode(data));
 			 jsonPost.put("signature", Base64Utils.encode(sign));
 			 return jsonPost;
 		} catch (Exception e) {
