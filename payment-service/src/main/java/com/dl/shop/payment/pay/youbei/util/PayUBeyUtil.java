@@ -1,7 +1,5 @@
 package com.dl.shop.payment.pay.youbei.util;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.TreeMap;
@@ -39,7 +37,7 @@ public class PayUBeyUtil {
 	public final FormUBeyEntity getUBeyPayUrl(String amount,String orderId,String banktype)  {
 		logger.info("getYBPayUrl调取优贝科技支付orderId={},amount={}",orderId,amount);
 		if("true".equals(cfgPay.getDEBUG())) {
-			amount = "1";
+			amount = "100";//单位（分）
 		}
 		try {
 			FormUBeyEntity rEntity = new FormUBeyEntity();
@@ -52,7 +50,7 @@ public class PayUBeyUtil {
 			jsonYB.put("orderId", orderId);
 			jsonYB.put("type", "kozl");
 			//加密
-			JSONObject dataJson = getDataAndSign(jsonYB.toString());
+			JSONObject dataJson = this.getDataAndSign(jsonYB.toString());
 			if(dataJson==null) {
 				logger.info("调取优贝科技加密参数异常dataJson==null");
 				return null;
@@ -68,7 +66,7 @@ public class PayUBeyUtil {
 	}
 	
 	/**
-	 * 请求支付
+	 * 支付查询
 	 * @throws Exception 
 	 */
 	public BaseResult<RspOrderQueryEntity> queryPayResult(String payCode, String orderNo) {
@@ -80,12 +78,12 @@ public class PayUBeyUtil {
 		treeMap.put("account", cfgPay.getAPP_ACCOUNT());
 		treeMap.put("orderId", orderNo);
 		treeMap.put("type", "TenQuery");
-		JSONObject dataJson = getDataAndSign(treeMap.toString());
+		JSONObject dataJson = this.getDataAndSign(treeMap.toString());
 		rspHttpEntity = HttpUtil.sendMsg(dataJson.toString(),cfgPay.getQUERY_URL(),false);
 		logger.info("优贝查询请求返回信息:" + rspHttpEntity.toString());
 		if(rspHttpEntity.isSucc) {
 			RespUBeyRSAEntity rsa = JSON.parseObject(rspHttpEntity.msg,RespUBeyRSAEntity.class);
-			String data = checkDataSign(rsa);
+			String data = this.checkDataSign(rsa);
 			if(data==null) {
 				return ResultGenerator.genFailResult("查询优贝支付返回数据验签失败[" + rEntity.getMessage() + "]");
 			}
@@ -127,7 +125,7 @@ public class PayUBeyUtil {
 	}
 	
 	/**
-	 * 
+	 * 签名校验
 	 * @param args
 	 * @throws Exception
 	 */
