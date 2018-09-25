@@ -36,7 +36,7 @@ public class PayUBeyUtil {
 	 * @throws Exception 
 	 */
 	public final FormUBeyEntity getUBeyPayUrl(String amount,String orderId,String banktype)  {
-		logger.info("getYBPayUrl调取优贝科技支付orderId={},amount={}",orderId,amount);
+		logger.info("getUBeyPayUrl调取优贝科技支付orderId={},amount={}",orderId,amount);
 		if("true".equals(cfgPay.getDEBUG())) {
 			amount = "100";//单位（分）
 		}
@@ -50,6 +50,9 @@ public class PayUBeyUtil {
 			jsonYB.put("notify_url", cfgPay.getNotifyUrl());
 			jsonYB.put("orderId", orderId);
 			jsonYB.put("type", PAY_TYPE);
+ 
+			logger.info("getUBeyPayUrl加密数据jsonYB={}",jsonYB);
+ 
 			//加密
 			JSONObject dataJson = this.getDataAndSign(jsonYB.toString());
 			if(dataJson==null) {
