@@ -2,8 +2,6 @@ package com.dl.shop.payment.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.annotation.Resource;
 
@@ -15,12 +13,8 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
-import com.dl.shop.payment.dao.BankUbeyCodeMapper;
-import com.dl.shop.payment.dto.BankUbeyCodeDTO;
 import com.dl.shop.payment.dto.PayReturnDTO;
-import com.dl.shop.payment.dto.BankUbeyCodeDTO.BankCode;
 import com.dl.shop.payment.dto.PayReturnUbeyDTO;
-import com.dl.shop.payment.model.BankUbeyCodeModel;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.pay.youbei.config.ConfigerUBeyPay;
 import com.dl.shop.payment.pay.youbei.entity.FormUBeyEntity;
@@ -36,8 +30,6 @@ public class UbeyPayService {
 	private final static Logger logger = LoggerFactory.getLogger(PaymentController.class);
 	@Resource
 	private PayUBeyUtil payUBeyUtil;
-	@Resource
-	private BankUbeyCodeMapper bankUbeyCodeMapper;
 	@Resource
 	private ConfigerUBeyPay cfgPay;
 	
