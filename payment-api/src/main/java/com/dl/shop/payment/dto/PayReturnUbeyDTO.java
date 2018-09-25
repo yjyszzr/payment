@@ -18,5 +18,5 @@ public class PayReturnUbeyDTO {
 	   @ApiModelProperty(value="data参数")
 	   private String data;
 	   @ApiModelProperty(value="signatrue签名")
-	   private String signatrue;
+	   private String signature;
 }

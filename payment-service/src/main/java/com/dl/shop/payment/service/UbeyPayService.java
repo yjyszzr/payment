@@ -50,7 +50,7 @@ public class UbeyPayService {
 				rEntity.setOrderId(orderId);
 //				rEntity.setLotteryClassifyId(lotteryClassifyId);
 				rEntity.setData(rspEntity.getData());
-				rEntity.setSignatrue(rspEntity.getSignature());
+				rEntity.setSignature(rspEntity.getSignature());
 				logger.info("Ubeyclient jump url:" + url + " payLogId:" + savePayLog.getLogId() + " orderId:" + orderId);
 				payBaseResult = ResultGenerator.genSuccessResult("succ", rEntity);
 			} else {
