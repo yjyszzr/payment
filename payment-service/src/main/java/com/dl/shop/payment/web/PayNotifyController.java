@@ -133,7 +133,7 @@ public class PayNotifyController {
 		while (paiter.hasNext()) {
 			String key = paiter.next().toString();
 			String[] values = (String[]) parameters.get(key);
-			log.info(key + "-------------" + values);
+			log.info(key + "-------------" + values[0]);
 			realMap.put(key, values[0]);
 		}
 		String payOrderfSn = realMap.get("merchant_order_no");

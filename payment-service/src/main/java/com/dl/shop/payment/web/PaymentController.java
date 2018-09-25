@@ -553,7 +553,7 @@ public class PaymentController extends AbstractBaseController {
 			}
 		} else if ("app_kuaijie_pay_qqqianbao".equalsIgnoreCase(payCode)) {
 			logger.info("生成快接支付qq钱包支付 payCode:" + savePayLog.getPayCode());
-			payBaseResult = paymentService.getKuaijiePayQqQianBaoUrl(savePayLog, orderSn,"");
+			payBaseResult = paymentService.getKuaijiePayQqQianBaoUrl(savePayLog, orderId,"");
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
 				logger.info("生成快接支付qq钱包支付payOrderSn={},url成功url={}:", orderSn, str);
@@ -562,7 +562,7 @@ public class PaymentController extends AbstractBaseController {
 			}
 		} else if ("app_kuaijie_pay_jd".equalsIgnoreCase(payCode)) {
 			logger.info("生成快接支付url:payCode:" + savePayLog.getPayCode());
-			payBaseResult = paymentService.getKuaijiePayJingDongUrl(savePayLog, orderSn,"");
+			payBaseResult = paymentService.getKuaijiePayJingDongUrl(savePayLog, orderId,"");
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
 				logger.info("生成快接支付payOrderSn={},url成功 url={}:", orderSn, str);
@@ -1458,7 +1458,7 @@ public class PaymentController extends AbstractBaseController {
 			}
 		} else if ("app_kuaijie_pay_qqqianbao".equalsIgnoreCase(payCode)) {
 			logger.info("生成快接支付qq钱包支付 payCode:" + savePayLog.getPayCode());
-			payBaseResult = paymentService.getKuaijiePayQqQianBaoUrl(savePayLog, orderSn,lotteryClassifyIdStr);
+			payBaseResult = paymentService.getKuaijiePayQqQianBaoUrl(savePayLog, orderId,lotteryClassifyIdStr);
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
 				logger.info("生成快接支付qq钱包支付payOrderSn={},url成功url={}:", orderSn, str);
@@ -1467,7 +1467,7 @@ public class PaymentController extends AbstractBaseController {
 			}
 		} else if ("app_kuaijie_pay_jd".equalsIgnoreCase(payCode)) {
 			logger.info("生成快接支付url:payCode:" + savePayLog.getPayCode());
-			payBaseResult = paymentService.getKuaijiePayJingDongUrl(savePayLog, orderSn,lotteryClassifyIdStr);
+			payBaseResult = paymentService.getKuaijiePayJingDongUrl(savePayLog, orderId,lotteryClassifyIdStr);
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
 				logger.info("生成快接支付payOrderSn={},url成功 url={}:", orderSn, str);
