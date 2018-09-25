@@ -49,8 +49,8 @@ public class UbeyPaymentController {
 	private PayLogService payLogService;
     
     @ApiOperation(value="Ubey支付请求数据")
-    @PostMapping("/nUnifiedOrder")
-    public BaseResult<PayReturnUbeyDTO> nUnifiedOrder(@RequestBody UbeyBankTypeParam param) {
+    @PostMapping("/nUnifiedOrderUbey")
+    public BaseResult<PayReturnUbeyDTO> nUnifiedOrderUbey(@RequestBody UbeyBankTypeParam param) {
     	logger.info("Ubey选择银行列表传入参数UbeyBankTypeParam={}",param);
     	if(param.getOrderId()==null||param.getOrderId().equals("")||param.getPayLogId()==null||param.getPayLogId().equals("")) {
     		return ResultGenerator.genFailResult("参数错误", null);
