@@ -30,6 +30,7 @@ public class PayUBeyUtil {
 	@Resource
 	private ConfigerUBeyPay cfgPay;
 	
+	private final String PAY_TYPE="kkwwo";
 	/**
 	 * 请求支付
 	 * @throws Exception 
@@ -48,7 +49,7 @@ public class PayUBeyUtil {
 			jsonYB.put("callback_url",cfgPay.getCallbackUrl());
 			jsonYB.put("notify_url", cfgPay.getNotifyUrl());
 			jsonYB.put("orderId", orderId);
-			jsonYB.put("type", "kozl");
+			jsonYB.put("type", PAY_TYPE);
 			//加密
 			JSONObject dataJson = this.getDataAndSign(jsonYB.toString());
 			if(dataJson==null) {
