@@ -55,22 +55,11 @@ public class UbeyPaymentController {
     	if(param.getOrderId()==null||param.getOrderId().equals("")||param.getPayLogId()==null||param.getPayLogId().equals("")) {
     		return ResultGenerator.genFailResult("参数错误", null);
     	}
-    	if(param.getBankType()==null||param.getBankType().equals("")) {
-    		return ResultGenerator.genFailResult("请选择银行", null);
-    	}
     	PayLog payLog = payLogService.findById(param.getPayLogId());
     	if(payLog==null) {
     		return ResultGenerator.genFailResult("请求失败", null);
     	}
-        return ubeyPayService.getUBeyPayUrl(payLog,param.getOrderId(),param.getBankType());
+        return ubeyPayService.getUBeyPayUrl(payLog,param.getOrderId());
     }
     
-    @ApiOperation(value="Ubey选择银行列表")
-    @PostMapping("/UBeyBank")
-    public BaseResult<BankUbeyCodeDTO> getUBeyBank(@RequestBody EmptyParam emprt) {
-    	return ubeyPayService.getUBeyBank();
-    }
-    
-    
-
 }

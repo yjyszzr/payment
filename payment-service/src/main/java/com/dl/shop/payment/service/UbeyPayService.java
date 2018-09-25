@@ -41,13 +41,13 @@ public class UbeyPayService {
 	@Resource
 	private ConfigerUBeyPay cfgPay;
 	
-	public BaseResult<PayReturnUbeyDTO> getUBeyPayUrl(PayLog savePayLog, String orderId,String banktype) {
+	public BaseResult<PayReturnUbeyDTO> getUBeyPayUrl(PayLog savePayLog, String orderId) {
 		BaseResult<PayReturnUbeyDTO> payBaseResult = null;
 		BigDecimal amtDouble = savePayLog.getOrderAmount();
 		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_EVEN);//！！！！！！！！！！！！！
 		String payOrderSn = savePayLog.getPayOrderSn();
 		FormUBeyEntity rspEntity = null;
-		rspEntity = payUBeyUtil.getUBeyPayUrl(bigD.toString(), payOrderSn,banktype);
+		rspEntity = payUBeyUtil.getUBeyPayUrl(bigD.toString(), payOrderSn);
 		if (rspEntity != null) {
 			PayReturnUbeyDTO rEntity = new PayReturnUbeyDTO();
 			String url = rspEntity.getUrl();
@@ -83,24 +83,24 @@ public class UbeyPayService {
 		return payBaseResult;
 	}
 	
-	public BaseResult<BankUbeyCodeDTO> getUBeyBank() {
-		logger.info("查询Ubey直连网银银行列表getUBeyBank..........");
-		BaseResult<?> payBaseResult = null;
-		List<BankUbeyCodeModel> bankUbey = bankUbeyCodeMapper.listUbeyBank(1);
-		BankUbeyCodeDTO bankUbeyDTO = new BankUbeyCodeDTO();
-		List<BankCode> bankList = new ArrayList<BankUbeyCodeDTO.BankCode>();
-		bankUbey.forEach(item->{
-			BankCode code = new  BankCode();
-			code.setCode(item.getCode());
-			code.setImageUrl(item.getImage());
-			code.setName(item.getName());
-			bankList.add(code);
-		});
-		bankUbeyDTO.setBank(bankList);
-		bankUbeyDTO.setUrl(cfgPay.getUBEYAPI_URL());
-		logger.info("Ubey银行列表页面参数BankUbeyCodeDTO={}",bankUbeyDTO);
-		return ResultGenerator.genSuccessResult("succ", bankUbeyDTO);
-	}
+//	public BaseResult<BankUbeyCodeDTO> getUBeyBank() {
+//		logger.info("查询Ubey直连网银银行列表getUBeyBank..........");
+//		BaseResult<?> payBaseResult = null;
+//		List<BankUbeyCodeModel> bankUbey = bankUbeyCodeMapper.listUbeyBank(1);
+//		BankUbeyCodeDTO bankUbeyDTO = new BankUbeyCodeDTO();
+//		List<BankCode> bankList = new ArrayList<BankUbeyCodeDTO.BankCode>();
+//		bankUbey.forEach(item->{
+//			BankCode code = new  BankCode();
+//			code.setCode(item.getCode());
+//			code.setImageUrl(item.getImage());
+//			code.setName(item.getName());
+//			bankList.add(code);
+//		});
+//		bankUbeyDTO.setBank(bankList);
+//		bankUbeyDTO.setUrl(cfgPay.getUBEYAPI_URL());
+//		logger.info("Ubey银行列表页面参数BankUbeyCodeDTO={}",bankUbeyDTO);
+//		return ResultGenerator.genSuccessResult("succ", bankUbeyDTO);
+//	}
 	
 	public boolean checkAmount(String payToken) {
 		JSONObject josn = (JSONObject) JSONObject.parse(payToken);
