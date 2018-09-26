@@ -92,6 +92,7 @@ public class PayUBeyUtil {
 				return ResultGenerator.genFailResult("查询优贝支付返回数据验签失败[" + rEntity.getMessage() + "]");
 			}
 			rEntity = JSONObject.parseObject(data, RespUBeyEntity.class);
+			logger.info("优贝查询详细参数RespUBeyEntity={}" ,rEntity);
 			if(!rEntity.getState().equals("61")) {
 				return ResultGenerator.genFailResult("查询优贝支付查询失败[" + rEntity.getMessage() + "]");
 			}
