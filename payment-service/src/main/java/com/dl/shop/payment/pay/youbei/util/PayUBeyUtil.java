@@ -73,14 +73,14 @@ public class PayUBeyUtil {
 	 * 支付查询
 	 * @throws Exception 
 	 */
-	public BaseResult<RspOrderQueryEntity> queryPayResult(String payCode, String orderNo) {
-		logger.info("queryPayResult调取优贝查询订单支付结果orderNo={}",orderNo);
+	public BaseResult<RspOrderQueryEntity> queryPayResult(String payCode, String orderId) {
+		logger.info("queryPayResult调取优贝查询订单支付结果orderId={}",orderId);
 		RspOrderQueryEntity rspOrderQueryEntity = new RspOrderQueryEntity();
 		RespUBeyEntity rEntity = null;
 		RspHttpEntity rspHttpEntity = null;
 		JSONObject treeMap = new JSONObject(new TreeMap<String, Object>());
 		treeMap.put("account", cfgPay.getAPP_ACCOUNT());
-		treeMap.put("orderId", orderNo);
+		treeMap.put("orderId", orderId);
 		treeMap.put("type", "TenQuery");
 		JSONObject dataJson = this.getDataAndSign(treeMap.toString());
 		rspHttpEntity = HttpUtil.sendMsg(dataJson.toString(),cfgPay.getQUERY_URL(),false);

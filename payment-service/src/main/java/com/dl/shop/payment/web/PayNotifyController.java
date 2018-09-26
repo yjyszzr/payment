@@ -262,6 +262,7 @@ public class PayNotifyController {
 	@PostMapping("/UbeyCallBack")
 	@ResponseBody
 	public void payNotifyUbey(RespUBeyRSAEntity rsa, HttpServletRequest request, HttpServletResponse response) {
+		log.info("Ubey支付回调返回报文：={}", rsa);
 		String data = payUBeyUtil.checkDataSign(rsa);
 		if(data==null) {
 			log.error("优贝支付回调通知验签失败RespUBeyRSAEntity={}", rsa);

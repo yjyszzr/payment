@@ -91,6 +91,7 @@ import com.dl.shop.payment.pay.xianfeng.util.XianFengPayUtil;
 import com.dl.shop.payment.pay.yifutong.entity.RspYFTEntity;
 import com.dl.shop.payment.pay.yifutong.util.PayYFTUtil;
 import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
+import com.dl.shop.payment.pay.youbei.util.PayUBeyUtil;
 import com.dl.shop.payment.utils.QrUtil;
 import com.dl.shop.payment.web.PaymentController;
 
@@ -159,6 +160,8 @@ public class PayMentService extends AbstractService<PayMent> {
 	private String appTXPayH5QrUrl;
 	@Resource
 	private KuaiJiePayUtil kuaiJiePayUtil;
+	@Resource
+	private PayUBeyUtil payUBeyUtil;
 
 	/**
 	 * 查询所有可用的支付方式
@@ -655,6 +658,8 @@ public class PayMentService extends AbstractService<PayMent> {
 			baseResult = kuaiJiePayUtil.queryOrderStatusQQqianBao(payLog.getTradeNo());
 		} else if ("app_kuaijie_pay_jd".equals(payCode)) {
 			baseResult = kuaiJiePayUtil.queryOrderStatusJd(payLog.getTradeNo());
+		}else if ("app_Ubey".equals(payCode)) {
+			baseResult = payUBeyUtil.queryPayResult("app_Ubey", payLog.getPayOrderSn());
 		}
 		if (baseResult == null || baseResult.getCode() != 0) {
 			if (baseResult != null) {
