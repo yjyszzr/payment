@@ -658,8 +658,8 @@ public class PayMentService extends AbstractService<PayMent> {
 			baseResult = kuaiJiePayUtil.queryOrderStatusQQqianBao(payLog.getTradeNo());
 		} else if ("app_kuaijie_pay_jd".equals(payCode)) {
 			baseResult = kuaiJiePayUtil.queryOrderStatusJd(payLog.getTradeNo());
-		}else if ("app_Ubey".equals(payCode)) {
-			baseResult = payUBeyUtil.queryPayResult("app_Ubey", payLog.getPayOrderSn());
+		}else if ("app_ubey".equals(payCode)) {
+			baseResult = payUBeyUtil.queryPayResult("app_ubey", payLog.getPayOrderSn());
 		}
 		if (baseResult == null || baseResult.getCode() != 0) {
 			if (baseResult != null) {
