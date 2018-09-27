@@ -13,8 +13,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -93,8 +91,11 @@ import com.dl.shop.payment.pay.xianfeng.util.XianFengPayUtil;
 import com.dl.shop.payment.pay.yifutong.entity.RspYFTEntity;
 import com.dl.shop.payment.pay.yifutong.util.PayYFTUtil;
 import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
+import com.dl.shop.payment.pay.youbei.util.PayUBeyUtil;
 import com.dl.shop.payment.utils.QrUtil;
 import com.dl.shop.payment.web.PaymentController;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
@@ -161,7 +162,8 @@ public class PayMentService extends AbstractService<PayMent> {
 	private String appTXPayH5QrUrl;
 	@Resource
 	private KuaiJiePayUtil kuaiJiePayUtil;
-	
+	@Resource
+	private PayUBeyUtil payUBeyUtil;
 	@Resource
 	private ISwitchConfigService iSwitchConfigService;
 

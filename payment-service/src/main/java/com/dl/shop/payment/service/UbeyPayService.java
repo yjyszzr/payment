@@ -2,8 +2,6 @@ package com.dl.shop.payment.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.annotation.Resource;
 
@@ -15,12 +13,8 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
-import com.dl.shop.payment.dao.BankUbeyCodeMapper;
-import com.dl.shop.payment.dto.BankUbeyCodeDTO;
 import com.dl.shop.payment.dto.PayReturnDTO;
-import com.dl.shop.payment.dto.BankUbeyCodeDTO.BankCode;
 import com.dl.shop.payment.dto.PayReturnUbeyDTO;
-import com.dl.shop.payment.model.BankUbeyCodeModel;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.pay.youbei.config.ConfigerUBeyPay;
 import com.dl.shop.payment.pay.youbei.entity.FormUBeyEntity;
@@ -37,17 +31,15 @@ public class UbeyPayService {
 	@Resource
 	private PayUBeyUtil payUBeyUtil;
 	@Resource
-	private BankUbeyCodeMapper bankUbeyCodeMapper;
-	@Resource
 	private ConfigerUBeyPay cfgPay;
 	
-	public BaseResult<PayReturnUbeyDTO> getUBeyPayUrl(PayLog savePayLog, String orderId,String banktype) {
+	public BaseResult<PayReturnUbeyDTO> getUBeyPayUrl(PayLog savePayLog, String orderId) {
 		BaseResult<PayReturnUbeyDTO> payBaseResult = null;
 		BigDecimal amtDouble = savePayLog.getOrderAmount();
 		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_EVEN);//！！！！！！！！！！！！！
 		String payOrderSn = savePayLog.getPayOrderSn();
 		FormUBeyEntity rspEntity = null;
-		rspEntity = payUBeyUtil.getUBeyPayUrl(bigD.toString(), payOrderSn,banktype);
+		rspEntity = payUBeyUtil.getUBeyPayUrl(bigD.toString(), payOrderSn);
 		if (rspEntity != null) {
 			PayReturnUbeyDTO rEntity = new PayReturnUbeyDTO();
 			String url = rspEntity.getUrl();
@@ -58,7 +50,7 @@ public class UbeyPayService {
 				rEntity.setOrderId(orderId);
 //				rEntity.setLotteryClassifyId(lotteryClassifyId);
 				rEntity.setData(rspEntity.getData());
-				rEntity.setSignatrue(rspEntity.getSignature());
+				rEntity.setSignature(rspEntity.getSignature());
 				logger.info("Ubeyclient jump url:" + url + " payLogId:" + savePayLog.getLogId() + " orderId:" + orderId);
 				payBaseResult = ResultGenerator.genSuccessResult("succ", rEntity);
 			} else {
@@ -83,24 +75,24 @@ public class UbeyPayService {
 		return payBaseResult;
 	}
 	
-	public BaseResult<BankUbeyCodeDTO> getUBeyBank() {
-		logger.info("查询Ubey直连网银银行列表getUBeyBank..........");
-		BaseResult<?> payBaseResult = null;
-		List<BankUbeyCodeModel> bankUbey = bankUbeyCodeMapper.listUbeyBank(1);
-		BankUbeyCodeDTO bankUbeyDTO = new BankUbeyCodeDTO();
-		List<BankCode> bankList = new ArrayList<BankUbeyCodeDTO.BankCode>();
-		bankUbey.forEach(item->{
-			BankCode code = new  BankCode();
-			code.setCode(item.getCode());
-			code.setImageUrl(item.getImage());
-			code.setName(item.getName());
-			bankList.add(code);
-		});
-		bankUbeyDTO.setBank(bankList);
-		bankUbeyDTO.setUrl(cfgPay.getUBEYAPI_URL());
-		logger.info("Ubey银行列表页面参数BankUbeyCodeDTO={}",bankUbeyDTO);
-		return ResultGenerator.genSuccessResult("succ", bankUbeyDTO);
-	}
+//	public BaseResult<BankUbeyCodeDTO> getUBeyBank() {
+//		logger.info("查询Ubey直连网银银行列表getUBeyBank..........");
+//		BaseResult<?> payBaseResult = null;
+//		List<BankUbeyCodeModel> bankUbey = bankUbeyCodeMapper.listUbeyBank(1);
+//		BankUbeyCodeDTO bankUbeyDTO = new BankUbeyCodeDTO();
+//		List<BankCode> bankList = new ArrayList<BankUbeyCodeDTO.BankCode>();
+//		bankUbey.forEach(item->{
+//			BankCode code = new  BankCode();
+//			code.setCode(item.getCode());
+//			code.setImageUrl(item.getImage());
+//			code.setName(item.getName());
+//			bankList.add(code);
+//		});
+//		bankUbeyDTO.setBank(bankList);
+//		bankUbeyDTO.setUrl(cfgPay.getUBEYAPI_URL());
+//		logger.info("Ubey银行列表页面参数BankUbeyCodeDTO={}",bankUbeyDTO);
+//		return ResultGenerator.genSuccessResult("succ", bankUbeyDTO);
+//	}
 	
 	public boolean checkAmount(String payToken) {
 		JSONObject josn = (JSONObject) JSONObject.parse(payToken);

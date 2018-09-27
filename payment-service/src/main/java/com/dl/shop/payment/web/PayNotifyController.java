@@ -133,7 +133,7 @@ public class PayNotifyController {
 		while (paiter.hasNext()) {
 			String key = paiter.next().toString();
 			String[] values = (String[]) parameters.get(key);
-			log.info(key + "-------------" + values);
+			log.info(key + "-------------" + values[0]);
 			realMap.put(key, values[0]);
 		}
 		String payOrderfSn = realMap.get("merchant_order_no");
@@ -262,7 +262,9 @@ public class PayNotifyController {
 	@PostMapping("/UbeyCallBack")
 	@ResponseBody
 	public void payNotifyUbey(RespUBeyRSAEntity rsa, HttpServletRequest request, HttpServletResponse response) {
+		log.info("Ubey支付回调返回报文：={}", rsa);
 		String data = payUBeyUtil.checkDataSign(rsa);
+		log.info("Ubey支付回调解密报文：={}", data);
 		if(data==null) {
 			log.error("优贝支付回调通知验签失败RespUBeyRSAEntity={}", rsa);
 		}

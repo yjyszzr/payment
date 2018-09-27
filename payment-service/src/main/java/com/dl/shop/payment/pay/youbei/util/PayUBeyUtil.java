@@ -30,12 +30,13 @@ public class PayUBeyUtil {
 	@Resource
 	private ConfigerUBeyPay cfgPay;
 	
+	private final String PAY_TYPE="kkwwo";
 	/**
 	 * 请求支付
 	 * @throws Exception 
 	 */
-	public final FormUBeyEntity getUBeyPayUrl(String amount,String orderId,String banktype)  {
-		logger.info("getYBPayUrl调取优贝科技支付orderId={},amount={}",orderId,amount);
+	public final FormUBeyEntity getUBeyPayUrl(String amount,String orderId)  {
+		logger.info("getUBeyPayUrl调取优贝科技支付orderId={},amount={}",orderId,amount);
 		if("true".equals(cfgPay.getDEBUG())) {
 			amount = "100";//单位（分）
 		}
@@ -44,11 +45,14 @@ public class PayUBeyUtil {
 			JSONObject jsonYB = new JSONObject(new TreeMap<String, Object>());
 			jsonYB.put("account", cfgPay.getAPP_ACCOUNT());
 			jsonYB.put("amount", amount);
-			jsonYB.put("banktype", banktype);
+			jsonYB.put("banktype", "");
 			jsonYB.put("callback_url",cfgPay.getCallbackUrl());
 			jsonYB.put("notify_url", cfgPay.getNotifyUrl());
 			jsonYB.put("orderId", orderId);
-			jsonYB.put("type", "kozl");
+			jsonYB.put("type", PAY_TYPE);
+ 
+			logger.info("getUBeyPayUrl加密数据jsonYB={}",jsonYB);
+ 
 			//加密
 			JSONObject dataJson = this.getDataAndSign(jsonYB.toString());
 			if(dataJson==null) {
@@ -69,14 +73,14 @@ public class PayUBeyUtil {
 	 * 支付查询
 	 * @throws Exception 
 	 */
-	public BaseResult<RspOrderQueryEntity> queryPayResult(String payCode, String orderNo) {
-		logger.info("queryPayResult调取优贝查询订单支付结果orderNo={}",orderNo);
+	public BaseResult<RspOrderQueryEntity> queryPayResult(String payCode, String orderId) {
+		logger.info("queryPayResult调取优贝查询订单支付结果orderId={}",orderId);
 		RspOrderQueryEntity rspOrderQueryEntity = new RspOrderQueryEntity();
 		RespUBeyEntity rEntity = null;
 		RspHttpEntity rspHttpEntity = null;
 		JSONObject treeMap = new JSONObject(new TreeMap<String, Object>());
 		treeMap.put("account", cfgPay.getAPP_ACCOUNT());
-		treeMap.put("orderId", orderNo);
+		treeMap.put("orderId", orderId);
 		treeMap.put("type", "TenQuery");
 		JSONObject dataJson = this.getDataAndSign(treeMap.toString());
 		rspHttpEntity = HttpUtil.sendMsg(dataJson.toString(),cfgPay.getQUERY_URL(),false);
@@ -88,6 +92,7 @@ public class PayUBeyUtil {
 				return ResultGenerator.genFailResult("查询优贝支付返回数据验签失败[" + rEntity.getMessage() + "]");
 			}
 			rEntity = JSONObject.parseObject(data, RespUBeyEntity.class);
+			logger.info("优贝查询详细参数RespUBeyEntity={}" ,rEntity);
 			if(!rEntity.getState().equals("61")) {
 				return ResultGenerator.genFailResult("查询优贝支付查询失败[" + rEntity.getMessage() + "]");
 			}

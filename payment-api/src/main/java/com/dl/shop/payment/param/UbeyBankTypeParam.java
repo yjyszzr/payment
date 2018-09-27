@@ -7,10 +7,8 @@ import lombok.Data;
 @Data
 public class UbeyBankTypeParam {
 
-	@ApiModelProperty("订单号")
+	@ApiModelProperty("支付订单号")
 	private Integer payLogId;
-	@ApiModelProperty("退回金额数据")
+	@ApiModelProperty("订单")
 	private String orderId;
-	@ApiModelProperty("退回金额数据")
-	private String bankType;
 }

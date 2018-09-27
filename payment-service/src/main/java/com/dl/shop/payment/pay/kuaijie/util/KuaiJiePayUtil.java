@@ -172,14 +172,14 @@ public class KuaiJiePayUtil {
 				rEntity.setInfo("QQ钱包验证响应签名失败");
 			}
 			String resultyCode="Process";
-			if("1".equals(rEntity.getData().getStatus())){
+			if(rEntity.getData()!=null&&"1".equals(rEntity.getData().getStatus())){
 				resultyCode="Success";
-			}else if("2".equals(rEntity.getData().getStatus())){
+			}else if(rEntity.getData()!=null&&"2".equals(rEntity.getData().getStatus())){
 				resultyCode="Fail";
 			}
 			RspOrderQueryEntity rspOrderQueryEntity = new RspOrderQueryEntity();
 			rspOrderQueryEntity.setResult_code(resultyCode);
-			rspOrderQueryEntity.setTrade_no(rEntity.getData().getTrade_no());
+//			rspOrderQueryEntity.setTrade_no(rEntity.getData().getTrade_no());
 			rspOrderQueryEntity.setType(RspOrderQueryEntity.TYPE_KUAIJIE_PAY);
 			return ResultGenerator.genSuccessResult("succ",rspOrderQueryEntity);
 		}else {
