@@ -35,6 +35,7 @@ import com.dl.base.util.DateUtil;
 import com.dl.base.util.SessionUtil;
 import com.dl.lottery.api.ILotteryPrintService;
 import com.dl.member.api.IActivityService;
+import com.dl.member.api.ISwitchConfigService;
 import com.dl.member.api.IUserAccountService;
 import com.dl.member.api.IUserBonusService;
 import com.dl.member.api.IUserQualificationService;
@@ -49,6 +50,7 @@ import com.dl.member.param.StrParam;
 import com.dl.member.param.SurplusPayParam;
 import com.dl.member.param.UpdateUserRechargeParam;
 import com.dl.member.param.UserBonusParam;
+import com.dl.member.param.UserDealActionParam;
 import com.dl.order.api.IOrderService;
 import com.dl.order.dto.OrderDTO;
 import com.dl.order.param.OrderCondtionParam;
@@ -159,6 +161,9 @@ public class PayMentService extends AbstractService<PayMent> {
 	private String appTXPayH5QrUrl;
 	@Resource
 	private KuaiJiePayUtil kuaiJiePayUtil;
+	
+	@Resource
+	private ISwitchConfigService iSwitchConfigService;
 
 	/**
 	 * 查询所有可用的支付方式
@@ -911,5 +916,17 @@ public class PayMentService extends AbstractService<PayMent> {
 	private void updatePayLogTradeNo(String payOrderSn, String tradeNo) {
 		int updateRow = payLogMapper.updatePayLogTradeNoByPayOrderSn(payOrderSn, tradeNo);
 		log.info("更新支付log的tradeNo={},payOrderSn={},updateRow={}", tradeNo, payOrderSn, updateRow);
+	}
+	
+	public boolean isShutDownPay() {
+		//判断用户是否有交易
+		UserDealActionParam param = new UserDealActionParam();
+		param.setUserId(SessionUtil.getUserId());
+		BaseResult<Integer> userDealAction = iSwitchConfigService.userDealAction(param);
+		Integer data = userDealAction.getData();
+		if(null != data && 0 == data) {
+			return true;
+		}
+		return false;
 	}
 }

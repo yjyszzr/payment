@@ -45,7 +45,8 @@ public enum PayEnums {
 	PAY_THREE_COUNT_WITHDRAW(304076, "一天提现不能超过3次"), 
 	PAY_XIANFENG_CVVN_ERROR(304077, "信用卡cv2，有效期参数有误"), 
 	PAY_YIFUTONG_INNER_ERROR(304078, "易富通内部失败"), 
-	PAY_YINLIAN_SCAN_INNER_ERROR(304079, "银联扫码内部失败");
+	PAY_YINLIAN_SCAN_INNER_ERROR(304079, "银联扫码内部失败"),
+	PAY_STOP(304080, "支付业务维护中");
 
 	private Integer code;
 	private String msg;

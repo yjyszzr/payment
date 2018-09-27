@@ -48,6 +48,7 @@ import com.dl.base.util.SessionUtil;
 import com.dl.lottery.api.ILotteryPrintService;
 import com.dl.lottery.dto.DIZQUserBetCellInfoDTO;
 import com.dl.lottery.dto.DIZQUserBetInfoDTO;
+import com.dl.lottery.enums.LotteryResultEnum;
 import com.dl.lotto.enums.LottoResultEnum;
 import com.dl.member.api.IActivityService;
 import com.dl.member.api.IUserAccountService;
@@ -695,6 +696,9 @@ public class PaymentController extends AbstractBaseController {
 	public BaseResult<Object> rechargeForApp(@RequestBody RechargeParam param, HttpServletRequest request) {
 		String loggerId = "rechargeForApp_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/recharge, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode() + " , totalAmount=" + param.getTotalAmount());
+		if(paymentService.isShutDownPay()) {
+			return ResultGenerator.genResult(PayEnums.PAY_STOP.getcode(), PayEnums.PAY_STOP.getMsg());
+		}
 		double totalAmount = param.getTotalAmount();
 		if (totalAmount <= 0) {
 			logger.info(loggerId + "充值金额有误！totalAmount=" + totalAmount);
