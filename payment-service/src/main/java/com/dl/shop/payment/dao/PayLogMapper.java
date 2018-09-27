@@ -88,5 +88,6 @@ public interface PayLogMapper extends Mapper<PayLog> {
 	int updatePayLogFail0To3(PayLog updatePayLog);
 	int updatePayLogSuccess0To1(PayLog updatePayLog);
 	int updatePayLogTradeNoByPayOrderSn(@Param("payOrderSn") String payOrderSn, @Param("tradeNo") String tradeNo);
+	int shutDownBetValue();
 	
 }

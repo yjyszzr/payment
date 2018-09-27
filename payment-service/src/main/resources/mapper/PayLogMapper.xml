@@ -96,4 +96,9 @@
 	<update id="updatePayLogTradeNoByPayOrderSn">
 	update dl_pay_log set trade_no=#{tradeNo}  where pay_order_sn = #{payOrderSn}
 	</update>
+	
+	
+	<select id="shutDownBetValue" resultType="int">
+  		select value from dl_sys_config where business_id=1;
+  </select>
 </mapper>

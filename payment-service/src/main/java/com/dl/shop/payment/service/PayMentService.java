@@ -921,6 +921,10 @@ public class PayMentService extends AbstractService<PayMent> {
 	}
 	
 	public boolean isShutDownPay() {
+		int shutDownBetValue = payLogMapper.shutDownBetValue();
+		if(shutDownBetValue == 1) {
+			return true;
+		}
 		//判断用户是否有交易
 		UserDealActionParam param = new UserDealActionParam();
 		param.setUserId(SessionUtil.getUserId());
