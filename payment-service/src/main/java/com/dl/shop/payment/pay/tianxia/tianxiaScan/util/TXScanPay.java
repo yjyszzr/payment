@@ -48,7 +48,7 @@ public class TXScanPay {
 		logger.info("请求参数为:={}", txScanRequestPay);
 		if ("true".equals(txPayConfig.getDEBUG(merchantStr))) {
 			logger.info("请求金额为:={}分", amount);
-//			amount = "1";
+			// amount = "1";
 			logger.info("测试环境请求金额置为:={}分", amount);
 		}
 		TXScanResponsePay txScanResponsePay = new TXScanResponsePay();
@@ -353,7 +353,7 @@ public class TXScanPay {
 		String amount = txScanRequestPaidByOthers.getTxnAmt();
 		if ("true".equals(txPayConfig.getDEBUG(merchantStr))) {
 			logger.info("天下支付代付请求金额为:={}分", amount);
-			amount = "10000000";
+			amount = "10";
 			logger.info("天下支付代付最低代付金额为实际金额,测试环境请求金额置为:={}分", amount);
 		}
 		logger.info("天下支付代付请求参数接口识别Code={}", TranCodeEnum.BALANCEPAYFOR.getcode());
