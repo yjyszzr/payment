@@ -203,6 +203,13 @@
             <artifactId>apollo-client</artifactId>
             <version>0.9.1-SNAPSHOT</version>
         </dependency> -->
+        
+       <dependency>
+		    <groupId>com.chinapay.secss</groupId>
+		    <artifactId>chinapay-security</artifactId>
+		    <version>1.0.5</version>
+		</dependency>
+        
     </dependencies>
 
     <dependencyManagement>
