@@ -74,14 +74,45 @@ public class YiWenControlelr {
 	@ResponseBody
 	public BaseResult<YWQuickCardPayDTO> quickByCard(@RequestBody YWQucikBankPayParam param) {
 		String payUrl = ywConfig.getFrontRequestUrl();
-		Map<String,String> sendMap = this.doPack(param.getOrderSn(),param.getOrderAmount());
+        // 请求map
+        Map<String, String> sendMap = new TreeMap<String, String>();
+        sendMap.put("Version", "20150922");
+        sendMap.put("MerId", ywConfig.getMerId());
+        sendMap.put("MerOrderNo", param.getOrderSn());
+        sendMap.put("TranDate", DateUtil.getCurrentDate(DateUtil.yyyyMMdd));
+        sendMap.put("TranTime", DateUtil.getCurrentTimeString(Long.valueOf(DateUtil.getCurrentTimeLong()), DateUtil.hhmmssSdf));
+        sendMap.put("BusiType", "0001");
+        sendMap.put("CurryNo", "CNY");
+        sendMap.put("OrderAmt", param.getOrderAmount());
+		this.doPack(sendMap);
+		
 		String res= this.doSend(payUrl, sendMap);
 		YWQuickCardPayDTO dto = new YWQuickCardPayDTO();
 		dto.setShowHtmlData(res);
 		dto.setFontNoticeUrl("");
-		return ResultGenerator.genSuccessResult("succ",dto);
+		return ResultGenerator.genSuccessResult("success",dto);
 	}
 	
+	@ApiOperation(value="伊蚊快捷支付结果查询接口")
+	@PostMapping("/quickPayResultQuery")
+	@ResponseBody
+	public BaseResult<YWQuickCardPayDTO> quickPayResultQuery(@RequestBody YWQucikBankPayParam param) {
+		String queryResultUrl = ywConfig.getQueryRequestUrl();
+		
+        // 请求map
+        Map<String, String> sendMap = new TreeMap<String, String>();
+        sendMap.put("Version", "20150922");
+        sendMap.put("MerId", ywConfig.getMerId());
+        sendMap.put("MerOrderNo", param.getOrderSn());
+        sendMap.put("TranDate", DateUtil.getCurrentDate(DateUtil.yyyyMMdd));
+        sendMap.put("TranType", "0502");
+        sendMap.put("BusiType", "0001");
+		
+		this.doPack(sendMap);
+		String res= this.doSend(queryResultUrl, sendMap);
+		YWQuickCardPayDTO dto = new YWQuickCardPayDTO();
+		return ResultGenerator.genSuccessResult("success",dto);
+	}
 
     /**
      * 组包.
@@ -89,17 +120,7 @@ public class YiWenControlelr {
      * @param request .
      * @param response .
      */
-    protected Map<String, String> doPack(String orderSn,String orderAmount) {  	
-        // 请求map
-        Map<String, String> sendMap = new TreeMap<String, String>();
-        sendMap.put("Version", "20150922");
-        sendMap.put("MerId", ywConfig.getMerId());
-        sendMap.put("MerOrderNo", orderSn);
-        sendMap.put("TranDate", DateUtil.getCurrentDate(DateUtil.yyyyMMdd));
-        sendMap.put("TranTime", DateUtil.getCurrentTimeString(Long.valueOf(DateUtil.getCurrentTimeLong()), DateUtil.hhmmssSdf));
-        sendMap.put("BusiType", "0001");
-        sendMap.put("CurryNo", "CNY");
-        sendMap.put("OrderAmt", orderAmount);
+    protected Map<String, String> doPack(Map<String, String> sendMap) {  	
         try {
             // 机构或商户接入
             String instuId = sendMap.get(Constants.INSTU_ID);
