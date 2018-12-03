@@ -1170,7 +1170,7 @@ public class PaymentController extends AbstractBaseController {
 	@ResponseBody
 	public BaseResult<PayReturnDTO> nUnifiedOrder(@RequestBody GoPayParam param, HttpServletRequest request) {
 		//20181203 加入提示，不能用金钱购买
-		return ResultGenerator.genResult(PayEnums.PAY_STOP_CONNECT_RECEIVER.getcode(), PayEnums.PAY_STOP_CONNECT_RECEIVER.getMsg());
+		return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
 
 		String loggerId = "payment_nUnifiedOrder_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/nUnifiedOrder, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode());
