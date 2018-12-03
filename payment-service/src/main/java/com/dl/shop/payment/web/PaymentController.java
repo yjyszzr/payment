@@ -250,7 +250,7 @@ public class PaymentController extends AbstractBaseController {
 		//20181203 加入提示
 		return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
 
-		String loggerId = "payment_app_" + System.currentTimeMillis();
+		/*String loggerId = "payment_app_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/app, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode());
 		String payToken = param.getPayToken();
 		if (StringUtils.isBlank(payToken)) {
@@ -584,7 +584,7 @@ public class PaymentController extends AbstractBaseController {
 			}
 		}
 		logger.info(loggerId + " result: code=" + payBaseResult.getCode() + " , msg=" + payBaseResult.getMsg());
-		return payBaseResult;
+		return payBaseResult;*/
 	}
 
 	/***
@@ -700,7 +700,7 @@ public class PaymentController extends AbstractBaseController {
 		//20181203 加入提示
 		return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
 
-		String loggerId = "rechargeForApp_" + System.currentTimeMillis();
+/*		String loggerId = "rechargeForApp_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/recharge, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode() + " , totalAmount=" + param.getTotalAmount());
 		if(paymentService.isShutDownPay()) {
 			return ResultGenerator.genResult(PayEnums.PAY_STOP.getcode(), PayEnums.PAY_STOP.getMsg());
@@ -883,7 +883,7 @@ public class PaymentController extends AbstractBaseController {
 			return payBaseResult;
 		} else {
 			return ResultGenerator.genFailResult("参数异常");
-		}
+		}*/
 	}
 
 	@ApiOperation(value = "app提现调用", notes = "")
@@ -893,7 +893,7 @@ public class PaymentController extends AbstractBaseController {
 		//20181203 加入提示
 		return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
 
-		String loggerId = "withdrawForApp_" + System.currentTimeMillis();
+/*		String loggerId = "withdrawForApp_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/withdraw, userId=" + SessionUtil.getUserId() + ", totalAmount=" + param.getTotalAmount() + ",userBankId=" + param.getUserBankId());
 		BaseResult<UserDTO> userInfoExceptPass = userService.userInfoExceptPass(new StrParam());
 		if (userInfoExceptPass == null) {
@@ -940,7 +940,7 @@ public class PaymentController extends AbstractBaseController {
 		userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
 		userWithdrawLog.setWithdrawSn(orderSn);
 		userWithdrawLogService.save(userWithdrawLog);
-		return ResultGenerator.genSuccessResult("请求成功！");
+		return ResultGenerator.genSuccessResult("请求成功！");*/
 	}
 
 	@ApiOperation(value = "支付订单结果 查询 ", notes = "")
@@ -1172,7 +1172,7 @@ public class PaymentController extends AbstractBaseController {
 		//20181203 加入提示，不能用金钱购买
 		return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
 
-		String loggerId = "payment_nUnifiedOrder_" + System.currentTimeMillis();
+/*		String loggerId = "payment_nUnifiedOrder_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/nUnifiedOrder, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode());
 		String payToken = param.getPayToken();
 		if (StringUtils.isBlank(payToken)) {
@@ -1501,7 +1501,7 @@ public class PaymentController extends AbstractBaseController {
 			}
 		}
 		logger.info(loggerId + " result: code=" + payBaseResult.getCode() + " , msg=" + payBaseResult.getMsg());
-		return payBaseResult;
+		return payBaseResult;*/
 	}
 
 }
