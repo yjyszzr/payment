@@ -1,5 +1,6 @@
 package com.dl.shop.payment.web;
 
+import com.dl.shop.payment.enums.PayEnums;
 import io.swagger.annotations.ApiOperation;
 
 import java.io.IOException;
@@ -71,7 +72,9 @@ public class CashController {
 	@PostMapping("/withdraw")
 	@ResponseBody
 	public BaseResult<Object> withdrawForApp(@RequestBody WithdrawParam param, HttpServletRequest request){
-		return cashService.withdrawForApp(param,request);
+		//20181203 加入提示
+		return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
+		//return cashService.withdrawForApp(param,request);
 	}
 	
 	@ApiOperation(value="后台管理提现调用", notes="")
