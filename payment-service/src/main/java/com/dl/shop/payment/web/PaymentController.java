@@ -247,6 +247,9 @@ public class PaymentController extends AbstractBaseController {
 	@PostMapping("/app")
 	@ResponseBody
 	public BaseResult<PayReturnDTO> unifiedOrderForApp(@RequestBody GoPayParam param, HttpServletRequest request) {
+		//20181203 加入提示
+		return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
+
 		String loggerId = "payment_app_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/app, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode());
 		String payToken = param.getPayToken();
@@ -694,6 +697,9 @@ public class PaymentController extends AbstractBaseController {
 	@PostMapping("/recharge")
 	@ResponseBody
 	public BaseResult<Object> rechargeForApp(@RequestBody RechargeParam param, HttpServletRequest request) {
+		//20181203 加入提示
+		return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
+
 		String loggerId = "rechargeForApp_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/recharge, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode() + " , totalAmount=" + param.getTotalAmount());
 		if(paymentService.isShutDownPay()) {
@@ -884,6 +890,9 @@ public class PaymentController extends AbstractBaseController {
 	@PostMapping("/withdraw")
 	@ResponseBody
 	public BaseResult<Object> withdrawForApp(@RequestBody WithdrawParam param, HttpServletRequest request) {
+		//20181203 加入提示
+		return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
+
 		String loggerId = "withdrawForApp_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/withdraw, userId=" + SessionUtil.getUserId() + ", totalAmount=" + param.getTotalAmount() + ",userBankId=" + param.getUserBankId());
 		BaseResult<UserDTO> userInfoExceptPass = userService.userInfoExceptPass(new StrParam());
@@ -1160,6 +1169,9 @@ public class PaymentController extends AbstractBaseController {
 	@PostMapping("/nUnifiedOrder")
 	@ResponseBody
 	public BaseResult<PayReturnDTO> nUnifiedOrder(@RequestBody GoPayParam param, HttpServletRequest request) {
+		//20181203 加入提示，不能用金钱购买
+		return ResultGenerator.genResult(PayEnums.PAY_STOP_CONNECT_RECEIVER.getcode(), PayEnums.PAY_STOP_CONNECT_RECEIVER.getMsg());
+
 		String loggerId = "payment_nUnifiedOrder_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/nUnifiedOrder, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode());
 		String payToken = param.getPayToken();
