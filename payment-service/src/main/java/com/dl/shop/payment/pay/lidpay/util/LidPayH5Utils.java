@@ -17,17 +17,20 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
+import com.dl.shop.payment.web.PaymentController;
 
 import lombok.Data;
 @Data
 @Component
 public class LidPayH5Utils {
-
+	private final static Logger logger = LoggerFactory.getLogger(PaymentController.class);
 	/**
 	 * 服务端地址
 	 */
@@ -258,6 +261,7 @@ public class LidPayH5Utils {
 		params.put("sign", getSign(params));
 		// ************订单生成，当返回result中code=1时，代表订单生成成功，需要验签************
 		String result = sendPostMessage(PAY_URL, params);
+		logger.info("华移支付请求结果:result={}",result);
 		// 校验返回值
 		if (result != null && !"".equals(result)) {
 			@SuppressWarnings("unchecked")
@@ -297,6 +301,7 @@ public class LidPayH5Utils {
 		// ************订单查询，当返回result中status=1时，代表支付成功，需要验签************
 		// status状态：0:等待支付；1：支付成功；2：支付失败；3：订单已撤销；4：订单已退款
 		String result = sendPostMessage(QUERY_URL, params);
+		logger.info("华移支付订单查询请求结果:result={}",result);
 		// 校验返回值
 		if (result != null && !"".equals(result)) {
 			@SuppressWarnings("unchecked")
