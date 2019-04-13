@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.result.BaseResult;
@@ -17,6 +18,9 @@ import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.lidpay.util.LidPayH5Utils;
 import com.dl.shop.payment.web.PaymentController;
 
+import lombok.extern.slf4j.Slf4j;
+@Slf4j
+@Service
 public class LidPayService {
 	private final static Logger logger = LoggerFactory.getLogger(PaymentController.class);
 	@Resource
