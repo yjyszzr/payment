@@ -78,6 +78,7 @@ import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.kuaijie.entity.KuaiJieJdPayOrderCreateResponse;
 import com.dl.shop.payment.pay.kuaijie.entity.KuaiJieQqPayOrderCreateResponse;
 import com.dl.shop.payment.pay.kuaijie.util.KuaiJiePayUtil;
+import com.dl.shop.payment.pay.lidpay.util.LidPayH5Utils;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
 import com.dl.shop.payment.pay.rongbao.entity.ReqRefundEntity;
 import com.dl.shop.payment.pay.rongbao.entity.RspRefundEntity;
@@ -115,7 +116,10 @@ public class PayMentService extends AbstractService<PayMent> {
 
 	@Resource
 	private PayLogService payLogService;
-
+	@Resource
+	private LidPayService lidPayService;
+	@Resource
+	private LidPayH5Utils lidutil;
 	@Resource
 	private PayLogMapper payLogMapper;
 
@@ -662,6 +666,8 @@ public class PayMentService extends AbstractService<PayMent> {
 			baseResult = kuaiJiePayUtil.queryOrderStatusQQqianBao(payLog.getTradeNo());
 		} else if ("app_kuaijie_pay_jd".equals(payCode)) {
 			baseResult = kuaiJiePayUtil.queryOrderStatusJd(payLog.getTradeNo());
+		} else if ("app_lidpay".equals(payCode)) {
+			baseResult = lidPayService.commonOrderQueryLid(payOrderSn);
 		}
 		if (baseResult == null || baseResult.getCode() != 0) {
 			if (baseResult != null) {
