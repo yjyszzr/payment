@@ -666,7 +666,9 @@ public class PayMentService extends AbstractService<PayMent> {
 			baseResult = kuaiJiePayUtil.queryOrderStatusQQqianBao(payLog.getTradeNo());
 		} else if ("app_kuaijie_pay_jd".equals(payCode)) {
 			baseResult = kuaiJiePayUtil.queryOrderStatusJd(payLog.getTradeNo());
-		} else*/ if ("app_lidpay".equals(payCode)) {
+		} else*/ 
+		logger.info("订单查询状态************："+payLog.getOrderSn());
+		if ("app_lidpay".equals(payCode)) {
 			baseResult = lidPayService.commonOrderQueryLid(payLog.getOrderSn());
 		}
 		if (baseResult == null || baseResult.getCode() != 0) {
