@@ -260,6 +260,7 @@ public class LidPayH5Utils {
 		params.put("timestamp", String.valueOf(System.currentTimeMillis()));
 		params.put("sign", getSign(params));
 		// ************订单生成，当返回result中code=1时，代表订单生成成功，需要验签************
+		logger.info("华移支付:PAY_URL={}",PAY_URL);
 		String result = sendPostMessage(PAY_URL, params);
 		logger.info("华移支付请求结果:result={}",result);
 		// 校验返回值
@@ -300,6 +301,7 @@ public class LidPayH5Utils {
 		params.put("sign", getSign(params));
 		// ************订单查询，当返回result中status=1时，代表支付成功，需要验签************
 		// status状态：0:等待支付；1：支付成功；2：支付失败；3：订单已撤销；4：订单已退款
+		logger.info("华移支付:QUERY_URL={}",QUERY_URL);
 		String result = sendPostMessage(QUERY_URL, params);
 		logger.info("华移支付订单查询请求结果:result={}",result);
 		// 校验返回值
@@ -346,6 +348,7 @@ public class LidPayH5Utils {
 		params.put("sign", getSign(params));
 
 		// ************订单退款，全额退款，简单接口，无须验签************
+		logger.info("华移支付:REFUND_URL={}",REFUND_URL);
 		String result = sendPostMessage(REFUND_URL, params);
 		System.out.println(result);
 
