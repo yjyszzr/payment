@@ -24,12 +24,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
+import com.dl.shop.payment.configurer.WxpayConfig;
 import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
 import com.dl.shop.payment.web.PaymentController;
 
 import lombok.Data;
 @Data
-@Component
+@Configuration
 public class LidPayH5Utils {
 	private final static Logger logger = LoggerFactory.getLogger(PaymentController.class);
 	/**
@@ -262,6 +263,7 @@ public class LidPayH5Utils {
 		params.put("sign", getSign(params));
 		// ************订单生成，当返回result中code=1时，代表订单生成成功，需要验签************
 		logger.info("华移支付:PAY_URL={}",PAY_URL);
+		logger.info("华移支付:PAY_URL={}",PATH + PAY_URL_METHOD);
 		String result = sendPostMessage(PAY_URL, params);
 		logger.info("华移支付请求结果:result={}",result);
 		// 校验返回值
