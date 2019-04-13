@@ -637,7 +637,7 @@ public class PayMentService extends AbstractService<PayMent> {
 		}
 		String payCode = payLog.getPayCode();
 		String payOrderSn = payLog.getPayOrderSn();
-		if ("app_zfb".equals(payCode)) {
+		/*if ("app_zfb".equals(payCode)) {
 			baseResult = yinHeUtil.orderQuery(true, false, payOrderSn);
 		} else if ("app_rongbao".equals(payCode)) {
 			baseResult = rongUtil.queryOrderInfo(payOrderSn);
@@ -666,7 +666,7 @@ public class PayMentService extends AbstractService<PayMent> {
 			baseResult = kuaiJiePayUtil.queryOrderStatusQQqianBao(payLog.getTradeNo());
 		} else if ("app_kuaijie_pay_jd".equals(payCode)) {
 			baseResult = kuaiJiePayUtil.queryOrderStatusJd(payLog.getTradeNo());
-		} else if ("app_lidpay".equals(payCode)) {
+		} else*/ if ("app_lidpay".equals(payCode)) {
 			baseResult = lidPayService.commonOrderQueryLid(payOrderSn);
 		}
 		if (baseResult == null || baseResult.getCode() != 0) {
