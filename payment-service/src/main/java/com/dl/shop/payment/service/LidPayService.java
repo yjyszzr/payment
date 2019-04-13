@@ -60,7 +60,7 @@ public class LidPayService {
 			payBaseResult = ResultGenerator.genSuccessResult("succ", rspOrderQueryEntity);
 		} else {
 			payBaseResult = ResultGenerator.genFailResult("华移支付返回数据有误");
-		}
+		} 
 		return payBaseResult;
 	}
 	
