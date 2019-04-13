@@ -770,7 +770,7 @@ public class PaymentController extends AbstractBaseController {
 		// url下发后，服务器开始主动轮序订单状态
 		// PayManager.getInstance().addReqQueue(orderSn,savePayLog.getPayOrderSn(),payCode);
 		BaseResult payBaseResult = null;
-		if ("app_zfb".equals(payCode)) {
+		/*if ("app_zfb".equals(payCode)) {
 			logger.info("支付宝支付url开始生成...isWechat:" + (param.getInnerWechat() == 1) + " payOrderSn:" + savePayLog.getPayOrderSn());
 			payBaseResult = getWechatPayUrl(true, param.getInnerWechat() == 1, param.getIsH5(), 1, savePayLog, payIp, orderSn, "");
 			logger.info("支付宝支付url生成成功 code" + payBaseResult.getCode() + " data:" + payBaseResult.getData());
@@ -854,7 +854,7 @@ public class PaymentController extends AbstractBaseController {
 			} else {
 				logger.info("获取Ubey银行列表失败");
 			}
-		}else if ("app_lidpay".equals(payCode)) {
+		}else*/ if ("app_lidpay".equals(payCode)) {
 			logger.info("华移支付url:" + " payCode:" + savePayLog.getPayCode());
 			payBaseResult = lidPayService.getLidPayUrl(savePayLog, orderSn,"充值");
 			if (payBaseResult != null && payBaseResult.getData() != null) {
@@ -1198,12 +1198,12 @@ public class PaymentController extends AbstractBaseController {
 			return ResultGenerator.genResult(PayEnums.PAY_TOKEN_EXPRIED.getcode(), PayEnums.PAY_TOKEN_EXPRIED.getMsg());
 		}
 		//ubey检验最小金额
-		if("app_ubey".equals(param.getPayCode())) {
-			boolean check = ubeyPayService.checkAmount(jsonData);
-			if(check) {
-				return ResultGenerator.genFailResult("该支付方式最低消费1元 ");
-			}
-		}
+//		if("app_ubey".equals(param.getPayCode())) {
+//			boolean check = ubeyPayService.checkAmount(jsonData);
+//			if(check) {
+//				return ResultGenerator.genFailResult("该支付方式最低消费1元 ");
+//			}
+//		}
 		//ubey检验最小金额
 		if("app_lidpay".equals(param.getPayCode())) {
 			boolean check = lidPayService.checkAmount(jsonData);
@@ -1431,7 +1431,7 @@ public class PaymentController extends AbstractBaseController {
 		// url下发后，服务器开始主动轮序订单状态
 		// PayManager.getInstance().addReqQueue(orderSn,savePayLog.getPayOrderSn(),paymentDto.getPayCode());
 		BaseResult payBaseResult = null;
-		if ("app_zfb".equals(payCode)) {
+		/*if ("app_zfb".equals(payCode)) {
 			logger.info("支付宝支付url开始生成...isWechat:" + (param.getInnerWechat() == 1) + " payOrderSn:" + savePayLog.getPayOrderSn());
 			payBaseResult = getWechatPayUrl(true, param.getInnerWechat() == 1, param.getIsH5(), 0, savePayLog, payIp, orderId, "");
 			logger.info("支付宝支付url生成成功 code" + payBaseResult.getCode() + " data:" + payBaseResult.getData());
@@ -1518,7 +1518,7 @@ public class PaymentController extends AbstractBaseController {
 			} else {
 				logger.info("获取Ubey银行列表失败");
 			}
-		}else if ("app_lidpay".equals(paymentDto.getPayCode())) {//华移支付
+		}else*/ if ("app_lidpay".equals(paymentDto.getPayCode())) {//华移支付
 			logger.info("华移支付url:" + " payCode:" + savePayLog.getPayCode());
 			payBaseResult = lidPayService.getLidPayUrl(savePayLog, orderId,"支付");
 			if (payBaseResult != null && payBaseResult.getData() != null) {
