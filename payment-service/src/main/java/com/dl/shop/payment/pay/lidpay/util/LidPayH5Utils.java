@@ -21,7 +21,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
+import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
 
+import lombok.Data;
+@Data
 @Component
 public class LidPayH5Utils {
 
