@@ -37,69 +37,47 @@ public class LidPayH5Utils {
 	 * 服务端地址
 	 */
 	@Value("${lid.pay.url}")
-	private static String PATH;
+	private String PATH;
 	/**
 	 * 订单支付回调URL地址,需要修改为自己的异步回调地址，公网可以访问的
 	 */
 	@Value("${lid.pay.notifyUrl}")
-	private static String NOTIFY_URL;
+	private String NOTIFY_URL;
 	/**
 	 * 订单支付同步URL地址,需要修改为自己的同步回调地址，公网可以访问的,本同步回调地址只在微信H5支付中使用payUrl时起作用
 	 */
 	@Value("${lid.pay.returnUrl}")
-	private static String RETURN_URL;
+	private String RETURN_URL;
 	/**
 	 * 商户号，正式上线需要修改为自己的商户号
 	 */
 	@Value("${lid.pay.merchant}")
-	private static String MERCHANT_NO;
+	private String MERCHANT_NO;
 	/**
 	 * 商户密钥，正式上线需要修改为自己的商户密钥
 	 */
 	@Value("${lid.pay.secret}")
-	private static String SECRET;
+	private String SECRET;
 	/**
 	 * 支付生成URL
 	 */
 	@Value("${lid.pay.url.paymethod}")
-	private static String PAY_URL_METHOD;
+	private String PAY_URL_METHOD;
 	/**
 	 * 订单查询URL
 	 */
 	@Value("${lid.pay.url.querymethod}")
-	private static String QUERY_URL_METHOD;
+	private String QUERY_URL_METHOD;
 	/**
 	 * 订单退款URL
 	 */
 	@Value("${lid.pay.url.refundmethod}")
-	private static String REFUND_URL_METHOD;
+	private String REFUND_URL_METHOD;
 	/**
 	 * 订单退款URL
 	 */
 	@Value("${lid.pay.version}")
-	private static String VERSION;
-	/**
-	 * 支付生成URL
-	 */
-	private static URL PAY_URL;
-	/**
-	 * 订单查询URL
-	 */
-	private static URL QUERY_URL;
-	/**
-	 * 订单退款URL
-	 */
-	private static URL REFUND_URL;
-	// 静态代码块实例化URL
-	static {
-		try {
-			PAY_URL = new URL(PATH + PAY_URL_METHOD);
-			QUERY_URL = new URL(PATH + QUERY_URL_METHOD);
-			REFUND_URL = new URL(PATH + REFUND_URL_METHOD);
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
-	}
+	private String VERSION;
 
 	/**
 	 * 发送消息体到服务端
@@ -183,7 +161,7 @@ public class LidPayH5Utils {
 	 * @param params 签名参数
 	 * @return sign
 	 */
-	private static String getSign(Map<String, String> params) {
+	private String getSign(Map<String, String> params) {
 
 		// 先将参数以其参数名的字典序升序进行排序
 		Map<String, String> sortedParams = new TreeMap<String, String>(params);
@@ -225,7 +203,7 @@ public class LidPayH5Utils {
 	 * @param params 返回参数
 	 * @return
 	 */
-	public static boolean checkParamSign(Map<String, String> params) {
+	public boolean checkParamSign(Map<String, String> params) {
 		boolean result = false;
 		try {
 			if (params == null || params.size() == 0) {
@@ -247,9 +225,10 @@ public class LidPayH5Utils {
 
 	/**
 	 * 测试订单订单生成，当返回result中code=1时，代表订单生成成功，需要验签
+	 * @throws MalformedURLException 
 	 */
 	@SuppressWarnings("unused")
-	public Map<String, String> pay(Map<String, String> param) {
+	public Map<String, String> pay(Map<String, String> param) throws MalformedURLException {
 		Map<String, String> params = new HashMap<>();
 		params.put("merchantNo", MERCHANT_NO);// 商户号
 		params.put("notifyUrl", NOTIFY_URL);// 回调
@@ -262,9 +241,8 @@ public class LidPayH5Utils {
 		params.put("timestamp", String.valueOf(System.currentTimeMillis()));
 		params.put("sign", getSign(params));
 		// ************订单生成，当返回result中code=1时，代表订单生成成功，需要验签************
-		logger.info("华移支付:PAY_URL={}",PAY_URL);
 		logger.info("华移支付:PAY_URL={}",PATH + PAY_URL_METHOD);
-		String result = sendPostMessage(PAY_URL, params);
+		String result = sendPostMessage(new URL(PATH + PAY_URL_METHOD), params);
 		logger.info("华移支付请求结果:result={}",result);
 		// 校验返回值
 		if (result != null && !"".equals(result)) {
@@ -293,9 +271,10 @@ public class LidPayH5Utils {
 
 	/**
 	 * 测试订单查询，当返回result中status=1时，代表支付成功，需要验签
+	 * @throws MalformedURLException 
 	 */
 	@SuppressWarnings("unused")
-	public Map<String, String> orderQuery(String orderNo) {
+	public Map<String, String> orderQuery(String orderNo) throws MalformedURLException {
 
 		Map<String, String> params = new HashMap<>();
 		params.put("merchantNo", MERCHANT_NO);
@@ -304,8 +283,8 @@ public class LidPayH5Utils {
 		params.put("sign", getSign(params));
 		// ************订单查询，当返回result中status=1时，代表支付成功，需要验签************
 		// status状态：0:等待支付；1：支付成功；2：支付失败；3：订单已撤销；4：订单已退款
-		logger.info("华移支付:QUERY_URL={}",QUERY_URL);
-		String result = sendPostMessage(QUERY_URL, params);
+		logger.info("华移支付:QUERY_URL={}",PATH + QUERY_URL_METHOD);
+		String result = sendPostMessage(new URL(PATH + QUERY_URL_METHOD), params);
 		logger.info("华移支付订单查询请求结果:result={}",result);
 		// 校验返回值
 		if (result != null && !"".equals(result)) {
@@ -338,9 +317,10 @@ public class LidPayH5Utils {
 
 	/**
 	 * 测试订单退款，全额退款，简单接口，无须验签
+	 * @throws MalformedURLException 
 	 */
 	@SuppressWarnings("unused")
-	public static void orderRefund(Map<String, String> param) {
+	public void orderRefund(Map<String, String> param) throws MalformedURLException {
 
 		Map<String, String> params = new HashMap<>();
 		params.put("merchantNo", MERCHANT_NO);
@@ -351,8 +331,8 @@ public class LidPayH5Utils {
 		params.put("sign", getSign(params));
 
 		// ************订单退款，全额退款，简单接口，无须验签************
-		logger.info("华移支付:REFUND_URL={}",REFUND_URL);
-		String result = sendPostMessage(REFUND_URL, params);
+		logger.info("华移支付:REFUND_URL={}",PATH + REFUND_URL_METHOD);
+		String result = sendPostMessage(new URL(PATH + REFUND_URL_METHOD), params);
 		System.out.println(result);
 
 		// 校验返回值
