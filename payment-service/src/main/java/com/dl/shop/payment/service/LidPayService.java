@@ -337,6 +337,7 @@ public class LidPayService {
 		param.put("name", paytype);//商品名称
 		try {
 			param = pay(param);
+			param.put("payLogId", savePayLog.getLogId());
 			logger.info("加工前返回APP结果 "+param);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
