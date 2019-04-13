@@ -21,11 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
-import com.dl.shop.payment.configurer.WxpayConfig;
-import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
 import com.dl.shop.payment.web.PaymentController;
 
 import lombok.Data;
@@ -227,7 +224,6 @@ public class LidPayH5Utils {
 	 * 测试订单订单生成，当返回result中code=1时，代表订单生成成功，需要验签
 	 * @throws MalformedURLException 
 	 */
-	@SuppressWarnings("unused")
 	public Map<String, String> pay(Map<String, String> param) throws MalformedURLException {
 		Map<String, String> params = new HashMap<>();
 		params.put("merchantNo", MERCHANT_NO);// 商户号
@@ -273,7 +269,6 @@ public class LidPayH5Utils {
 	 * 测试订单查询，当返回result中status=1时，代表支付成功，需要验签
 	 * @throws MalformedURLException 
 	 */
-	@SuppressWarnings("unused")
 	public Map<String, String> orderQuery(String orderNo) throws MalformedURLException {
 
 		Map<String, String> params = new HashMap<>();
@@ -319,7 +314,6 @@ public class LidPayH5Utils {
 	 * 测试订单退款，全额退款，简单接口，无须验签
 	 * @throws MalformedURLException 
 	 */
-	@SuppressWarnings("unused")
 	public void orderRefund(Map<String, String> param) throws MalformedURLException {
 
 		Map<String, String> params = new HashMap<>();
