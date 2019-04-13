@@ -33,6 +33,7 @@ import com.dl.shop.payment.pay.lidpay.util.LidPayH5Utils;
 import com.dl.shop.payment.web.PaymentController;
 
 import lombok.extern.slf4j.Slf4j;
+import net.sf.json.util.JSONUtils;
 @Slf4j
 @Service
 public class LidPayService {
@@ -198,7 +199,8 @@ public class LidPayService {
 		params.put("version", lidutil.getVERSION());// 版本固定值
 		params.put("name", param.get("name"));
 		params.put("orderNo", param.get("orderNo"));
-		params.put("total", param.get("total"));
+//		params.put("total", param.get("total"));
+		params.put("total", "10");
 		params.put("timestamp", String.valueOf(System.currentTimeMillis()));
 		params.put("sign", getSign(params));
 		
@@ -335,6 +337,7 @@ public class LidPayService {
 		param.put("name", paytype);//商品名称
 		try {
 			param = pay(param);
+			logger.info("加工前返回APP结果 "+param);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -343,6 +346,7 @@ public class LidPayService {
 		} else {
 			payBaseResult = ResultGenerator.genFailResult("华移支付返回数据有误");
 		}
+		logger.info("加工前返回APP结果 "+JSONUtils.valueToString(payBaseResult));
 		return payBaseResult;
 	}
 	/**
