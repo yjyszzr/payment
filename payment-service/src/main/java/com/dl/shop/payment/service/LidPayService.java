@@ -134,6 +134,7 @@ public class LidPayService {
 			basestring.append(param.getKey()).append("=").append(param.getValue());
 		}
 		basestring.append(lidutil.getSECRET());
+		logger.info("sign签名参数"+basestring.toString());
 		// 使用MD5对待签名串求签
 		byte[] bytes = null;
 		MessageDigest md5;
@@ -200,6 +201,7 @@ public class LidPayService {
 		params.put("total", param.get("total"));
 		params.put("timestamp", String.valueOf(System.currentTimeMillis()));
 		params.put("sign", getSign(params));
+		
 		// ************订单生成，当返回result中code=1时，代表订单生成成功，需要验签************
 		logger.info("METHOD PAY()华移支付:PAY_URL={}",lidutil.getPATH() + lidutil.getPAY_URL_METHOD());
 		String result = sendPostMessage(new URL(lidutil.getPATH() + lidutil.getPAY_URL_METHOD()), params);
@@ -223,7 +225,7 @@ public class LidPayService {
 				}
 			} else {
 				logger.info("METHOD PAY()华移支付失败");
-				return obj;
+				return null;
 			}
 		} else {
 			return null;
@@ -268,7 +270,7 @@ public class LidPayService {
 					}
 				} else {
 					logger.info("METHOD ORDERQUERY()华移支付验证签名失败");
-					return resultObj;
+					return obj;
 				}
 			} else {
 				logger.info("METHOD ORDERQUERY()华移支付订单查询失败");
