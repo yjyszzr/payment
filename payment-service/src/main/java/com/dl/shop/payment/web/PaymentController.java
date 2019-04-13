@@ -1,6 +1,7 @@
 package com.dl.shop.payment.web;
 
 import io.swagger.annotations.ApiOperation;
+import net.sf.json.util.JSONUtils;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -1529,6 +1530,7 @@ public class PaymentController extends AbstractBaseController {
 			}
 		}
 		logger.info(loggerId + " result: code=" + payBaseResult.getCode() + " , msg=" + payBaseResult.getMsg());
+		logger.info("支付成功后："+JSONUtils.valueToString(payBaseResult));
 		return payBaseResult;
 	}
 
