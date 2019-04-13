@@ -268,7 +268,7 @@ public class LidPayService {
 					}
 				} else {
 					logger.info("METHOD ORDERQUERY()华移支付验证签名失败");
-					return obj;
+					return resultObj;
 				}
 			} else {
 				logger.info("METHOD ORDERQUERY()华移支付订单查询失败");
