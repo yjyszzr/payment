@@ -20,6 +20,7 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
@@ -34,47 +35,47 @@ public class LidPayH5Utils {
 	/**
 	 * 服务端地址
 	 */
-	@Value("${lid.pay.url }")
+	@Value("${lid.pay.url}")
 	private static String PATH;
 	/**
 	 * 订单支付回调URL地址,需要修改为自己的异步回调地址，公网可以访问的
 	 */
-	@Value("${lid.pay.notifyUrl }")
+	@Value("${lid.pay.notifyUrl}")
 	private static String NOTIFY_URL;
 	/**
 	 * 订单支付同步URL地址,需要修改为自己的同步回调地址，公网可以访问的,本同步回调地址只在微信H5支付中使用payUrl时起作用
 	 */
-	@Value("${lid.pay.returnUrl }")
+	@Value("${lid.pay.returnUrl}")
 	private static String RETURN_URL;
 	/**
 	 * 商户号，正式上线需要修改为自己的商户号
 	 */
-	@Value("${lid.pay.merchant }")
+	@Value("${lid.pay.merchant}")
 	private static String MERCHANT_NO;
 	/**
 	 * 商户密钥，正式上线需要修改为自己的商户密钥
 	 */
-	@Value("${lid.pay.secret }")
+	@Value("${lid.pay.secret}")
 	private static String SECRET;
 	/**
 	 * 支付生成URL
 	 */
-	@Value("${lid.pay.url.paymethod }")
+	@Value("${lid.pay.url.paymethod}")
 	private static String PAY_URL_METHOD;
 	/**
 	 * 订单查询URL
 	 */
-	@Value("${lid.pay.url.querymethod }")
+	@Value("${lid.pay.url.querymethod}")
 	private static String QUERY_URL_METHOD;
 	/**
 	 * 订单退款URL
 	 */
-	@Value("${lid.pay.url.refundmethod }")
+	@Value("${lid.pay.url.refundmethod}")
 	private static String REFUND_URL_METHOD;
 	/**
 	 * 订单退款URL
 	 */
-	@Value("${lid.pay.version }")
+	@Value("${lid.pay.version}")
 	private static String VERSION;
 	/**
 	 * 支付生成URL
@@ -370,7 +371,7 @@ public class LidPayH5Utils {
 	}
 
 //	public static void main(String[] args) {
-//		System.out.println(REFUND_URL_METHOD);
+//		System.out.println(PATH);
 //		String orderNo = "20180818134613";
 //		String total = "100";
 //		String payMethod = "6015";
@@ -390,6 +391,5 @@ public class LidPayH5Utils {
 //
 //		// ************订单退款，全额退款，简单接口，无须验签************
 //		orderRefund(param);
-
 //	}
 }
