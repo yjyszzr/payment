@@ -46,13 +46,13 @@ public class LidPayService {
 	 * @param params
 	 * @return
 	 */
-	public String sendPostMessage(URL url, Map<String, String> params) {
+	public String sendPostMessage(URL url, Map<String, Object> params) {
 		StringBuilder stringBuilder = new StringBuilder();
 		if (params != null && !params.isEmpty()) {
-			for (Map.Entry<String, String> entry : params.entrySet()) {
+			for (Map.Entry<String, Object> entry : params.entrySet()) {
 				try {
 					stringBuilder.append(entry.getKey()).append("=")
-							.append(URLEncoder.encode(entry.getValue()==null?"":entry.getValue(), "utf-8")).append("&");
+							.append(URLEncoder.encode(entry.getValue()==null?"":entry.getValue().toString(), "utf-8")).append("&");
 				} catch (UnsupportedEncodingException e) {
 					e.printStackTrace();
 				}
@@ -122,15 +122,15 @@ public class LidPayService {
 	 * @param params 签名参数
 	 * @return sign
 	 */
-	private String getSign(Map<String, String> params) {
+	private String getSign(Map<String, Object> params) {
 
 		// 先将参数以其参数名的字典序升序进行排序
-		Map<String, String> sortedParams = new TreeMap<String, String>(params);
-		Set<Entry<String, String>> entrys = sortedParams.entrySet();
+		Map<String, Object> sortedParams = new TreeMap<String, Object>(params);
+		Set<Entry<String, Object>> entrys = sortedParams.entrySet();
 
 		// 遍历排序后的字典，将所有参数按"key=value"格式拼接在一起
 		StringBuilder basestring = new StringBuilder();
-		for (Entry<String, String> param : entrys) {
+		for (Entry<String, Object> param : entrys) {
 			basestring.append(param.getKey()).append("=").append(param.getValue());
 		}
 		basestring.append(lidutil.getSECRET());
@@ -164,14 +164,14 @@ public class LidPayService {
 	 * @param params 返回参数
 	 * @return
 	 */
-	public boolean checkParamSign(Map<String, String> params) {
+	public boolean checkParamSign(Map<String, Object> params) {
 		boolean result = false;
 		try {
 			if (params == null || params.size() == 0) {
 				return result;
 			}
 			if (params.containsKey("sign")) {
-				String sign = params.get("sign");
+				String sign = params.get("sign").toString();
 				params.remove("sign");
 				String signRecieve = null;
 				signRecieve = getSign(params);
@@ -188,8 +188,8 @@ public class LidPayService {
 	 * 测试订单订单生成，当返回result中code=1时，代表订单生成成功，需要验签
 	 * @throws MalformedURLException 
 	 */
-	public Map<String, String> pay(Map<String, String> param) throws MalformedURLException {
-		Map<String, String> params = new HashMap<>();
+	public Map<String, Object> pay(Map<String, Object> param) throws MalformedURLException {
+		Map<String, Object> params = new HashMap<>();
 		params.put("merchantNo", lidutil.getMERCHANT_NO());// 商户号
 		params.put("notifyUrl", lidutil.getNOTIFY_URL());// 回调
 		params.put("returnUrl", lidutil.getRETURN_URL());// 回调
@@ -201,9 +201,9 @@ public class LidPayService {
 		params.put("timestamp", String.valueOf(System.currentTimeMillis()));
 		params.put("sign", getSign(params));
 		// ************订单生成，当返回result中code=1时，代表订单生成成功，需要验签************
-		logger.info("华移支付:PAY_URL={}",lidutil.getPATH() + lidutil.getPAY_URL_METHOD());
+		logger.info("METHOD PAY()华移支付:PAY_URL={}",lidutil.getPATH() + lidutil.getPAY_URL_METHOD());
 		String result = sendPostMessage(new URL(lidutil.getPATH() + lidutil.getPAY_URL_METHOD()), params);
-		logger.info("华移支付请求结果:result={}",result);
+		logger.info("METHOD PAY()华移支付请求结果:result={}",result);
 		// 校验返回值
 		if (result != null && !"".equals(result)) {
 			@SuppressWarnings("unchecked")
@@ -212,16 +212,17 @@ public class LidPayService {
 			if (code == 1)// 成功
 			{
 				@SuppressWarnings("unchecked")
-				Map<String, String> resultObj = (Map<String, String>) obj.get("result");
+				Map<String, Object> resultObj = (Map<String, Object>) obj.get("result");
 				// 验证返回参数签名
 				if (checkParamSign(resultObj)) {
-					// 获取payUrl
-//					String payUrl = resultObj.get("payUrl");
+					logger.info("METHOD PAY()华移支付验证签名通过");
 					return resultObj;
 				} else {
-					return null;
+					logger.info("METHOD PAY()华移支付验证签名失败");
+					return resultObj;
 				}
 			} else {
+				logger.info("METHOD PAY()华移支付失败");
 				return null;
 			}
 		} else {
@@ -233,18 +234,18 @@ public class LidPayService {
 	 * 测试订单查询，当返回result中status=1时，代表支付成功，需要验签
 	 * @throws MalformedURLException 
 	 */
-	public Map<String, String> orderQuery(String orderNo) throws MalformedURLException {
+	public Map<String, Object> orderQuery(String orderNo) throws MalformedURLException {
 
-		Map<String, String> params = new HashMap<>();
+		Map<String, Object> params = new HashMap<>();
 		params.put("merchantNo", lidutil.getMERCHANT_NO());
 		params.put("orderNo", orderNo);
 		params.put("timestamp", String.valueOf(System.currentTimeMillis()));
 		params.put("sign", getSign(params));
 		// ************订单查询，当返回result中status=1时，代表支付成功，需要验签************
 		// status状态：0:等待支付；1：支付成功；2：支付失败；3：订单已撤销；4：订单已退款
-		logger.info("华移支付:QUERY_URL={}",lidutil.getPATH() + lidutil.getQUERY_URL_METHOD());
+		logger.info("METHOD ORDERQUERY()华移支付:QUERY_URL={}",lidutil.getPATH() + lidutil.getQUERY_URL_METHOD());
 		String result = sendPostMessage(new URL(lidutil.getPATH() + lidutil.getQUERY_URL_METHOD()), params);
-		logger.info("华移支付订单查询请求结果:result={}",result);
+		logger.info("METHOD ORDERQUERY()华移支付订单查询请求结果:result={}",result);
 		// 校验返回值
 		if (result != null && !"".equals(result)) {
 			@SuppressWarnings("unchecked")
@@ -253,23 +254,28 @@ public class LidPayService {
 			if (code == 1)// 成功
 			{
 				@SuppressWarnings("unchecked")
-				Map<String, String> resultObj = (Map<String, String>) obj.get("result");
+				Map<String, Object> resultObj = (Map<String, Object>) obj.get("result");
 				// 验证返回参数签名
 				if (checkParamSign(resultObj)) {
 					// 获取status
-					String status = resultObj.get("status");
+					String status = resultObj.get("status").toString();
 					if ("1".equals(status)) {
+						logger.info("METHOD ORDERQUERY()华移支付成功");
 						return resultObj;
 					}else {
-						return null;
+						logger.info("METHOD ORDERQUERY()华移支付失败");
+						return resultObj;
 					}
 				} else {
-					return null;
+					logger.info("METHOD ORDERQUERY()华移支付验证签名失败");
+					return obj;
 				}
 			} else {
+				logger.info("METHOD ORDERQUERY()华移支付订单查询失败");
 				return null;
 			}
 		} else {
+			logger.info("METHOD ORDERQUERY()华移支付订单查询失败");
 			return null;
 		}
 	}
@@ -278,9 +284,9 @@ public class LidPayService {
 	 * 测试订单退款，全额退款，简单接口，无须验签
 	 * @throws MalformedURLException 
 	 */
-	public void orderRefund(Map<String, String> param) throws MalformedURLException {
+	public void orderRefund(Map<String, Object> param) throws MalformedURLException {
 
-		Map<String, String> params = new HashMap<>();
+		Map<String, Object> params = new HashMap<>();
 		params.put("merchantNo", lidutil.getMERCHANT_NO());
 		params.put("orderNo", param.get("orderNo"));// 单号
 		params.put("refundFee", param.get("total"));// 退款金额
@@ -320,7 +326,7 @@ public class LidPayService {
 		BaseResult<?> payBaseResult = null;
 		BigDecimal amtDouble = savePayLog.getOrderAmount();
 		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_EVEN);// 金额转换成分
-		Map<String,String> param = new HashMap<>();
+		Map<String,Object> param = new HashMap<>();
 		param.put("orderNo", orderSn);
 		param.put("total", bigD.toString());
 		param.put("payMethod", "6023");//支付业务编号： 6015 微信个人收款； 6023 支付宝企业收款
@@ -344,16 +350,15 @@ public class LidPayService {
 	 */
 	public BaseResult<RspOrderQueryEntity> commonOrderQueryLid(String orderSn){
 		BaseResult<RspOrderQueryEntity> payBaseResult = null;
-		Map<String,String> param = new HashMap<>();
+		Map<String,Object> param = null;
 		try {
 			param = orderQuery(orderSn);
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		if (param != null) {
 			RspOrderQueryEntity rspOrderQueryEntity = new RspOrderQueryEntity();
-			rspOrderQueryEntity.setResult_code(param.get("status"));
+			rspOrderQueryEntity.setResult_code(param.get("status").toString());
 			rspOrderQueryEntity.setType(RspOrderQueryEntity.TYPE_LID);
 			payBaseResult = ResultGenerator.genSuccessResult("succ", rspOrderQueryEntity);
 		} else {
