@@ -2,6 +2,7 @@ package com.dl.shop.payment.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,7 +41,11 @@ public class LidPayService {
 		param.put("total", bigD.toString());
 		param.put("payMethod", "6023");//支付业务编号： 6015 微信个人收款； 6023 支付宝企业收款
 		param.put("name", paytype);//商品名称
-		param = lidutil.pay(param);
+		try {
+			param = lidutil.pay(param);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 		if (param != null) {
 			payBaseResult = ResultGenerator.genSuccessResult("succ", param);
 		} else {
@@ -56,7 +61,12 @@ public class LidPayService {
 	public BaseResult<RspOrderQueryEntity> commonOrderQueryLid(String orderSn){
 		BaseResult<RspOrderQueryEntity> payBaseResult = null;
 		Map<String,String> param = new HashMap<>();
-		param = lidutil.orderQuery(orderSn);
+		try {
+			param = lidutil.orderQuery(orderSn);
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		if (param != null) {
 			RspOrderQueryEntity rspOrderQueryEntity = new RspOrderQueryEntity();
 			rspOrderQueryEntity.setResult_code(param.get("status"));
