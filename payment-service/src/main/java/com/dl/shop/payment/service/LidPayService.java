@@ -365,7 +365,7 @@ public class LidPayService {
 		}
 		if (param != null) {
 			RspOrderQueryEntity rspOrderQueryEntity = new RspOrderQueryEntity();
-			rspOrderQueryEntity.setResult_code(param.get("status").toString());
+			rspOrderQueryEntity.setResult_code(param.get("status")==null?"":param.get("status").toString());
 			rspOrderQueryEntity.setType(RspOrderQueryEntity.TYPE_LID);
 			payBaseResult = ResultGenerator.genSuccessResult("succ", rspOrderQueryEntity);
 		} else {
