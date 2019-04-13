@@ -223,7 +223,7 @@ public class LidPayService {
 				}
 			} else {
 				logger.info("METHOD PAY()华移支付失败");
-				return null;
+				return obj;
 			}
 		} else {
 			return null;
@@ -272,7 +272,7 @@ public class LidPayService {
 				}
 			} else {
 				logger.info("METHOD ORDERQUERY()华移支付订单查询失败");
-				return null;
+				return obj;
 			}
 		} else {
 			logger.info("METHOD ORDERQUERY()华移支付订单查询失败");
