@@ -348,7 +348,7 @@ public class LidPayDemo {
 	}
 
 	public static void main(String[] args) {
-		String orderNo = "2019081455909";
+		String orderNo = "2019041320509401360079";
 		String total = "10";
 		String payMethod = "6023";
 		String name="绿茶";//商品名称
@@ -358,12 +358,12 @@ public class LidPayDemo {
 		param.put("total", total);
 		param.put("payMethod", payMethod);
 		param.put("name", name);
-		param.put("refundReson", refundReson);
+//		param.put("refundReson", refundReson);
 		// ************订单生成，当返回result中code=1时，代表订单生成成功，需要验签************
-		pay(param);
+//		pay(param);
 
 		// ************订单查询，当返回result中status=1时，代表支付成功，需要验签************
-//		orderQuery(param);
+		orderQuery(param);
 
 		// ************订单退款，全额退款，简单接口，无须验签************
 //		orderRefund(param);
