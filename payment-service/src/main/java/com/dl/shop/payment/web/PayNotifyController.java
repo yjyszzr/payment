@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
+import net.sf.json.util.JSONUtils;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -325,6 +326,7 @@ public class PayNotifyController {
 			log.info("LidPayNotify()*********"+key + "-------------" + values[0]);
 			realMap.put(key, values[0]);
 		}
+		log.info("LidPayNotify()返回报文*********"+JSONUtils.valueToString(realMap));
 		String payOrderfSn = realMap.get("orderNo");
 		String status=realMap.get("status");
 		if (StringUtils.isEmpty(payOrderfSn)) {
