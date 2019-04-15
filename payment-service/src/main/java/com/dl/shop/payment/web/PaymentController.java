@@ -1,48 +1,28 @@
 package com.dl.shop.payment.web;
 
-import com.alibaba.fastjson.JSON;
-import com.dl.base.param.EmptyParam;
-import com.dl.base.result.BaseResult;
-import com.dl.base.result.ResultGenerator;
-import com.dl.base.util.DateUtil;
-import com.dl.base.util.JSONHelper;
-import com.dl.base.util.MD5Util;
-import com.dl.base.util.SessionUtil;
-import com.dl.lottery.api.ILotteryPrintService;
-import com.dl.lotto.enums.LottoResultEnum;
-import com.dl.member.api.*;
-import com.dl.member.dto.RechargeDataActivityDTO;
-import com.dl.member.dto.SurplusPaymentCallbackDTO;
-import com.dl.member.dto.UserBonusDTO;
-import com.dl.member.dto.UserDTO;
-import com.dl.member.param.BonusLimitConditionParam;
-import com.dl.member.param.StrParam;
-import com.dl.member.param.SurplusPayParam;
-import com.dl.order.api.IOrderService;
-import com.dl.order.dto.OrderDTO;
-import com.dl.order.param.SubmitOrderParam;
-import com.dl.order.param.SubmitOrderParam.TicketDetail;
-import com.dl.order.param.UpdateOrderInfoParam;
-import com.dl.order.param.UpdateOrderPayStatusParam;
-import com.dl.shop.payment.core.ProjectConstant;
-import com.dl.shop.payment.dao.DlPayQrBase64Mapper;
-import com.dl.shop.payment.dto.*;
-import com.dl.shop.payment.enums.PayEnums;
-import com.dl.shop.payment.model.DlPayQrBase64;
-import com.dl.shop.payment.model.PayLog;
-import com.dl.shop.payment.param.*;
-import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
-import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
-import com.dl.shop.payment.pay.rongbao.entity.ReqRongEntity;
-import com.dl.shop.payment.pay.xianfeng.util.XianFengPayUtil;
-import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
-import com.dl.shop.payment.pay.yinhe.entity.RspYinHeEntity;
-import com.dl.shop.payment.pay.yinhe.util.PayUtil;
-import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
-import com.dl.shop.payment.service.*;
-import com.dl.shop.payment.utils.QrUtil;
-import com.dl.shop.payment.utils.WxpayUtil;
 import io.swagger.annotations.ApiOperation;
+import net.sf.json.util.JSONUtils;
+
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.net.URLEncoder;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import javax.annotation.Resource;
+import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -58,19 +38,91 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.annotation.Resource;
-import javax.imageio.ImageIO;
-import javax.servlet.http.HttpServletRequest;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.net.URLEncoder;
-import java.time.Instant;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import com.alibaba.fastjson.JSON;
+import com.dl.base.param.EmptyParam;
+import com.dl.base.result.BaseResult;
+import com.dl.base.result.ResultGenerator;
+import com.dl.base.util.DateUtil;
+import com.dl.base.util.JSONHelper;
+import com.dl.base.util.MD5Util;
+import com.dl.base.util.SessionUtil;
+import com.dl.lottery.api.ILotteryPrintService;
+import com.dl.lottery.dto.DIZQUserBetCellInfoDTO;
+import com.dl.lottery.dto.DIZQUserBetInfoDTO;
+import com.dl.lottery.enums.LotteryResultEnum;
+import com.dl.lotto.enums.LottoResultEnum;
+import com.dl.member.api.IActivityService;
+import com.dl.member.api.IUserAccountService;
+import com.dl.member.api.IUserBankService;
+import com.dl.member.api.IUserBonusService;
+import com.dl.member.api.IUserMessageService;
+import com.dl.member.api.IUserService;
+import com.dl.member.dto.RechargeDataActivityDTO;
+import com.dl.member.dto.SurplusPaymentCallbackDTO;
+import com.dl.member.dto.UserBankDTO;
+import com.dl.member.dto.UserBonusDTO;
+import com.dl.member.dto.UserDTO;
+import com.dl.member.dto.UserWithdrawDTO;
+import com.dl.member.param.BonusLimitConditionParam;
+import com.dl.member.param.IDParam;
+import com.dl.member.param.StrParam;
+import com.dl.member.param.SurplusPayParam;
+import com.dl.member.param.UpdateUserRechargeParam;
+import com.dl.member.param.UserWithdrawParam;
+import com.dl.order.api.IOrderService;
+import com.dl.order.dto.OrderDTO;
+import com.dl.order.param.SubmitOrderParam;
+import com.dl.order.param.SubmitOrderParam.TicketDetail;
+import com.dl.order.param.UpdateOrderInfoParam;
+import com.dl.order.param.UpdateOrderPayStatusParam;
+import com.dl.order.param.UpdateOrderStatusByAnotherStatusParam;
+import com.dl.shop.payment.core.ProjectConstant;
+import com.dl.shop.payment.dao.DlPayQrBase64Mapper;
+import com.dl.shop.payment.dto.PayLogDTO;
+import com.dl.shop.payment.dto.PayLogDetailDTO;
+import com.dl.shop.payment.dto.PayReturnDTO;
+import com.dl.shop.payment.dto.PayWaysDTO;
+import com.dl.shop.payment.dto.PaymentDTO;
+import com.dl.shop.payment.dto.PriceDTO;
+import com.dl.shop.payment.dto.RechargeUserDTO;
+import com.dl.shop.payment.dto.RspOrderQueryDTO;
+import com.dl.shop.payment.dto.UserBetDetailInfoDTO;
+import com.dl.shop.payment.dto.UserBetPayInfoDTO;
+import com.dl.shop.payment.dto.UserGoPayInfoDTO;
+import com.dl.shop.payment.dto.ValidPayDTO;
+import com.dl.shop.payment.enums.PayEnums;
+import com.dl.shop.payment.model.DlPayQrBase64;
+import com.dl.shop.payment.model.PayLog;
+import com.dl.shop.payment.model.UnifiedOrderParam;
+import com.dl.shop.payment.model.UserWithdrawLog;
+import com.dl.shop.payment.param.AllPaymentInfoParam;
+import com.dl.shop.payment.param.GoPayBeforeParam;
+import com.dl.shop.payment.param.GoPayParam;
+import com.dl.shop.payment.param.PayLogIdParam;
+import com.dl.shop.payment.param.PayLogOrderSnParam;
+import com.dl.shop.payment.param.RechargeParam;
+import com.dl.shop.payment.param.ReqOrderQueryParam;
+import com.dl.shop.payment.param.RollbackOrderAmountParam;
+import com.dl.shop.payment.param.RollbackThirdOrderAmountParam;
+import com.dl.shop.payment.param.UrlBase64Param;
+import com.dl.shop.payment.param.UserIdParam;
+import com.dl.shop.payment.param.WithdrawParam;
+import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
+import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
+import com.dl.shop.payment.pay.rongbao.entity.ReqRongEntity;
+import com.dl.shop.payment.pay.xianfeng.util.XianFengPayUtil;
+import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
+import com.dl.shop.payment.pay.yinhe.entity.RspYinHeEntity;
+import com.dl.shop.payment.pay.yinhe.util.PayUtil;
+import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
+import com.dl.shop.payment.service.LidPayService;
+import com.dl.shop.payment.service.PayLogService;
+import com.dl.shop.payment.service.PayMentService;
+import com.dl.shop.payment.service.UbeyPayService;
+import com.dl.shop.payment.service.UserRechargeService;
+import com.dl.shop.payment.service.UserWithdrawLogService;
+import com.dl.shop.payment.utils.QrUtil;
+import com.dl.shop.payment.utils.WxpayUtil;
 
 @Controller
 @RequestMapping("/payment")
@@ -84,6 +136,8 @@ public class PaymentController extends AbstractBaseController {
 	private PayMentService paymentService;
 	@Resource
 	private UbeyPayService ubeyPayService;
+	@Resource
+	private LidPayService lidPayService;
 	@Resource
 	private WxpayUtil wxpayUtil;
 	@Resource
@@ -648,9 +702,9 @@ public class PaymentController extends AbstractBaseController {
 	@ResponseBody
 	public BaseResult<Object> rechargeForApp(@RequestBody RechargeParam param, HttpServletRequest request) {
 		//20181203 加入提示
-		return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
+//		return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
 
-/*		String loggerId = "rechargeForApp_" + System.currentTimeMillis();
+		String loggerId = "rechargeForApp_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/recharge, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode() + " , totalAmount=" + param.getTotalAmount());
 		if(paymentService.isShutDownPay()) {
 			return ResultGenerator.genResult(PayEnums.PAY_STOP.getcode(), PayEnums.PAY_STOP.getMsg());
@@ -717,7 +771,7 @@ public class PaymentController extends AbstractBaseController {
 		// url下发后，服务器开始主动轮序订单状态
 		// PayManager.getInstance().addReqQueue(orderSn,savePayLog.getPayOrderSn(),payCode);
 		BaseResult payBaseResult = null;
-		if ("app_zfb".equals(payCode)) {
+		/*if ("app_zfb".equals(payCode)) {
 			logger.info("支付宝支付url开始生成...isWechat:" + (param.getInnerWechat() == 1) + " payOrderSn:" + savePayLog.getPayOrderSn());
 			payBaseResult = getWechatPayUrl(true, param.getInnerWechat() == 1, param.getIsH5(), 1, savePayLog, payIp, orderSn, "");
 			logger.info("支付宝支付url生成成功 code" + payBaseResult.getCode() + " data:" + payBaseResult.getData());
@@ -801,6 +855,15 @@ public class PaymentController extends AbstractBaseController {
 			} else {
 				logger.info("获取Ubey银行列表失败");
 			}
+		}else*/ if ("app_lidpay".equals(payCode)) {
+			logger.info("华移支付url:" + " payCode:" + savePayLog.getPayCode());
+			payBaseResult = lidPayService.getLidPayUrl(savePayLog, orderSn,"充值");
+			if (payBaseResult != null && payBaseResult.getData() != null) {
+				String str = payBaseResult.getData() + "";
+				logger.info("生成华移支付payOrderSn={},url成功 url={}:", orderSn, str);
+			} else {
+				logger.info("生成华移支付payOrderSn={},url失败", orderSn);
+			}
 		}
 		// 处理支付失败的情况
 		if (null == payBaseResult || payBaseResult.getCode() != 0) {
@@ -833,7 +896,7 @@ public class PaymentController extends AbstractBaseController {
 			return payBaseResult;
 		} else {
 			return ResultGenerator.genFailResult("参数异常");
-		}*/
+		}
 	}
 
 	@ApiOperation(value = "app提现调用", notes = "")
@@ -1120,7 +1183,7 @@ public class PaymentController extends AbstractBaseController {
 	@ResponseBody
 	public BaseResult<PayReturnDTO> nUnifiedOrder(@RequestBody GoPayParam param, HttpServletRequest request) {
 		//20181203 加入提示，不能用金钱购买
-		//return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
+//		return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
 
 		String loggerId = "payment_nUnifiedOrder_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/nUnifiedOrder, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode());
@@ -1136,8 +1199,15 @@ public class PaymentController extends AbstractBaseController {
 			return ResultGenerator.genResult(PayEnums.PAY_TOKEN_EXPRIED.getcode(), PayEnums.PAY_TOKEN_EXPRIED.getMsg());
 		}
 		//ubey检验最小金额
-		if("app_ubey".equals(param.getPayCode())) {
-			boolean check = ubeyPayService.checkAmount(jsonData);
+//		if("app_ubey".equals(param.getPayCode())) {
+//			boolean check = ubeyPayService.checkAmount(jsonData);
+//			if(check) {
+//				return ResultGenerator.genFailResult("该支付方式最低消费1元 ");
+//			}
+//		}
+		//ubey检验最小金额
+		if("app_lidpay".equals(param.getPayCode())) {
+			boolean check = lidPayService.checkAmount(jsonData);
 			if(check) {
 				return ResultGenerator.genFailResult("该支付方式最低消费1元 ");
 			}
@@ -1362,7 +1432,7 @@ public class PaymentController extends AbstractBaseController {
 		// url下发后，服务器开始主动轮序订单状态
 		// PayManager.getInstance().addReqQueue(orderSn,savePayLog.getPayOrderSn(),paymentDto.getPayCode());
 		BaseResult payBaseResult = null;
-		if ("app_zfb".equals(payCode)) {
+		/*if ("app_zfb".equals(payCode)) {
 			logger.info("支付宝支付url开始生成...isWechat:" + (param.getInnerWechat() == 1) + " payOrderSn:" + savePayLog.getPayOrderSn());
 			payBaseResult = getWechatPayUrl(true, param.getInnerWechat() == 1, param.getIsH5(), 0, savePayLog, payIp, orderId, "");
 			logger.info("支付宝支付url生成成功 code" + payBaseResult.getCode() + " data:" + payBaseResult.getData());
@@ -1449,8 +1519,18 @@ public class PaymentController extends AbstractBaseController {
 			} else {
 				logger.info("获取Ubey银行列表失败");
 			}
+		}else*/ if ("app_lidpay".equals(paymentDto.getPayCode())) {//华移支付
+			logger.info("华移支付url:" + " payCode:" + savePayLog.getPayCode());
+			payBaseResult = lidPayService.getLidPayUrl(savePayLog, orderSn,"支付");
+			if (payBaseResult != null && payBaseResult.getData() != null) {
+				String str = payBaseResult.getData() + "";
+				logger.info("生成华移支付payOrderSn={},url成功 url={}:", orderSn, str);
+			} else {
+				logger.info("生成华移支付payOrderSn={},url失败", orderSn);
+			}
 		}
 		logger.info(loggerId + " result: code=" + payBaseResult.getCode() + " , msg=" + payBaseResult.getMsg());
+		logger.info("支付成功后："+JSONUtils.valueToString(payBaseResult));
 		return payBaseResult;
 	}
 

@@ -125,8 +125,9 @@ public class PayYFTUtil {
 	 * 易富通订单支付查询接口
 	 */
 	public BaseResult<RspOrderQueryEntity> queryPayResult(String payCode, String orderNo) {
-		logger.info("调取易富通查询订单支付结果orderNo={}",orderNo);
-		RspOrderQueryEntity rspOrderQueryEntity = new RspOrderQueryEntity();
+//		logger.info("调取易富通查询订单支付结果orderNo={}",orderNo);
+		return ResultGenerator.genFailResult("请求易富通支付回调失败[]");
+		/*RspOrderQueryEntity rspOrderQueryEntity = new RspOrderQueryEntity();
 		RspQueryYFTEntity rEntity = null;
 		RspHttpEntity rspHttpEntity = null;
 		StringBuffer buffer = new StringBuffer();
@@ -147,6 +148,7 @@ public class PayYFTUtil {
 		}else {
 			return ResultGenerator.genFailResult("请求易富通支付回调失败[" + rspHttpEntity.msg + "]");
 		}
+		*/
 	}
 	
 	/**

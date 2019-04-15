@@ -78,6 +78,7 @@ import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.kuaijie.entity.KuaiJieJdPayOrderCreateResponse;
 import com.dl.shop.payment.pay.kuaijie.entity.KuaiJieQqPayOrderCreateResponse;
 import com.dl.shop.payment.pay.kuaijie.util.KuaiJiePayUtil;
+import com.dl.shop.payment.pay.lidpay.util.LidPayH5Utils;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
 import com.dl.shop.payment.pay.rongbao.entity.ReqRefundEntity;
 import com.dl.shop.payment.pay.rongbao.entity.RspRefundEntity;
@@ -115,7 +116,10 @@ public class PayMentService extends AbstractService<PayMent> {
 
 	@Resource
 	private PayLogService payLogService;
-
+	@Resource
+	private LidPayService lidPayService;
+	@Resource
+	private LidPayH5Utils lidutil;
 	@Resource
 	private PayLogMapper payLogMapper;
 
@@ -633,7 +637,7 @@ public class PayMentService extends AbstractService<PayMent> {
 		}
 		String payCode = payLog.getPayCode();
 		String payOrderSn = payLog.getPayOrderSn();
-		if ("app_zfb".equals(payCode)) {
+		/*if ("app_zfb".equals(payCode)) {
 			baseResult = yinHeUtil.orderQuery(true, false, payOrderSn);
 		} else if ("app_rongbao".equals(payCode)) {
 			baseResult = rongUtil.queryOrderInfo(payOrderSn);
@@ -662,6 +666,10 @@ public class PayMentService extends AbstractService<PayMent> {
 			baseResult = kuaiJiePayUtil.queryOrderStatusQQqianBao(payLog.getTradeNo());
 		} else if ("app_kuaijie_pay_jd".equals(payCode)) {
 			baseResult = kuaiJiePayUtil.queryOrderStatusJd(payLog.getTradeNo());
+		} else*/ 
+		logger.info("订单查询状态************："+payLog.getOrderSn());
+		if ("app_lidpay".equals(payCode)) {
+			baseResult = lidPayService.commonOrderQueryLid(payLog.getOrderSn());
 		}
 		if (baseResult == null || baseResult.getCode() != 0) {
 			if (baseResult != null) {

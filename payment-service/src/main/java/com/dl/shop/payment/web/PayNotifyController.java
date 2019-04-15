@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
+import net.sf.json.util.JSONUtils;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -304,5 +305,60 @@ public class PayNotifyController {
 			}
 			writeUppercaseSuccess(response);
 		}
+	}
+	
+	@ApiOperation(value = "Lid支付回调")
+	@PostMapping("/LidPayNotify")
+	@ResponseBody
+	public void LidPayNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+		request.setCharacterEncoding("UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		response.setHeader("Content-type", "text/html;charset=UTF-8");
+		Map<?, ?> parameters = request.getParameterMap();// 保存request请求参数的临时变量
+		log.info("LidPayNotify()华移支付通知消息LidPayNotify={}", parameters);
+		Map<String,String> realMap = new HashMap<String, String>();
+		// 打印华移支付返回值
+		log.info("LidPayNotify()华移支付服务器端通知-接收到华移支付返回报文：");
+		Iterator<?> paiter = parameters.keySet().iterator();
+		while (paiter.hasNext()) {
+			String key = paiter.next().toString();
+			String[] values = (String[]) parameters.get(key);
+			log.info("LidPayNotify()*********"+key + "-------------" + values[0]);
+			realMap.put(key, values[0]);
+		}
+		log.info("LidPayNotify()返回报文*********"+JSONUtils.valueToString(realMap));
+		String payOrderfSn = realMap.get("orderNo");
+		String status=realMap.get("status");
+		if (StringUtils.isEmpty(payOrderfSn)) {
+			log.error("LidPayNotify()华移支付返回payOrderSn is null");
+			writeLowerSuccess(response);
+			return;
+		}
+		PayLog payLog = payLogService.findPayLogByOrderSn(payOrderfSn);
+		if (payLog == null) {
+			log.info("LidPayNotify()华移支付[payNotify]该支付订单查询失败 payLogSn:" + payOrderfSn);
+			writeLowerSuccess(response);
+			return;
+		}
+		int isPaid = payLog.getIsPaid();
+		if (isPaid == 1) {
+			log.info("LidPayNotify()华移支付[payNotify] payOrderSn={}订单已支付...", payOrderfSn);
+			writeLowerSuccess(response);
+			return;
+		}
+		int payType = payLog.getPayType();
+		String payCode = payLog.getPayCode();
+		RspOrderQueryEntity rspOrderEntikty = new RspOrderQueryEntity();
+		rspOrderEntikty.setResult_code(status);
+		rspOrderEntikty.setPayCode(payCode);
+		rspOrderEntikty.setType(RspOrderQueryEntity.TYPE_LID);
+		rspOrderEntikty.setTrade_status(status);
+		if (payType == 0) {
+			paymentService.orderOptions(payLog, rspOrderEntikty);
+		} else {
+			paymentService.rechargeOptions(payLog, rspOrderEntikty);
+		}
+		writeLowerSuccess(response);
+		return;
 	}
 }
