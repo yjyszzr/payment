@@ -248,6 +248,7 @@ public class LidPayService {
 		// ************订单查询，当返回result中status=1时，代表支付成功，需要验签************
 		// status状态：0:等待支付；1：支付成功；2：支付失败；3：订单已撤销；4：订单已退款
 		logger.info("METHOD ORDERQUERY()华移支付:QUERY_URL={}",lidutil.getPATH() + lidutil.getQUERY_URL_METHOD());
+		logger.info("METHOD ORDERQUERY()华移支付:orderNo={}",orderNo);
 		String result = sendPostMessage(new URL(lidutil.getPATH() + lidutil.getQUERY_URL_METHOD()), params);
 		logger.info("METHOD ORDERQUERY()华移支付订单查询请求结果:result={}",result);
 		// 校验返回值
