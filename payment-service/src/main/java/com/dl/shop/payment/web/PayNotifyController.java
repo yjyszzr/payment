@@ -328,7 +328,7 @@ public class PayNotifyController {
 		}
 		log.info("LidPayNotify()返回报文*********"+JSONUtils.valueToString(realMap));
 		String payOrderfSn = realMap.get("orderNo");
-		String status=realMap.get("status");
+		String status=realMap.get("code");
 		if (StringUtils.isEmpty(payOrderfSn)) {
 			log.error("LidPayNotify()华移支付返回payOrderSn is null");
 			writeLowerSuccess(response);
