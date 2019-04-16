@@ -709,6 +709,7 @@ public class PaymentController extends AbstractBaseController {
 		logger.info(loggerId + " int /payment/recharge, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode() + " , totalAmount=" + param.getTotalAmount());
 		UserDeviceInfo userDeviceInfo = new UserDeviceInfo();
 		String appCodeName = userDeviceInfo.getAppCodeName();
+		logger.info("当前平台是====appCodeName=" + appCodeName);
 		if(!"11".equals(appCodeName)) {
 			if(paymentService.isShutDownPay()) {
 				return ResultGenerator.genResult(PayEnums.PAY_STOP.getcode(), PayEnums.PAY_STOP.getMsg());
