@@ -707,7 +707,7 @@ public class PaymentController extends AbstractBaseController {
 
 		String loggerId = "rechargeForApp_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/recharge, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode() + " , totalAmount=" + param.getTotalAmount());
-		UserDeviceInfo userDeviceInfo = new UserDeviceInfo();
+		UserDeviceInfo userDeviceInfo = SessionUtil.getUserDevice();
 		String appCodeName = userDeviceInfo.getAppCodeName();
 		logger.info("当前平台是====appCodeName=" + appCodeName);
 		if(!"11".equals(appCodeName)) {
