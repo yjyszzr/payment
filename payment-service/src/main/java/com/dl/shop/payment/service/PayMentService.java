@@ -97,6 +97,7 @@ import com.dl.shop.payment.utils.QrUtil;
 import com.dl.shop.payment.web.PaymentController;
 
 import lombok.extern.slf4j.Slf4j;
+import net.sf.json.util.JSONUtils;
 
 @Service
 @Slf4j
@@ -514,6 +515,7 @@ public class PayMentService extends AbstractService<PayMent> {
 	 * @return
 	 */
 	public BaseResult<RspOrderQueryDTO> orderOptions(PayLog payLog, RspOrderQueryEntity response) {
+		logger.info("orderOptions()===response*******"+JSONUtils.valueToString(response));
 		int currentTime = DateUtil.getCurrentTimeLong();
 		if (response.isSucc()) {
 			// 2018-07-04
@@ -528,9 +530,9 @@ public class PayMentService extends AbstractService<PayMent> {
 			param.setOrderSn(payLog.getOrderSn());
 			BaseResult<Integer> updateOrderInfo = orderService.updateOrderPayStatus(param);
 
-			logger.info("==============支付成功订单回调[orderService]==================");
+			logger.info("orderOptions()==============支付成功订单回调[orderService]==================");
 			logger.info("payLogId:" + payLog.getLogId() + " payName:" + payLog.getPayName() + " payCode:" + payLog.getPayCode() + " payOrderSn:" + payLog.getPayOrderSn());
-			logger.info("==================================");
+			logger.info("orderOptions()==================================");
 			if (updateOrderInfo.getCode() == 0) {
 				PayLog updatePayLog = new PayLog();
 				updatePayLog.setPayTime(currentTime);
@@ -546,6 +548,7 @@ public class PayMentService extends AbstractService<PayMent> {
 			}
 			return ResultGenerator.genSuccessResult("订单已支付成功！", null);
 		} else if (response.isFail()) {
+			logger.info("orderOptions() isfail==============支付成功订单回调[orderService]==================");
 			// 更新order
 			UpdateOrderPayStatusParam param = new UpdateOrderPayStatusParam();
 			param.setPayStatus(2);
