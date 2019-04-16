@@ -883,9 +883,9 @@ public class PaymentController extends AbstractBaseController {
 			payBaseResult = aPayService.getAPayUrl(savePayLog, orderSn,orderSn,userId,"9","127.0.0.1","充值");
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
-				logger.info("生成华移支付payOrderSn={},url成功 url={}:", orderSn, str);
+				logger.info("生成艾支付payOrderSn={},url成功 url={}:", orderSn, str);
 			} else {
-				logger.info("生成华移支付payOrderSn={},url失败", orderSn);
+				logger.info("生成艾支付payOrderSn={},url失败", orderSn);
 			}
 		}else if ("app_awx".equals(payCode)) {
 			logger.info("艾支付url:" + " payCode:" + savePayLog.getPayCode());
@@ -897,9 +897,9 @@ public class PaymentController extends AbstractBaseController {
 			payBaseResult = aPayService.getAPayUrl(savePayLog, orderSn,orderSn,userId,"6","127.0.0.1","充值");
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
-				logger.info("生成华移支付payOrderSn={},url成功 url={}:", orderSn, str);
+				logger.info("生成艾支付payOrderSn={},url成功 url={}:", orderSn, str);
 			} else {
-				logger.info("生成华移支付payOrderSn={},url失败", orderSn);
+				logger.info("生成艾支付payOrderSn={},url失败", orderSn);
 			}
 		}
 		
@@ -1583,7 +1583,7 @@ public class PaymentController extends AbstractBaseController {
 				logger.info("生成华移支付payOrderSn={},url失败", orderSn);
 			}
 		}else if ("app_apay".equals(paymentDto.getPayCode())) {//艾支付
-			logger.info("华移支付url:" + " payCode:" + savePayLog.getPayCode());
+			logger.info("艾支付url:" + " payCode:" + savePayLog.getPayCode());
 //			String channel_id = "9";//渠道编号  微信支付(扫码):6     微信支付H5:7		支付宝支付：9
 //			int iswechat = param.getInnerWechat();
 //			if(iswechat==1) {
@@ -1606,9 +1606,9 @@ public class PaymentController extends AbstractBaseController {
 			payBaseResult = aPayService.getAPayUrl(savePayLog, orderSn,orderId,userId,"6","127.0.0.1","支付");
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
-				logger.info("生成华移支付payOrderSn={},url成功 url={}:", orderSn, str);
+				logger.info("生成艾支付payOrderSn={},url成功 url={}:", orderSn, str);
 			} else {
-				logger.info("生成华移支付payOrderSn={},url失败", orderSn);
+				logger.info("生成艾支付payOrderSn={},url失败", orderSn);
 			}
 		}
 		logger.info(loggerId + " result: code=" + payBaseResult.getCode() + " , msg=" + payBaseResult.getMsg());
