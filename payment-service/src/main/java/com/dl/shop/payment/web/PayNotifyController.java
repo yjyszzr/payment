@@ -36,6 +36,7 @@ import com.dl.shop.payment.pay.yifutong.util.PayYFTUtil;
 import com.dl.shop.payment.pay.youbei.entity.RespUBeyNotifyEntity;
 import com.dl.shop.payment.pay.youbei.entity.RespUBeyRSAEntity;
 import com.dl.shop.payment.pay.youbei.util.PayUBeyUtil;
+import com.dl.shop.payment.service.APayService;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
 
@@ -48,7 +49,10 @@ public class PayNotifyController {
 
 	@Resource
 	private PayLogService payLogService;
-
+	
+	@Resource
+	private APayService aPayService;
+	
 	@Resource
 	private PayYFTUtil payYFTUtil;
 	
@@ -355,6 +359,63 @@ public class PayNotifyController {
 		rspOrderEntikty.setType(RspOrderQueryEntity.TYPE_LID);
 		rspOrderEntikty.setTrade_status(status);
 		log.info("LidPayNotify()返回报文*********"+payType);
+		if (payType == 0) {
+			paymentService.orderOptions(payLog, rspOrderEntikty);
+		} else {
+			paymentService.rechargeOptions(payLog, rspOrderEntikty);
+		}
+		writeLowerSuccess(response);
+		return;
+	}
+	@ApiOperation(value = "艾支付回调")
+	@PostMapping("/APayNotify")
+	@ResponseBody
+	public void APayNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+		request.setCharacterEncoding("UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		response.setHeader("Content-type", "text/html;charset=UTF-8");
+		Map<?, ?> parameters = request.getParameterMap();// 保存request请求参数的临时变量
+		log.info("APayNotify()艾支付通知消息LidPayNotify={}", parameters);
+		Map<String,Object> realMap = new HashMap<String, Object>();
+		// 打印华移支付返回值
+		log.info("APayNotify()艾支付服务器端通知-接收到华移支付返回报文：");
+		Iterator<?> paiter = parameters.keySet().iterator();
+		while (paiter.hasNext()) {
+			String key = paiter.next().toString();
+			String[] values = (String[]) parameters.get(key);
+			log.info("APayNotify()*********"+key + "-------------" + values[0]);
+			realMap.put(key, values[0]);
+		}
+//		aPayService.getSign(realMap); ///签名校验
+		log.info("APayNotify()返回报文*********"+JSONUtils.valueToString(realMap));
+		String payOrderfSn = realMap.get("partner_order")==null?"":realMap.get("partner_order").toString();
+		String status=realMap.get("code")==null?"":realMap.get("code").toString();
+		log.info("APayNotify()返回报文*********"+payOrderfSn+"&&&"+status);
+		if (StringUtils.isEmpty(payOrderfSn)) {
+			log.info("APayNotify()艾支付返回payOrderSn is null");
+			writeLowerSuccess(response);
+			return;
+		}
+		PayLog payLog = payLogService.findPayLogByOrderSn(payOrderfSn);
+		if (payLog == null) {
+			log.info("APayNotify()艾支付[payNotify]该支付订单查询失败 payLogSn:" + payOrderfSn);
+			writeLowerSuccess(response);
+			return;
+		} 
+		int isPaid = payLog.getIsPaid();
+		if (isPaid == 1) {
+			log.info("APayNotify()艾支付[payNotify] payOrderSn={}订单已支付...", payOrderfSn);
+			writeLowerSuccess(response);
+			return;
+		}
+		int payType = payLog.getPayType();
+		String payCode = payLog.getPayCode();
+		RspOrderQueryEntity rspOrderEntikty = new RspOrderQueryEntity();
+		rspOrderEntikty.setResult_code(status);
+		rspOrderEntikty.setPayCode(payCode);
+		rspOrderEntikty.setType(RspOrderQueryEntity.TYPE_APAY);
+		rspOrderEntikty.setTrade_status(status);
+		log.info("APayNotify()返回报文*********"+payType);
 		if (payType == 0) {
 			paymentService.orderOptions(payLog, rspOrderEntikty);
 		} else {

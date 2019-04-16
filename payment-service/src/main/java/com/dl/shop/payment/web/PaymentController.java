@@ -116,6 +116,7 @@ import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
 import com.dl.shop.payment.pay.yinhe.entity.RspYinHeEntity;
 import com.dl.shop.payment.pay.yinhe.util.PayUtil;
 import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
+import com.dl.shop.payment.service.APayService;
 import com.dl.shop.payment.service.LidPayService;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
@@ -139,6 +140,8 @@ public class PaymentController extends AbstractBaseController {
 	private UbeyPayService ubeyPayService;
 	@Resource
 	private LidPayService lidPayService;
+	@Resource
+	private APayService aPayService;
 	@Resource
 	private WxpayUtil wxpayUtil;
 	@Resource
@@ -870,7 +873,22 @@ public class PaymentController extends AbstractBaseController {
 			} else {
 				logger.info("生成华移支付payOrderSn={},url失败", orderSn);
 			}
+		}else if ("app_apay".equals(payCode)) {
+			logger.info("艾支付url:" + " payCode:" + savePayLog.getPayCode());
+			String channel_id = "9";//渠道编号  微信支付(扫码):6     微信支付H5:7		支付宝支付：9
+			int iswechat = param.getInnerWechat();
+			if(iswechat==1) {
+				channel_id = "6";
+			}
+			payBaseResult = aPayService.getAPayUrl(savePayLog, orderSn,orderSn,userId,channel_id,"127.0.0.1","充值");
+			if (payBaseResult != null && payBaseResult.getData() != null) {
+				String str = payBaseResult.getData() + "";
+				logger.info("生成华移支付payOrderSn={},url成功 url={}:", orderSn, str);
+			} else {
+				logger.info("生成华移支付payOrderSn={},url失败", orderSn);
+			}
 		}
+		
 		// 处理支付失败的情况
 		if (null == payBaseResult || payBaseResult.getCode() != 0) {
 			// 充值失败逻辑
@@ -1222,6 +1240,11 @@ public class PaymentController extends AbstractBaseController {
 			if(check) {
 				return ResultGenerator.genFailResult("该支付方式最低消费1元 ");
 			}
+		} else if("app_apay".equals(param.getPayCode())) {
+			boolean check = aPayService.checkAmount(jsonData);
+			if(check) {
+				return ResultGenerator.genFailResult("该支付方式最低消费1元 ");
+			}
 		}
 		// 清除payToken
 		stringRedisTemplate.delete(payToken);
@@ -1538,6 +1561,20 @@ public class PaymentController extends AbstractBaseController {
 				logger.info("生成华移支付payOrderSn={},url成功 url={}:", orderSn, str);
 			} else {
 				logger.info("生成华移支付payOrderSn={},url失败", orderSn);
+			}
+		}else if ("app_apay".equals(paymentDto.getPayCode())) {//艾支付
+			logger.info("华移支付url:" + " payCode:" + savePayLog.getPayCode());
+			String channel_id = "9";//渠道编号  微信支付(扫码):6     微信支付H5:7		支付宝支付：9
+			int iswechat = param.getInnerWechat();
+			if(iswechat==1) {
+				channel_id = "6";
+			}
+			payBaseResult = aPayService.getAPayUrl(savePayLog, orderSn,orderId,userId,channel_id,"127.0.0.1","支付");
+			if (payBaseResult != null && payBaseResult.getData() != null) {
+				String str = payBaseResult.getData() + "";
+				logger.info("生成艾支付payOrderSn={},url成功 url={}:", orderSn, str);
+			} else {
+				logger.info("生成艾支付payOrderSn={},url失败", orderSn);
 			}
 		}
 		logger.info(loggerId + " result: code=" + payBaseResult.getCode() + " , msg=" + payBaseResult.getMsg());

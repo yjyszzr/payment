@@ -53,11 +53,11 @@ public class LidPayDemo {
 	/**
 	 * 商户号，正式上线需要修改为自己的商户号
 	 */
-	private static String MERCHANT_NO = "8080108511299699";
+	private static String MERCHANT_NO = "8006859000120561";
 	/**
 	 * 商户密钥，正式上线需要修改为自己的商户密钥
 	 */
-	private static String SECRET = "058240662901";
+	private static String SECRET = "103670529156";
 
 	// 静态代码块实例化URL
 	static {
@@ -348,7 +348,7 @@ public class LidPayDemo {
 	}
 
 	public static void main(String[] args) {
-		String orderNo = "2019041320509401360079";
+		String orderNo = "2019041518242531330097";
 		String total = "10";
 		String payMethod = "6023";
 		String name="绿茶";//商品名称
