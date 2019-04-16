@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.dl.base.model.UserDeviceInfo;
 import com.dl.base.param.EmptyParam;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -706,8 +707,12 @@ public class PaymentController extends AbstractBaseController {
 
 		String loggerId = "rechargeForApp_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/recharge, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode() + " , totalAmount=" + param.getTotalAmount());
-		if(paymentService.isShutDownPay()) {
-			return ResultGenerator.genResult(PayEnums.PAY_STOP.getcode(), PayEnums.PAY_STOP.getMsg());
+		UserDeviceInfo userDeviceInfo = new UserDeviceInfo();
+		String appCodeName = userDeviceInfo.getAppCodeName();
+		if(!"11".equals(appCodeName)) {
+			if(paymentService.isShutDownPay()) {
+				return ResultGenerator.genResult(PayEnums.PAY_STOP.getcode(), PayEnums.PAY_STOP.getMsg());
+			}
 		}
 		double totalAmount = param.getTotalAmount();
 		if (totalAmount <= 0) {
