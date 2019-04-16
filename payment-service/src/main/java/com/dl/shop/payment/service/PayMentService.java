@@ -939,6 +939,7 @@ public class PayMentService extends AbstractService<PayMent> {
 		//判断用户是否有交易
 		UserDealActionParam param = new UserDealActionParam();
 		param.setUserId(SessionUtil.getUserId());
+		log.info("isShutDownPay()====userid={}", param.getUserId());
 		BaseResult<Integer> userDealAction = iSwitchConfigService.userDealAction(param);
 		Integer data = userDealAction.getData();
 		if(null != data && 0 == data) {
