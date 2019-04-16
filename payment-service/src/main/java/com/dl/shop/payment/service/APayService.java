@@ -384,10 +384,13 @@ public class APayService {
 //		return payBaseResult;
 //	}
 	
-	public boolean checkAmount(String payToken) {
+	public boolean checkAmount(String payToken,String paytype) {
 		JSONObject josn = (JSONObject) JSONObject.parse(payToken);
 		BigDecimal thirdPartyPaid = new BigDecimal(josn.getString("thirdPartyPaid"));
 		int paid = thirdPartyPaid.intValue();
+		if("6".equals(paytype) && paid<10) {
+			return true;
+		}
 		if(paid<1) {
 			return true;
 		}
