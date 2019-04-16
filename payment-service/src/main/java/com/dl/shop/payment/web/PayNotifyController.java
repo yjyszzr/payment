@@ -329,8 +329,9 @@ public class PayNotifyController {
 		log.info("LidPayNotify()返回报文*********"+JSONUtils.valueToString(realMap));
 		String payOrderfSn = realMap.get("orderNo");
 		String status=realMap.get("code");
+		log.info("LidPayNotify()返回报文*********"+payOrderfSn+"&&&"+status);
 		if (StringUtils.isEmpty(payOrderfSn)) {
-			log.error("LidPayNotify()华移支付返回payOrderSn is null");
+			log.info("LidPayNotify()华移支付返回payOrderSn is null");
 			writeLowerSuccess(response);
 			return;
 		}
@@ -353,6 +354,7 @@ public class PayNotifyController {
 		rspOrderEntikty.setPayCode(payCode);
 		rspOrderEntikty.setType(RspOrderQueryEntity.TYPE_LID);
 		rspOrderEntikty.setTrade_status(status);
+		log.info("LidPayNotify()返回报文*********"+payType);
 		if (payType == 0) {
 			paymentService.orderOptions(payLog, rspOrderEntikty);
 		} else {
