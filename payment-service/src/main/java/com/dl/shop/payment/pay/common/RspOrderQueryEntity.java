@@ -3,12 +3,18 @@ package com.dl.shop.payment.pay.common;
 import java.io.Serializable;
 
 import lombok.Data;
+import net.sf.json.util.JSONUtils;
 
 import org.apache.http.util.TextUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
+
+import com.dl.shop.payment.web.PaymentController;
 
 @Data
 public class RspOrderQueryEntity implements Serializable {
+	private final static Logger logger = LoggerFactory.getLogger(RspOrderQueryEntity.class);
 	private static final long serialVersionUID = 1L;
 
 	private String merchant_id;
@@ -35,6 +41,7 @@ public class RspOrderQueryEntity implements Serializable {
 	public static final int TYPE_LID = 6;
 	
 	public boolean isSucc() {
+		logger.info("orderOptions()===response*******"+result_code+"&&&&&"+type);
 		if (!TextUtils.isEmpty(result_code) && type == TYPE_YINHE) {
 			return result_code.equals("0000");
 		} else if (!TextUtils.isEmpty(result_code) && type == TYPE_XIANFENG) {
