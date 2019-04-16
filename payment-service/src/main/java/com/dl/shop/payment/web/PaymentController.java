@@ -960,6 +960,11 @@ public class PaymentController extends AbstractBaseController {
 	@PostMapping("/query")
 	@ResponseBody
 	public BaseResult<RspOrderQueryDTO> orderquery(@RequestBody ReqOrderQueryParam p) {
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		String loggerId = "orderquery_" + System.currentTimeMillis();
 		String payLogId = p.getPayLogId();
 		if (StringUtils.isBlank(payLogId)) {
