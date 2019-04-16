@@ -340,7 +340,7 @@ public class PayNotifyController {
 			log.info("LidPayNotify()华移支付[payNotify]该支付订单查询失败 payLogSn:" + payOrderfSn);
 			writeLowerSuccess(response);
 			return;
-		}
+		} 
 		int isPaid = payLog.getIsPaid();
 		if (isPaid == 1) {
 			log.info("LidPayNotify()华移支付[payNotify] payOrderSn={}订单已支付...", payOrderfSn);
