@@ -857,7 +857,7 @@ public class PaymentController extends AbstractBaseController {
 			}
 		}else*/ if ("app_lidpay".equals(payCode)) {
 			logger.info("华移支付url:" + " payCode:" + savePayLog.getPayCode());
-			payBaseResult = lidPayService.getLidPayUrl(savePayLog, orderSn,"充值");
+			payBaseResult = lidPayService.getLidPayUrl(savePayLog, orderSn,orderSn,"充值");
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
 				logger.info("生成华移支付payOrderSn={},url成功 url={}:", orderSn, str);
@@ -1526,7 +1526,7 @@ public class PaymentController extends AbstractBaseController {
 			}
 		}else*/ if ("app_lidpay".equals(paymentDto.getPayCode())) {//华移支付
 			logger.info("华移支付url:" + " payCode:" + savePayLog.getPayCode());
-			payBaseResult = lidPayService.getLidPayUrl(savePayLog, orderSn,"支付");
+			payBaseResult = lidPayService.getLidPayUrl(savePayLog, orderSn,orderId,"支付");
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
 				logger.info("生成华移支付payOrderSn={},url成功 url={}:", orderSn, str);
