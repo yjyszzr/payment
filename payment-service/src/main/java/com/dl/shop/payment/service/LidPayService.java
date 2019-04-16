@@ -327,7 +327,7 @@ public class LidPayService {
 	 * @param orderSn
 	 * @return
 	 */
-	public BaseResult<?> getLidPayUrl(PayLog savePayLog, String orderSn,String paytype) {
+	public BaseResult<?> getLidPayUrl(PayLog savePayLog, String orderSn,String orderId,String paytype) {
 		BaseResult<?> payBaseResult = null;
 		BigDecimal amtDouble = savePayLog.getOrderAmount();
 		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_EVEN);// 金额转换成分
@@ -338,6 +338,7 @@ public class LidPayService {
 		param.put("name", paytype);//商品名称
 		try {
 			param = pay(param);
+			param.put("orderId", orderId);
 			param.put("payLogId", savePayLog.getLogId());
 			logger.info("加工前返回APP结果 "+param);
 		} catch (MalformedURLException e) {
