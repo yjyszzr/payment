@@ -942,6 +942,7 @@ public class PayMentService extends AbstractService<PayMent> {
 		log.info("isShutDownPay()====userid={}", param.getUserId());
 		BaseResult<Integer> userDealAction = iSwitchConfigService.userDealAction(param);
 		Integer data = userDealAction.getData();
+		log.info("isShutDownPay()====data={}", data);
 		if(null != data && 0 == data) {
 			return true;
 		}
