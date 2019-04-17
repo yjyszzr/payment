@@ -207,6 +207,7 @@ public class APayService {
 		params.put("sign_type", "MD5");// 签名类型
 		params.put("sign", getSign(params));
 		params.put("subject", param.get("subject"));// 用户id
+		logger.info("艾支付接口参数：params={}"+JSONUtils.valueToString(params));
 		// ************订单生成，当返回result中code=1时，代表订单生成成功，需要验签************
 		String result = sendPostMessage(new URL(autil.getPATH()+autil.getPAY_URL_METHOD()), params);
 		return result;
