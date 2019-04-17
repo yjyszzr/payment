@@ -217,10 +217,22 @@ public class APayDemo {
 	 * @throws MalformedURLException 
 	 */
 	public void pay(Map<String, String> param) throws MalformedURLException {
-		param.put("sign", getSign(param));
-		param.put("subject", "足球宝贝衬衫");// 用户id
+		Map<String, String> params = new HashMap<>();
+		params.put("partner_id", param.get("partner_id"));// 商户编号
+		params.put("channel_id", param.get("channel_id"));//渠道编号
+		params.put("partner_order", param.get("partner_order"));// 商户订单
+		params.put("user_id", param.get("user_id"));// 用户id
+		params.put("total_fee", param.get("total_fee"));// 订单金额
+		params.put("back_url", param.get("back_url"));//同步回调地址
+		params.put("notify_url", param.get("notify_url"));// 异步回调地址
+		params.put("payextra_param", param.get("payextra_param"));// 扩展参数
+		params.put("pay_method", param.get("pay_method"));// 支付类型
+		params.put("exter_invoke_ip", param.get("exter_invoke_ip"));// 用户ip
+		params.put("sign_type", param.get("sign_type"));// 签名类型
+		params.put("sign", getSign(params));
+		params.put("subject", param.get("sign_type"));// 用户id
 		// ************订单生成，当返回result中code=1时，代表订单生成成功，需要验签************
-		String result = sendPostMessage(new URL(PATH+PAY_URL), param);
+		String result = sendPostMessage(new URL(PATH+PAY_URL), params);
 		System.out.println(result);
 
 		// 校验返回值
@@ -339,17 +351,30 @@ public class APayDemo {
 	public static void main(String[] args) throws MalformedURLException {
 		APayDemo apay = new APayDemo();
 		Map<String,String> param = new HashMap<>();
-		param.put("partner_id", apay.MERCHANT_NO);// 商户编号
-		param.put("back_url", apay.NOTIFY_URL);//同步回调地址
-		param.put("notify_url", apay.RETURN_URL);// 异步回调地址
-		param.put("channel_id", "6");//渠道编号
+//		{partner_id=11880031, 
+//		partner_order=2019041716395561300016, 
+//		payextra_param=, 
+//		user_id=1000000025, 
+//		subject=支付, 
+//		total_fee=1000, 
+//		back_url=http://39.106.18.39:8765/api/payment/payment/notify/APayNotify, 
+//		sign=17cca74344c23dbc6641ae236b31ecba, 
+//		exter_invoke_ip=127.0.0.1, 
+//		notify_url=http://39.106.18.39:8765/api/payment/payment/notify/APayNotify, 
+//		channel_id=9, 
+//		sign_type=MD5}" 
+		param.put("partner_id", "11880031");// 商户编号
+		param.put("back_url", "http://39.106.18.39:8765/api/payment/payment/notify/APayNotify");//同步回调地址
+		param.put("notify_url", "http://39.106.18.39:8765/api/payment/payment/notify/APayNotify");// 异步回调地址
+		param.put("channel_id", "9");//渠道编号
 		param.put("pay_method", "");// 支付类型
-		param.put("partner_order", "20111181999121331028");// 商户订单
-		param.put("user_id", "2");// 用户id
-		param.put("total_fee", "100");// 订单金额
+		param.put("partner_order", "2111041716395561300016");// 商户订单
+		param.put("user_id", "1000000025");// 用户id
+		param.put("total_fee", "1000");// 订单金额
 		param.put("payextra_param", "");// 扩展参数
-		param.put("exter_invoke_ip", "192.168.31.13");// 用户ip
+		param.put("exter_invoke_ip", "127.0.0.1");// 用户ip
 		param.put("sign_type", "MD5");// 签名类型
+		param.put("subject", "支付");// 用户id
 		// ************订单生成，当返回result中code=1时，代表订单生成成功，需要验签************
 		apay.pay(param);
 

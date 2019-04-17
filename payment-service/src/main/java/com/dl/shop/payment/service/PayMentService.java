@@ -25,11 +25,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
+import com.dl.base.enums.SNBusinessCodeEnum;
 import com.dl.base.model.UserDeviceInfo;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.base.service.AbstractService;
 import com.dl.base.util.DateUtil;
+import com.dl.base.util.SNGenerator;
 import com.dl.base.util.SessionUtil;
 import com.dl.lottery.api.ILotteryPrintService;
 import com.dl.member.api.IActivityService;
@@ -47,6 +49,8 @@ import com.dl.member.param.RecharegeParam;
 import com.dl.member.param.StrParam;
 import com.dl.member.param.SurplusPayParam;
 import com.dl.member.param.UpdateUserRechargeParam;
+import com.dl.member.param.UserAccountParam;
+import com.dl.member.param.UserAccountParamByType;
 import com.dl.member.param.UserBonusParam;
 import com.dl.member.param.UserDealActionParam;
 import com.dl.order.api.IOrderService;
@@ -437,6 +441,8 @@ public class PayMentService extends AbstractService<PayMent> {
 					recharegeParam.setThirdPartName("微信");
 				} else if ("app_rongbao".equals(payCode)) {
 					recharegeParam.setThirdPartName("银行卡");
+				}else {
+					recharegeParam.setThirdPartName(payLog.getPayName());
 				}
 				recharegeParam.setThirdPartPaid(payLog.getOrderAmount());
 				recharegeParam.setUserId(payLog.getUserId());
@@ -543,6 +549,7 @@ public class PayMentService extends AbstractService<PayMent> {
 				updatePayLog.setPayMsg("支付成功");
 				payLogService.update(updatePayLog);
 				updatePaybankRecord(payLog.getLogId());
+				insertThirdPayAccount(payLog);//流水记录
 			} else {
 				logger.error("payOrderSn={}" + payLog.getPayOrderSn() + " paylogid=" + "ordersn=" + payLog.getOrderSn() + "更新订单成功状态失败");
 			}
@@ -947,5 +954,27 @@ public class PayMentService extends AbstractService<PayMent> {
 			return true;
 		}
 		return false;
+	}
+	/**
+	 * 插入第三方支付流水
+	 * @param order
+	 */
+	private void insertThirdPayAccount(PayLog payLog) {
+		Integer userId = payLog.getUserId();
+		if(userId==null) {
+			userId = SessionUtil.getUserId();
+		}
+		
+		UserAccountParamByType userAccountParamByType = new UserAccountParamByType();
+		userAccountParamByType.setPayId(payLog.getLogId());
+		userAccountParamByType.setUserId(userId);
+		userAccountParamByType.setAccountType(Integer.valueOf(3));
+		userAccountParamByType.setAmount(BigDecimal.ZERO.subtract(payLog.getOrderAmount()));
+		userAccountParamByType.setOrderSn(payLog.getOrderSn());
+		userAccountParamByType.setPaymentName(payLog.getPayName());
+		userAccountParamByType.setThirdPartName(payLog.getPayName());
+		userAccountParamByType.setThirdPartPaid(BigDecimal.ZERO.subtract(payLog.getOrderAmount()));
+		userAccountParamByType.setBonusPrice(null);
+		userAccountService.insertUserAccount(userAccountParamByType);
 	}
 }
