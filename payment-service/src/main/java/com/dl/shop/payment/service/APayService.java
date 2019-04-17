@@ -195,7 +195,6 @@ public class APayService {
 		Map<String, Object> params = new HashMap<>();
 		params.put("partner_id", autil.getMERCHANT_NO());// 商户编号
 		params.put("channel_id", param.get("channel_id"));//渠道编号
-		params.put("pay_method", param.get("pay_method"));// 支付类型
 		params.put("partner_order", param.get("partner_order"));// 商户订单
 		params.put("user_id", param.get("user_id"));// 用户id
 		params.put("total_fee", param.get("total_fee"));// 订单金额
