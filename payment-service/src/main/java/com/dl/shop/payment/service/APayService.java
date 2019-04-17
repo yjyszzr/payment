@@ -332,6 +332,7 @@ public class APayService {
 		param.put("exter_invoke_ip", exter_invoke_ip);// 用户ip
 		try {
 			String result = pay(param);
+			logger.info(result);
 			param = null;
 			if (result != null && !"".equals(result)) {
 				if (!result.contains("code")) {
