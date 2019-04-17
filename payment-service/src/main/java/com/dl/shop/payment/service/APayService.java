@@ -201,7 +201,7 @@ public class APayService {
 		params.put("back_url", autil.getNOTIFY_URL());//同步回调地址
 		params.put("notify_url", autil.getRETURN_URL());// 异步回调地址
 		params.put("payextra_param", "");// 扩展参数
-		param.put("pay_method", "");// 支付类型
+		params.put("pay_method", "");// 支付类型
 		params.put("exter_invoke_ip", param.get("exter_invoke_ip"));// 用户ip
 		params.put("sign_type", "MD5");// 签名类型
 		params.put("sign", getSign(params));
