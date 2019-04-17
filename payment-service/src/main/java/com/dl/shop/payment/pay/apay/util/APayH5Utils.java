@@ -45,6 +45,6 @@ public class APayH5Utils {
 	/**
 	 * 订单退款URL
 	 */
-	@Value("${lid.pay.url.refundmethod}")
+	@Value("${a.pay.url.refundmethod}")
 	private String REFUND_URL_METHOD;
 }
