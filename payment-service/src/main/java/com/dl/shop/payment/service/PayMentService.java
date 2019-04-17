@@ -975,6 +975,7 @@ public class PayMentService extends AbstractService<PayMent> {
 		userAccountParamByType.setThirdPartName(payLog.getPayName());
 		userAccountParamByType.setThirdPartPaid(BigDecimal.ZERO.subtract(payLog.getOrderAmount()));
 		userAccountParamByType.setBonusPrice(null);
+		logger.info("支付流水记录useraccount={}"+JSONUtils.valueToString(userAccountParamByType));
 		userAccountService.insertUserAccount(userAccountParamByType);
 	}
 }
