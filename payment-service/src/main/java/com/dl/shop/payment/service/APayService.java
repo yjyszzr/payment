@@ -332,7 +332,6 @@ public class APayService {
 		param.put("exter_invoke_ip", exter_invoke_ip);// 用户ip
 		try {
 			String result = pay(param);
-			logger.info("接口返回result={}"+result);
 			param = null;
 			if (result != null && !"".equals(result)) {
 				if (!result.contains("code")) {
@@ -344,11 +343,11 @@ public class APayService {
 					param.put("payUrl", url);
 					param.put("orderId", orderId);
 					param.put("payLogId", savePayLog.getLogId());
-				} 
-//				else {
+				} else {
+					logger.info("接口返回result={}"+result);
 //					Map<String, Object> obj = JSONObject.parseObject(result, Map.class);
 //					return null;
-//				}
+				}
 			}
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
