@@ -22,7 +22,6 @@ import com.dl.order.param.UpdateOrderInfoParam;
 import com.dl.order.param.UpdateOrderPayStatusParam;
 import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dao.DlPayQrBase64Mapper;
-import com.dl.shop.payment.dto.UserWithdrawDTO;
 import com.dl.shop.payment.dto.*;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.DlPayQrBase64;
@@ -31,7 +30,6 @@ import com.dl.shop.payment.model.UnifiedOrderParam;
 import com.dl.shop.payment.model.UserWithdrawLog;
 import com.dl.shop.payment.param.PayLogIdParam;
 import com.dl.shop.payment.param.UserIdParam;
-import com.dl.shop.payment.param.UserWithdrawParam;
 import com.dl.shop.payment.param.*;
 import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
@@ -920,11 +918,11 @@ public class PaymentController extends AbstractBaseController {
 		String realName = userBankDTO.getRealName();
 		String cardNo = userBankDTO.getCardNo();
 		// 生成提现单
-		UserWithdrawParam userWithdrawParam = new UserWithdrawParam();
+		com.dl.member.param.UserWithdrawParam userWithdrawParam = new com.dl.member.param.UserWithdrawParam();
 		userWithdrawParam.setAmount(BigDecimal.valueOf(totalAmount));
 		userWithdrawParam.setCardNo(cardNo);
 		userWithdrawParam.setRealName(realName);
-		BaseResult<UserWithdrawDTO> createUserWithdraw = userAccountService.createUserWithdraw(userWithdrawParam);
+		BaseResult<com.dl.member.dto.UserWithdrawDTO> createUserWithdraw = userAccountService.createUserWithdraw(userWithdrawParam);
 		if (createUserWithdraw.getCode() != 0) {
 			logger.info(loggerId + " 生成提现单，code=" + createUserWithdraw.getCode() + " , msg=" + createUserWithdraw.getMsg());
 			return ResultGenerator.genFailResult("提现失败！", null);
