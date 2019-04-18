@@ -129,6 +129,9 @@ public class PaymentController extends AbstractBaseController {
 	@Value("${yinhe.app_ZFB_H5_qr_url}")
 	private String appZFBH5QrUrl;
 
+	@Resource
+	private ISysConfigService iSysConfigService;
+
 	@ApiOperation(value = "系统可用第三方支付方式", notes = "系统可用第三方支付方式")
 	@PostMapping("/allPayment")
 	@ResponseBody
@@ -1238,11 +1241,18 @@ public class PaymentController extends AbstractBaseController {
 			min = userBetCellInfos.stream().min((cell1,cell2)->cell1.getMatchTime()-cell2.getMatchTime()).get();
 		}
 
-		//提前1h 就不能买了
+		//比赛提前1h	禁止支付
 		Integer sysLimitBetTime = 3600;
-		Integer nowTime = DateUtilNew.getCurrentTimeLong();
+		SysConfigParam sysConfigParam = new SysConfigParam();
+		sysConfigParam.setBusinessId(4);
+		BaseResult<SysConfigDTO> sysConfigDTOBaseResult = iSysConfigService.querySysConfig(sysConfigParam);
+		if(sysConfigDTOBaseResult.isSuccess()){
+			sysLimitBetTime = sysConfigDTOBaseResult.getData().getValue().intValue();
+		}
+
+		Integer nowTime = DateUtil.getCurrentTimeLong();
 		if(min.getMatchTime() - sysLimitBetTime  <= nowTime){
-			return ResultGenerator.genResult(LotteryResultEnum.BET_SYS_TIME_LIMIT.getCode(), LotteryResultEnum.BET_SYS_TIME_LIMIT.getMsg());
+			return ResultGenerator.genResult(LotteryResultEnum.BET_TIME_LIMIT.getCode(), LotteryResultEnum.BET_TIME_LIMIT.getMsg());
 		}
 
 		List<TicketDetail> ticketDetails = userBetCellInfos.stream().map(betCell -> {
