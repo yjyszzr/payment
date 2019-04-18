@@ -11,14 +11,9 @@ import com.dl.base.util.SessionUtil;
 import com.dl.lottery.api.ILotteryPrintService;
 import com.dl.lotto.enums.LottoResultEnum;
 import com.dl.member.api.*;
-import com.dl.member.dto.RechargeDataActivityDTO;
-import com.dl.member.dto.SurplusPaymentCallbackDTO;
-import com.dl.member.dto.UserBonusDTO;
-import com.dl.member.dto.UserDTO;
-import com.dl.member.param.BonusLimitConditionParam;
+import com.dl.member.dto.*;
 import com.dl.member.param.StrParam;
-import com.dl.member.param.SurplusPayParam;
-import com.dl.member.param.UpdateUserRechargeParam;
+import com.dl.member.param.*;
 import com.dl.order.api.IOrderService;
 import com.dl.order.dto.OrderDTO;
 import com.dl.order.param.SubmitOrderParam;
@@ -27,11 +22,16 @@ import com.dl.order.param.UpdateOrderInfoParam;
 import com.dl.order.param.UpdateOrderPayStatusParam;
 import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dao.DlPayQrBase64Mapper;
+import com.dl.shop.payment.dto.UserWithdrawDTO;
 import com.dl.shop.payment.dto.*;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.model.DlPayQrBase64;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.UnifiedOrderParam;
+import com.dl.shop.payment.model.UserWithdrawLog;
+import com.dl.shop.payment.param.PayLogIdParam;
+import com.dl.shop.payment.param.UserIdParam;
+import com.dl.shop.payment.param.UserWithdrawParam;
 import com.dl.shop.payment.param.*;
 import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
@@ -890,9 +890,7 @@ public class PaymentController extends AbstractBaseController {
 	@ResponseBody
 	public BaseResult<Object> withdrawForApp(@RequestBody WithdrawParam param, HttpServletRequest request) {
 		//20181203 加入提示
-		return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
-
-/*		String loggerId = "withdrawForApp_" + System.currentTimeMillis();
+		String loggerId = "withdrawForApp_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/withdraw, userId=" + SessionUtil.getUserId() + ", totalAmount=" + param.getTotalAmount() + ",userBankId=" + param.getUserBankId());
 		BaseResult<UserDTO> userInfoExceptPass = userService.userInfoExceptPass(new StrParam());
 		if (userInfoExceptPass == null) {
