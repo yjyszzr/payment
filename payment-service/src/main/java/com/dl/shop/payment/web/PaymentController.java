@@ -1241,14 +1241,7 @@ public class PaymentController extends AbstractBaseController {
 			logger.info(loggerId + "支付信息获取为空！");
 			return ResultGenerator.genResult(PayEnums.PAY_TOKEN_EXPRIED.getcode(), PayEnums.PAY_TOKEN_EXPRIED.getMsg());
 		}
-		//ubey检验最小金额
-//		if("app_ubey".equals(param.getPayCode())) {
-//			boolean check = ubeyPayService.checkAmount(jsonData);
-//			if(check) {
-//				return ResultGenerator.genFailResult("该支付方式最低消费1元 ");
-//			}
-//		}
-		//ubey检验最小金额
+		//各支付方式最小金额检验
 		if("app_lidpay".equals(param.getPayCode())) {
 			boolean check = lidPayService.checkAmount(jsonData);
 			if(check) {
@@ -1497,83 +1490,8 @@ public class PaymentController extends AbstractBaseController {
 				String str = payBaseResult.getData() + "";
 				logger.info("生成支付url成功:" + str);
 			}
-		} else if ("app_rongbao".equals(paymentDto.getPayCode())) {
-			// 生成支付链接信息
-			String payOrder = savePayLog.getPayOrderSn();
-			ReqRongEntity reqEntity = new ReqRongEntity();
-			reqEntity.setOrderId(payOrder);
-			reqEntity.setUserId(savePayLog.getUserId().toString());
-			reqEntity.setTotal(savePayLog.getOrderAmount().doubleValue());
-			reqEntity.setPName("彩小秘");
-			reqEntity.setPDesc("彩小秘足彩支付");
-			reqEntity.setTransTime(savePayLog.getAddTime() + "");
-			String data = JSON.toJSONString(reqEntity);
-			try {
-				data = URLEncoder.encode(data, "UTF-8");
-				String url = rongCfg.getURL_PAY() + "?data=" + data;
-				PayReturnDTO rEntity = new PayReturnDTO();
-				rEntity.setPayUrl(url);
-				rEntity.setPayLogId(savePayLog.getLogId() + "");
-				rEntity.setOrderId(orderId);
-				// rEntity.setLotteryClassifyId(lotteryClassifyIdStr);
-				payBaseResult = ResultGenerator.genSuccessResult("succ", rEntity);
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-		} else if ("app_xianfeng".equals(paymentDto.getPayCode())) {
-			PayReturnDTO rEntity = new PayReturnDTO();
-			rEntity.setPayUrl(xianFengUtil.getPayH5Url(savePayLog.getLogId()));
-			rEntity.setPayLogId(savePayLog.getLogId() + "");
-			rEntity.setOrderId(orderId);
-			// rEntity.setLotteryClassifyId(lotteryClassifyIdStr);
-			payBaseResult = ResultGenerator.genSuccessResult("succ", rEntity);
-		} else if ("app_yifutong".equals(paymentDto.getPayCode())) {
-			logger.info("生成易富通支付宝支付url:" + " payCode:" + savePayLog.getPayCode());
-			payBaseResult = paymentService.getYFTPayUrl(savePayLog, orderId, lotteryClassifyIdStr);
-			if (payBaseResult != null && payBaseResult.getData() != null) {
-				String str = payBaseResult.getData() + "";
-				logger.info("生成易富通支付url成功:" + str);
-			} else {
-				logger.info("生成易富通支付url失败");
-			}
-		} else if (paymentDto.getPayCode().startsWith("app_tianxia_scan")) {
-			String[] merchentArr = paymentDto.getPayCode().split("_");
-			logger.info("生成天下支付银联二维码url:" + " payCode:" + savePayLog.getPayCode());
-			payBaseResult = paymentService.getTXScanPayUrl(savePayLog, orderId, payIp, merchentArr[merchentArr.length - 1]);
-			if (payBaseResult != null && payBaseResult.getData() != null) {
-				String str = payBaseResult.getData() + "";
-				logger.info("生成天下支付银联二维码url成功:" + str);
-			} else {
-				logger.info("生成天下支付银联二维码url失败");
-			}
-		} else if ("app_kuaijie_pay_qqqianbao".equalsIgnoreCase(payCode)) {
-			logger.info("生成快接支付qq钱包支付 payCode:" + savePayLog.getPayCode());
-			payBaseResult = paymentService.getKuaijiePayQqQianBaoUrl(savePayLog, orderId,lotteryClassifyIdStr);
-			if (payBaseResult != null && payBaseResult.getData() != null) {
-				String str = payBaseResult.getData() + "";
-				logger.info("生成快接支付qq钱包支付payOrderSn={},url成功url={}:", orderSn, str);
-			} else {
-				logger.info("生成快接支付qq钱包支付payOrderSn={},url失败", orderSn);
-			}
-		} else if ("app_kuaijie_pay_jd".equalsIgnoreCase(payCode)) {
-			logger.info("生成快接支付url:payCode:" + savePayLog.getPayCode());
-			payBaseResult = paymentService.getKuaijiePayJingDongUrl(savePayLog, orderId,lotteryClassifyIdStr);
-			if (payBaseResult != null && payBaseResult.getData() != null) {
-				String str = payBaseResult.getData() + "";
-				logger.info("生成快接支付payOrderSn={},url成功 url={}:", orderSn, str);
-			} else {
-				logger.info("生成快接支付payOrderSn={},url失败", orderSn);
-			}
-		}else if ("app_ubey".equals(paymentDto.getPayCode())) {
-			logger.info("ubey支付url:" + " payCode:" + savePayLog.getPayCode());
-			payBaseResult = ubeyPayService.getUBeyBankUrl(savePayLog, orderId);
-			if (payBaseResult != null && payBaseResult.getData() != null) {
-				String str = payBaseResult.getData() + "";
-				logger.info("获取Ubey银行列表成功:" + str);
-			} else {
-				logger.info("获取Ubey银行列表失败");
-			}
-		}else*/ if ("app_lidpay".equals(paymentDto.getPayCode())) {//华移支付
+		}*/ 
+		if ("app_lidpay".equals(paymentDto.getPayCode())) {//华移支付
 			logger.info("华移支付url:" + " payCode:" + savePayLog.getPayCode());
 			payBaseResult = lidPayService.getLidPayUrl(savePayLog, orderSn,orderId,"支付");
 			if (payBaseResult != null && payBaseResult.getData() != null) {
@@ -1584,11 +1502,6 @@ public class PaymentController extends AbstractBaseController {
 			}
 		}else if ("app_apay".equals(paymentDto.getPayCode())) {//艾支付
 			logger.info("艾支付url:" + " payCode:" + savePayLog.getPayCode());
-//			String channel_id = "9";//渠道编号  微信支付(扫码):6     微信支付H5:7		支付宝支付：9
-//			int iswechat = param.getInnerWechat();
-//			if(iswechat==1) {
-//				channel_id = "6";
-//			}
 			payBaseResult = aPayService.getAPayUrl(savePayLog, orderSn,orderId,userId,"9","127.0.0.1","支付");
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
