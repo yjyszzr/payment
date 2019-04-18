@@ -937,7 +937,7 @@ public class PaymentController extends AbstractBaseController {
 		userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
 		userWithdrawLog.setWithdrawSn(orderSn);
 		userWithdrawLogService.save(userWithdrawLog);
-		return ResultGenerator.genSuccessResult("请求成功！");*/
+		return ResultGenerator.genSuccessResult("请求成功！");
 	}
 
 	@ApiOperation(value = "支付订单结果 查询 ", notes = "")
