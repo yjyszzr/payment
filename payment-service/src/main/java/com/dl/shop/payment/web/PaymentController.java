@@ -9,7 +9,6 @@ import com.dl.base.util.JSONHelper;
 import com.dl.base.util.MD5Util;
 import com.dl.base.util.SessionUtil;
 import com.dl.lottery.api.ILotteryPrintService;
-import com.dl.lottery.enums.LotteryResultEnum;
 import com.dl.lotto.enums.LottoResultEnum;
 import com.dl.member.api.*;
 import com.dl.member.dto.RechargeDataActivityDTO;
@@ -1246,11 +1245,11 @@ public class PaymentController extends AbstractBaseController {
 			min = userBetCellInfos.stream().min((cell1,cell2)->cell1.getMatchTime()-cell2.getMatchTime()).get();
 		}
 		//提前1h 就不能买了
-		Integer sysLimitBetTime = 3600;
-		Integer betEndTime =  min.getMatchTime() - sysLimitBetTime;
-		if(betEndTime >= 0){
-			return ResultGenerator.genResult(LotteryResultEnum.BET_SYS_TIME_LIMIT.getCode(), LotteryResultEnum.BET_SYS_TIME_LIMIT.getMsg());
-		}
+//		Integer sysLimitBetTime = 3600;
+//		Integer betEndTime =  min.getMatchTime() - sysLimitBetTime;
+//		if(min.getMatchTime() - betEndTime <= 0){
+//			return ResultGenerator.genResult(LotteryResultEnum.BET_SYS_TIME_LIMIT.getCode(), LotteryResultEnum.BET_SYS_TIME_LIMIT.getMsg());
+//		}
 		List<TicketDetail> ticketDetails = userBetCellInfos.stream().map(betCell -> {
 			TicketDetail ticketDetail = new TicketDetail();
 			ticketDetail.setMatch_id(betCell.getMatchId());
