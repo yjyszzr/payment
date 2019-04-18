@@ -337,15 +337,8 @@ public class APayService {
 				if (!result.contains("code")) {
 					Document doc = Jsoup.parse(result);
 					String url = doc.select("iframe").first().attr("src");
-					logger.info("支付渠道channel_id={}:"+channel_id);
-					if("6".equals(channel_id) || Integer.valueOf(channel_id)==6) {//微信支付
-						url = url+"&testFiler=.html";//避免返回的url手机系统不支持解析后缀.html；&testFiler:避免改变原url参数值
-						logger.info("支付urltest="+url);
-					}
-//					System.out.println(url);
-					logger.info("接口返回url={}:"+url);
 					param = new HashMap<>();
-					param.put("payUrl", url);
+					param.put("payUrl", url.trim());
 					param.put("orderId", orderId);
 					param.put("payLogId", savePayLog.getLogId());
 				} else {
