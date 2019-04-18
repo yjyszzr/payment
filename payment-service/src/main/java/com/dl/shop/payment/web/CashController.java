@@ -1,25 +1,5 @@
 package com.dl.shop.payment.web;
 
-import com.dl.shop.payment.enums.PayEnums;
-import io.swagger.annotations.ApiOperation;
-
-import java.io.IOException;
-import java.util.List;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import lombok.extern.slf4j.Slf4j;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.dl.base.param.EmptyParam;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -34,6 +14,19 @@ import com.dl.shop.payment.pay.xianfeng.cash.util.XianFengCashUtil;
 import com.dl.shop.payment.service.CashService;
 import com.dl.shop.payment.service.UserWithdrawLogService;
 import com.dl.shop.payment.service.UserWithdrawService;
+import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * 代支付
@@ -73,8 +66,8 @@ public class CashController {
 	@ResponseBody
 	public BaseResult<Object> withdrawForApp(@RequestBody WithdrawParam param, HttpServletRequest request){
 		//20181203 加入提示
-		return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
-		//return cashService.withdrawForApp(param,request);
+		//return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
+		return cashService.withdrawForApp(param,request);
 	}
 	
 	@ApiOperation(value="后台管理提现调用", notes="")
