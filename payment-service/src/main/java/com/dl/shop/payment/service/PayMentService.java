@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -199,6 +200,10 @@ public class PayMentService extends AbstractService<PayMent> {
 			paymentDTO.setPayType(payment.getPayType());
 			paymentDTO.setPayTitle(payment.getPayTitle());
 			paymentDTO.setPayImg(payment.getPayImg());
+			paymentDTO.setIsReadonly(payment.getIsReadonly());
+			if(StringUtils.isEmpty(payment.getReadMoney())) {
+				paymentDTO.setReadMoney(payment.getReadMoney().split(";"));
+			}
 			return paymentDTO;
 		}).collect(Collectors.toList());
 		return list;
