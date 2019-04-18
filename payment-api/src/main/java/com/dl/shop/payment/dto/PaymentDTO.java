@@ -24,5 +24,9 @@ public class PaymentDTO {
     private String payImg;
 	@ApiModelProperty(value="描述")
     private String payDesc;
+	@ApiModelProperty(value="是否固额")
+    private Integer isReadonly;
+	@ApiModelProperty(value="固定额度")
+    private String[] readMoney;
 
 }
