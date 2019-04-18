@@ -201,7 +201,7 @@ public class PayMentService extends AbstractService<PayMent> {
 			paymentDTO.setPayTitle(payment.getPayTitle());
 			paymentDTO.setPayImg(payment.getPayImg());
 			paymentDTO.setIsReadonly(payment.getIsReadonly());
-			if(StringUtils.isEmpty(payment.getReadMoney())) {
+			if(payment.getReadMoney()!=null) {
 				paymentDTO.setReadMoney(payment.getReadMoney().split(";"));
 			}
 			return paymentDTO;
