@@ -337,6 +337,9 @@ public class APayService {
 				if (!result.contains("code")) {
 					Document doc = Jsoup.parse(result);
 					String url = doc.select("iframe").first().attr("src");
+					if("6".equals(channel_id)) {//微信支付
+						url = url+"&testFiler=.html";//避免返回的url手机系统不支持解析后缀.html；&testFiler:避免改变原url参数值
+					}
 //					System.out.println(url);
 					logger.info("接口返回url={}:"+url);
 					param = new HashMap<>();
