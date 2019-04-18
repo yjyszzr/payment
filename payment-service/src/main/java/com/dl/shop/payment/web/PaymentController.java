@@ -1228,8 +1228,7 @@ public class PaymentController extends AbstractBaseController {
 																											// paytoken
 		BigDecimal ticketAmount = BigDecimal.valueOf(orderMoney);// from
 																	// paytoken
-		BigDecimal bonusAmount = BigDecimal.valueOf(dto.getBonusAmount());// from
-																			// paytoken
+		BigDecimal bonusAmount = BigDecimal.valueOf(dto.getBonusAmount());// from paytoken
 		BigDecimal moneyPaid = BigDecimal.valueOf(orderMoney - dto.getBonusAmount());
 		;// from paytoken
 		BigDecimal surplus = BigDecimal.valueOf(dto.getSurplus());// from
