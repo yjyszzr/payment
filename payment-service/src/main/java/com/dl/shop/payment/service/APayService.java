@@ -388,7 +388,7 @@ public class APayService {
 		JSONObject josn = (JSONObject) JSONObject.parse(payToken);
 		BigDecimal thirdPartyPaid = new BigDecimal(josn.getString("thirdPartyPaid"));
 		int paid = thirdPartyPaid.intValue();
-		if("6".equals(paytype) && paid<10) {
+		if("6".equals(paytype) && paid<100) {
 			return true;
 		}
 		if(paid<1) {

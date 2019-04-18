@@ -1262,7 +1262,7 @@ public class PaymentController extends AbstractBaseController {
 		} else if("app_awx".equals(param.getPayCode())) {
 			boolean check = aPayService.checkAmount(jsonData,"6");
 			if(check) {
-				return ResultGenerator.genFailResult("该支付方式最低消费10元 ");
+				return ResultGenerator.genFailResult("该支付方式最低消费100元 ");
 			}
 		}
 		
