@@ -199,8 +199,8 @@ public class LidPayService {
 		params.put("version", lidutil.getVERSION());// 版本固定值
 		params.put("name", param.get("name"));
 		params.put("orderNo", param.get("orderNo"));
-//		params.put("total", param.get("total"));
-		params.put("total", "10");
+		params.put("total", param.get("total"));
+//		params.put("total", "10");
 		params.put("timestamp", String.valueOf(System.currentTimeMillis()));
 		params.put("sign", getSign(params));
 		
@@ -376,11 +376,20 @@ public class LidPayService {
 		return payBaseResult;
 	}
 	
-	public boolean checkAmount(String payToken) {
+	public boolean checkMinAmount(String payToken) {
 		JSONObject josn = (JSONObject) JSONObject.parse(payToken);
 		BigDecimal thirdPartyPaid = new BigDecimal(josn.getString("thirdPartyPaid"));
 		int paid = thirdPartyPaid.intValue();
 		if(paid<1) {
+			return true;
+		}
+		return false;
+	}
+	public boolean checkMaxAmount(String payToken) {
+		JSONObject josn = (JSONObject) JSONObject.parse(payToken);
+		BigDecimal thirdPartyPaid = new BigDecimal(josn.getString("thirdPartyPaid"));
+		int paid = thirdPartyPaid.intValue();
+		if(paid>10000) {
 			return true;
 		}
 		return false;
