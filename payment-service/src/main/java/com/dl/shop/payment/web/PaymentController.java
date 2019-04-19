@@ -1263,15 +1263,12 @@ public class PaymentController extends AbstractBaseController {
 		}
 		Double orderMoney = dto.getOrderMoney();
 		Integer userBonusId = StringUtils.isBlank(dto.getBonusId()) ? 0 : Integer.valueOf(dto.getBonusId());// form
-																											// paytoken
 		BigDecimal ticketAmount = BigDecimal.valueOf(orderMoney);// from
-																	// paytoken
 		BigDecimal bonusAmount = BigDecimal.valueOf(dto.getBonusAmount());// from paytoken
 		BigDecimal moneyPaid = BigDecimal.valueOf(orderMoney - dto.getBonusAmount());
-		;// from paytoken
 		BigDecimal surplus = BigDecimal.valueOf(dto.getSurplus());// from
-																	// paytoken
 		BigDecimal thirdPartyPaid = BigDecimal.valueOf(dto.getThirdPartyPaid());
+		
 		List<UserBetDetailInfoDTO> userBetCellInfos = dto.getBetDetailInfos();
 		UserBetDetailInfoDTO min = userBetCellInfos.get(0);
 		if(userBetCellInfos.size() > 1) {
@@ -1288,6 +1285,8 @@ public class PaymentController extends AbstractBaseController {
 		}
 
 		Integer nowTime = DateUtil.getCurrentTimeLong();
+		logger.info("nUnifiedOrder()：提前售票： 比赛时间="+min.getMatchTime()+"提前时间="+sysLimitBetTime+"当前时间="+nowTime);
+		logger.info("nUnifiedOrder()：提前售票： 是否停止售票="+(min.getMatchTime() - sysLimitBetTime  <= nowTime));
 		if(min.getMatchTime() - sysLimitBetTime  <= nowTime){
 			return ResultGenerator.genResult(LotteryResultEnum.BET_TIME_LIMIT.getCode(), LotteryResultEnum.BET_TIME_LIMIT.getMsg());
 		}
