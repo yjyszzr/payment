@@ -1217,29 +1217,29 @@ public class PaymentController extends AbstractBaseController {
 		if("app_lidpay".equals(param.getPayCode())) {
 			boolean bomin = lidPayService.checkMinAmount(jsonData);
 			if(bomin) {
-				return ResultGenerator.genFailResult("单笔支付金额不能低于1元 ");
+				return ResultGenerator.genFailResult("单笔支付仅支持大于1元，建议充值后使用账户余额下单 ");
 			}
 			boolean bomax = lidPayService.checkMaxAmount(jsonData);
 			if(bomax) {
-				return ResultGenerator.genFailResult("单笔支付金额不能超过10000元 ");
+				return ResultGenerator.genFailResult("单笔支付仅支持小于10000元，建议充值后使用账户余额下单 ");
 			}
 		} else if("app_apay".equals(param.getPayCode())) {
 			boolean bomin = aPayService.checkMinAmount(jsonData,"9");
 			if(bomin) {
-				return ResultGenerator.genFailResult("单笔支付金额不能低于1元 ");
+				return ResultGenerator.genFailResult("单笔支付仅支持大于1元，建议充值后使用账户余额下单 ");
 			}
 			boolean bomax = aPayService.checkMaxAmount(jsonData,null);
 			if(bomax) {
-				return ResultGenerator.genFailResult("单笔支付金额不能超过10000元 ");
+				return ResultGenerator.genFailResult("单笔支付仅支持小于10000元，建议充值后使用账户余额下单 ");
 			}
 		} else if("app_awx".equals(param.getPayCode())) {
 			boolean bomin = aPayService.checkMinAmount(jsonData,"6");
 			if(bomin) {
-				return ResultGenerator.genFailResult("单笔支付金额不能低于500元 ");
+				return ResultGenerator.genFailResult("单笔支付仅支持大于500元，建议充值后使用账户余额下单 ");
 			}
 			boolean bomax = aPayService.checkMaxAmount(jsonData,null);
 			if(bomax) {
-				return ResultGenerator.genFailResult("单笔支付金额不能超过10000元 ");
+				return ResultGenerator.genFailResult("单笔支付仅支持小于10000元，建议充值后使用账户余额下单  ");
 			}
 		}
 		
