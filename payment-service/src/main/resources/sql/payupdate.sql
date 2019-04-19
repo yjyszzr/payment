@@ -5,3 +5,14 @@ INSERT INTO `dl_payment` VALUES ('12', 'app_lidpay', '支付宝', '1', null, '�
 INSERT INTO `dl_payment` VALUES ('13', 'app_apay', '艾支付', '1', null, '艾支付', '0', '255', '0', null, 'https://szcq-icon.oss-cn-beijing.aliyuncs.com/zfb20190413.png', '0', null);
 INSERT INTO `dl_payment` VALUES ('14', 'app_awx', '艾支付微信', '1', null, '艾支付微信', '0', '255', '0', null, 'https://szcq-icon.oss-cn-beijing.aliyuncs.com/weixin.png', '1', '10;20;30;50;100;200;300');
 
+
+                                      腾迅云-圣和彩店-关键配置
+
+eureka  172.30.0.6
+
+datasource 39.107.102.22
+username	cxm_user_rw
+password	YNShTBmL1X1X
+
+redis	172.30.0.6               
+圣和彩店 生产环境IP 94.191.113.169      
