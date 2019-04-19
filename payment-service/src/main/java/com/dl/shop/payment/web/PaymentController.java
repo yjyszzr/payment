@@ -666,21 +666,46 @@ public class PaymentController extends AbstractBaseController {
 			}
 		}
 		double totalAmount = param.getTotalAmount();
-		if (totalAmount <= 0) {
-			logger.info(loggerId + "充值金额有误！totalAmount=" + totalAmount);
-			return ResultGenerator.genResult(PayEnums.RECHARGE_AMT_ERROR.getcode(), PayEnums.RECHARGE_AMT_ERROR.getMsg());
-		}
+//		if (totalAmount <= 0) {
+//			logger.info(loggerId + "充值金额有误！totalAmount=" + totalAmount);
+//			return ResultGenerator.genResult(PayEnums.RECHARGE_AMT_ERROR.getcode(), PayEnums.RECHARGE_AMT_ERROR.getMsg());
+//		}
 		// 当前支付方式限额10万/笔
-		if (totalAmount > 100000) {
-			logger.info(loggerId + "每笔限额10w");
-			return ResultGenerator.genResult(PayEnums.PAY_RECHARGE_MAX.getcode(), PayEnums.PAY_RECHARGE_MAX.getMsg());
-		}
+//		if (totalAmount > 100000) {
+//			logger.info(loggerId + "每笔限额10w");
+//			return ResultGenerator.genResult(PayEnums.PAY_RECHARGE_MAX.getcode(), PayEnums.PAY_RECHARGE_MAX.getMsg());
+//		}
 		// 支付方式
 		String payCode = param.getPayCode();
 		if (StringUtils.isBlank(payCode)) {
 			logger.info(loggerId + "订单第三支付没有提供paycode！");
 			return ResultGenerator.genResult(PayEnums.RECHARGE_PAY_STYLE_EMPTY.getcode(), PayEnums.RECHARGE_PAY_STYLE_EMPTY.getMsg());
 		}
+		
+		//各支付方式最小金额检验
+		if("app_lidpay".equals(param.getPayCode())) {
+			if(totalAmount<1) {
+				return ResultGenerator.genFailResult("单笔充值金额不能低于1元 ");
+			}
+			if(totalAmount>10000) {
+				return ResultGenerator.genFailResult("单笔充值金额不能超过10000元 ");
+			}
+		} else if("app_apay".equals(param.getPayCode())) {
+			if(totalAmount<1) {
+				return ResultGenerator.genFailResult("单笔充值金额不能低于1元 ");
+			}
+			if(totalAmount>10000) {
+				return ResultGenerator.genFailResult("单笔充值金额不能超过10000元 ");
+			}
+		} else if("app_awx".equals(param.getPayCode())) {
+			if(totalAmount<500) {
+				return ResultGenerator.genFailResult("单笔充值金额不能低于500元 ");
+			}
+			if(totalAmount>10000) {
+				return ResultGenerator.genFailResult("单笔充值金额不能超过10000元 ");
+			}
+		}
+		
 		BaseResult<PaymentDTO> paymentResult = paymentService.queryByCode(payCode);
 		if (paymentResult.getCode() != 0) {
 			logger.info(loggerId + "订单第三方支付提供paycode有误！");
@@ -1188,19 +1213,31 @@ public class PaymentController extends AbstractBaseController {
 		}
 		//各支付方式最小金额检验
 		if("app_lidpay".equals(param.getPayCode())) {
-			boolean check = lidPayService.checkAmount(jsonData);
-			if(check) {
-				return ResultGenerator.genFailResult("该支付方式最低消费1元 ");
+			boolean bomin = lidPayService.checkMinAmount(jsonData);
+			if(bomin) {
+				return ResultGenerator.genFailResult("单笔支付金额不能低于1元 ");
+			}
+			boolean bomax = lidPayService.checkMaxAmount(jsonData);
+			if(bomax) {
+				return ResultGenerator.genFailResult("单笔支付金额不能超过10000元 ");
 			}
 		} else if("app_apay".equals(param.getPayCode())) {
-			boolean check = aPayService.checkAmount(jsonData,"9");
-			if(check) {
-				return ResultGenerator.genFailResult("该支付方式最低消费1元 ");
+			boolean bomin = aPayService.checkMinAmount(jsonData,"9");
+			if(bomin) {
+				return ResultGenerator.genFailResult("单笔支付金额不能低于1元 ");
+			}
+			boolean bomax = aPayService.checkMaxAmount(jsonData,null);
+			if(bomax) {
+				return ResultGenerator.genFailResult("单笔支付金额不能超过10000元 ");
 			}
 		} else if("app_awx".equals(param.getPayCode())) {
-			boolean check = aPayService.checkAmount(jsonData,"6");
-			if(check) {
-				return ResultGenerator.genFailResult("该支付方式最低消费100元 ");
+			boolean bomin = aPayService.checkMinAmount(jsonData,"6");
+			if(bomin) {
+				return ResultGenerator.genFailResult("单笔支付金额不能低于500元 ");
+			}
+			boolean bomax = aPayService.checkMaxAmount(jsonData,null);
+			if(bomax) {
+				return ResultGenerator.genFailResult("单笔支付金额不能超过10000元 ");
 			}
 		}
 		
