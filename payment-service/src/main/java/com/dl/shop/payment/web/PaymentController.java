@@ -1285,12 +1285,15 @@ public class PaymentController extends AbstractBaseController {
 		if(sysConfigDTOBaseResult.isSuccess()){
 			sysLimitBetTime = sysConfigDTOBaseResult.getData().getValue().intValue();
 		}
-		Integer nowTime = DateUtil.getCurrentTimeLong();
+		
 		String strMatchTime= DateUtil.getTimeString(min.getMatchTime(), DateUtil.datetimeFormat);
-		String strNowTime= DateUtil.getTimeString(nowTime, DateUtil.datetimeFormat);
-		logger.info("nUnifiedOrder()：提前售票： 比赛时间="+min.getMatchTime()+"||"+strMatchTime+"提前时间="+sysLimitBetTime+"当前时间="+nowTime+"||"+strNowTime);
-		logger.info("nUnifiedOrder()：提前售票： 是否停止售票="+(min.getMatchTime() - sysLimitBetTime  <= nowTime));
-		if(min.getMatchTime() - sysLimitBetTime  <= nowTime){
+		String strNowTime= DateUtil.getTimeString(DateUtil.getCurrentTimeLong(), DateUtil.datetimeFormat);
+		
+		String seconds = DateUtilNew.dateSubtractionHours(strNowTime,strMatchTime);
+		logger.info("nUnifiedOrder()：提前售票： 比赛时间="+min.getMatchTime()+"||"+strMatchTime+"提前时间="+sysLimitBetTime+"当前时间="+DateUtil.getCurrentTimeLong()+"||"+strNowTime);
+		logger.info("nUnifiedOrder()：提前售票： 是否停止售票="+(Integer.valueOf(seconds)<=sysLimitBetTime));
+		if(Integer.valueOf(seconds)<=sysLimitBetTime) {
+//		if(min.getMatchTime() - sysLimitBetTime  <= nowTime){
 			return ResultGenerator.genResult(LotteryResultEnum.BET_TIME_LIMIT.getCode(), LotteryResultEnum.BET_TIME_LIMIT.getMsg());
 		}
 
