@@ -45,6 +45,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.util.TextUtils;
+import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +67,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -1283,9 +1285,10 @@ public class PaymentController extends AbstractBaseController {
 		if(sysConfigDTOBaseResult.isSuccess()){
 			sysLimitBetTime = sysConfigDTOBaseResult.getData().getValue().intValue();
 		}
-
 		Integer nowTime = DateUtil.getCurrentTimeLong();
-		logger.info("nUnifiedOrder()：提前售票： 比赛时间="+min.getMatchTime()+"提前时间="+sysLimitBetTime+"当前时间="+nowTime);
+		String strMatchTime= DateUtil.getTimeString(min.getMatchTime(), DateUtil.datetimeFormat);
+		String strNowTime= DateUtil.getTimeString(nowTime, DateUtil.datetimeFormat);
+		logger.info("nUnifiedOrder()：提前售票： 比赛时间="+min.getMatchTime()+"||"+strMatchTime+"提前时间="+sysLimitBetTime+"当前时间="+nowTime+"||"+strNowTime);
 		logger.info("nUnifiedOrder()：提前售票： 是否停止售票="+(min.getMatchTime() - sysLimitBetTime  <= nowTime));
 		if(min.getMatchTime() - sysLimitBetTime  <= nowTime){
 			return ResultGenerator.genResult(LotteryResultEnum.BET_TIME_LIMIT.getCode(), LotteryResultEnum.BET_TIME_LIMIT.getMsg());
