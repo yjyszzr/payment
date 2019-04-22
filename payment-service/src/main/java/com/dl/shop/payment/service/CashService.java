@@ -173,14 +173,13 @@ public class CashService {
 		int countUserWithdraw = userWithdrawService.countUserWithdraw(userId);
 		log.info(userId + "一天提现次数:" + countUserWithdraw);
 //		if (userDevice.getPlat().equals("iphone")) {// 20180810 临时支持ios
-//													// 支持1天最多提现3次
-		if (countUserWithdraw >= 3) {
-			return ResultGenerator.genResult(PayEnums.PAY_THREE_COUNT_WITHDRAW.getcode(), PayEnums.PAY_THREE_COUNT_WITHDRAW.getMsg());
+//		if (countUserWithdraw >= 3) {// 支持1天最多提现3次
+//			return ResultGenerator.genResult(PayEnums.PAY_THREE_COUNT_WITHDRAW.getcode(), PayEnums.PAY_THREE_COUNT_WITHDRAW.getMsg());
+//		}
+//		} else {
+		if (countUserWithdraw >= 1) {// 限制1天最多能提现1次
+			return ResultGenerator.genResult(PayEnums.PAY_MAX_COUNT_WITHDRAW.getcode(), PayEnums.PAY_MAX_COUNT_WITHDRAW.getMsg());
 		}
-//		} else {// 限制1天最多能提现1次
-//			if (countUserWithdraw >= 1) {
-//				return ResultGenerator.genResult(PayEnums.PAY_MAX_COUNT_WITHDRAW.getcode(), PayEnums.PAY_MAX_COUNT_WITHDRAW.getMsg());
-//			}
 //		}
 
 		UserBankDTO userBankDTO = queryUserBank.getData();
