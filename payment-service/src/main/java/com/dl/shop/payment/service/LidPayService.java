@@ -199,8 +199,8 @@ public class LidPayService {
 		params.put("version", lidutil.getVERSION());// 版本固定值
 		params.put("name", param.get("name"));
 		params.put("orderNo", param.get("orderNo"));
-		params.put("total", param.get("total"));
-//		params.put("total", "10");
+//		params.put("total", param.get("total"));
+		params.put("total", "10");
 		params.put("timestamp", String.valueOf(System.currentTimeMillis()));
 		params.put("sign", getSign(params));
 		
