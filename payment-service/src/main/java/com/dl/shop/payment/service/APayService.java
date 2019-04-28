@@ -358,8 +358,9 @@ public class APayService {
 		} else {
 			if(code==1007) {
 				payBaseResult = ResultGenerator.genFailResult("维护中");
+			}else {
+				payBaseResult = ResultGenerator.genFailResult("艾支付返回数据有误");
 			}
-			payBaseResult = ResultGenerator.genFailResult("艾支付返回数据有误");
 		}
 		logger.info("加工前返回APP结果 "+JSONUtils.valueToString(payBaseResult));
 		return payBaseResult;
