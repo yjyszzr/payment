@@ -330,6 +330,7 @@ public class APayService {
 		param.put("channel_id", channel_id);//渠道编号
 		param.put("user_id", userId);// 用户id
 		param.put("exter_invoke_ip", exter_invoke_ip);// 用户ip
+		int code = 0;
 		try {
 			String result = pay(param);
 			param = null;
@@ -342,6 +343,8 @@ public class APayService {
 					param.put("orderId", orderId);
 					param.put("payLogId", savePayLog.getLogId());
 				} else {
+					Map<String, Object> obj = JSONObject.parseObject(result, Map.class);
+					code = (int) obj.get("code");
 					logger.info("接口返回result={}"+result);
 //					Map<String, Object> obj = JSONObject.parseObject(result, Map.class);
 //					return null;
@@ -353,6 +356,9 @@ public class APayService {
 		if (param != null) {
 			payBaseResult = ResultGenerator.genSuccessResult("succ", param);
 		} else {
+			if(code==1007) {
+				payBaseResult = ResultGenerator.genFailResult("维护中");
+			}
 			payBaseResult = ResultGenerator.genFailResult("艾支付返回数据有误");
 		}
 		logger.info("加工前返回APP结果 "+JSONUtils.valueToString(payBaseResult));

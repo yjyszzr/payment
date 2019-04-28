@@ -367,7 +367,7 @@ public class APayDemo {
 		param.put("partner_id", "11880031");// 商户编号
 		param.put("back_url", "http://39.106.18.39:8765/api/payment/payment/notify/APayNotify");//同步回调地址
 		param.put("notify_url", "http://39.106.18.39:8765/api/payment/payment/notify/APayNotify");// 异步回调地址
-		param.put("channel_id", "6");//渠道编号
+		param.put("channel_id", "7");//渠道编号
 		param.put("pay_method", "");// 支付类型
 		param.put("partner_order", "2115561300016");// 商户订单
 		param.put("user_id", "1000000025");// 用户id
