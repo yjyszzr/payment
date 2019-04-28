@@ -10,6 +10,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -18,10 +19,10 @@ import java.util.TreeMap;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 
 import com.alibaba.fastjson.JSONObject;
-import com.dl.base.util.MD5Utils;
+import com.dl.base.util.DateUtil;
+import com.dl.shop.payment.utils.DateUtilPay;
 
 /**
  * 华移支付工具类 。 由于需要解析返回的json数据，本工具类需要引入fastjson.jar第三方包
@@ -366,9 +367,9 @@ public class APayDemo {
 		param.put("partner_id", "11880031");// 商户编号
 		param.put("back_url", "http://39.106.18.39:8765/api/payment/payment/notify/APayNotify");//同步回调地址
 		param.put("notify_url", "http://39.106.18.39:8765/api/payment/payment/notify/APayNotify");// 异步回调地址
-		param.put("channel_id", "9");//渠道编号
+		param.put("channel_id", "6");//渠道编号
 		param.put("pay_method", "");// 支付类型
-		param.put("partner_order", "2111041716395561300016");// 商户订单
+		param.put("partner_order", "2115561300016");// 商户订单
 		param.put("user_id", "1000000025");// 用户id
 		param.put("total_fee", "1000");// 订单金额
 		param.put("payextra_param", "");// 扩展参数
@@ -383,7 +384,31 @@ public class APayDemo {
 
 		// ************订单退款，全额退款，简单接口，无须验签************
 //		apay.orderRefund(param);
+		
+		//比赛提前1h	禁止支付
+		Integer sysLimitBetTime = 3600;
+//		SysConfigParam sysConfigParam = new SysConfigParam();
+//		sysConfigParam.setBusinessId(4);
+//		BaseResult<SysConfigDTO> sysConfigDTOBaseResult = iSysConfigService.querySysConfig(sysConfigParam);
+//		if(sysConfigDTOBaseResult.isSuccess()){
+//			sysLimitBetTime = sysConfigDTOBaseResult.getData().getValue().intValue();
+//		}
 
+//		Integer nowTime = DateUtil.getCurrentTimeLong();
+//		Integer matchTime = DateUtil.getCurrentTimeLong();
+//		String s= DateUtil.getTimeString(DateUtil.getCurrentTimeLong(), DateUtil.datetimeFormat);
+//		System.out.println(Integer.valueOf(DateUtilPay.dateSubtractionHours("2019-04-19 15:05:00","2050-04-22 16:05:00")));
+//		System.out.println(nowTime);
+//		System.out.println(DateUtil.getTimeSomeDate(DateUtil.strToDate("2019-04-19 16:05:00")));
+//		System.out.println(DateUtil.getTimeSomeDate(DateUtil.strToDate("2019-04-19 15:05:00")));
+//		System.out.println(DateUtil.getTimeSomeDate(new Date()));
+//		System.out.println(matchTime - sysLimitBetTime  <= nowTime);
+//		if(min.getMatchTime() - sysLimitBetTime  <= nowTime){
+//			return ResultGenerator.genResult(LotteryResultEnum.BET_TIME_LIMIT.getCode(), LotteryResultEnum.BET_TIME_LIMIT.getMsg());
+//		}
+//		String surplusStr ="";
+//		surplusStr = surplusStr.substring(0, surplusStr.length()-1);
+//		System.out.println(surplusStr);
 	}
 
 }

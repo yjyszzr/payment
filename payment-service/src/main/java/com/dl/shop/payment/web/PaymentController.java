@@ -756,6 +756,13 @@ public class PaymentController extends AbstractBaseController {
 			if(totalAmount>10000) {
 				return ResultGenerator.genFailResult("单笔充值金额不能超过10000元 ");
 			}
+		} else if("app_awxxe".equals(param.getPayCode())) {
+			if(totalAmount<10) {
+				return ResultGenerator.genFailResult("单笔充值金额不能低于10元 ");
+			}
+			if(totalAmount>300) {
+				return ResultGenerator.genFailResult("单笔充值金额不能超过300元 ");
+			}
 		}
 		
 		BaseResult<PaymentDTO> paymentResult = paymentService.queryByCode(payCode);
@@ -912,6 +919,20 @@ public class PaymentController extends AbstractBaseController {
 				logger.info("生成艾支付payOrderSn={},url失败", orderSn);
 			}
 		}else if ("app_awx".equals(payCode)) {
+			logger.info("艾支付url:" + " payCode:" + savePayLog.getPayCode());
+//			String channel_id = "9";//渠道编号  微信支付(扫码):6     微信支付H5:7		支付宝支付：9
+//			int iswechat = param.getInnerWechat();
+//			if(iswechat==1) {
+//				channel_id = "6";
+//			}
+			payBaseResult = aPayService.getAPayUrl(savePayLog, orderSn,orderSn,userId,"6","127.0.0.1","充值");
+			if (payBaseResult != null && payBaseResult.getData() != null) {
+				String str = payBaseResult.getData() + "";
+				logger.info("生成艾支付payOrderSn={},url成功 url={}:", orderSn, str);
+			} else {
+				logger.info("生成艾支付payOrderSn={},url失败", orderSn);
+			}
+		}else if ("app_awxxe".equals(payCode)) {
 			logger.info("艾支付url:" + " payCode:" + savePayLog.getPayCode());
 //			String channel_id = "9";//渠道编号  微信支付(扫码):6     微信支付H5:7		支付宝支付：9
 //			int iswechat = param.getInnerWechat();
@@ -1291,6 +1312,15 @@ public class PaymentController extends AbstractBaseController {
 			if(bomax) {
 				return ResultGenerator.genFailResult("单笔支付仅支持小于10000元，建议充值后使用账户余额下单  ");
 			}
+		} else if("app_awxxe".equals(param.getPayCode())) {
+			boolean bomin = aPayService.checkMinAmount(jsonData,"7");
+			if(bomin) {
+				return ResultGenerator.genFailResult("单笔支付仅支持大于10元，建议充值后使用账户余额下单 ");
+			}
+			boolean bomax = aPayService.checkMaxAmount(jsonData,"7");
+			if(bomax) {
+				return ResultGenerator.genFailResult("单笔支付仅支持小于300元，建议充值后使用账户余额下单  ");
+			}
 		}
 		
 		// 清除payToken
@@ -1565,6 +1595,20 @@ public class PaymentController extends AbstractBaseController {
 				logger.info("生成艾支付payOrderSn={},url失败", orderSn);
 			}
 		}else if ("app_awx".equals(payCode)) {
+			logger.info("艾支付url:" + " payCode:" + savePayLog.getPayCode());
+//			String channel_id = "9";//渠道编号  微信支付(扫码):6     微信支付H5:7		支付宝支付：9
+//			int iswechat = param.getInnerWechat();
+//			if(iswechat==1) {
+//				channel_id = "6";
+//			}
+			payBaseResult = aPayService.getAPayUrl(savePayLog, orderSn,orderId,userId,"6","127.0.0.1","支付");
+			if (payBaseResult != null && payBaseResult.getData() != null) {
+				String str = payBaseResult.getData() + "";
+				logger.info("生成艾支付payOrderSn={},url成功 url={}:", orderSn, str);
+			} else {
+				logger.info("生成艾支付payOrderSn={},url失败", orderSn);
+			}
+		} else if ("app_awxxe".equals(payCode)) {
 			logger.info("艾支付url:" + " payCode:" + savePayLog.getPayCode());
 //			String channel_id = "9";//渠道编号  微信支付(扫码):6     微信支付H5:7		支付宝支付：9
 //			int iswechat = param.getInnerWechat();

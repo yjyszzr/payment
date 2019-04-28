@@ -389,6 +389,9 @@ public class APayService {
 		if("6".equals(paytype) && paid<500) {
 			return true;
 		}
+		if("7".equals(paytype) && paid<10) {
+			return true;
+		}
 		if(paid<1) {
 			return true;
 		}
@@ -398,6 +401,9 @@ public class APayService {
 		JSONObject josn = (JSONObject) JSONObject.parse(payToken);
 		BigDecimal thirdPartyPaid = new BigDecimal(josn.getString("thirdPartyPaid"));
 		int paid = thirdPartyPaid.intValue();
+		if("7".equals(paytype) && paid>300) {
+			return true;
+		}
 		if(paid>10000) {
 			return true;
 		}
