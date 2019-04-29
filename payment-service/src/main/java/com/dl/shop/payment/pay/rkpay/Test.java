@@ -3,25 +3,35 @@ package com.dl.shop.payment.pay.rkpay;
 import java.util.Map;
 import java.util.Optional;
 
-import org.springframework.util.StringUtils;
-
 import com.alibaba.druid.support.json.JSONUtils;
 import com.dl.shop.payment.pay.rkpay.util.Client;
-import com.dl.shop.payment.pay.rkpay.util.PayConfig;
+import com.dl.shop.payment.pay.rkpay.util.PayQrcodeConfig;
 import com.dl.shop.payment.pay.rkpay.util.PayQuickConfig;
+import com.dl.shop.payment.pay.rkpay.util.PayWapConfig;
 import com.dl.shop.payment.pay.rkpay.util.QueryConfig;
 import com.dl.shop.payment.pay.rkpay.util.ReFundConfig;
 import com.dl.shop.payment.pay.rkpay.util.ReFundQueryConfig;
 
 public class Test {
-	/**支付宝支付
+	/**WAP支付
 	 * @return
 	 */
-    public String pay(){
-        PayConfig payConfig=new PayConfig();
-        payConfig.initParams("MC0000000000000001","DS421fefgDF","0.01","AP","test","test","notify_url","callback_url");
+    public String payWap(){
+        PayWapConfig payConfig=new PayWapConfig();
+        payConfig.initParams("MC0000000000000001","AD1023162143432940","0.01","AP","test","test","notify_url","callback_url");
         Client client=new Client();
         String data=client.request(payConfig,"/pay/wap");
+        return data;
+    }
+    
+    /**扫描支付(支持微信/支付宝)
+	 * @return
+	 */
+    public String payQrcode(){
+    	PayQrcodeConfig payQrcodeConfig=new PayQrcodeConfig();
+    	payQrcodeConfig.initParams("MC0000000000000001","AD1023162143432940","0.01","WX","120","test","test","notify_url");
+        Client client=new Client();
+        String data=client.request(payQrcodeConfig,"/pay/qrcode");
         return data;
     }
     
@@ -92,6 +102,8 @@ public class Test {
 //        System.out.print(test.payQuick("GM"));//NORMAL-普通模式/YT/RK/GM
 //        System.out.print(test.tradeQuery());
 //        System.out.println(test.refund());
-        System.out.println(test.refundQuery("FD0721030144500588"));
+//        System.out.println(test.refundQuery("FD0721030144500588"));
+//        System.out.println(test.payWap());
+        System.out.println(test.payQrcode());
     }
 }

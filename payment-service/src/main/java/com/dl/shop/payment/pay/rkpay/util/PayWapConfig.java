@@ -1,7 +1,7 @@
 package com.dl.shop.payment.pay.rkpay.util;
 
 //支付相关参数
-public class PayConfig extends Config {
+public class PayWapConfig extends Config {
 
     public String mch_id;
     public String ds_trade_no;
