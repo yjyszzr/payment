@@ -2,6 +2,7 @@ package com.dl.shop.payment.pay.rkpay;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 
 import com.alibaba.druid.support.json.JSONUtils;
 import com.dl.shop.payment.pay.rkpay.util.Client;
@@ -18,7 +19,8 @@ public class Test {
 	 */
     public String payWap(){
         PayWapConfig payConfig=new PayWapConfig();
-        payConfig.initParams("MC0000000000000001","AD1023162143432940","0.01","AP","test","test","notify_url","callback_url");
+        double fee_money = Integer.parseInt("100")+randomNum();
+        payConfig.initParams("MP1904241125194799","TEST23162143432940",fee_money+"","AP","test","test","notify_url","callback_url");
         Client client=new Client();
         String data=client.request(payConfig,"/pay/wap");
         return data;
@@ -29,29 +31,30 @@ public class Test {
 	 */
     public String payQrcode(){
     	PayQrcodeConfig payQrcodeConfig=new PayQrcodeConfig();
-    	payQrcodeConfig.initParams("MC0000000000000001","AD1023162143432940","0.01","WX","120","test","test","notify_url");
+    	double fee_money = Integer.parseInt("100")+randomNum();
+    	payQrcodeConfig.initParams("MP1904241125194799","AD1023162143432940",fee_money+"","SS","120","test","test","notify_url");
         Client client=new Client();
         String data=client.request(payQrcodeConfig,"/pay/qrcode");
         return data;
     }
     
-    /**银联快捷支付
+    /**网银快捷支付
      * quick_mode 支付模式NORMAL-普通模式/YT/RK/GM
 	 * @return
 	 */
     public String payQuick(String quick_mode){
         PayQuickConfig payQuickConfig=new PayQuickConfig();
         if("YT".equalsIgnoreCase(quick_mode)) {
-        	payQuickConfig.initParams("MC0000000000000006","DS1608261827551467","0.01",
+        	payQuickConfig.initParams("MC1905051517214236","TEST16082618275514","0.01",
         			"test","test","notify_url","callback_url",quick_mode,"9558801001177120303","张三","141124198804215237","13888888888");
         }else if("RK".equalsIgnoreCase(quick_mode)) {
-        	payQuickConfig.initParams("MC0000000000000006","DS1608261827551467","0.01",
+        	payQuickConfig.initParams("MC1905051517214236","DS1608261827551467","0.01",
         			"test","test","notify_url","callback_url",quick_mode,"工商银行");
         }else if("GM".equalsIgnoreCase(quick_mode)) {
-        	payQuickConfig.initParams("MC0000000000000006","DS1608261827551467","0.01",
+        	payQuickConfig.initParams("MC1905051517214236","DS1608261827551467","0.01",
         			"test","test","notify_url","callback_url",quick_mode,"141124198804215237","张三");
         }else {
-        	payQuickConfig.initParams("MC0000000000000006","DS1608261827551467","0.01",
+        	payQuickConfig.initParams("MC1905051517214236","DS1608261827551467","0.01",
         			"test","test","notify_url","callback_url",quick_mode);
         }
         Client client=new Client();
@@ -59,24 +62,24 @@ public class Test {
         return data;
     }
     
-    /**交易查询
+    /**交易状态查询
      * @return
      */
     public String tradeQuery(){
         QueryConfig queryConfig=new QueryConfig();
-        queryConfig.initParams("MC0000000000000006","AA0702000240879559","","");
+        queryConfig.initParams("MC1905051517214236","TEST23162143432940","","");
         Client client=new Client();
         String data=client.request(queryConfig,"/pay/tradequery");
         return data;
     }
     
-	/**发起退款
+	/**发起退款(暂无该接口)
 	 * 
 	 * @return
 	 */
     public String refund(){
         ReFundConfig refundConfig=new ReFundConfig();
-        refundConfig.initParams("MC0000000000000006","AA0702000240879559","");
+        refundConfig.initParams("MC1905051517214236","AA0702000240879559","");
         Client client=new Client();
         String data=client.request(refundConfig,"/pay/refund");
         Map<String,Object> map = (Map<String,Object>)JSONUtils.parse(data);
@@ -86,24 +89,29 @@ public class Test {
         }
         return data;
     }
-    /**退款结果查询
-	 * @param refund_no交易号 由发起退款接口返回
-	 * @return
+    /**退款结果查询(暂无该接口)
+	 * @return String=json
 	 */
     public String refundQuery(String refund_no){
     	ReFundQueryConfig reFundQueryConfig=new ReFundQueryConfig();
-    	reFundQueryConfig.initParams("MC0000000000000006",refund_no);
+    	reFundQueryConfig.initParams("MC1905051517214236",refund_no);
         Client client=new Client();
         String data=client.request(reFundQueryConfig,"/pay/refundquery");
         return data;
     }
+    /**获取1—9的随机数
+     * @return
+     */
+    public double randomNum() {
+    	Random random = new Random();
+    	int rnum = random.nextInt(8)+1;//随机1-9的正整数
+    	return rnum/100d;
+    }
     public static void main(String [] args){
         Test test=new Test();
-//        System.out.print(test.payQuick("GM"));//NORMAL-普通模式/YT/RK/GM
-//        System.out.print(test.tradeQuery());
-//        System.out.println(test.refund());
-//        System.out.println(test.refundQuery("FD0721030144500588"));
+        System.out.println(test.payQuick("GM"));//NORMAL-普通模式/YT/RK/GM
+//        System.out.println(test.tradeQuery());
 //        System.out.println(test.payWap());
-        System.out.println(test.payQrcode());
+//        System.out.println(test.payQrcode());
     }
 }
