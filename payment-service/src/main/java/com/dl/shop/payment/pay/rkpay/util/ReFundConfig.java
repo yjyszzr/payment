@@ -5,8 +5,8 @@ public class ReFundConfig extends Config {
     public String trade_no;
     public String ds_trade_no;
 
-    public void initParams(String mch_id,String trade_no,String ds_trade_no){
-        this.mch_id=mch_id;
+    public void initParams(String trade_no,String ds_trade_no){
+    	this.mch_id=StaticV.mchid;
         if(trade_no!=""){
             this.trade_no=trade_no;
         }else if(ds_trade_no!=""){

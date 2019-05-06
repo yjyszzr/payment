@@ -14,8 +14,8 @@ public class PayWapConfig extends Config {
     public String notify_url;
     public String callback_url;
 
-    public void initParams(String mp_id,String ds_trade_no,String pay_fee,String trade_type,String trade_subject,String trade_memo,String notify_url,String callback_url){
-        this.mp_id=mp_id;
+    public void initParams(String ds_trade_no,String pay_fee,String trade_type,String trade_subject,String trade_memo,String notify_url,String callback_url){
+        this.mp_id=StaticV.mpid;
         this.ds_trade_no=ds_trade_no;
         this.pay_fee=pay_fee;
         this.trade_type=trade_type;
