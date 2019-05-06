@@ -471,7 +471,7 @@ public class PayNotifyController {
 		RspOrderQueryEntity rspOrderEntikty = new RspOrderQueryEntity();
 		rspOrderEntikty.setResult_code(status);
 		rspOrderEntikty.setPayCode(payCode);
-		rspOrderEntikty.setType(RspOrderQueryEntity.TYPE_APAY);
+		rspOrderEntikty.setType(RspOrderQueryEntity.TYPE_RKPAY);
 		rspOrderEntikty.setTrade_status(status);
 		log.info("RkPayNotify()返回报文*********"+payType);
 		if (payType == 0) {
