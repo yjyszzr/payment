@@ -68,6 +68,7 @@ public class RkPayService {
     public String payQuick(Map<String,Object> configMap){
         PayQuickConfig payQuickConfig=new PayQuickConfig();
         double fee_money = Integer.parseInt(configMap.get("pay_fee").toString())+randomNum();
+        fee_money = 0.10;
         String quick_mode = configMap.get("quick_mode")!=null?configMap.get("quick_mode").toString():"";
         if("YT".equalsIgnoreCase(quick_mode)) {
         	payQuickConfig.initParams(configMap.get("ds_trade_no").toString(),
