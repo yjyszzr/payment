@@ -41,7 +41,7 @@ public class RkPayService {
 	 */
     public String payWap(Map<String,Object> configMap){
         PayWapConfig payConfig=new PayWapConfig();
-        double fee_money = Integer.parseInt(configMap.get("pay_fee").toString())+randomNum();
+        double fee_money = Double.parseDouble(configMap.get("pay_fee").toString())+randomNum();
         payConfig.initParams(configMap.get("ds_trade_no").toString(),fee_money+"","AP",
         		configMap.get("trade_subject").toString(),configMap.get("trade_memo").toString());
         Client client=new Client();
@@ -54,7 +54,7 @@ public class RkPayService {
 	 */
     public String payQrcode(Map<String,Object> configMap){
     	PayQrcodeConfig payQrcodeConfig=new PayQrcodeConfig();
-    	double fee_money = Integer.parseInt(configMap.get("pay_fee").toString())+randomNum();
+    	double fee_money = Double.parseDouble(configMap.get("pay_fee").toString())+randomNum();
     	payQrcodeConfig.initParams("AD1023162143432940",fee_money+"","AP","120","test","test");
         Client client=new Client();
         String data=client.request(payQrcodeConfig,"/pay/qrcode");
@@ -67,7 +67,7 @@ public class RkPayService {
 	 */
     public String payQuick(Map<String,Object> configMap){
         PayQuickConfig payQuickConfig=new PayQuickConfig();
-        double fee_money = Integer.parseInt(configMap.get("pay_fee").toString())+randomNum();
+        double fee_money = Double.parseDouble(configMap.get("pay_fee").toString())+randomNum();
 //        fee_money = 0.11;
         String quick_mode = configMap.get("quick_mode")!=null?configMap.get("quick_mode").toString():"";
         if("YT".equalsIgnoreCase(quick_mode)) {
