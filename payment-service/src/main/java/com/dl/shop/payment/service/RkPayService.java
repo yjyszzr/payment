@@ -157,10 +157,10 @@ public class RkPayService {
     public BaseResult<?> getRkPayWapUrl(PayLog savePayLog, String orderSn,String orderId,String paytype)  {
 		BaseResult<?> payBaseResult = null;
 		BigDecimal amtDouble = savePayLog.getOrderAmount();
-		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_EVEN);// 金额转换成分
+//		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_EVEN);// 金额转换成分
 		Map<String,Object> param = new HashMap<>();
 		param.put("ds_trade_no", orderSn);// 商户订单
-		param.put("pay_fee", bigD.toString());// 订单金额
+		param.put("pay_fee", amtDouble.toString());// 订单金额
 		param.put("trade_subject", paytype);// 商品名称
 		param.put("trade_memo", paytype);// 商品名称
 		String result = payWap(param);
@@ -192,13 +192,13 @@ public class RkPayService {
 			String bank_name,String user_name,String account_no) {
 		BaseResult<?> payBaseResult = null;
 		BigDecimal amtDouble = savePayLog.getOrderAmount();
-		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_EVEN);// 金额转换成分
+//		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_EVEN);// 金额转换成分
 		Map<String,Object> param = new HashMap<>();
 //		支付模式NORMAL-普通模式/YT/RK/GM
 		//NORMAL/YT/RK/GM
 		param.put("quick_mode", quick_mode);// 支付模式
 		param.put("ds_trade_no", orderSn);// 商户订单
-		param.put("pay_fee", bigD.toString());// 订单金额
+		param.put("pay_fee", amtDouble.toString());// 订单金额
 		param.put("trade_subject", paytype);// 商品名称
 		param.put("trade_memo", paytype);// 商品名称
 		if("YT".equalsIgnoreCase(quick_mode)) {//YT
