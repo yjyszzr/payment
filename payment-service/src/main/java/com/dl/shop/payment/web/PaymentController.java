@@ -959,11 +959,6 @@ public class PaymentController extends AbstractBaseController {
 			}
 		}else if ("app_rkquick".equals(payCode)) {
 			logger.info("Q多多网银快捷支付url:" + " payCode:" + savePayLog.getPayCode());
-//			String channel_id = "9";//渠道编号  微信支付(扫码):6     微信支付H5:7		支付宝支付：9
-//			int iswechat = param.getInnerWechat();
-//			if(iswechat==1) {
-//				channel_id = "6";
-//			}
 			payBaseResult = rkPayService.getRkPayQuickUrl(savePayLog, "NORMAL", orderSn, orderSn, "充值", "", "", "", "", "");
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
