@@ -768,8 +768,8 @@ public class PaymentController extends AbstractBaseController {
 				return ResultGenerator.genFailResult("单笔充值金额不能超过300元 ");
 			}
 		} else if("app_rkquick".equals(param.getPayCode())) {
-			if(totalAmount<100) {
-				return ResultGenerator.genFailResult("单笔充值金额不能低于100元 ");
+			if(totalAmount<20) {
+				return ResultGenerator.genFailResult("单笔充值金额不能低于20元 ");
 			}
 			if(totalAmount>3000) {
 				return ResultGenerator.genFailResult("单笔充值金额不能超过3000元 ");
@@ -1344,7 +1344,7 @@ public class PaymentController extends AbstractBaseController {
 		} else if("app_rkquick".equals(param.getPayCode())) {
 			boolean bomin = rkPayService.checkMinAmount(jsonData);
 			if(bomin) {
-				return ResultGenerator.genFailResult("单笔支付仅支持大于100元，建议充值后使用账户余额下单 ");
+				return ResultGenerator.genFailResult("单笔支付仅支持大于20元，建议充值后使用账户余额下单 ");
 			}
 			boolean bomax = rkPayService.checkMaxAmount(jsonData);
 			if(bomax) {
