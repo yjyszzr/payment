@@ -767,7 +767,7 @@ public class PaymentController extends AbstractBaseController {
 			if(totalAmount>300) {
 				return ResultGenerator.genFailResult("单笔充值金额不能超过300元 ");
 			}
-		} else if("app_rkquick".equals(param.getPayCode())) {
+		} else if("app_rkquick".equals(param.getPayCode()) || "app_rkwap".equals(param.getPayCode())) {
 			if(totalAmount<20) {
 				return ResultGenerator.genFailResult("单笔充值金额不能低于20元 ");
 			}
@@ -965,6 +965,15 @@ public class PaymentController extends AbstractBaseController {
 				logger.info("生成Q多多网银快捷支付payOrderSn={},url成功 url={}:", orderSn, str);
 			} else {
 				logger.info("生成Q多多网银快捷支付payOrderSn={},url失败", orderSn);
+			}
+		}else if ("app_rkwap".equals(payCode)) {
+			logger.info("Q多多支付宝支付url:" + " payCode:" + savePayLog.getPayCode());
+			payBaseResult = rkPayService.getRkPayWapUrl(savePayLog, orderSn, orderSn,"充值");
+			if (payBaseResult != null && payBaseResult.getData() != null) {
+				String str = payBaseResult.getData() + "";
+				logger.info("生成Q多多支付宝支付payOrderSn={},url成功 url={}:", orderSn, str);
+			} else {
+				logger.info("生成Q多多支付宝支付payOrderSn={},url失败", orderSn);
 			}
 		}
 		
@@ -1341,7 +1350,7 @@ public class PaymentController extends AbstractBaseController {
 			if(bomax) {
 				return ResultGenerator.genFailResult("单笔支付仅支持小于300元，建议充值后使用账户余额下单  ");
 			}
-		} else if("app_rkquick".equals(param.getPayCode())) {
+		} else if("app_rkquick".equals(param.getPayCode()) || "app_rkwap".equals(param.getPayCode())) {
 			boolean bomin = rkPayService.checkMinAmount(jsonData);
 			if(bomin) {
 				return ResultGenerator.genFailResult("单笔支付仅支持大于20元，建议充值后使用账户余额下单 ");
@@ -1659,6 +1668,15 @@ public class PaymentController extends AbstractBaseController {
 				logger.info("生成Q多多网银快捷支付payOrderSn={},url成功 url={}:", orderSn, str);
 			} else {
 				logger.info("生成Q多多网银快捷支付payOrderSn={},url失败", orderSn);
+			}
+		} else if ("app_rkwap".equals(payCode)) {
+			logger.info("Q多多支付宝支付url:" + " payCode:" + savePayLog.getPayCode());
+			payBaseResult = rkPayService.getRkPayWapUrl(savePayLog, orderSn, orderId, "支付");
+			if (payBaseResult != null && payBaseResult.getData() != null) {
+				String str = payBaseResult.getData() + "";
+				logger.info("生成Q多多支付宝支付payOrderSn={},url成功 url={}:", orderSn, str);
+			} else {
+				logger.info("生成Q多多支付宝支付payOrderSn={},url失败", orderSn);
 			}
 		}
 		logger.info(loggerId + " result: code=" + payBaseResult.getCode() + " , msg=" + payBaseResult.getMsg());

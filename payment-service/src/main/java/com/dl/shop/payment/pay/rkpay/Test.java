@@ -7,6 +7,7 @@ import java.util.Random;
 
 import com.alibaba.druid.support.json.JSONUtils;
 import com.dl.shop.payment.pay.rkpay.util.Client;
+import com.dl.shop.payment.pay.rkpay.util.FundApplyConfig;
 import com.dl.shop.payment.pay.rkpay.util.PayQrcodeConfig;
 import com.dl.shop.payment.pay.rkpay.util.PayQuickConfig;
 import com.dl.shop.payment.pay.rkpay.util.PayWapConfig;
@@ -27,7 +28,7 @@ public class Test {
         return data;
     }
     
-    /**扫描支付(支持微信/支付宝)
+    /**扫描支付(支持微信/支付宝)（暂无接口）
 	 * @return
 	 */
     public String payQrcode(Map<String,Object> configMap){
@@ -58,7 +59,39 @@ public class Test {
         String data=client.request(payQuickConfig,"/pay/quick");
         return data;
     }
-    
+    /**代付
+     * apply_mode=RK
+	 * @return
+	 */
+    public String fundApply(Map<String,Object> configMap){
+    	FundApplyConfig fundApplyConfig=new FundApplyConfig();
+    	fundApplyConfig.initParams("AS1231989424818219", "提现", "提现", "RK", "22.33", "6217000010142034811", "孙泽强");
+        Client client=new Client();
+        String data=client.request(fundApplyConfig,"/fund/apply");
+        return data;
+    }
+    /**代付状态查询
+     * apply_mode=RK
+	 * @return
+	 */
+    public String fundTradeQuery(Map<String,Object> configMap){
+    	FundApplyConfig fundApplyConfig=new FundApplyConfig();
+    	fundApplyConfig.initParams("AS1231989424818219","AS1231989424818219");
+        Client client=new Client();
+        String data=client.request(fundApplyConfig,"/fund/tradequery");
+        return data;
+    }
+    /**代付账户余额查询
+     * apply_mode=RK
+	 * @return
+	 */
+    public String fundAccountQuery(Map<String,Object> configMap){
+    	FundApplyConfig fundApplyConfig=new FundApplyConfig();
+    	fundApplyConfig.initParams();
+        Client client=new Client();
+        String data=client.request(fundApplyConfig,"/fund/accountquery");
+        return data;
+    }
     /**交易状态查询
      * @return
      */
@@ -107,10 +140,13 @@ public class Test {
     public static void main(String [] args){
     	Map<String,Object> configMap = new HashMap<>();
         Test test=new Test();
-//        System.out.println(test.payQuick("NORMAL",configMap));//NORMAL-普通模式/YT/RK/GM
+//        System.out.println(test.randomNum());
+//        System.out.println(test.fundApply(configMap));
+//        System.out.println(test.fundAccountQuery(configMap));
+//        System.out.println(test.fundTradeQuery(configMap));
 //        Map ms = (Map) JSONUtils.parse();
-        System.out.println(test.tradeQuery(configMap));
-//        System.out.println(test.payWap(configMap));
-//        System.out.println(test.payQrcode(configMap));
+        System.out.println(test.payQuick("NORMAL",configMap));
+        System.out.println(test.payWap(configMap));
+        System.out.println(test.payQrcode(configMap));
     }
 }
