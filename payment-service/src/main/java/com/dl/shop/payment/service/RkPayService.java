@@ -154,7 +154,7 @@ public class RkPayService {
 	 * @param savePayLog 支付日志
 	 * @return
 	 */
-    public BaseResult<?> getRkPayWapUrl(PayLog savePayLog, String orderSn,String orderId,Integer userId,String paytype) throws MalformedURLException {
+    public BaseResult<?> getRkPayWapUrl(PayLog savePayLog, String orderSn,String orderId,String paytype)  {
 		BaseResult<?> payBaseResult = null;
 		BigDecimal amtDouble = savePayLog.getOrderAmount();
 		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_EVEN);// 金额转换成分
