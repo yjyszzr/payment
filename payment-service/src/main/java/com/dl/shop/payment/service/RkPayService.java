@@ -167,7 +167,7 @@ public class RkPayService {
 		param = null;
 		if (result != null && !"".equals(result)) {
 			Map<String,Object> resultMap = (Map<String, Object>) JSONUtils.parse(result);
-			if("0".equals(resultMap.get("status"))) {
+			if("0".equals(resultMap.get("status").toString())) {
 				param = new HashMap<>();
 				param.put("payUrl", resultMap.get("prepay_url"));
 				param.put("orderId", orderId);
