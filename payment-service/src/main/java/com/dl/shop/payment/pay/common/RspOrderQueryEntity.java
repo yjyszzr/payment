@@ -60,7 +60,7 @@ public class RspOrderQueryEntity implements Serializable {
 		} else if (!TextUtils.isEmpty(result_code) && type == TYPE_APAY) {
 			return !StringUtils.isEmpty(result_code) &&  "1001".equalsIgnoreCase(result_code);// 成功
 		} else if (!TextUtils.isEmpty(result_code) && type == TYPE_RKPAY) {
-			return !StringUtils.isEmpty(result_code) &&  "8".equalsIgnoreCase(result_code);// 成功
+			return !StringUtils.isEmpty(result_code) &&  "0".equalsIgnoreCase(result_code);// 成功
 		}
 		return false;
 	}
