@@ -162,8 +162,8 @@ public class RkPayService {
 		param.put("pay_fee", bigD.toString());// 订单金额
 		param.put("trade_subject", paytype);// 商品名称
 		param.put("trade_memo", paytype);// 商品名称
-		param = null;
 		String result = payWap(param);
+		param = null;
 		if (result != null && !"".equals(result)) {
 			Map<String,Object> resultMap = (Map<String, Object>) JSONUtils.parse(result);
 			if("0".equals(resultMap.get("status"))) {
@@ -211,8 +211,8 @@ public class RkPayService {
 			param.put("id_no", id_no);
 			param.put("id_name", user_name);
 		}
-		param = null;
 		String result = payQuick(param);
+		param = null;
 		if (result != null && !"".equals(result)) {
 			Map<String,Object> resultMap = (Map<String, Object>) JSONUtils.parse(result);
 			if("0".equals(resultMap.get("status"))) {
