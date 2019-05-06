@@ -31,7 +31,7 @@ public class UserBetPayInfoDTO {
 	@ApiModelProperty("玩法")
 	private String playType;
 	@ApiModelProperty("混合投注的具体玩法")
-	private String playTypeDetail;
+	private String playTypeDetailStr;
 	@ApiModelProperty(value="余额抵扣")
 	private Double surplus;
 	@ApiModelProperty(value="优惠卷抵扣")
