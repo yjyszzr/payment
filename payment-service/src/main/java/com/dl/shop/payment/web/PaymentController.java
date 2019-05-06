@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.time.Instant;
 import java.util.Date;
@@ -112,6 +113,7 @@ import com.dl.shop.payment.service.APayService;
 import com.dl.shop.payment.service.LidPayService;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
+import com.dl.shop.payment.service.RkPayService;
 import com.dl.shop.payment.service.UbeyPayService;
 import com.dl.shop.payment.service.UserRechargeService;
 import com.dl.shop.payment.service.UserWithdrawLogService;
@@ -138,6 +140,8 @@ public class PaymentController extends AbstractBaseController {
 	private LidPayService lidPayService;
 	@Resource
 	private APayService aPayService;
+	@Resource
+	private RkPayService rkPayService;
 	@Resource
 	private WxpayUtil wxpayUtil;
 	@Resource
@@ -763,6 +767,13 @@ public class PaymentController extends AbstractBaseController {
 			if(totalAmount>300) {
 				return ResultGenerator.genFailResult("单笔充值金额不能超过300元 ");
 			}
+		} else if("app_rkquick".equals(param.getPayCode())) {
+			if(totalAmount<100) {
+				return ResultGenerator.genFailResult("单笔充值金额不能低于100元 ");
+			}
+			if(totalAmount>3000) {
+				return ResultGenerator.genFailResult("单笔充值金额不能超过3000元 ");
+			}
 		}
 		
 		BaseResult<PaymentDTO> paymentResult = paymentService.queryByCode(payCode);
@@ -945,6 +956,20 @@ public class PaymentController extends AbstractBaseController {
 				logger.info("生成艾支付payOrderSn={},url成功 url={}:", orderSn, str);
 			} else {
 				logger.info("生成艾支付payOrderSn={},url失败", orderSn);
+			}
+		}else if ("app_rkquick".equals(payCode)) {
+			logger.info("Q多多网银快捷支付url:" + " payCode:" + savePayLog.getPayCode());
+//			String channel_id = "9";//渠道编号  微信支付(扫码):6     微信支付H5:7		支付宝支付：9
+//			int iswechat = param.getInnerWechat();
+//			if(iswechat==1) {
+//				channel_id = "6";
+//			}
+			payBaseResult = rkPayService.getRkPayQuickUrl(savePayLog, "NORMAL", orderSn, orderSn, "充值", "", "", "", "", "");
+			if (payBaseResult != null && payBaseResult.getData() != null) {
+				String str = payBaseResult.getData() + "";
+				logger.info("生成Q多多网银快捷支付payOrderSn={},url成功 url={}:", orderSn, str);
+			} else {
+				logger.info("生成Q多多网银快捷支付payOrderSn={},url失败", orderSn);
 			}
 		}
 		
@@ -1321,6 +1346,15 @@ public class PaymentController extends AbstractBaseController {
 			if(bomax) {
 				return ResultGenerator.genFailResult("单笔支付仅支持小于300元，建议充值后使用账户余额下单  ");
 			}
+		} else if("app_rkquick".equals(param.getPayCode())) {
+			boolean bomin = rkPayService.checkMinAmount(jsonData);
+			if(bomin) {
+				return ResultGenerator.genFailResult("单笔支付仅支持大于100元，建议充值后使用账户余额下单 ");
+			}
+			boolean bomax = rkPayService.checkMaxAmount(jsonData);
+			if(bomax) {
+				return ResultGenerator.genFailResult("单笔支付仅支持小于3000元，建议充值后使用账户余额下单  ");
+			}
 		}
 		
 		// 清除payToken
@@ -1621,6 +1655,15 @@ public class PaymentController extends AbstractBaseController {
 				logger.info("生成艾支付payOrderSn={},url成功 url={}:", orderSn, str);
 			} else {
 				logger.info("生成艾支付payOrderSn={},url失败", orderSn);
+			}
+		} else if ("app_rkquick".equals(payCode)) {
+			logger.info("Q多多网银快捷支付url:" + " payCode:" + savePayLog.getPayCode());
+			payBaseResult = rkPayService.getRkPayQuickUrl(savePayLog, "NORMAL", orderSn, orderId, "支付", "", "", "", "", "");
+			if (payBaseResult != null && payBaseResult.getData() != null) {
+				String str = payBaseResult.getData() + "";
+				logger.info("生成Q多多网银快捷支付payOrderSn={},url成功 url={}:", orderSn, str);
+			} else {
+				logger.info("生成Q多多网银快捷支付payOrderSn={},url失败", orderSn);
 			}
 		}
 		logger.info(loggerId + " result: code=" + payBaseResult.getCode() + " , msg=" + payBaseResult.getMsg());

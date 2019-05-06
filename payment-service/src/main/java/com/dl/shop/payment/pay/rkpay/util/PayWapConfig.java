@@ -14,15 +14,15 @@ public class PayWapConfig extends Config {
     public String notify_url;
     public String callback_url;
 
-    public void initParams(String ds_trade_no,String pay_fee,String trade_type,String trade_subject,String trade_memo,String notify_url,String callback_url){
+    public void initParams(String ds_trade_no,String pay_fee,String trade_type,String trade_subject,String trade_memo){
         this.mp_id=StaticV.mpid;
         this.ds_trade_no=ds_trade_no;
         this.pay_fee=pay_fee;
         this.trade_type=trade_type;
         this.trade_subject=trade_subject;
         this.trade_memo=trade_memo;
-        this.notify_url=notify_url;
-        this.callback_url=callback_url;
+        this.notify_url=StaticV.notify_url;
+        this.callback_url=StaticV.callback_url;
         this.user_ip="127.0.0.1";
         this.expire_time=StaticV.expire_time;
     }

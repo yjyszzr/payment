@@ -13,7 +13,7 @@ public class PayQrcodeConfig extends Config {
     public String notify_url;//	交易异步通知地址	string(200)	是	http://pay.abc.com/pay/trade_notify	由客户端提供URL，接收来自系统推送的交易数据，200个字符内详情参考本文档【交易异步通知】
 
     public void initParams(String ds_trade_no,String pay_fee,String trade_type,
-    		String expire_time,String trade_subject,String trade_memo,String notify_url){
+    		String expire_time,String trade_subject,String trade_memo){
         this.mp_id=StaticV.mpid;
         this.ds_trade_no=ds_trade_no;
         this.pay_fee=pay_fee;
@@ -21,6 +21,6 @@ public class PayQrcodeConfig extends Config {
         this.expire_time=expire_time;
         this.trade_subject=trade_subject;
         this.trade_memo=trade_memo;
-        this.notify_url=notify_url;
+        this.notify_url=StaticV.notify_url;
     }
 }
