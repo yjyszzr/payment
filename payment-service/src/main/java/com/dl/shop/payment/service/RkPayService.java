@@ -215,6 +215,7 @@ public class RkPayService {
 			param.put("id_name", user_name);
 		}
 		String result = payQuick(param);
+		logger.info("Q多多参数值："+JSONUtils.toJSONString(new StaticV()));
 		logger.info("Q多多返回结果："+result+"参数："+StaticV.ds_id);
 		param = null;
 		if (result != null && !"".equals(result)) {
