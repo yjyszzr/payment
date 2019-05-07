@@ -783,8 +783,8 @@ public class PaymentController extends AbstractBaseController {
 		}
 		// 生成充值记录payLog
 		String payName = paymentResult.getData().getPayName();
-		// 生成充值单
-		String rechargeSn = userRechargeService.saveReCharege(BigDecimal.valueOf(totalAmount), payCode, payName);
+		// 生成充值单 金额由充值金额和赠送金额组成
+		String rechargeSn = userRechargeService.saveReCharege(BigDecimal.valueOf(totalAmount+param.getGiveAmount()), payCode, payName);
 		if (StringUtils.isEmpty(rechargeSn)) {
 			logger.info(loggerId + "生成充值单失败");
 			return ResultGenerator.genFailResult("充值失败！", null);
@@ -804,7 +804,7 @@ public class PaymentController extends AbstractBaseController {
 			}
 		}
 		Integer userId = SessionUtil.getUserId();
-		PayLog payLog = super.newPayLog(userId, orderSn, BigDecimal.valueOf(totalAmount), 1, payCode, payName, payIp);
+		PayLog payLog = super.newPayLog(userId, orderSn, BigDecimal.valueOf(totalAmount), 1, payCode, payName, payIp,param.getGiveAmount()+"");
 		PayLog savePayLog = payLogService.savePayLog(payLog);
 		if (null == savePayLog) {
 			logger.info(loggerId + " payLog对象保存失败！");

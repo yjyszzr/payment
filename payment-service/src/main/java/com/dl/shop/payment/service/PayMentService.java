@@ -5,8 +5,9 @@ import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -26,13 +27,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
-import com.dl.base.enums.SNBusinessCodeEnum;
 import com.dl.base.model.UserDeviceInfo;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.base.service.AbstractService;
 import com.dl.base.util.DateUtil;
-import com.dl.base.util.SNGenerator;
 import com.dl.base.util.SessionUtil;
 import com.dl.lottery.api.ILotteryPrintService;
 import com.dl.member.api.IActivityService;
@@ -50,7 +49,6 @@ import com.dl.member.param.RecharegeParam;
 import com.dl.member.param.StrParam;
 import com.dl.member.param.SurplusPayParam;
 import com.dl.member.param.UpdateUserRechargeParam;
-import com.dl.member.param.UserAccountParam;
 import com.dl.member.param.UserAccountParamByType;
 import com.dl.member.param.UserBonusParam;
 import com.dl.member.param.UserDealActionParam;
@@ -87,12 +85,9 @@ import com.dl.shop.payment.pay.lidpay.util.LidPayH5Utils;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
 import com.dl.shop.payment.pay.rongbao.entity.ReqRefundEntity;
 import com.dl.shop.payment.pay.rongbao.entity.RspRefundEntity;
-import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestOrderQuery;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestPay;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanResponsePay;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.util.TXScanPay;
-import com.dl.shop.payment.pay.tianxia.tianxiaScan.util.TdExpBasicFunctions;
-import com.dl.shop.payment.pay.xianfeng.entity.RspApplyBaseEntity;
 import com.dl.shop.payment.pay.xianfeng.util.XianFengPayUtil;
 import com.dl.shop.payment.pay.yifutong.entity.RspYFTEntity;
 import com.dl.shop.payment.pay.yifutong.util.PayYFTUtil;
@@ -201,9 +196,23 @@ public class PayMentService extends AbstractService<PayMent> {
 			paymentDTO.setPayTitle(payment.getPayTitle());
 			paymentDTO.setPayImg(payment.getPayImg());
 			paymentDTO.setIsReadonly(payment.getIsReadonly());
-			if(payment.getReadMoney()!=null) {
-				paymentDTO.setReadMoney(payment.getReadMoney().split(";"));
+			List<Map<String,String>> maps = new ArrayList();
+			if(payment.getReadMoney()!=null && !"".equals(payment.getReadMoney())) {
+				String readMoney[]=payment.getReadMoney().split(";");
+				for (int i = 0; i < readMoney.length; i++) {
+					Map<String,String> remap = new HashMap();
+					if(readMoney[i].contains(":")) {
+						String money[] = readMoney[i].split(":");
+						if(money.length>1) {
+							remap.put("readmoney", readMoney[0]);
+							remap.put("givemoney", readMoney[1]);
+						}
+					}
+					maps.add(remap);
+				}
 			}
+			paymentDTO.setReadMoney(maps);
+			
 			return paymentDTO;
 		}).collect(Collectors.toList());
 		return list;
@@ -417,13 +426,17 @@ public class PayMentService extends AbstractService<PayMent> {
 		// Integer tradeState = response.getTradeState();
 		if (response.isSucc()) {
 			int currentTime = DateUtil.getCurrentTimeLong();
+			String giveMoney = payLog.getPayMsg();//获取赠送金额
+			if(StringUtils.isNotEmpty(giveMoney)) {
+				giveMoney = "0";
+			}
 			PayLog updatePayLog = new PayLog();
 			updatePayLog.setPayTime(currentTime);
 			payLog.setLastTime(currentTime);
 			updatePayLog.setTradeNo(response.getTrade_no());
 			updatePayLog.setLogId(payLog.getLogId());
 			updatePayLog.setIsPaid(1);
-			updatePayLog.setPayMsg("充值成功");
+			updatePayLog.setPayMsg("充值成功，充值赠送金额："+giveMoney+"元。");
 			int updateRow = payLogMapper.updatePayLogSuccess0To1(updatePayLog);
 			logger.info("充值记录payOrderSn={},更新充值成功,updateRow={}", payLog.getPayOrderSn(), updateRow);
 			if (updateRow > 0) {
@@ -438,6 +451,7 @@ public class PayMentService extends AbstractService<PayMent> {
 				userRechargeService.updateReCharege(updateUserRechargeParam);
 				RecharegeParam recharegeParam = new RecharegeParam();
 				recharegeParam.setAmount(payLog.getOrderAmount());
+				recharegeParam.setGiveAmount(giveMoney);
 				recharegeParam.setPayId(payLog.getPayOrderSn());// 解决充值两次问题
 				String payCode = payLog.getPayCode();
 				if ("app_zfb".equals(payCode)) {

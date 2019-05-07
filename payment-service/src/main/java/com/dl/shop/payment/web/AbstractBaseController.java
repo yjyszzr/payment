@@ -47,6 +47,35 @@ public abstract class AbstractBaseController {
 		return payLog;
 	}
 	/**
+	 * 
+	 * @param orderSn 订单编码
+	 * @param totalAmount 订单需支付金额
+	 * @param payType 支付类型：0-订单支付 1-充值
+	 * @param payCode 支付方式编码
+	 * @param payName 支付方式名称
+	 * @param payIp 客户端ip
+	 * @return
+	 */
+	protected PayLog newPayLog(int userId,String orderSn, BigDecimal totalAmount, Integer payType, String payCode, String payName, String payIp,String payMsg) {
+		PayLog payLog = new PayLog();
+		payLog.setUserId(userId);
+		payLog.setPayType(payType);
+		payLog.setPayName(payName);
+		payLog.setPayCode(payCode);
+		payLog.setParentSn("");
+		payLog.setOrderSn(orderSn);
+		payLog.setOrderAmount(totalAmount);
+		Integer current = DateUtil.getCurrentTimeLong();
+		payLog.setLastTime(current);
+		payLog.setAddTime(current);
+		payLog.setIsPaid(0);
+		payLog.setPayIp(payIp);
+		String sn = SNGenerator.nextSN(SNBusinessCodeEnum.PAY_SN.getCode());
+		payLog.setPayOrderSn(sn);
+		payLog.setPayMsg(payMsg);
+		return payLog;
+	}
+	/**
 	 * 获取客户端ip
 	 * @param request
 	 * @return
