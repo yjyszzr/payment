@@ -783,7 +783,7 @@ public class PaymentController extends AbstractBaseController {
 		// 生成充值记录payLog
 		String payName = paymentResult.getData().getPayName();
 		// 生成充值单 金额由充值金额和赠送金额组成
-		int givemoney = param.getGiveAmount();
+		int givemoney = 0;
 		if ("app_rkquick".equals(payCode) || "app_rkwap".equals(payCode)) {//网银快捷支付附加固额充值赠送
 			PaymentDTO paymentdto = paymentResult.getData();
 			if(paymentdto!=null) {
