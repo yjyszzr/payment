@@ -32,8 +32,16 @@ public class UserBetPayInfoDTO {
 	private String playType;
 	@ApiModelProperty("混合投注的具体玩法")
 	private String mixPlayDetail;
-	@ApiModelProperty("xxx")
+
 	private String somp;
+	public String getSomp() {
+		return somp;
+	}
+
+	public void setSomp(String somp) {
+		this.somp = somp;
+	}
+	
 	@ApiModelProperty(value="余额抵扣")
 	private Double surplus;
 	@ApiModelProperty(value="优惠卷抵扣")
