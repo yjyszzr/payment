@@ -27,17 +27,17 @@ public class StaticV {
 //    public static String callback_url="http://94.191.113.169:8765/api/payment/payment/notify/RkPayNotify";//交易通知
 //    public static String fund_notify_url="http://94.191.113.169:8765/api/payment/payment/notify/RkFundNotify";//代付通知
 //    
-    public static String ds_id;//渠道号
-    public static String secret;//渠道商密钥
-    public static String serverRoot;//接口地址
-    public static String version;//版本号
-    public static String sign_type;//签名类型
+    public static String ds_id="";//渠道号
+    public static String secret="";//渠道商密钥
+    public static String serverRoot="";//接口地址
+    public static String version="";//版本号
+    public static String sign_type="";//签名类型
     public static int expire_time=30;//付款有效期，单位分钟
-    public static String mpid;//商户池编号
-    public static String mchid;//商户号
-    public static String notify_url;//交易通知
-    public static String callback_url;//交易通知
-    public static String fund_notify_url;//代付通知
+    public static String mpid="";//商户池编号
+    public static String mchid="";//商户号
+    public static String notify_url="";//交易通知
+    public static String callback_url="";//交易通知
+    public static String fund_notify_url="";//代付通知
     
     {
     	ds_id = scutil.getDs_id();
