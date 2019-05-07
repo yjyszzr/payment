@@ -1,9 +1,9 @@
 package com.dl.shop.payment.dto;
 
-import java.util.List;
-
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class UserBetPayInfoDTO {
@@ -30,7 +30,8 @@ public class UserBetPayInfoDTO {
 	private String betType;
 	@ApiModelProperty("玩法")
 	private String playType;
-	
+	@ApiModelProperty("混合投注具体玩法")
+	private String aa;
 	@ApiModelProperty(value="余额抵扣")
 	private Double surplus;
 	@ApiModelProperty(value="优惠卷抵扣")
