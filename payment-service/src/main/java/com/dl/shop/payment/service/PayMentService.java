@@ -204,9 +204,15 @@ public class PayMentService extends AbstractService<PayMent> {
 					if(readMoney[i].contains(":")) {
 						String money[] = readMoney[i].split(":");
 						if(money.length>1) {
-							remap.put("readmoney", readMoney[0]);
-							remap.put("givemoney", readMoney[1]);
+							remap.put("readmoney", money[0]);
+							remap.put("givemoney", money[1]);
+						} else {
+							remap.put("readmoney", money[0]);
+							remap.put("givemoney", "0");
 						}
+					}else {
+						remap.put("readmoney", readMoney[i]);
+						remap.put("givemoney", "0");
 					}
 					maps.add(remap);
 				}
