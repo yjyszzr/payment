@@ -15,6 +15,7 @@ public class StaticV {
     public static String mchid="MC1905051517214236";//商户号
     public static String notify_url="http://94.191.113.169:8765/api/payment/payment/notify/RkPayNotify";//交易通知
     public static String callback_url="http://94.191.113.169:8765/api/payment/payment/notify/RkPayNotify";//交易通知
+    public static String fund_notify_url="http://94.191.113.169:8765/api/payment/payment/notify/RkFundNotify";//代付通知
     
 //    @Value("${rk.pay.ds_id}")
 //    public static String ds_id;//渠道号
@@ -36,4 +37,6 @@ public class StaticV {
 //    public static String notify_url;//交易通知
 //    @Value("${rk.pay.callback_url}")
 //    public static String callback_url;//交易通知
+//    @Value("${rk.pay.fund_notify_url}")
+//    public static String fund_notify_url;//代付通知
 }

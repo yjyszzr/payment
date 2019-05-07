@@ -482,4 +482,62 @@ public class PayNotifyController {
 		writeLowerSuccess(response);
 		return;
 	}
+	
+	@ApiOperation(value = "Q多多代付回调")
+	@PostMapping("/RkFundNotify")
+	@ResponseBody
+	public void RkFundNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+		request.setCharacterEncoding("UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		response.setHeader("Content-type", "text/html;charset=UTF-8");
+		Map<?, ?> parameters = request.getParameterMap();// 保存request请求参数的临时变量
+		log.info("RkFundNotify()Q多多代付通知消息RkFundNotify={}", parameters);
+		Map<String,Object> realMap = new HashMap<String, Object>();
+		// 打印华移支付返回值
+		log.info("RkFundNotify()Q多多代付服务器端通知-接收到支付返回报文：");
+		Iterator<?> paiter = parameters.keySet().iterator();
+		while (paiter.hasNext()) {
+			String key = paiter.next().toString();
+			String[] values = (String[]) parameters.get(key);
+			log.info("RkFundNotify()*********"+key + "-------------" + values[0]);
+			realMap.put(key, values[0]);
+		}
+//		aPayService.getSign(realMap); ///签名校验
+		log.info("RkFundNotify()返回报文*********"+JSONUtils.valueToString(realMap));
+		String payOrderfSn = realMap.get("ds_trade_no")==null?"":realMap.get("ds_trade_no").toString();
+		String status=realMap.get("status")==null?"":realMap.get("status").toString();
+		log.info("RkFundNotify()返回报文*********"+payOrderfSn+"&&&"+status);
+		if (StringUtils.isEmpty(payOrderfSn)) {
+			log.info("RkFundNotify()Q多多代付返回payOrderSn is null");
+			writeLowerSuccess(response);
+			return;
+		}
+		PayLog payLog = payLogService.findPayLogByOrderSn(payOrderfSn);
+		if (payLog == null) {
+			log.info("RkFundNotify()Q多多代付[RkFundNotify]该支付订单查询失败 payLogSn:" + payOrderfSn);
+			writeLowerSuccess(response);
+			return;
+		} 
+		int isPaid = payLog.getIsPaid();
+		if (isPaid == 1) {
+			log.info("RkFundNotify()Q多多代付[payNotify] payOrderSn={}订单已支付...", payOrderfSn);
+			writeLowerSuccess(response);
+			return;
+		}
+		int payType = payLog.getPayType();
+		String payCode = payLog.getPayCode();
+		RspOrderQueryEntity rspOrderEntikty = new RspOrderQueryEntity();
+		rspOrderEntikty.setResult_code(status);
+		rspOrderEntikty.setPayCode(payCode);
+		rspOrderEntikty.setType(RspOrderQueryEntity.TYPE_RKPAY);
+		rspOrderEntikty.setTrade_status(status);
+		log.info("RkFundNotify()返回报文*********"+payType);
+		if (payType == 0) {
+			paymentService.orderOptions(payLog, rspOrderEntikty);
+		} else {
+			paymentService.rechargeOptions(payLog, rspOrderEntikty);
+		}
+		writeLowerSuccess(response);
+		return;
+	}
 }
