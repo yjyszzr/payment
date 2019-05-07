@@ -253,7 +253,7 @@ public class RkPayService {
 			rspOrderQueryEntity.setType(RspOrderQueryEntity.TYPE_RKPAY);
 			payBaseResult = ResultGenerator.genSuccessResult("succ", rspOrderQueryEntity);
 		} else {
-			payBaseResult = ResultGenerator.genFailResult("Q多多支付返回数据有误");
+			payBaseResult = ResultGenerator.genFailResult("支付返回数据有误");
 		} 
 		return payBaseResult;
 	}
