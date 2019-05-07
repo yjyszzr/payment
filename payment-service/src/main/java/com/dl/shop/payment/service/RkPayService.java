@@ -306,7 +306,7 @@ public class RkPayService {
     		logger.info("Q多多代付请求金额为:={}分", amount);
     		DecimalFormat df = new DecimalFormat("######0.00");   
         	fundApplyConfig.initParams(staticv.getMchid(),txScanRequestPaidByOthers.getOrderId(), 
-        			"提现","提现","RK",df.format(Double.parseDouble(amount)),txScanRequestPaidByOthers.getAccountNo(),
+        			"提现","提现","RK",df.format(Double.parseDouble(amount)/100),txScanRequestPaidByOthers.getAccountNo(),
         			txScanRequestPaidByOthers.getAccountName(),staticv.getFund_notify_url());
         	Client client=new Client();
         	String data=client.request(fundApplyConfig,"/fund/apply",staticv);
