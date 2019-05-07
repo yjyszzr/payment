@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.time.Instant;
 import java.util.Date;
@@ -665,7 +664,7 @@ public class PaymentController extends AbstractBaseController {
 							BufferedImage bufferImage = QrUtil.genBarcode(url, 520, 520, amount);
 							ImageIO.write(bufferImage, "png", out);
 							byte[] imageB = out.toByteArray();
-							sun.misc.BASE64Encoder encoder = new sun.misc.BASE64Encoder();
+//							sun.misc.BASE64Encoder encoder = new sun.misc.BASE64Encoder();
 							String qrBase64 = "data:image/png;base64," + Base64.encodeBase64String(imageB);
 							DlPayQrBase64 saveBean = new DlPayQrBase64();
 							saveBean.setPayordersn(payOrderSn);
@@ -785,6 +784,18 @@ public class PaymentController extends AbstractBaseController {
 		String payName = paymentResult.getData().getPayName();
 		// 生成充值单 金额由充值金额和赠送金额组成
 		int givemoney = param.getGiveAmount();
+		if(givemoney>0) {
+			PaymentDTO paymentdto = paymentResult.getData();
+			if(paymentdto!=null) {
+				List<Map<String,String>> maps = paymentdto.getReadMoney();
+				for (Map<String, String> map : maps) {
+					String readmoney = map.get("readmoney");
+					if((param.getTotalAmount()+"").equals(readmoney)) {
+						givemoney = Integer.parseInt(StringUtils.isNotEmpty(map.get("givemoney"))?"0":map.get("givemoney"));
+					}
+				}
+			}
+		}
 		logger.info(loggerId + "赠送金额为"+givemoney);
 		String rechargeSn = userRechargeService.saveReCharege(BigDecimal.valueOf(totalAmount+givemoney), payCode, payName);
 		if (StringUtils.isEmpty(rechargeSn)) {
@@ -1490,7 +1501,6 @@ public class PaymentController extends AbstractBaseController {
 		submitOrderParam.setLotteryPlayClassifyId(lotteryPlayClassifyId);
 		submitOrderParam.setPassType(dto.getBetType());
 		submitOrderParam.setPlayType("0" + dto.getPlayType());
-		submitOrderParam.setPlayTypeDetail(dto.getSomp());
 		submitOrderParam.setBetNum(dto.getBetNum());
 		submitOrderParam.setCathectic(dto.getTimes());
 		if (lotteryPlayClassifyId != 8 && lotteryClassifyId == 1) {
