@@ -10,8 +10,10 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -20,6 +22,7 @@ import java.util.TreeMap;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
+import com.alibaba.druid.support.json.JSONUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.util.DateUtil;
 import com.dl.shop.payment.utils.DateUtilPay;
@@ -377,7 +380,7 @@ public class APayDemo {
 		param.put("sign_type", "MD5");// 签名类型
 		param.put("subject", "支付");// 用户id
 		// ************订单生成，当返回result中code=1时，代表订单生成成功，需要验签************
-		apay.pay(param);
+//		apay.pay(param);
 
 		// ************订单查询，当返回result中status=1时，代表支付成功，需要验签************
 //		apay.orderQuery(param);
@@ -409,6 +412,32 @@ public class APayDemo {
 //		String surplusStr ="";
 //		surplusStr = surplusStr.substring(0, surplusStr.length()-1);
 //		System.out.println(surplusStr);
+		
+		List<Map<String,String>> maps = new ArrayList();
+		String str = "98:2;198:4;498:10;988:16;1988:35;2988:64";
+		str = "98;99;100;111";
+		str = "98:;:99;;100;111";
+		if(str!=null && !"".equals(str)) {
+			String readMoney[]=str.split(";");
+			for (int i = 0; i < readMoney.length; i++) {
+				Map<String,String> remap = new HashMap();
+				if(readMoney[i].contains(":")) {
+					String money[] = readMoney[i].split(":");
+					if(money.length>1) {
+						remap.put("readmoney", money[0]);
+						remap.put("givemoney", money[1]);
+					} else {
+						remap.put("readmoney", money[0]);
+						remap.put("givemoney", "0");
+					}
+				}else {
+					remap.put("readmoney", readMoney[i]);
+					remap.put("givemoney", "0");
+				}
+				maps.add(remap);
+			}
+		}
+		System.out.println(JSONUtils.toJSONString(maps));
 	}
 
 }
