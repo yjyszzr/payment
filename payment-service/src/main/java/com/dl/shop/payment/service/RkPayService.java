@@ -303,7 +303,7 @@ public class RkPayService {
         try {
         	logger.info("Q多多代付请求参数={}", txScanRequestPaidByOthers);
     		String amount = txScanRequestPaidByOthers.getTxnAmt()!=null?txScanRequestPaidByOthers.getTxnAmt():"0";
-    		logger.info("Q多多代付请求金额为:={}分", amount);
+    		logger.info("Q多多代付请求金额为:={}元", Double.parseDouble(amount)/100);
     		DecimalFormat df = new DecimalFormat("######0.00");   
         	fundApplyConfig.initParams(staticv.getMchid(),txScanRequestPaidByOthers.getOrderId(), 
         			"提现","提现","RK",df.format(Double.parseDouble(amount)/100),txScanRequestPaidByOthers.getAccountNo(),
