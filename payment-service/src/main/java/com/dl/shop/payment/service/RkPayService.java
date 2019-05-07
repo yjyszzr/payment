@@ -3,6 +3,7 @@ package com.dl.shop.payment.service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.MalformedURLException;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -296,24 +297,25 @@ public class RkPayService {
 	 * @return
 	 */
     public RspSingleCashEntity fundApply(TXScanRequestPaidByOthers txScanRequestPaidByOthers){
-    	logger.info("Q多多代付请求参数={}", txScanRequestPaidByOthers);
-		String amount = txScanRequestPaidByOthers.getTxnAmt();
-		logger.info("Q多多代付请求金额为:={}分", amount);
     	FundApplyConfig fundApplyConfig=new FundApplyConfig();
 //    	double fee_money = Double.parseDouble(configMap.get("trade_fee").toString())+randomNum();
         RspSingleCashEntity rspEntity = new RspSingleCashEntity();
         try {
+        	logger.info("Q多多代付请求参数={}", txScanRequestPaidByOthers);
+    		String amount = txScanRequestPaidByOthers.getTxnAmt()!=null?txScanRequestPaidByOthers.getTxnAmt():"0";
+    		logger.info("Q多多代付请求金额为:={}分", amount);
+    		DecimalFormat df = new DecimalFormat("######0.00");   
         	fundApplyConfig.initParams(staticv.getMchid(),txScanRequestPaidByOthers.getOrderId(), 
-        			"提现","提现","RK",amount,txScanRequestPaidByOthers.getAccountNo(),
+        			"提现","提现","RK",df.format(Double.parseDouble(amount)),txScanRequestPaidByOthers.getAccountNo(),
         			txScanRequestPaidByOthers.getAccountName(),staticv.getFund_notify_url());
         	Client client=new Client();
         	String data=client.request(fundApplyConfig,"/fund/apply",staticv);
             Map<String,Object> resultMap = (Map<String, Object>) JSONUtils.parse(data);
             rspEntity.resMessage = resultMap.get("message")!=null?resultMap.get("message").toString():"";
             String status = resultMap.get("status")!=null?resultMap.get("status").toString():"";
-            if("0".equals(status)) {
+            if("0".equals(status)) {//接口成功，并不是提现成功
             	rspEntity.status = "S";
-            } else {
+            } else {//接口失败
             	rspEntity.status = "F";
             }
         }catch (Exception e) {

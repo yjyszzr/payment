@@ -1,5 +1,6 @@
 package com.dl.shop.payment.pay.rkpay;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -176,16 +177,17 @@ public class Test {
     	configMap.put("pay_fee", "20");// 订单金额
 		configMap.put("trade_subject", "sf");// 商品名称
 		configMap.put("trade_memo", "sf");// 商品名称
-        Test test=new Test();
+//        Test test=new Test();
 //        System.out.println(test.randomNum());
 //        System.out.println(test.fundApply(configMap));
-        System.out.println(test.fundAccountQuery(configMap));
+//        System.out.println(test.fundAccountQuery(configMap));
 //        System.out.println(test.fundTradeQuery(configMap));
 //        Map ms = (Map) JSONUtils.parse();
 //        System.out.println(test.payQuick(configMap));
 //        System.out.println(test.payWap(configMap));
 //        System.out.println(test.payQrcode(configMap));
-//        double fee_money = Integer.parseInt("20.0")+test.randomNum();
-//        System.out.println(fee_money+"");
+		DecimalFormat df = new DecimalFormat("######0.00");   
+        double fee_money = Double.parseDouble("20");
+        System.out.println(df.format(fee_money)+"");
     }
 }
