@@ -206,9 +206,11 @@ public class PayMentService extends AbstractService<PayMent> {
 						if(money.length>1) {
 							remap.put("readmoney", money[0]);
 							remap.put("givemoney", money[1]);
-						} else {
+						} else if(money.length==1) {
 							remap.put("readmoney", money[0]);
 							remap.put("givemoney", "0");
+						} else {
+							continue;
 						}
 					}else {
 						remap.put("readmoney", readMoney[i]);
