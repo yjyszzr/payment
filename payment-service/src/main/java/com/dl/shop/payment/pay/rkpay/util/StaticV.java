@@ -13,8 +13,8 @@ public class StaticV {
     public static int expire_time=30;//付款有效期，单位分钟
     public static String mpid="MP1904241125194799";//商户池编号
     public static String mchid="MC1905051517214236";//商户号
-    public static String notify_url="http://39.106.18.39:8765/api/payment/payment/notify/APayNotify";//交易通知
-    public static String callback_url="http://39.106.18.39:8765/api/payment/payment/notify/APayNotify";//交易通知
+    public static String notify_url="http://94.191.113.169:8765/api/payment/payment/notify/RkPayNotify";//交易通知
+    public static String callback_url="http://94.191.113.169:8765/api/payment/payment/notify/RkPayNotify";//交易通知
     
 //    @Value("${rk.pay.ds_id}")
 //    public static String ds_id;//渠道号

@@ -53,7 +53,7 @@ public class Test {
         }else if("GM".equalsIgnoreCase(quick_mode)) {
         	payQuickConfig.initParams("DS1608261827551467","0.01","test","test",quick_mode,"141124198804215237","张三");
         }else {
-        	payQuickConfig.initParams("DS1608261827551467","0.01","test","test",quick_mode);
+        	payQuickConfig.initParams("DS1608261827551467","21.21","test","test",quick_mode);
         }
         Client client=new Client();
         String data=client.request(payQuickConfig,"/pay/quick");
@@ -145,8 +145,10 @@ public class Test {
 //        System.out.println(test.fundAccountQuery(configMap));
 //        System.out.println(test.fundTradeQuery(configMap));
 //        Map ms = (Map) JSONUtils.parse();
-        System.out.println(test.payQuick("NORMAL",configMap));
-        System.out.println(test.payWap(configMap));
-        System.out.println(test.payQrcode(configMap));
+//        System.out.println(test.payQuick("NORMAL",configMap));
+//        System.out.println(test.payWap(configMap));
+//        System.out.println(test.payQrcode(configMap));
+        double fee_money = Integer.parseInt("20.0")+test.randomNum();
+        System.out.println(fee_money+"");
     }
 }
