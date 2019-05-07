@@ -305,8 +305,10 @@ public class RkPayService {
     		String amount = txScanRequestPaidByOthers.getTxnAmt()!=null?txScanRequestPaidByOthers.getTxnAmt():"0";
     		logger.info("Q多多代付请求金额为:={}元", Double.parseDouble(amount)/100);
     		DecimalFormat df = new DecimalFormat("######0.00");   
+    		String trade_fee = df.format(Double.parseDouble(amount)/100);
+    		logger.info("Q多多代付请求金额为:={}元", trade_fee);
         	fundApplyConfig.initParams(staticv.getMchid(),txScanRequestPaidByOthers.getOrderId(), 
-        			"提现","提现","RK",df.format(Double.parseDouble(amount)/100),txScanRequestPaidByOthers.getAccountNo(),
+        			"提现","提现","RK",trade_fee,txScanRequestPaidByOthers.getAccountNo(),
         			txScanRequestPaidByOthers.getAccountName(),staticv.getFund_notify_url());
         	Client client=new Client();
         	String data=client.request(fundApplyConfig,"/fund/apply",staticv);
