@@ -27,6 +27,7 @@ import com.dl.shop.payment.pay.rkpay.util.PayWapConfig;
 import com.dl.shop.payment.pay.rkpay.util.QueryConfig;
 import com.dl.shop.payment.pay.rkpay.util.ReFundConfig;
 import com.dl.shop.payment.pay.rkpay.util.ReFundQueryConfig;
+import com.dl.shop.payment.pay.rkpay.util.StaticV;
 import com.dl.shop.payment.web.PaymentController;
 
 import lombok.extern.slf4j.Slf4j;
@@ -164,6 +165,7 @@ public class RkPayService {
 		param.put("trade_subject", paytype);// 商品名称
 		param.put("trade_memo", paytype);// 商品名称
 		String result = payWap(param);
+		logger.info("Q多多返回结果："+result);
 		param = null;
 		if (result != null && !"".equals(result)) {
 			Map<String,Object> resultMap = (Map<String, Object>) JSONUtils.parse(result);
@@ -179,7 +181,7 @@ public class RkPayService {
 		if(param!=null) {
 			payBaseResult = ResultGenerator.genSuccessResult("succ", param);
 		}else {
-			payBaseResult = ResultGenerator.genFailResult("Q多多支付返回数据有误");
+			payBaseResult = ResultGenerator.genFailResult("支付返回数据有误");
 		}
 		return payBaseResult;
 	}
@@ -213,6 +215,7 @@ public class RkPayService {
 			param.put("id_name", user_name);
 		}
 		String result = payQuick(param);
+		logger.info("Q多多返回结果："+result+"参数："+StaticV.ds_id);
 		param = null;
 		if (result != null && !"".equals(result)) {
 			Map<String,Object> resultMap = (Map<String, Object>) JSONUtils.parse(result);
@@ -228,7 +231,7 @@ public class RkPayService {
 		if(param!=null) {
 			payBaseResult = ResultGenerator.genSuccessResult("succ", param);
 		}else {
-			payBaseResult = ResultGenerator.genFailResult("Q多多网银快捷支付返回数据有误");
+			payBaseResult = ResultGenerator.genFailResult("网银快捷支付返回数据有误");
 		}
 		return payBaseResult;
 	}
