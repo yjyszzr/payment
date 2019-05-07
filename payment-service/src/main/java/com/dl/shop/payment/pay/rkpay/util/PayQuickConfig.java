@@ -23,26 +23,27 @@ public class PayQuickConfig extends Config {
 	//	public String id_no;//	付款人身份证编号	string	是	310102198804215237	
 	public String id_name;//	付款人身份证姓名	string	是	张飞	
 	//默认NORMAL支付模式参数 
-    public void initParams(String ds_trade_no,String pay_fee,String trade_subject,String trade_memo,String quick_mode){
-        this.mch_id=StaticV.mchid;
+    public void initParams(String mchid,String ds_trade_no,String pay_fee,
+    		String trade_subject,String trade_memo,String quick_mode,String notify_url,String callback_url){
+        this.mch_id=mchid;
         this.ds_trade_no=ds_trade_no;
         this.pay_fee=pay_fee;
         this.trade_subject=trade_subject;
         this.trade_memo=trade_memo;
-        this.notify_url=StaticV.notify_url;
-        this.callback_url=StaticV.callback_url;
+        this.notify_url=notify_url;
+        this.callback_url=callback_url;
         this.quick_mode=quick_mode;
     }
     //默认YT支付模式参数 
-    public void initParams(String ds_trade_no,String pay_fee,String trade_subject,String trade_memo,
-    		String quick_mode,String account_no,String account_name,String id_no,String mobile_phone){
-    	this.mch_id=StaticV.mchid;
+    public void initParams(String mchid,String ds_trade_no,String pay_fee,String trade_subject,String trade_memo,
+    		String quick_mode,String account_no,String account_name,String id_no,String mobile_phone,String notify_url,String callback_url){
+    	this.mch_id=mchid;
         this.ds_trade_no=ds_trade_no;
         this.pay_fee=pay_fee;
         this.trade_subject=trade_subject;
         this.trade_memo=trade_memo;
-        this.notify_url=StaticV.notify_url;
-        this.callback_url=StaticV.callback_url;
+        this.notify_url=notify_url;
+        this.callback_url=callback_url;
         this.quick_mode=quick_mode;
         this.account_no=account_no;
         this.account_name=account_name;
@@ -50,28 +51,28 @@ public class PayQuickConfig extends Config {
         this.mobile_phone=mobile_phone;
     }
     //默认RK支付模式参数 
-    public void initParams(String ds_trade_no,String pay_fee,String trade_subject,String trade_memo,
-    		String quick_mode,String bank_name){
-    	this.mch_id=StaticV.mchid;
+    public void initParams(String mchid,String ds_trade_no,String pay_fee,String trade_subject,String trade_memo,
+    		String quick_mode,String bank_name,String notify_url,String callback_url){
+    	this.mch_id=mchid;
         this.ds_trade_no=ds_trade_no;
         this.pay_fee=pay_fee;
         this.trade_subject=trade_subject;
         this.trade_memo=trade_memo;
-        this.notify_url=StaticV.notify_url;
-        this.callback_url=StaticV.callback_url;
+        this.notify_url=notify_url;
+        this.callback_url=callback_url;
         this.quick_mode=quick_mode;
         this.bank_name=bank_name;
     }
     //默认GM支付模式参数 
-    public void initParams(String ds_trade_no,String pay_fee,String trade_subject,String trade_memo,
-    		String quick_mode,String id_no,String id_name){
-    	this.mch_id=StaticV.mchid;
+    public void initParams(String mchid,String ds_trade_no,String pay_fee,String trade_subject,String trade_memo,
+    		String quick_mode,String id_no,String id_name,String notify_url,String callback_url){
+    	this.mch_id=mchid;
         this.ds_trade_no=ds_trade_no;
         this.pay_fee=pay_fee;
         this.trade_subject=trade_subject;
         this.trade_memo=trade_memo;
-        this.notify_url=StaticV.notify_url;
-        this.callback_url=StaticV.callback_url;
+        this.notify_url=notify_url;
+        this.callback_url=callback_url;
         this.quick_mode=quick_mode;
         this.id_no=id_no;
         this.id_name=id_name;

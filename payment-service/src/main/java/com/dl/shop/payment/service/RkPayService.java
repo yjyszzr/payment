@@ -8,11 +8,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
+import javax.annotation.Resource;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import com.alibaba.druid.support.json.JSONUtils;
 import com.alibaba.fastjson.JSONObject;
@@ -37,16 +40,20 @@ import lombok.extern.slf4j.Slf4j;
 public class RkPayService {
 	private final static Logger logger = LoggerFactory.getLogger(PaymentController.class);
 	
+	@Resource
+	private StaticV staticv;
+	
 	/**WAP支付
 	 * @return
 	 */
     public String payWap(Map<String,Object> configMap){
         PayWapConfig payConfig=new PayWapConfig();
         double fee_money = Double.parseDouble(configMap.get("pay_fee").toString())+randomNum();
-        payConfig.initParams(configMap.get("ds_trade_no").toString(),fee_money+"","AP",
-        		configMap.get("trade_subject").toString(),configMap.get("trade_memo").toString());
+        payConfig.initParams(staticv.getMpid(),configMap.get("ds_trade_no").toString(),fee_money+"","AP",
+        		configMap.get("trade_subject").toString(),configMap.get("trade_memo").toString(),
+        		staticv.getNotify_url(),staticv.getCallback_url(),staticv.getExpire_time());
         Client client=new Client();
-        String data=client.request(payConfig,"/pay/wap");
+        String data=client.request(payConfig,"/pay/wap",staticv);
         return data;
     }
     
@@ -56,9 +63,9 @@ public class RkPayService {
     public String payQrcode(Map<String,Object> configMap){
     	PayQrcodeConfig payQrcodeConfig=new PayQrcodeConfig();
     	double fee_money = Double.parseDouble(configMap.get("pay_fee").toString())+randomNum();
-    	payQrcodeConfig.initParams("AD1023162143432940",fee_money+"","AP","120","test","test");
+    	payQrcodeConfig.initParams(staticv.getMpid(),"AD1023162143432940",fee_money+"","AP","120","test","test",staticv.getNotify_url());
         Client client=new Client();
-        String data=client.request(payQrcodeConfig,"/pay/qrcode");
+        String data=client.request(payQrcodeConfig,"/pay/qrcode",staticv);
         return data;
     }
     
@@ -72,35 +79,39 @@ public class RkPayService {
 //        fee_money = 0.11;
         String quick_mode = configMap.get("quick_mode")!=null?configMap.get("quick_mode").toString():"";
         if("YT".equalsIgnoreCase(quick_mode)) {
-        	payQuickConfig.initParams(configMap.get("ds_trade_no").toString(),
+        	payQuickConfig.initParams(staticv.getMchid(),configMap.get("ds_trade_no").toString(),
         			fee_money+"",
         			configMap.get("trade_subject").toString(),
         			configMap.get("trade_memo").toString(),quick_mode,
         			configMap.get("account_no").toString(),
         			configMap.get("account_name").toString(),
         			configMap.get("id_no").toString(),
-        			configMap.get("mobile_phone").toString());
+        			configMap.get("mobile_phone").toString(),
+        			staticv.getNotify_url(),staticv.getCallback_url());
         }else if("RK".equalsIgnoreCase(quick_mode)) {
-        	payQuickConfig.initParams(configMap.get("ds_trade_no").toString(),
+        	payQuickConfig.initParams(staticv.getMchid(),configMap.get("ds_trade_no").toString(),
         			fee_money+"",
         			configMap.get("trade_subject").toString(),
         			configMap.get("trade_memo").toString(),quick_mode,
-        			configMap.get("bank_name").toString());
+        			configMap.get("bank_name").toString(),
+        			staticv.getNotify_url(),staticv.getCallback_url());
         }else if("GM".equalsIgnoreCase(quick_mode)) {
-        	payQuickConfig.initParams(configMap.get("ds_trade_no").toString(),
+        	payQuickConfig.initParams(staticv.getMchid(),configMap.get("ds_trade_no").toString(),
         			fee_money+"",
         			configMap.get("trade_subject").toString(),
         			configMap.get("trade_memo").toString(),quick_mode,
         			configMap.get("id_no").toString(),
-        			configMap.get("id_name").toString());
+        			configMap.get("id_name").toString(),
+        			staticv.getNotify_url(),staticv.getCallback_url());
         }else {
-        	payQuickConfig.initParams(configMap.get("ds_trade_no").toString(),
+        	payQuickConfig.initParams(staticv.getMchid(),configMap.get("ds_trade_no").toString(),
         			fee_money+"",
         			configMap.get("trade_subject").toString(),
-        			configMap.get("trade_memo").toString(),quick_mode);
+        			configMap.get("trade_memo").toString(),quick_mode,
+        			staticv.getNotify_url(),staticv.getCallback_url());
         }
         Client client=new Client();
-        String data=client.request(payQuickConfig,"/pay/quick");
+        String data=client.request(payQuickConfig,"/pay/quick",staticv);
         return data;
     }
     
@@ -109,9 +120,9 @@ public class RkPayService {
      */
     public String tradeQuery(String orderSn){
         QueryConfig queryConfig=new QueryConfig();
-        queryConfig.initParams("",orderSn,"");
+        queryConfig.initParams(staticv.getMchid(),"",orderSn,"");
         Client client=new Client();
-        String data=client.request(queryConfig,"/pay/tradequery");
+        String data=client.request(queryConfig,"/pay/tradequery",staticv);
         return data;
     }
     
@@ -121,9 +132,9 @@ public class RkPayService {
 	 */
     public String refund(Map<String,Object> configMap){
         ReFundConfig refundConfig=new ReFundConfig();
-        refundConfig.initParams("AA0702000240879559","");
+        refundConfig.initParams(staticv.getMchid(),"AA0702000240879559","");
         Client client=new Client();
-        String data=client.request(refundConfig,"/pay/refund");
+        String data=client.request(refundConfig,"/pay/refund",staticv);
         Map<String,Object> map = (Map<String,Object>)JSONUtils.parse(data);
         Optional<Map<String,Object>> omap = Optional.ofNullable(map);
         if("0".equals(omap.get().get("status"))) {//查询成功
@@ -136,9 +147,9 @@ public class RkPayService {
 	 */
     public String refundQuery(String refund_no){
     	ReFundQueryConfig reFundQueryConfig=new ReFundQueryConfig();
-    	reFundQueryConfig.initParams(refund_no);
+    	reFundQueryConfig.initParams(staticv.getMchid(),refund_no);
         Client client=new Client();
-        String data=client.request(reFundQueryConfig,"/pay/refundquery");
+        String data=client.request(reFundQueryConfig,"/pay/refundquery",staticv);
         return data;
     }
     /**获取1—9的随机数
@@ -216,7 +227,7 @@ public class RkPayService {
 		}
 		String result = payQuick(param);
 		logger.info("Q多多参数值："+JSONUtils.toJSONString(new StaticV()));
-		logger.info("Q多多返回结果："+result+"参数："+StaticV.ds_id);
+		logger.info("Q多多返回结果："+result+"参数："+staticv.getDs_id());
 		param = null;
 		if (result != null && !"".equals(result)) {
 			Map<String,Object> resultMap = (Map<String, Object>) JSONUtils.parse(result);

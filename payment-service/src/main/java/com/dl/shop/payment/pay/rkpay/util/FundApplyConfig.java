@@ -14,19 +14,19 @@ public class FundApplyConfig extends Config {
     public String account_name;
     public String notify_url;
     
-    public void initParams() {//代付账户余额查询
-    	this.mch_id=StaticV.mchid;
+    public void initParams(String mchid) {//代付账户余额查询
+    	this.mch_id=mchid;
     }
 
-    public void initParams(String trade_no,String ds_trade_no) {//代付状态查询
-    	this.mch_id=StaticV.mchid;
+    public void initParams(String mchid,String trade_no,String ds_trade_no) {//代付状态查询
+    	this.mch_id=mchid;
     	this.trade_no=trade_no;
     	this.ds_trade_no=ds_trade_no;
     }
     
-    public void initParams(String ds_trade_no,String trade_subject,String trade_memo,
-    		String apply_mode,String trade_fee,String account_no,String account_name){//代付
-        this.mch_id=StaticV.mchid;
+    public void initParams(String mchid,String ds_trade_no,String trade_subject,String trade_memo,
+    		String apply_mode,String trade_fee,String account_no,String account_name,String notify_url){//代付
+        this.mch_id=mchid;
         this.ds_trade_no=ds_trade_no;
         this.trade_subject=trade_subject;
         this.trade_memo=trade_memo;
@@ -34,6 +34,6 @@ public class FundApplyConfig extends Config {
         this.trade_fee=trade_fee;
         this.account_no=account_no;
         this.account_name=account_name;
-        this.notify_url=StaticV.notify_url;
+        this.notify_url=notify_url;
     }
 }

@@ -10,12 +10,12 @@ import java.util.Set;
 
 public class HttpRequest {
 
-    public static String request(RequestParams data,String api_fun){
+    public static String request(RequestParams data,String api_fun,String serverRoot){
         HashMap<String, String> params=Tools.objectToMap(data);
         Set keyset = params.keySet();
         ArrayList list = new ArrayList(keyset);
 
-        String url = StaticV.serverRoot+api_fun+"?";
+        String url = serverRoot+api_fun+"?";
         for(int i = 0; i < list.size(); ++i) {
             if(i==0) {
                 url = url + (String)list.get(i) + "=" + (String)params.get(list.get(i));

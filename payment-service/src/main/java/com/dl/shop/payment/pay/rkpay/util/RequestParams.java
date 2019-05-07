@@ -11,12 +11,12 @@ public class RequestParams {
     public String biz_content;
     public String sign;
 
-    public void initParams(Config config){
+    public void initParams(Config config,StaticV staticv){
         setBiz_content(config);
         timestamp=System.currentTimeMillis()/1000;
-        ds_id=StaticV.ds_id;
-        version=StaticV.version;
-        sign_type=StaticV.sign_type;
+        this.ds_id=staticv.getDs_id();
+        this.version=staticv.getVersion();
+        this.sign_type=staticv.getSign_type();
     }
 
     private void setBiz_content(Config config){

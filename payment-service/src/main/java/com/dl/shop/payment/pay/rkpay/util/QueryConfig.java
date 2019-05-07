@@ -8,8 +8,8 @@ public class QueryConfig extends Config{
     public String ds_trade_no;
     public String tp_trade_no;
 
-    public void initParams(String trade_no,String ds_trade_no,String tp_trade_no){
-        this.mch_id=StaticV.mchid;
+    public void initParams(String mchid,String trade_no,String ds_trade_no,String tp_trade_no){
+        this.mch_id=mchid;
         if(trade_no!=""){
             this.trade_no=trade_no;
         }else if(ds_trade_no!=""){
