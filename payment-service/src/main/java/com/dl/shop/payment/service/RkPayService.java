@@ -32,6 +32,9 @@ import com.dl.shop.payment.pay.rkpay.util.QueryConfig;
 import com.dl.shop.payment.pay.rkpay.util.ReFundConfig;
 import com.dl.shop.payment.pay.rkpay.util.ReFundQueryConfig;
 import com.dl.shop.payment.pay.rkpay.util.StaticV;
+import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestPaidByOthers;
+import com.dl.shop.payment.pay.tianxia.tianxiaScan.util.TdExpBasicFunctions;
+import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
 import com.dl.shop.payment.web.PaymentController;
 
 import lombok.extern.slf4j.Slf4j;
@@ -115,21 +118,7 @@ public class RkPayService {
         String data=client.request(payQuickConfig,"/pay/quick",staticv);
         return data;
     }
-    /**代付
-     * apply_mode=RK
-	 * @return
-	 */
-    public String fundApply(Map<String,Object> configMap){
-    	FundApplyConfig fundApplyConfig=new FundApplyConfig();
-    	double fee_money = Double.parseDouble(configMap.get("trade_fee").toString())+randomNum();
-    	fundApplyConfig.initParams(staticv.getMchid(),configMap.get("ds_trade_no").toString(), 
-    			configMap.get("trade_subject").toString(),configMap.get("trade_memo").toString(), 
-    			configMap.get("apply_mode").toString(),fee_money+"",configMap.get("account_no").toString(),
-    			configMap.get("account_name").toString(),staticv.getFund_notify_url());
-        Client client=new Client();
-        String data=client.request(fundApplyConfig,"/fund/apply",staticv);
-        return data;
-    }
+   
     /**交易状态查询
      * @return
      */
@@ -183,31 +172,36 @@ public class RkPayService {
 	 */
     public BaseResult<?> getRkPayWapUrl(PayLog savePayLog, String orderSn,String orderId,String paytype)  {
 		BaseResult<?> payBaseResult = null;
-		BigDecimal amtDouble = savePayLog.getOrderAmount();
-//		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_EVEN);// 金额转换成分
-		Map<String,Object> param = new HashMap<>();
-		param.put("ds_trade_no", orderSn);// 商户订单
-		param.put("pay_fee", amtDouble.toString());// 订单金额
-		param.put("trade_subject", paytype);// 商品名称
-		param.put("trade_memo", paytype);// 商品名称
-		String result = payWap(param);
-		logger.info("Q多多返回结果："+result);
-		param = null;
-		if (result != null && !"".equals(result)) {
-			Map<String,Object> resultMap = (Map<String, Object>) JSONUtils.parse(result);
-			if("0".equals(resultMap.get("status").toString())) {
-				param = new HashMap<>();
-				param.put("payUrl", resultMap.get("prepay_url"));
-				param.put("orderId", orderId);
-				param.put("payLogId", savePayLog.getLogId());
-			}else {
-				param = resultMap;
+		try {
+			BigDecimal amtDouble = savePayLog.getOrderAmount();
+	//		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_EVEN);// 金额转换成分
+			Map<String,Object> param = new HashMap<>();
+			param.put("ds_trade_no", orderSn);// 商户订单
+			param.put("pay_fee", amtDouble.toString());// 订单金额
+			param.put("trade_subject", paytype);// 商品名称
+			param.put("trade_memo", paytype);// 商品名称
+			String result = payWap(param);
+			logger.info("Q多多返回结果："+result);
+			param = null;
+			if (result != null && !"".equals(result)) {
+				Map<String,Object> resultMap = (Map<String, Object>) JSONUtils.parse(result);
+				if("0".equals(resultMap.get("status").toString())) {
+					param = new HashMap<>();
+					param.put("payUrl", resultMap.get("prepay_url"));
+					param.put("orderId", orderId);
+					param.put("payLogId", savePayLog.getLogId());
+				}else {
+					param = resultMap;
+				}
 			}
-		}
-		if(param!=null) {
-			payBaseResult = ResultGenerator.genSuccessResult("succ", param);
-		}else {
-			payBaseResult = ResultGenerator.genFailResult("WAP支付返回数据有误");
+			if(param!=null) {
+				payBaseResult = ResultGenerator.genSuccessResult("succ", param);
+			}else {
+				payBaseResult = ResultGenerator.genFailResult("WAP支付返回数据有误");
+			}
+		} catch (Exception e) {
+			log.info("WAP支付返回数据错误");
+			payBaseResult = ResultGenerator.genFailResult("接口内部错误");
 		}
 		return payBaseResult;
 	}
@@ -219,87 +213,55 @@ public class RkPayService {
 	public BaseResult<?> getRkPayQuickUrl(PayLog savePayLog,String quick_mode,String orderSn,String orderId,String paytype,String id_no,String mobile_phone,
 			String bank_name,String user_name,String account_no) {
 		BaseResult<?> payBaseResult = null;
-		BigDecimal amtDouble = savePayLog.getOrderAmount();
-//		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_EVEN);// 金额转换成分
-		Map<String,Object> param = new HashMap<>();
-//		支付模式NORMAL-普通模式/YT/RK/GM
-		//NORMAL/YT/RK/GM
-		param.put("quick_mode", quick_mode);// 支付模式
-		param.put("ds_trade_no", orderSn);// 商户订单
-		param.put("pay_fee", amtDouble.toString());// 订单金额
-		param.put("trade_subject", paytype);// 商品名称
-		param.put("trade_memo", paytype);// 商品名称
-		if("YT".equalsIgnoreCase(quick_mode)) {//YT
-			param.put("account_no", account_no);
-			param.put("account_name", user_name);
-			param.put("id_no", id_no);
-			param.put("mobile_phone", mobile_phone);
-		} else if("RK".equalsIgnoreCase(quick_mode)) {	//RK
-			param.put("bank_name", bank_name);
-		} else if("GM".equalsIgnoreCase(quick_mode)) {	//GM
-			param.put("id_no", id_no);
-			param.put("id_name", user_name);
-		}
-		String result = payQuick(param);
-//		logger.info("Q多多参数值："+JSONUtils.toJSONString(staticv));
-		logger.info("Q多多返回结果："+result+"参数："+staticv.getDs_id());
-		param = null;
-		if (result != null && !"".equals(result)) {
-			Map<String,Object> resultMap = (Map<String, Object>) JSONUtils.parse(result);
-			if("0".equals(resultMap.get("status").toString())) {
-				param = new HashMap<>();
-				param.put("payUrl", resultMap.get("prepay_url"));
-				param.put("orderId", orderId);
-				param.put("payLogId", savePayLog.getLogId());
-			}else {
-				param = resultMap;
+		try {
+			BigDecimal amtDouble = savePayLog.getOrderAmount();
+	//		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_EVEN);// 金额转换成分
+			Map<String,Object> param = new HashMap<>();
+	//		支付模式NORMAL-普通模式/YT/RK/GM
+			//NORMAL/YT/RK/GM
+			param.put("quick_mode", quick_mode);// 支付模式
+			param.put("ds_trade_no", orderSn);// 商户订单
+			param.put("pay_fee", amtDouble.toString());// 订单金额
+			param.put("trade_subject", paytype);// 商品名称
+			param.put("trade_memo", paytype);// 商品名称
+			if("YT".equalsIgnoreCase(quick_mode)) {//YT
+				param.put("account_no", account_no);
+				param.put("account_name", user_name);
+				param.put("id_no", id_no);
+				param.put("mobile_phone", mobile_phone);
+			} else if("RK".equalsIgnoreCase(quick_mode)) {	//RK
+				param.put("bank_name", bank_name);
+			} else if("GM".equalsIgnoreCase(quick_mode)) {	//GM
+				param.put("id_no", id_no);
+				param.put("id_name", user_name);
 			}
-		}
-		if(param!=null) {
-			payBaseResult = ResultGenerator.genSuccessResult("succ", param);
-		}else {
-			payBaseResult = ResultGenerator.genFailResult("网银快捷支付返回数据有误");
+			String result = payQuick(param);
+	//		logger.info("Q多多参数值："+JSONUtils.toJSONString(staticv));
+			logger.info("Q多多返回结果："+result+"参数："+staticv.getDs_id());
+			param = null;
+			if (result != null && !"".equals(result)) {
+				Map<String,Object> resultMap = (Map<String, Object>) JSONUtils.parse(result);
+				if("0".equals(resultMap.get("status").toString())) {
+					param = new HashMap<>();
+					param.put("payUrl", resultMap.get("prepay_url"));
+					param.put("orderId", orderId);
+					param.put("payLogId", savePayLog.getLogId());
+				}else {
+					param = resultMap;
+				}
+			}
+			if(param!=null) {
+				payBaseResult = ResultGenerator.genSuccessResult("succ", param);
+			}else {
+				payBaseResult = ResultGenerator.genFailResult("网银快捷支付返回数据有误");
+			}
+		}catch (Exception e) {
+			log.info("网银快捷支付返回数据有误");
+			payBaseResult = ResultGenerator.genFailResult("接口内部错误");
 		}
 		return payBaseResult;
 	}
-	/**
-	 * 代付
-	 * @param savePayLog 支付日志
-	 * @return
-	 */
-	public BaseResult<?> getRkFundUrl(PayLog savePayLog,String quick_mode,String orderSn,String orderId,String paytype,String id_no,String mobile_phone,
-			String bank_name,String user_name,String account_no) {
-		BaseResult<?> payBaseResult = null;
-		BigDecimal amtDouble = savePayLog.getOrderAmount();
-		Map<String,Object> param = new HashMap<>();
-		param.put("apply_mode", "RK");// 代付模式 使用rk
-		param.put("ds_trade_no", orderSn);// 商户订单
-		param.put("trade_fee", amtDouble.toString());// 订单金额
-		param.put("trade_subject", paytype);// 商品名称
-		param.put("trade_memo", paytype);// 商品名称
-		param.put("account_no", account_no);
-		param.put("account_name", user_name);
-		String result = fundApply(param);
-		logger.info("Q多多返回结果："+result+"参数："+staticv.getDs_id());
-		param = null;
-		if (result != null && !"".equals(result)) {
-			Map<String,Object> resultMap = (Map<String, Object>) JSONUtils.parse(result);
-			if("0".equals(resultMap.get("status").toString())) {
-				param = new HashMap<>();
-				param.put("payUrl", resultMap.get("prepay_url"));
-				param.put("orderId", orderId);
-				param.put("payLogId", savePayLog.getLogId());
-			}else {
-				param = resultMap;
-			}
-		}
-		if(param!=null) {
-			payBaseResult = ResultGenerator.genSuccessResult("succ", param);
-		}else {
-			payBaseResult = ResultGenerator.genFailResult("代付返回数据有误");
-		}
-		return payBaseResult;
-	}
+	
 	/**
 	 * 查询订单状态
 	 * @param orderSn
@@ -308,20 +270,59 @@ public class RkPayService {
 	public BaseResult<RspOrderQueryEntity> commonOrderQueryLid(String orderSn) throws MalformedURLException{
 		BaseResult<RspOrderQueryEntity> payBaseResult = null;
 		Map<String,Object> param = null;
-		String result = tradeQuery(orderSn);
-		if(result!=null) {
-			param = (Map<String, Object>) JSONUtils.parse(result);
+		try {
+			String result = tradeQuery(orderSn);
+			if(result!=null) {
+				param = (Map<String, Object>) JSONUtils.parse(result);
+			}
+			if (param != null) {
+				RspOrderQueryEntity rspOrderQueryEntity = new RspOrderQueryEntity();
+				rspOrderQueryEntity.setResult_code(param.get("status")==null?"":param.get("status").toString());
+				rspOrderQueryEntity.setType(RspOrderQueryEntity.TYPE_RKPAY);
+				payBaseResult = ResultGenerator.genSuccessResult("succ", rspOrderQueryEntity);
+			} else {
+				payBaseResult = ResultGenerator.genFailResult("查询返回数据有误");
+			} 
+		} catch (Exception e) {
+			log.info("订单状态查询返回数据错误");
+			payBaseResult = ResultGenerator.genFailResult("接口内部错误");
 		}
-		if (param != null) {
-			RspOrderQueryEntity rspOrderQueryEntity = new RspOrderQueryEntity();
-			rspOrderQueryEntity.setResult_code(param.get("status")==null?"":param.get("status").toString());
-			rspOrderQueryEntity.setType(RspOrderQueryEntity.TYPE_RKPAY);
-			payBaseResult = ResultGenerator.genSuccessResult("succ", rspOrderQueryEntity);
-		} else {
-			payBaseResult = ResultGenerator.genFailResult("查询返回数据有误");
-		} 
 		return payBaseResult;
 	}
+	
+	
+	 /**代付
+     * apply_mode=RK
+	 * @return
+	 */
+    public RspSingleCashEntity fundApply(TXScanRequestPaidByOthers txScanRequestPaidByOthers){
+    	logger.info("Q多多代付请求参数={}", txScanRequestPaidByOthers);
+		String amount = txScanRequestPaidByOthers.getTxnAmt();
+		logger.info("Q多多代付请求金额为:={}分", amount);
+    	FundApplyConfig fundApplyConfig=new FundApplyConfig();
+//    	double fee_money = Double.parseDouble(configMap.get("trade_fee").toString())+randomNum();
+        RspSingleCashEntity rspEntity = new RspSingleCashEntity();
+        try {
+        	fundApplyConfig.initParams(staticv.getMchid(),txScanRequestPaidByOthers.getOrderId(), 
+        			"提现","提现","RK",amount,txScanRequestPaidByOthers.getAccountNo(),
+        			txScanRequestPaidByOthers.getAccountName(),staticv.getFund_notify_url());
+        	Client client=new Client();
+        	String data=client.request(fundApplyConfig,"/fund/apply",staticv);
+            Map<String,Object> resultMap = (Map<String, Object>) JSONUtils.parse(data);
+            rspEntity.resMessage = resultMap.get("message")!=null?resultMap.get("message").toString():"";
+            String status = resultMap.get("status")!=null?resultMap.get("status").toString():"";
+            if("0".equals(status)) {
+            	rspEntity.status = "S";
+            } else {
+            	rspEntity.status = "F";
+            }
+        }catch (Exception e) {
+			log.info("代付返回数据错误");
+			rspEntity.resMessage = "接口内部错误";
+            rspEntity.status = "F";
+		}
+        return rspEntity;
+    }
 	
 	public boolean checkMinAmount(String payToken) {
 		JSONObject josn = (JSONObject) JSONObject.parse(payToken);

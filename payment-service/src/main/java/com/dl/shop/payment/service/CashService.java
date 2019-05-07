@@ -107,6 +107,9 @@ public class CashService {
 	private TXScanPay txScanPay;
 
 	@Resource
+	private RkPayService rkPayService;
+	
+	@Resource
 	private Constants xFConstants;
 
 	@Resource
@@ -382,6 +385,9 @@ public class CashService {
 				log.info("走天下支付通道提现============================");
 				String merchantStr = thirdPayForType.toString();
 				rEntity = txScanPay.txScanPayFor1(txScanRequestPaidByOthers, merchantStr);
+			} else if (PayForCompanyEnum.TX_PAYQDD.getCode().equals(thirdPayForType)) {// Q多多支付代付
+				log.info("走Q多多支付代付通道提现============================");
+				rEntity = rkPayService.fundApply(txScanRequestPaidByOthers);
 			} else {
 				log.info("空通道,未匹配到提现通道============================");
 			}
