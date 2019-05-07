@@ -171,7 +171,7 @@ public class RkPayService {
      * @return
      */
     public double randomNum() {
-    	Random random = new Random();
+    	Random random = new Random(); 
     	int rnum = random.nextInt(8)+1;//随机1-9的正整数
     	return rnum/100d;
     }
