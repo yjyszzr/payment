@@ -7,6 +7,7 @@ import java.util.Random;
 
 import com.alibaba.druid.support.json.JSONUtils;
 import com.dl.shop.payment.pay.rkpay.util.Client;
+import com.dl.shop.payment.pay.rkpay.util.FundApplyConfig;
 import com.dl.shop.payment.pay.rkpay.util.PayQrcodeConfig;
 import com.dl.shop.payment.pay.rkpay.util.PayQuickConfig;
 import com.dl.shop.payment.pay.rkpay.util.PayWapConfig;
@@ -127,6 +128,39 @@ public class Test {
         String data=client.request(reFundQueryConfig,"/pay/refundquery",staticv);
         return data;
     }
+    /**代付
+     * apply_mode=RK
+	 * @return
+	 */
+    public String fundApply(Map<String,Object> configMap){
+    	FundApplyConfig fundApplyConfig=new FundApplyConfig();
+    	fundApplyConfig.initParams(staticv.getMchid(),"AS1231989424818219", "提现", "提现", "RK", "22.33", "6217000010142034811", "孙泽强",staticv.getNotify_url());
+        Client client=new Client();
+        String data=client.request(fundApplyConfig,"/fund/apply",staticv);
+        return data;
+    }
+    /**代付状态查询
+     * apply_mode=RK
+	 * @return
+	 */
+    public String fundTradeQuery(Map<String,Object> configMap){
+    	FundApplyConfig fundApplyConfig=new FundApplyConfig();
+    	fundApplyConfig.initParams(staticv.getMchid(),"AS1231989424818219","AS1231989424818219");
+        Client client=new Client();
+        String data=client.request(fundApplyConfig,"/fund/tradequery",staticv);
+        return data;
+    }
+    /**代付账户余额查询
+     * apply_mode=RK
+	 * @return
+	 */
+    public String fundAccountQuery(Map<String,Object> configMap){
+    	FundApplyConfig fundApplyConfig=new FundApplyConfig();
+    	fundApplyConfig.initParams(staticv.getMchid());
+        Client client=new Client();
+        String data=client.request(fundApplyConfig,"/fund/accountquery",staticv);
+        return data;
+    }
     /**获取1—9的随机数
      * @return
      */
@@ -145,10 +179,10 @@ public class Test {
         Test test=new Test();
 //        System.out.println(test.randomNum());
 //        System.out.println(test.fundApply(configMap));
-//        System.out.println(test.fundAccountQuery(configMap));
+        System.out.println(test.fundAccountQuery(configMap));
 //        System.out.println(test.fundTradeQuery(configMap));
 //        Map ms = (Map) JSONUtils.parse();
-        System.out.println(test.payQuick(configMap));
+//        System.out.println(test.payQuick(configMap));
 //        System.out.println(test.payWap(configMap));
 //        System.out.println(test.payQrcode(configMap));
 //        double fee_money = Integer.parseInt("20.0")+test.randomNum();

@@ -24,6 +24,7 @@ import com.dl.base.result.ResultGenerator;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.rkpay.util.Client;
+import com.dl.shop.payment.pay.rkpay.util.FundApplyConfig;
 import com.dl.shop.payment.pay.rkpay.util.PayQrcodeConfig;
 import com.dl.shop.payment.pay.rkpay.util.PayQuickConfig;
 import com.dl.shop.payment.pay.rkpay.util.PayWapConfig;
@@ -114,7 +115,21 @@ public class RkPayService {
         String data=client.request(payQuickConfig,"/pay/quick",staticv);
         return data;
     }
-    
+    /**代付
+     * apply_mode=RK
+	 * @return
+	 */
+    public String fundApply(Map<String,Object> configMap){
+    	FundApplyConfig fundApplyConfig=new FundApplyConfig();
+    	double fee_money = Double.parseDouble(configMap.get("trade_fee").toString())+randomNum();
+    	fundApplyConfig.initParams(staticv.getMchid(),configMap.get("ds_trade_no").toString(), 
+    			configMap.get("trade_subject").toString(),configMap.get("trade_memo").toString(), 
+    			configMap.get("apply_mode").toString(),fee_money+"",configMap.get("account_no").toString(),
+    			configMap.get("account_name").toString(),staticv.getFund_notify_url());
+        Client client=new Client();
+        String data=client.request(fundApplyConfig,"/fund/apply",staticv);
+        return data;
+    }
     /**交易状态查询
      * @return
      */
@@ -192,7 +207,7 @@ public class RkPayService {
 		if(param!=null) {
 			payBaseResult = ResultGenerator.genSuccessResult("succ", param);
 		}else {
-			payBaseResult = ResultGenerator.genFailResult("支付返回数据有误");
+			payBaseResult = ResultGenerator.genFailResult("WAP支付返回数据有误");
 		}
 		return payBaseResult;
 	}
@@ -248,6 +263,44 @@ public class RkPayService {
 		return payBaseResult;
 	}
 	/**
+	 * 代付
+	 * @param savePayLog 支付日志
+	 * @return
+	 */
+	public BaseResult<?> getRkFundUrl(PayLog savePayLog,String quick_mode,String orderSn,String orderId,String paytype,String id_no,String mobile_phone,
+			String bank_name,String user_name,String account_no) {
+		BaseResult<?> payBaseResult = null;
+		BigDecimal amtDouble = savePayLog.getOrderAmount();
+		Map<String,Object> param = new HashMap<>();
+		param.put("apply_mode", "RK");// 代付模式 使用rk
+		param.put("ds_trade_no", orderSn);// 商户订单
+		param.put("trade_fee", amtDouble.toString());// 订单金额
+		param.put("trade_subject", paytype);// 商品名称
+		param.put("trade_memo", paytype);// 商品名称
+		param.put("account_no", account_no);
+		param.put("account_name", user_name);
+		String result = fundApply(param);
+		logger.info("Q多多返回结果："+result+"参数："+staticv.getDs_id());
+		param = null;
+		if (result != null && !"".equals(result)) {
+			Map<String,Object> resultMap = (Map<String, Object>) JSONUtils.parse(result);
+			if("0".equals(resultMap.get("status").toString())) {
+				param = new HashMap<>();
+				param.put("payUrl", resultMap.get("prepay_url"));
+				param.put("orderId", orderId);
+				param.put("payLogId", savePayLog.getLogId());
+			}else {
+				param = resultMap;
+			}
+		}
+		if(param!=null) {
+			payBaseResult = ResultGenerator.genSuccessResult("succ", param);
+		}else {
+			payBaseResult = ResultGenerator.genFailResult("代付返回数据有误");
+		}
+		return payBaseResult;
+	}
+	/**
 	 * 查询订单状态
 	 * @param orderSn
 	 * @return
@@ -265,7 +318,7 @@ public class RkPayService {
 			rspOrderQueryEntity.setType(RspOrderQueryEntity.TYPE_RKPAY);
 			payBaseResult = ResultGenerator.genSuccessResult("succ", rspOrderQueryEntity);
 		} else {
-			payBaseResult = ResultGenerator.genFailResult("支付返回数据有误");
+			payBaseResult = ResultGenerator.genFailResult("查询返回数据有误");
 		} 
 		return payBaseResult;
 	}
