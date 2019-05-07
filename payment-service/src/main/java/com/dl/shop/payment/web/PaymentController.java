@@ -784,7 +784,8 @@ public class PaymentController extends AbstractBaseController {
 		// 生成充值记录payLog
 		String payName = paymentResult.getData().getPayName();
 		// 生成充值单 金额由充值金额和赠送金额组成
-		String rechargeSn = userRechargeService.saveReCharege(BigDecimal.valueOf(totalAmount+param.getGiveAmount()), payCode, payName);
+		int givemoney = param.getGiveAmount();
+		String rechargeSn = userRechargeService.saveReCharege(BigDecimal.valueOf(totalAmount+givemoney), payCode, payName);
 		if (StringUtils.isEmpty(rechargeSn)) {
 			logger.info(loggerId + "生成充值单失败");
 			return ResultGenerator.genFailResult("充值失败！", null);
