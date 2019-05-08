@@ -333,20 +333,30 @@ public class RkPayService {
         return rspEntity;
     }
 	
-	public boolean checkMinAmount(String payToken) {
+	public boolean checkMinAmount(String payToken,String payCode) {
 		JSONObject josn = (JSONObject) JSONObject.parse(payToken);
 		BigDecimal thirdPartyPaid = new BigDecimal(josn.getString("thirdPartyPaid"));
 		int paid = thirdPartyPaid.intValue();
+		if("app_rkwap".equals(payCode)) {
+			if(paid<80) {
+				return true;
+			}
+		}
 		if(paid<20) {
 			return true;
 		}
 		return false;
 	}
-	public boolean checkMaxAmount(String payToken) {
+	public boolean checkMaxAmount(String payToken,String payCode) {
 		JSONObject josn = (JSONObject) JSONObject.parse(payToken);
 		BigDecimal thirdPartyPaid = new BigDecimal(josn.getString("thirdPartyPaid"));
 		int paid = thirdPartyPaid.intValue();
-		if(paid>3000) {
+		if("app_rkwap".equals(payCode)) {
+			if(paid>3000) {
+				return true;
+			}
+		}
+		if(paid>5000) {
 			return true;
 		}
 		return false;

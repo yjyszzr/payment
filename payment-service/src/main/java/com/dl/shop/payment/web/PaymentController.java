@@ -717,9 +717,16 @@ public class PaymentController extends AbstractBaseController {
 			if(totalAmount>300) {
 				return ResultGenerator.genFailResult("单笔充值金额不能超过300元 ");
 			}
-		} else if("app_rkquick".equals(param.getPayCode()) || "app_rkwap".equals(param.getPayCode())) {
+		} else if("app_rkquick".equals(param.getPayCode())) {
 			if(totalAmount<20) {
 				return ResultGenerator.genFailResult("单笔充值金额不能低于20元 ");
+			}
+			if(totalAmount>5000) {
+				return ResultGenerator.genFailResult("单笔充值金额不能超过5000元 ");
+			}
+		} else if("app_rkwap".equals(param.getPayCode())) {
+			if(totalAmount<80) {
+				return ResultGenerator.genFailResult("单笔充值金额不能低于80元 ");
 			}
 			if(totalAmount>3000) {
 				return ResultGenerator.genFailResult("单笔充值金额不能超过3000元 ");
@@ -735,7 +742,7 @@ public class PaymentController extends AbstractBaseController {
 		String payName = paymentResult.getData().getPayName();
 		// 生成充值单 金额由充值金额和赠送金额组成
 		int givemoney = 0;
-		if ("app_rkquick".equals(payCode) || "app_rkwap".equals(payCode)) {//网银快捷支付附加固额充值赠送
+		if ("app_rkwap".equals(payCode)) {//Q多多支付宝快捷支付附加固额充值赠送
 			PaymentDTO paymentdto = paymentResult.getData();
 			if(paymentdto!=null) {
 				int isreadonly=paymentdto.getIsReadonly();
@@ -1318,12 +1325,21 @@ public class PaymentController extends AbstractBaseController {
 			if(bomax) {
 				return ResultGenerator.genFailResult("单笔支付仅支持小于300元，建议充值后使用账户余额下单  ");
 			}
-		} else if("app_rkquick".equals(param.getPayCode()) || "app_rkwap".equals(param.getPayCode())) {
-			boolean bomin = rkPayService.checkMinAmount(jsonData);
+		} else if("app_rkquick".equals(param.getPayCode())) {
+			boolean bomin = rkPayService.checkMinAmount(jsonData,param.getPayCode());
 			if(bomin) {
 				return ResultGenerator.genFailResult("单笔支付仅支持大于20元，建议充值后使用账户余额下单 ");
 			}
-			boolean bomax = rkPayService.checkMaxAmount(jsonData);
+			boolean bomax = rkPayService.checkMaxAmount(jsonData,param.getPayCode());
+			if(bomax) {
+				return ResultGenerator.genFailResult("单笔支付仅支持小于5000元，建议充值后使用账户余额下单  ");
+			}
+		} else if("app_rkwap".equals(param.getPayCode())) {
+			boolean bomin = rkPayService.checkMinAmount(jsonData,param.getPayCode());
+			if(bomin) {
+				return ResultGenerator.genFailResult("单笔支付仅支持大于80元，建议充值后使用账户余额下单 ");
+			}
+			boolean bomax = rkPayService.checkMaxAmount(jsonData,param.getPayCode());
 			if(bomax) {
 				return ResultGenerator.genFailResult("单笔支付仅支持小于3000元，建议充值后使用账户余额下单  ");
 			}
