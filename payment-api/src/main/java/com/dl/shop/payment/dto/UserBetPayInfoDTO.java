@@ -8,6 +8,10 @@ import java.util.List;
 @Data
 public class UserBetPayInfoDTO {
 
+
+	@ApiModelProperty("混合投注具体玩法")
+	private String somp;
+
 	@ApiModelProperty(value="用户id")
 	private Integer userId;
 	@ApiModelProperty(value="彩票种类")
@@ -30,8 +34,7 @@ public class UserBetPayInfoDTO {
 	private String betType;
 	@ApiModelProperty("玩法")
 	private String playType;
-	@ApiModelProperty("混合投注具体玩法")
-	private String somp;
+
 	@ApiModelProperty(value="余额抵扣")
 	private Double surplus;
 	@ApiModelProperty(value="优惠卷抵扣")
