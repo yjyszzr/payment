@@ -779,7 +779,7 @@ public class PaymentController extends AbstractBaseController {
 			}
 		}
 		Integer userId = SessionUtil.getUserId();
-		PayLog payLog = super.newPayLog(userId, orderSn, BigDecimal.valueOf(totalAmount), 1, payCode, payName, payIp,param.getGiveAmount()+"");
+		PayLog payLog = super.newPayLog(userId, orderSn, BigDecimal.valueOf(totalAmount), 1, payCode, payName, payIp,givemoney+"");
 		PayLog savePayLog = payLogService.savePayLog(payLog);
 		if (null == savePayLog) {
 			logger.info(loggerId + " payLog对象保存失败！");
