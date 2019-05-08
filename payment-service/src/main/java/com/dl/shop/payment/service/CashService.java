@@ -136,7 +136,7 @@ public class CashService {
 
 		String loggerId = "withdrawForApp_" + System.currentTimeMillis();
 		log.info(loggerId + " int /payment/withdraw, userId=" + SessionUtil.getUserId() + ", totalAmount=" + param.getTotalAmount() + ",userBankId=" + param.getUserBankId());
-
+		SysConfigParam cfg = new SysConfigParam();
 		// bank判断
 		int userBankId = param.getUserBankId();
 		if (userBankId < 1) {
@@ -166,31 +166,34 @@ public class CashService {
 			log.info(loggerId + "提现金额提供有误！");
 			return ResultGenerator.genResult(PayEnums.PAY_TOTAL_NOTRANGE.getcode(), PayEnums.PAY_TOTAL_NOTRANGE.getMsg());
 		}
+		cfg.setBusinessId(64);//读取最低提现金额
+		int minTxMoney = userAccountService.queryBusinessLimit(cfg).getData()!=null?userAccountService.queryBusinessLimit(cfg).getData().getValue().intValue():0;
 		// 是否小于3元钱
-		if (totalAmount < 3) {
-			log.info(loggerId + "最低提现金额大于3元~");
-			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_LOW_LIMIT.getcode(), PayEnums.PAY_RONGBAO_LOW_LIMIT.getMsg());
+		if (totalAmount < minTxMoney) {
+			log.info(loggerId + "单笔最低提现金额大于"+minTxMoney+"元~");
+			return ResultGenerator.genFailResult("单笔提现金额不能低于"+minTxMoney+"元");
 		}
-
+		cfg.setBusinessId(64);//读取最高提现金额
+		int maxTxMoney = userAccountService.queryBusinessLimit(cfg).getData()!=null?userAccountService.queryBusinessLimit(cfg).getData().getValue().intValue():0;
+		// 是否小于3元钱
+		if (totalAmount > maxTxMoney) {
+			log.info(loggerId + "单笔最高提现金额小于"+minTxMoney+"元~");
+			return ResultGenerator.genFailResult("单笔提现金额不能高于"+maxTxMoney+"元");
+		}
 		UserDeviceInfo userDevice = SessionUtil.getUserDevice();
 		int countUserWithdraw = userWithdrawService.countUserWithdraw(userId);
-		log.info(userId + "一天提现次数:" + countUserWithdraw);
-//		if (userDevice.getPlat().equals("iphone")) {// 20180810 临时支持ios
-//		if (countUserWithdraw >= 3) {// 支持1天最多提现3次
-//			return ResultGenerator.genResult(PayEnums.PAY_THREE_COUNT_WITHDRAW.getcode(), PayEnums.PAY_THREE_COUNT_WITHDRAW.getMsg());
-//		}
-//		} else {
-		if (countUserWithdraw >= 1) {// 限制1天最多能提现1次
-			return ResultGenerator.genResult(PayEnums.PAY_MAX_COUNT_WITHDRAW.getcode(), PayEnums.PAY_MAX_COUNT_WITHDRAW.getMsg());
+		log.info(userId + "当天已提现次数:" + countUserWithdraw);
+		cfg.setBusinessId(63);//读取提现次数
+		int conuntTx = userAccountService.queryBusinessLimit(cfg).getData()!=null?userAccountService.queryBusinessLimit(cfg).getData().getValue().intValue():0;
+		if (countUserWithdraw >= conuntTx) {
+			return ResultGenerator.genFailResult("每日提现次数不能超过"+conuntTx+"次");
 		}
-//		}
 
 		UserBankDTO userBankDTO = queryUserBank.getData();
 		String bankCode = userBankDTO.getAbbreviation();
 		String realName = userBankDTO.getRealName();
 		String cardNo = userBankDTO.getCardNo();
 		String bankName = userBankDTO.getBankName();
-		SysConfigParam cfg = new SysConfigParam();
 		cfg.setBusinessId(8);// 提现
 		log.info("[withdrawForApp]" + " 扣除用户余额成功:" + totalAmount);
 		StrParam strParam = new StrParam();
