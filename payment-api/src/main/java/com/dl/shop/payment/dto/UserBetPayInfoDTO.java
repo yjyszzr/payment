@@ -14,7 +14,8 @@ public class UserBetPayInfoDTO {
 
 	@ApiModelProperty(value="混合投注具体玩法")
 	private String somp;
-
+	private String sy;
+	
 	@ApiModelProperty(value="用户id")
 	private Integer userId;
 	@ApiModelProperty(value="彩票种类")
