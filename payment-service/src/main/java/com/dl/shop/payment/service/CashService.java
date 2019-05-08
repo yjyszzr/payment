@@ -171,14 +171,14 @@ public class CashService {
 		// 是否小于3元钱
 		if (totalAmount < minTxMoney) {
 			log.info(loggerId + "单笔最低提现金额大于"+minTxMoney+"元~");
-			return ResultGenerator.genFailResult("单笔提现金额不能低于"+minTxMoney+"元");
+			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_LOW_LIMIT.getcode(),"单笔提现金额不能低于"+minTxMoney+"元");
 		}
 		cfg.setBusinessId(65);//读取最高提现金额
 		int maxTxMoney = userAccountService.queryBusinessLimit(cfg).getData()!=null?userAccountService.queryBusinessLimit(cfg).getData().getValue().intValue():0;
 		// 是否小于3元钱
 		if (totalAmount > maxTxMoney) {
 			log.info(loggerId + "单笔最高提现金额小于"+minTxMoney+"元~");
-			return ResultGenerator.genFailResult("单笔提现金额不能高于"+maxTxMoney+"元");
+			return ResultGenerator.genResult(PayEnums.PAY_TOTAL_NOTRANGE.getcode(),"单笔提现金额不能高于"+maxTxMoney+"元");
 		}
 		UserDeviceInfo userDevice = SessionUtil.getUserDevice();
 		int countUserWithdraw = userWithdrawService.countUserWithdraw(userId);
@@ -186,7 +186,7 @@ public class CashService {
 		cfg.setBusinessId(63);//读取提现次数
 		int conuntTx = userAccountService.queryBusinessLimit(cfg).getData()!=null?userAccountService.queryBusinessLimit(cfg).getData().getValue().intValue():0;
 		if (countUserWithdraw >= conuntTx) {
-			return ResultGenerator.genFailResult("每日提现次数不能超过"+conuntTx+"次");
+			return ResultGenerator.genResult(PayEnums.PAY_THREE_COUNT_WITHDRAW.getcode(),"每日提现次数不能超过"+conuntTx+"次");
 		}
 
 		UserBankDTO userBankDTO = queryUserBank.getData();
