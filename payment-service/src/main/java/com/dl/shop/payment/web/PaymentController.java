@@ -743,13 +743,19 @@ public class PaymentController extends AbstractBaseController {
 		// 生成充值单 金额由充值金额和赠送金额组成
 		int givemoney = 0;
 		if ("app_rkwap".equals(payCode)) {//Q多多支付宝快捷支付附加固额充值赠送
+			logger.info("Q多多充值");
 			PaymentDTO paymentdto = paymentResult.getData();
 			if(paymentdto!=null) {
+				logger.info("Q多多充值2");
 				int isreadonly=paymentdto.getIsReadonly();
+				logger.info("是否固定额度"+isreadonly);
 				if(isreadonly==1) {//固额充值赠送
+					logger.info("Q多多充值3");
 					List<Map<String,String>> maps = paymentdto.getReadMoney();
 					for (Map<String, String> map : maps) {
 						String readmoney = map.get("readmoney");
+						logger.info("是否固定额度"+Integer.parseInt(readmoney));
+						logger.info("是否固定额度"+param.getTotalAmount());
 						if(param.getTotalAmount()==Integer.parseInt(readmoney)) {
 							givemoney = Integer.parseInt(StringUtils.isNotEmpty(map.get("givemoney"))?"0":map.get("givemoney"));
 							break;
