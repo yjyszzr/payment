@@ -173,7 +173,7 @@ public class CashService {
 			log.info(loggerId + "单笔最低提现金额大于"+minTxMoney+"元~");
 			return ResultGenerator.genFailResult("单笔提现金额不能低于"+minTxMoney+"元");
 		}
-		cfg.setBusinessId(64);//读取最高提现金额
+		cfg.setBusinessId(65);//读取最高提现金额
 		int maxTxMoney = userAccountService.queryBusinessLimit(cfg).getData()!=null?userAccountService.queryBusinessLimit(cfg).getData().getValue().intValue():0;
 		// 是否小于3元钱
 		if (totalAmount > maxTxMoney) {
