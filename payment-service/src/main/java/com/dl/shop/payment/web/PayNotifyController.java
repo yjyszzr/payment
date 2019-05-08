@@ -428,24 +428,16 @@ public class PayNotifyController {
 	@ApiOperation(value = "Q多多支付回调")
 	@PostMapping("/RkPayNotify")
 	@ResponseBody
-	public void RkPayNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+	public void RkPayNotify(@RequestBody JSONObject jsonStr,HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		response.setHeader("Content-type", "text/html;charset=UTF-8");
-		Map<?, ?> parameters = request.getParameterMap();// 保存request请求参数的临时变量
-		log.info("RkPayNotify()Q多多支付通知消息RkPayNotify={}", parameters);
-		Map<String,Object> realMap = new HashMap<String, Object>();
-		// 打印华移支付返回值
-		log.info("RkPayNotify()Q多多支付服务器端通知-接收到支付返回报文：");
-		Iterator<?> paiter = parameters.keySet().iterator();
-		while (paiter.hasNext()) {
-			String key = paiter.next().toString();
-			String[] values = (String[]) parameters.get(key);
-			log.info("RkPayNotify()*********"+key + "-------------" + values[0]);
-			realMap.put(key, values[0]);
+		Map<String,Object> realMap = new HashMap<>();
+		if(jsonStr!=null) {
+			realMap = (Map<String, Object>) com.alibaba.druid.support.json.JSONUtils.parse(jsonStr.toJSONString());
 		}
-//		aPayService.getSign(realMap); ///签名校验
-		log.info("RkPayNotify()返回报文*********"+JSONUtils.valueToString(realMap));
+		
+		log.info("RkPayNotify()返回报文*********"+jsonStr);
 		String payOrderfSn = realMap.get("ds_trade_no")==null?"":realMap.get("ds_trade_no").toString();
 		String status=realMap.get("status")==null?"":realMap.get("status").toString();
 		log.info("RkPayNotify()返回报文*********"+payOrderfSn+"&&&"+status);
