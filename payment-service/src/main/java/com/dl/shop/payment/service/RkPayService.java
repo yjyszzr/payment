@@ -55,7 +55,7 @@ public class RkPayService {
         PayWapConfig payConfig=new PayWapConfig();
 //        double fee_money = Double.parseDouble(configMap.get("pay_fee").toString())+randomNum();
         DecimalFormat df = new DecimalFormat("######0.00");   
-		String fee_money = df.format(Double.parseDouble(configMap.get("pay_fee").toString())/100);
+		String fee_money = df.format(Double.parseDouble(configMap.get("pay_fee").toString()));
         payConfig.initParams(staticv.getMpid(),configMap.get("ds_trade_no").toString(),fee_money+"","AP",
         		configMap.get("trade_subject").toString(),configMap.get("trade_memo").toString(),
         		staticv.getNotify_url(),staticv.getCallback_url(),staticv.getExpire_time());
@@ -71,7 +71,7 @@ public class RkPayService {
     	PayQrcodeConfig payQrcodeConfig=new PayQrcodeConfig();
 //    	double fee_money = Double.parseDouble(configMap.get("pay_fee").toString())+randomNum();
     	DecimalFormat df = new DecimalFormat("######0.00");   
-		String fee_money = df.format(Double.parseDouble(configMap.get("pay_fee").toString())/100);
+		String fee_money = df.format(Double.parseDouble(configMap.get("pay_fee").toString()));
     	payQrcodeConfig.initParams(staticv.getMpid(),"AD1023162143432940",fee_money+"","AP","120","test","test",staticv.getNotify_url());
         Client client=new Client();
         String data=client.request(payQrcodeConfig,"/pay/qrcode",staticv);
@@ -86,7 +86,7 @@ public class RkPayService {
         PayQuickConfig payQuickConfig=new PayQuickConfig();
 //        double fee_money = Double.parseDouble(configMap.get("pay_fee").toString())+randomNum();
         DecimalFormat df = new DecimalFormat("######0.00");   
-		String fee_money = df.format(Double.parseDouble(configMap.get("pay_fee").toString())/100);
+		String fee_money = df.format(Double.parseDouble(configMap.get("pay_fee").toString()));
         String quick_mode = configMap.get("quick_mode")!=null?configMap.get("quick_mode").toString():"";
         if("YT".equalsIgnoreCase(quick_mode)) {
         	payQuickConfig.initParams(staticv.getMchid(),configMap.get("ds_trade_no").toString(),
