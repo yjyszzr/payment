@@ -1,7 +1,5 @@
 package com.dl.shop.payment.web;
 
-import io.swagger.annotations.ApiOperation;
-
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
@@ -9,7 +7,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +34,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.fastjson.JSON;
+import com.dl.base.model.UserDeviceInfo;
 import com.dl.base.param.EmptyParam;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -46,11 +43,10 @@ import com.dl.base.util.JSONHelper;
 import com.dl.base.util.MD5Util;
 import com.dl.base.util.SessionUtil;
 import com.dl.lottery.api.ILotteryPrintService;
-import com.dl.lottery.dto.DIZQUserBetCellInfoDTO;
-import com.dl.lottery.dto.DIZQUserBetInfoDTO;
 import com.dl.lottery.enums.LotteryResultEnum;
 import com.dl.lotto.enums.LottoResultEnum;
 import com.dl.member.api.IActivityService;
+import com.dl.member.api.ISysConfigService;
 import com.dl.member.api.IUserAccountService;
 import com.dl.member.api.IUserBankService;
 import com.dl.member.api.IUserBonusService;
@@ -58,23 +54,22 @@ import com.dl.member.api.IUserMessageService;
 import com.dl.member.api.IUserService;
 import com.dl.member.dto.RechargeDataActivityDTO;
 import com.dl.member.dto.SurplusPaymentCallbackDTO;
+import com.dl.member.dto.SysConfigDTO;
 import com.dl.member.dto.UserBankDTO;
 import com.dl.member.dto.UserBonusDTO;
 import com.dl.member.dto.UserDTO;
-import com.dl.member.dto.UserWithdrawDTO;
 import com.dl.member.param.BonusLimitConditionParam;
 import com.dl.member.param.IDParam;
 import com.dl.member.param.StrParam;
 import com.dl.member.param.SurplusPayParam;
+import com.dl.member.param.SysConfigParam;
 import com.dl.member.param.UpdateUserRechargeParam;
-import com.dl.member.param.UserWithdrawParam;
 import com.dl.order.api.IOrderService;
 import com.dl.order.dto.OrderDTO;
 import com.dl.order.param.SubmitOrderParam;
 import com.dl.order.param.SubmitOrderParam.TicketDetail;
 import com.dl.order.param.UpdateOrderInfoParam;
 import com.dl.order.param.UpdateOrderPayStatusParam;
-import com.dl.order.param.UpdateOrderStatusByAnotherStatusParam;
 import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dao.DlPayQrBase64Mapper;
 import com.dl.shop.payment.dto.PayLogDTO;
@@ -108,19 +103,25 @@ import com.dl.shop.payment.param.UserIdParam;
 import com.dl.shop.payment.param.WithdrawParam;
 import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
-import com.dl.shop.payment.pay.rongbao.entity.ReqRongEntity;
 import com.dl.shop.payment.pay.xianfeng.util.XianFengPayUtil;
 import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
 import com.dl.shop.payment.pay.yinhe.entity.RspYinHeEntity;
 import com.dl.shop.payment.pay.yinhe.util.PayUtil;
 import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
+import com.dl.shop.payment.service.APayService;
+import com.dl.shop.payment.service.LidPayService;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
+import com.dl.shop.payment.service.RkPayService;
 import com.dl.shop.payment.service.UbeyPayService;
 import com.dl.shop.payment.service.UserRechargeService;
 import com.dl.shop.payment.service.UserWithdrawLogService;
+import com.dl.shop.payment.utils.DateUtilPay;
 import com.dl.shop.payment.utils.QrUtil;
 import com.dl.shop.payment.utils.WxpayUtil;
+
+import io.swagger.annotations.ApiOperation;
+import net.sf.json.util.JSONUtils;
 
 @Controller
 @RequestMapping("/payment")
@@ -134,6 +135,12 @@ public class PaymentController extends AbstractBaseController {
 	private PayMentService paymentService;
 	@Resource
 	private UbeyPayService ubeyPayService;
+	@Resource
+	private LidPayService lidPayService;
+	@Resource
+	private APayService aPayService;
+	@Resource
+	private RkPayService rkPayService;
 	@Resource
 	private WxpayUtil wxpayUtil;
 	@Resource
@@ -176,6 +183,9 @@ public class PaymentController extends AbstractBaseController {
 	private String appH5QrUrl;
 	@Value("${yinhe.app_ZFB_H5_qr_url}")
 	private String appZFBH5QrUrl;
+
+	@Resource
+	private ISysConfigService iSysConfigService;
 
 	@ApiOperation(value = "系统可用第三方支付方式", notes = "系统可用第三方支付方式")
 	@PostMapping("/allPayment")
@@ -654,7 +664,7 @@ public class PaymentController extends AbstractBaseController {
 							BufferedImage bufferImage = QrUtil.genBarcode(url, 520, 520, amount);
 							ImageIO.write(bufferImage, "png", out);
 							byte[] imageB = out.toByteArray();
-							sun.misc.BASE64Encoder encoder = new sun.misc.BASE64Encoder();
+//							sun.misc.BASE64Encoder encoder = new sun.misc.BASE64Encoder();
 							String qrBase64 = "data:image/png;base64," + Base64.encodeBase64String(imageB);
 							DlPayQrBase64 saveBean = new DlPayQrBase64();
 							saveBean.setPayordersn(payOrderSn);
@@ -698,29 +708,73 @@ public class PaymentController extends AbstractBaseController {
 	@ResponseBody
 	public BaseResult<Object> rechargeForApp(@RequestBody RechargeParam param, HttpServletRequest request) {
 		//20181203 加入提示
-		return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
+//		return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
 
-/*		String loggerId = "rechargeForApp_" + System.currentTimeMillis();
+		String loggerId = "rechargeForApp_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/recharge, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode() + " , totalAmount=" + param.getTotalAmount());
-		if(paymentService.isShutDownPay()) {
-			return ResultGenerator.genResult(PayEnums.PAY_STOP.getcode(), PayEnums.PAY_STOP.getMsg());
+		UserDeviceInfo userDeviceInfo = SessionUtil.getUserDevice();
+		String appCodeName = userDeviceInfo.getAppCodeName();
+		logger.info("当前平台是====appCodeName=" + appCodeName);
+		if(!"11".equals(appCodeName)) {
+			if(paymentService.isShutDownPay()) {
+				return ResultGenerator.genResult(PayEnums.PAY_STOP.getcode(), PayEnums.PAY_STOP.getMsg());
+			}
 		}
 		double totalAmount = param.getTotalAmount();
-		if (totalAmount <= 0) {
-			logger.info(loggerId + "充值金额有误！totalAmount=" + totalAmount);
-			return ResultGenerator.genResult(PayEnums.RECHARGE_AMT_ERROR.getcode(), PayEnums.RECHARGE_AMT_ERROR.getMsg());
-		}
+//		if (totalAmount <= 0) {
+//			logger.info(loggerId + "充值金额有误！totalAmount=" + totalAmount);
+//			return ResultGenerator.genResult(PayEnums.RECHARGE_AMT_ERROR.getcode(), PayEnums.RECHARGE_AMT_ERROR.getMsg());
+//		}
 		// 当前支付方式限额10万/笔
-		if (totalAmount > 100000) {
-			logger.info(loggerId + "每笔限额10w");
-			return ResultGenerator.genResult(PayEnums.PAY_RECHARGE_MAX.getcode(), PayEnums.PAY_RECHARGE_MAX.getMsg());
-		}
+//		if (totalAmount > 100000) {
+//			logger.info(loggerId + "每笔限额10w");
+//			return ResultGenerator.genResult(PayEnums.PAY_RECHARGE_MAX.getcode(), PayEnums.PAY_RECHARGE_MAX.getMsg());
+//		}
 		// 支付方式
 		String payCode = param.getPayCode();
 		if (StringUtils.isBlank(payCode)) {
 			logger.info(loggerId + "订单第三支付没有提供paycode！");
 			return ResultGenerator.genResult(PayEnums.RECHARGE_PAY_STYLE_EMPTY.getcode(), PayEnums.RECHARGE_PAY_STYLE_EMPTY.getMsg());
 		}
+		
+		//各支付方式最小金额检验
+		if("app_lidpay".equals(param.getPayCode())) {
+			if(totalAmount<1) {
+				return ResultGenerator.genFailResult("单笔充值金额不能低于1元 ");
+			}
+			if(totalAmount>10000) {
+				return ResultGenerator.genFailResult("单笔充值金额不能超过10000元 ");
+			}
+		} else if("app_apay".equals(param.getPayCode())) {
+			if(totalAmount<1) {
+				return ResultGenerator.genFailResult("单笔充值金额不能低于1元 ");
+			}
+			if(totalAmount>10000) {
+				return ResultGenerator.genFailResult("单笔充值金额不能超过10000元 ");
+			}
+		} else if("app_awx".equals(param.getPayCode())) {
+			if(totalAmount<500) {
+				return ResultGenerator.genFailResult("单笔充值金额不能低于500元 ");
+			}
+			if(totalAmount>10000) {
+				return ResultGenerator.genFailResult("单笔充值金额不能超过10000元 ");
+			}
+		} else if("app_awxxe".equals(param.getPayCode())) {
+			if(totalAmount<10) {
+				return ResultGenerator.genFailResult("单笔充值金额不能低于10元 ");
+			}
+			if(totalAmount>300) {
+				return ResultGenerator.genFailResult("单笔充值金额不能超过300元 ");
+			}
+		} else if("app_rkquick".equals(param.getPayCode()) || "app_rkwap".equals(param.getPayCode())) {
+			if(totalAmount<20) {
+				return ResultGenerator.genFailResult("单笔充值金额不能低于20元 ");
+			}
+			if(totalAmount>3000) {
+				return ResultGenerator.genFailResult("单笔充值金额不能超过3000元 ");
+			}
+		}
+		
 		BaseResult<PaymentDTO> paymentResult = paymentService.queryByCode(payCode);
 		if (paymentResult.getCode() != 0) {
 			logger.info(loggerId + "订单第三方支付提供paycode有误！");
@@ -728,8 +782,26 @@ public class PaymentController extends AbstractBaseController {
 		}
 		// 生成充值记录payLog
 		String payName = paymentResult.getData().getPayName();
-		// 生成充值单
-		String rechargeSn = userRechargeService.saveReCharege(BigDecimal.valueOf(totalAmount), payCode, payName);
+		// 生成充值单 金额由充值金额和赠送金额组成
+		int givemoney = 0;
+		if ("app_rkquick".equals(payCode) || "app_rkwap".equals(payCode)) {//网银快捷支付附加固额充值赠送
+			PaymentDTO paymentdto = paymentResult.getData();
+			if(paymentdto!=null) {
+				int isreadonly=paymentdto.getIsReadonly();
+				if(isreadonly==1) {//固额充值赠送
+					List<Map<String,String>> maps = paymentdto.getReadMoney();
+					for (Map<String, String> map : maps) {
+						String readmoney = map.get("readmoney");
+						if((param.getTotalAmount()+"").equals(readmoney)) {
+							givemoney = Integer.parseInt(StringUtils.isNotEmpty(map.get("givemoney"))?"0":map.get("givemoney"));
+							break;
+						}
+					}
+				}
+			}
+		}
+		logger.info(loggerId + "赠送金额为"+givemoney);
+		String rechargeSn = userRechargeService.saveReCharege(BigDecimal.valueOf(totalAmount+givemoney), payCode, payName);
 		if (StringUtils.isEmpty(rechargeSn)) {
 			logger.info(loggerId + "生成充值单失败");
 			return ResultGenerator.genFailResult("充值失败！", null);
@@ -749,7 +821,7 @@ public class PaymentController extends AbstractBaseController {
 			}
 		}
 		Integer userId = SessionUtil.getUserId();
-		PayLog payLog = super.newPayLog(userId, orderSn, BigDecimal.valueOf(totalAmount), 1, payCode, payName, payIp);
+		PayLog payLog = super.newPayLog(userId, orderSn, BigDecimal.valueOf(totalAmount), 1, payCode, payName, payIp,param.getGiveAmount()+"");
 		PayLog savePayLog = payLogService.savePayLog(payLog);
 		if (null == savePayLog) {
 			logger.info(loggerId + " payLog对象保存失败！");
@@ -767,7 +839,7 @@ public class PaymentController extends AbstractBaseController {
 		// url下发后，服务器开始主动轮序订单状态
 		// PayManager.getInstance().addReqQueue(orderSn,savePayLog.getPayOrderSn(),payCode);
 		BaseResult payBaseResult = null;
-		if ("app_zfb".equals(payCode)) {
+		/*if ("app_zfb".equals(payCode)) {
 			logger.info("支付宝支付url开始生成...isWechat:" + (param.getInnerWechat() == 1) + " payOrderSn:" + savePayLog.getPayOrderSn());
 			payBaseResult = getWechatPayUrl(true, param.getInnerWechat() == 1, param.getIsH5(), 1, savePayLog, payIp, orderSn, "");
 			logger.info("支付宝支付url生成成功 code" + payBaseResult.getCode() + " data:" + payBaseResult.getData());
@@ -851,7 +923,77 @@ public class PaymentController extends AbstractBaseController {
 			} else {
 				logger.info("获取Ubey银行列表失败");
 			}
+		}else*/ if ("app_lidpay".equals(payCode)) {
+			logger.info("华移支付url:" + " payCode:" + savePayLog.getPayCode());
+			payBaseResult = lidPayService.getLidPayUrl(savePayLog, orderSn,orderSn,"充值");
+			if (payBaseResult != null && payBaseResult.getData() != null) {
+				String str = payBaseResult.getData() + "";
+				logger.info("生成华移支付payOrderSn={},url成功 url={}:", orderSn, str);
+			} else {
+				logger.info("生成华移支付payOrderSn={},url失败", orderSn);
+			}
+		}else if ("app_apay".equals(payCode)) {
+			logger.info("艾支付url:" + " payCode:" + savePayLog.getPayCode());
+//			String channel_id = "9";//渠道编号  微信支付(扫码):6     微信支付H5:7		支付宝支付：9
+//			int iswechat = param.getInnerWechat();
+//			if(iswechat==1) {
+//				channel_id = "6";
+//			}
+			payBaseResult = aPayService.getAPayUrl(savePayLog, orderSn,orderSn,userId,"9","127.0.0.1","充值");
+			if (payBaseResult != null && payBaseResult.getData() != null) {
+				String str = payBaseResult.getData() + "";
+				logger.info("生成艾支付payOrderSn={},url成功 url={}:", orderSn, str);
+			} else {
+				logger.info("生成艾支付payOrderSn={},url失败", orderSn);
+			}
+		}else if ("app_awx".equals(payCode)) {
+			logger.info("艾支付url:" + " payCode:" + savePayLog.getPayCode());
+//			String channel_id = "9";//渠道编号  微信支付(扫码):6     微信支付H5:7		支付宝支付：9
+//			int iswechat = param.getInnerWechat();
+//			if(iswechat==1) {
+//				channel_id = "6";
+//			}
+			payBaseResult = aPayService.getAPayUrl(savePayLog, orderSn,orderSn,userId,"6","127.0.0.1","充值");
+			if (payBaseResult != null && payBaseResult.getData() != null) {
+				String str = payBaseResult.getData() + "";
+				logger.info("生成艾支付payOrderSn={},url成功 url={}:", orderSn, str);
+			} else {
+				logger.info("生成艾支付payOrderSn={},url失败", orderSn);
+			}
+		}else if ("app_awxxe".equals(payCode)) {
+			logger.info("艾支付url:" + " payCode:" + savePayLog.getPayCode());
+//			String channel_id = "9";//渠道编号  微信支付(扫码):6     微信支付H5:7		支付宝支付：9
+//			int iswechat = param.getInnerWechat();
+//			if(iswechat==1) {
+//				channel_id = "6";
+//			}
+			payBaseResult = aPayService.getAPayUrl(savePayLog, orderSn,orderSn,userId,"6","127.0.0.1","充值");
+			if (payBaseResult != null && payBaseResult.getData() != null) {
+				String str = payBaseResult.getData() + "";
+				logger.info("生成艾支付payOrderSn={},url成功 url={}:", orderSn, str);
+			} else {
+				logger.info("生成艾支付payOrderSn={},url失败", orderSn);
+			}
+		}else if ("app_rkquick".equals(payCode)) {
+			logger.info("Q多多网银快捷支付url:" + " payCode:" + savePayLog.getPayCode());
+			payBaseResult = rkPayService.getRkPayQuickUrl(savePayLog, "NORMAL", orderSn, orderSn, "充值", "", "", "", "", "");
+			if (payBaseResult != null && payBaseResult.getData() != null) {
+				String str = payBaseResult.getData() + "";
+				logger.info("生成Q多多网银快捷支付payOrderSn={},url成功 url={}:", orderSn, str);
+			} else {
+				logger.info("生成Q多多网银快捷支付payOrderSn={},url失败", orderSn);
+			}
+		}else if ("app_rkwap".equals(payCode)) {
+			logger.info("Q多多支付宝支付url:" + " payCode:" + savePayLog.getPayCode());
+			payBaseResult = rkPayService.getRkPayWapUrl(savePayLog, orderSn, orderSn,"充值");
+			if (payBaseResult != null && payBaseResult.getData() != null) {
+				String str = payBaseResult.getData() + "";
+				logger.info("生成Q多多支付宝支付payOrderSn={},url成功 url={}:", orderSn, str);
+			} else {
+				logger.info("生成Q多多支付宝支付payOrderSn={},url失败", orderSn);
+			}
 		}
+		
 		// 处理支付失败的情况
 		if (null == payBaseResult || payBaseResult.getCode() != 0) {
 			// 充值失败逻辑
@@ -883,7 +1025,7 @@ public class PaymentController extends AbstractBaseController {
 			return payBaseResult;
 		} else {
 			return ResultGenerator.genFailResult("参数异常");
-		}*/
+		}
 	}
 
 	@ApiOperation(value = "app提现调用", notes = "")
@@ -891,9 +1033,7 @@ public class PaymentController extends AbstractBaseController {
 	@ResponseBody
 	public BaseResult<Object> withdrawForApp(@RequestBody WithdrawParam param, HttpServletRequest request) {
 		//20181203 加入提示
-		return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
-
-/*		String loggerId = "withdrawForApp_" + System.currentTimeMillis();
+		String loggerId = "withdrawForApp_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/withdraw, userId=" + SessionUtil.getUserId() + ", totalAmount=" + param.getTotalAmount() + ",userBankId=" + param.getUserBankId());
 		BaseResult<UserDTO> userInfoExceptPass = userService.userInfoExceptPass(new StrParam());
 		if (userInfoExceptPass == null) {
@@ -923,11 +1063,11 @@ public class PaymentController extends AbstractBaseController {
 		String realName = userBankDTO.getRealName();
 		String cardNo = userBankDTO.getCardNo();
 		// 生成提现单
-		UserWithdrawParam userWithdrawParam = new UserWithdrawParam();
+		com.dl.member.param.UserWithdrawParam userWithdrawParam = new com.dl.member.param.UserWithdrawParam();
 		userWithdrawParam.setAmount(BigDecimal.valueOf(totalAmount));
 		userWithdrawParam.setCardNo(cardNo);
 		userWithdrawParam.setRealName(realName);
-		BaseResult<UserWithdrawDTO> createUserWithdraw = userAccountService.createUserWithdraw(userWithdrawParam);
+		BaseResult<com.dl.member.dto.UserWithdrawDTO> createUserWithdraw = userAccountService.createUserWithdraw(userWithdrawParam);
 		if (createUserWithdraw.getCode() != 0) {
 			logger.info(loggerId + " 生成提现单，code=" + createUserWithdraw.getCode() + " , msg=" + createUserWithdraw.getMsg());
 			return ResultGenerator.genFailResult("提现失败！", null);
@@ -940,13 +1080,18 @@ public class PaymentController extends AbstractBaseController {
 		userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
 		userWithdrawLog.setWithdrawSn(orderSn);
 		userWithdrawLogService.save(userWithdrawLog);
-		return ResultGenerator.genSuccessResult("请求成功！");*/
+		return ResultGenerator.genSuccessResult("请求成功！");
 	}
 
 	@ApiOperation(value = "支付订单结果 查询 ", notes = "")
 	@PostMapping("/query")
 	@ResponseBody
 	public BaseResult<RspOrderQueryDTO> orderquery(@RequestBody ReqOrderQueryParam p) {
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		String loggerId = "orderquery_" + System.currentTimeMillis();
 		String payLogId = p.getPayLogId();
 		if (StringUtils.isBlank(payLogId)) {
@@ -1170,9 +1315,9 @@ public class PaymentController extends AbstractBaseController {
 	@ResponseBody
 	public BaseResult<PayReturnDTO> nUnifiedOrder(@RequestBody GoPayParam param, HttpServletRequest request) {
 		//20181203 加入提示，不能用金钱购买
-		return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
+//		return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
 
-/*		String loggerId = "payment_nUnifiedOrder_" + System.currentTimeMillis();
+		String loggerId = "payment_nUnifiedOrder_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/nUnifiedOrder, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode());
 		String payToken = param.getPayToken();
 		if (StringUtils.isBlank(payToken)) {
@@ -1185,13 +1330,54 @@ public class PaymentController extends AbstractBaseController {
 			logger.info(loggerId + "支付信息获取为空！");
 			return ResultGenerator.genResult(PayEnums.PAY_TOKEN_EXPRIED.getcode(), PayEnums.PAY_TOKEN_EXPRIED.getMsg());
 		}
-		//ubey检验最小金额
-		if("app_ubey".equals(param.getPayCode())) {
-			boolean check = ubeyPayService.checkAmount(jsonData);
-			if(check) {
-				return ResultGenerator.genFailResult("该支付方式最低消费1元 ");
+		//各支付方式最小金额检验
+		if("app_lidpay".equals(param.getPayCode())) {
+			boolean bomin = lidPayService.checkMinAmount(jsonData);
+			if(bomin) {
+				return ResultGenerator.genFailResult("单笔支付仅支持大于1元，建议充值后使用账户余额下单 ");
+			}
+			boolean bomax = lidPayService.checkMaxAmount(jsonData);
+			if(bomax) {
+				return ResultGenerator.genFailResult("单笔支付仅支持小于10000元，建议充值后使用账户余额下单 ");
+			}
+		} else if("app_apay".equals(param.getPayCode())) {
+			boolean bomin = aPayService.checkMinAmount(jsonData,"9");
+			if(bomin) {
+				return ResultGenerator.genFailResult("单笔支付仅支持大于1元，建议充值后使用账户余额下单 ");
+			}
+			boolean bomax = aPayService.checkMaxAmount(jsonData,null);
+			if(bomax) {
+				return ResultGenerator.genFailResult("单笔支付仅支持小于10000元，建议充值后使用账户余额下单 ");
+			}
+		} else if("app_awx".equals(param.getPayCode())) {
+			boolean bomin = aPayService.checkMinAmount(jsonData,"6");
+			if(bomin) {
+				return ResultGenerator.genFailResult("单笔支付仅支持大于500元，建议充值后使用账户余额下单 ");
+			}
+			boolean bomax = aPayService.checkMaxAmount(jsonData,null);
+			if(bomax) {
+				return ResultGenerator.genFailResult("单笔支付仅支持小于10000元，建议充值后使用账户余额下单  ");
+			}
+		} else if("app_awxxe".equals(param.getPayCode())) {
+			boolean bomin = aPayService.checkMinAmount(jsonData,"7");
+			if(bomin) {
+				return ResultGenerator.genFailResult("单笔支付仅支持大于10元，建议充值后使用账户余额下单 ");
+			}
+			boolean bomax = aPayService.checkMaxAmount(jsonData,"7");
+			if(bomax) {
+				return ResultGenerator.genFailResult("单笔支付仅支持小于300元，建议充值后使用账户余额下单  ");
+			}
+		} else if("app_rkquick".equals(param.getPayCode()) || "app_rkwap".equals(param.getPayCode())) {
+			boolean bomin = rkPayService.checkMinAmount(jsonData);
+			if(bomin) {
+				return ResultGenerator.genFailResult("单笔支付仅支持大于20元，建议充值后使用账户余额下单 ");
+			}
+			boolean bomax = rkPayService.checkMaxAmount(jsonData);
+			if(bomax) {
+				return ResultGenerator.genFailResult("单笔支付仅支持小于3000元，建议充值后使用账户余额下单  ");
 			}
 		}
+		
 		// 清除payToken
 		stringRedisTemplate.delete(payToken);
 
@@ -1214,17 +1400,38 @@ public class PaymentController extends AbstractBaseController {
 		}
 		Double orderMoney = dto.getOrderMoney();
 		Integer userBonusId = StringUtils.isBlank(dto.getBonusId()) ? 0 : Integer.valueOf(dto.getBonusId());// form
-																											// paytoken
 		BigDecimal ticketAmount = BigDecimal.valueOf(orderMoney);// from
-																	// paytoken
-		BigDecimal bonusAmount = BigDecimal.valueOf(dto.getBonusAmount());// from
-																			// paytoken
+		BigDecimal bonusAmount = BigDecimal.valueOf(dto.getBonusAmount());// from paytoken
 		BigDecimal moneyPaid = BigDecimal.valueOf(orderMoney - dto.getBonusAmount());
-		;// from paytoken
 		BigDecimal surplus = BigDecimal.valueOf(dto.getSurplus());// from
-																	// paytoken
 		BigDecimal thirdPartyPaid = BigDecimal.valueOf(dto.getThirdPartyPaid());
+		
 		List<UserBetDetailInfoDTO> userBetCellInfos = dto.getBetDetailInfos();
+		UserBetDetailInfoDTO min = userBetCellInfos.get(0);
+		if(userBetCellInfos.size() > 1) {
+			min = userBetCellInfos.stream().min((cell1,cell2)->cell1.getMatchTime()-cell2.getMatchTime()).get();
+		}
+
+		//比赛提前1h	禁止支付
+		Integer sysLimitBetTime = 3600;
+		SysConfigParam sysConfigParam = new SysConfigParam();
+		sysConfigParam.setBusinessId(4);
+		BaseResult<SysConfigDTO> sysConfigDTOBaseResult = iSysConfigService.querySysConfig(sysConfigParam);
+		if(sysConfigDTOBaseResult.isSuccess()){
+			sysLimitBetTime = sysConfigDTOBaseResult.getData().getValue().intValue();
+		}
+		
+		String strMatchTime= DateUtil.getTimeString(min.getMatchTime(), DateUtil.datetimeFormat);
+		String strNowTime= DateUtil.getTimeString(DateUtil.getCurrentTimeLong(), DateUtil.datetimeFormat);
+		
+		String seconds = DateUtilPay.dateSubtractionHours(strNowTime,strMatchTime);
+		logger.info("nUnifiedOrder()：提前售票： 比赛时间="+min.getMatchTime()+"||"+strMatchTime+"提前时间="+sysLimitBetTime+"当前时间="+DateUtil.getCurrentTimeLong()+"||"+strNowTime);
+		logger.info("nUnifiedOrder()：提前售票： 是否停止售票="+(Integer.valueOf(seconds)<=sysLimitBetTime));
+		if(Integer.valueOf(seconds)<=sysLimitBetTime) {
+//		if(min.getMatchTime() - sysLimitBetTime  <= nowTime){
+			return ResultGenerator.genResult(LotteryResultEnum.BET_TIME_LIMIT.getCode(), LotteryResultEnum.BET_TIME_LIMIT.getMsg());
+		}
+
 		List<TicketDetail> ticketDetails = userBetCellInfos.stream().map(betCell -> {
 			TicketDetail ticketDetail = new TicketDetail();
 			ticketDetail.setMatch_id(betCell.getMatchId());
@@ -1412,7 +1619,7 @@ public class PaymentController extends AbstractBaseController {
 		// url下发后，服务器开始主动轮序订单状态
 		// PayManager.getInstance().addReqQueue(orderSn,savePayLog.getPayOrderSn(),paymentDto.getPayCode());
 		BaseResult payBaseResult = null;
-		if ("app_zfb".equals(payCode)) {
+		/*if ("app_zfb".equals(payCode)) {
 			logger.info("支付宝支付url开始生成...isWechat:" + (param.getInnerWechat() == 1) + " payOrderSn:" + savePayLog.getPayOrderSn());
 			payBaseResult = getWechatPayUrl(true, param.getInnerWechat() == 1, param.getIsH5(), 0, savePayLog, payIp, orderId, "");
 			logger.info("支付宝支付url生成成功 code" + payBaseResult.getCode() + " data:" + payBaseResult.getData());
@@ -1423,85 +1630,75 @@ public class PaymentController extends AbstractBaseController {
 				String str = payBaseResult.getData() + "";
 				logger.info("生成支付url成功:" + str);
 			}
-		} else if ("app_rongbao".equals(paymentDto.getPayCode())) {
-			// 生成支付链接信息
-			String payOrder = savePayLog.getPayOrderSn();
-			ReqRongEntity reqEntity = new ReqRongEntity();
-			reqEntity.setOrderId(payOrder);
-			reqEntity.setUserId(savePayLog.getUserId().toString());
-			reqEntity.setTotal(savePayLog.getOrderAmount().doubleValue());
-			reqEntity.setPName("彩小秘");
-			reqEntity.setPDesc("彩小秘足彩支付");
-			reqEntity.setTransTime(savePayLog.getAddTime() + "");
-			String data = JSON.toJSONString(reqEntity);
-			try {
-				data = URLEncoder.encode(data, "UTF-8");
-				String url = rongCfg.getURL_PAY() + "?data=" + data;
-				PayReturnDTO rEntity = new PayReturnDTO();
-				rEntity.setPayUrl(url);
-				rEntity.setPayLogId(savePayLog.getLogId() + "");
-				rEntity.setOrderId(orderId);
-				// rEntity.setLotteryClassifyId(lotteryClassifyIdStr);
-				payBaseResult = ResultGenerator.genSuccessResult("succ", rEntity);
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-		} else if ("app_xianfeng".equals(paymentDto.getPayCode())) {
-			PayReturnDTO rEntity = new PayReturnDTO();
-			rEntity.setPayUrl(xianFengUtil.getPayH5Url(savePayLog.getLogId()));
-			rEntity.setPayLogId(savePayLog.getLogId() + "");
-			rEntity.setOrderId(orderId);
-			// rEntity.setLotteryClassifyId(lotteryClassifyIdStr);
-			payBaseResult = ResultGenerator.genSuccessResult("succ", rEntity);
-		} else if ("app_yifutong".equals(paymentDto.getPayCode())) {
-			logger.info("生成易富通支付宝支付url:" + " payCode:" + savePayLog.getPayCode());
-			payBaseResult = paymentService.getYFTPayUrl(savePayLog, orderId, lotteryClassifyIdStr);
+		}*/ 
+		if ("app_lidpay".equals(paymentDto.getPayCode())) {//华移支付
+			logger.info("华移支付url:" + " payCode:" + savePayLog.getPayCode());
+			payBaseResult = lidPayService.getLidPayUrl(savePayLog, orderSn,orderId,"支付");
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
-				logger.info("生成易富通支付url成功:" + str);
+				logger.info("生成华移支付payOrderSn={},url成功 url={}:", orderSn, str);
 			} else {
-				logger.info("生成易富通支付url失败");
+				logger.info("生成华移支付payOrderSn={},url失败", orderSn);
 			}
-		} else if (paymentDto.getPayCode().startsWith("app_tianxia_scan")) {
-			String[] merchentArr = paymentDto.getPayCode().split("_");
-			logger.info("生成天下支付银联二维码url:" + " payCode:" + savePayLog.getPayCode());
-			payBaseResult = paymentService.getTXScanPayUrl(savePayLog, orderId, payIp, merchentArr[merchentArr.length - 1]);
+		}else if ("app_apay".equals(paymentDto.getPayCode())) {//艾支付
+			logger.info("艾支付url:" + " payCode:" + savePayLog.getPayCode());
+			payBaseResult = aPayService.getAPayUrl(savePayLog, orderSn,orderId,userId,"9","127.0.0.1","支付");
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
-				logger.info("生成天下支付银联二维码url成功:" + str);
+				logger.info("生成艾支付payOrderSn={},url成功 url={}:", orderSn, str);
 			} else {
-				logger.info("生成天下支付银联二维码url失败");
+				logger.info("生成艾支付payOrderSn={},url失败", orderSn);
 			}
-		} else if ("app_kuaijie_pay_qqqianbao".equalsIgnoreCase(payCode)) {
-			logger.info("生成快接支付qq钱包支付 payCode:" + savePayLog.getPayCode());
-			payBaseResult = paymentService.getKuaijiePayQqQianBaoUrl(savePayLog, orderId,lotteryClassifyIdStr);
+		}else if ("app_awx".equals(payCode)) {
+			logger.info("艾支付url:" + " payCode:" + savePayLog.getPayCode());
+//			String channel_id = "9";//渠道编号  微信支付(扫码):6     微信支付H5:7		支付宝支付：9
+//			int iswechat = param.getInnerWechat();
+//			if(iswechat==1) {
+//				channel_id = "6";
+//			}
+			payBaseResult = aPayService.getAPayUrl(savePayLog, orderSn,orderId,userId,"6","127.0.0.1","支付");
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
-				logger.info("生成快接支付qq钱包支付payOrderSn={},url成功url={}:", orderSn, str);
+				logger.info("生成艾支付payOrderSn={},url成功 url={}:", orderSn, str);
 			} else {
-				logger.info("生成快接支付qq钱包支付payOrderSn={},url失败", orderSn);
+				logger.info("生成艾支付payOrderSn={},url失败", orderSn);
 			}
-		} else if ("app_kuaijie_pay_jd".equalsIgnoreCase(payCode)) {
-			logger.info("生成快接支付url:payCode:" + savePayLog.getPayCode());
-			payBaseResult = paymentService.getKuaijiePayJingDongUrl(savePayLog, orderId,lotteryClassifyIdStr);
+		} else if ("app_awxxe".equals(payCode)) {
+			logger.info("艾支付url:" + " payCode:" + savePayLog.getPayCode());
+//			String channel_id = "9";//渠道编号  微信支付(扫码):6     微信支付H5:7		支付宝支付：9
+//			int iswechat = param.getInnerWechat();
+//			if(iswechat==1) {
+//				channel_id = "6";
+//			}
+			payBaseResult = aPayService.getAPayUrl(savePayLog, orderSn,orderId,userId,"6","127.0.0.1","支付");
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
-				logger.info("生成快接支付payOrderSn={},url成功 url={}:", orderSn, str);
+				logger.info("生成艾支付payOrderSn={},url成功 url={}:", orderSn, str);
 			} else {
-				logger.info("生成快接支付payOrderSn={},url失败", orderSn);
+				logger.info("生成艾支付payOrderSn={},url失败", orderSn);
 			}
-		}else if ("app_ubey".equals(paymentDto.getPayCode())) {
-			logger.info("ubey支付url:" + " payCode:" + savePayLog.getPayCode());
-			payBaseResult = ubeyPayService.getUBeyBankUrl(savePayLog, orderId);
+		} else if ("app_rkquick".equals(payCode)) {
+			logger.info("Q多多网银快捷支付url:" + " payCode:" + savePayLog.getPayCode());
+			payBaseResult = rkPayService.getRkPayQuickUrl(savePayLog, "NORMAL", orderSn, orderId, "支付", "", "", "", "", "");
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
-				logger.info("获取Ubey银行列表成功:" + str);
+				logger.info("生成Q多多网银快捷支付payOrderSn={},url成功 url={}:", orderSn, str);
 			} else {
-				logger.info("获取Ubey银行列表失败");
+				logger.info("生成Q多多网银快捷支付payOrderSn={},url失败", orderSn);
+			}
+		} else if ("app_rkwap".equals(payCode)) {
+			logger.info("Q多多支付宝支付url:" + " payCode:" + savePayLog.getPayCode());
+			payBaseResult = rkPayService.getRkPayWapUrl(savePayLog, orderSn, orderId, "支付");
+			if (payBaseResult != null && payBaseResult.getData() != null) {
+				String str = payBaseResult.getData() + "";
+				logger.info("生成Q多多支付宝支付payOrderSn={},url成功 url={}:", orderSn, str);
+			} else {
+				logger.info("生成Q多多支付宝支付payOrderSn={},url失败", orderSn);
 			}
 		}
 		logger.info(loggerId + " result: code=" + payBaseResult.getCode() + " , msg=" + payBaseResult.getMsg());
-		return payBaseResult;*/
+		logger.info("支付成功后："+JSONUtils.valueToString(payBaseResult));
+		return payBaseResult;
 	}
 
 }

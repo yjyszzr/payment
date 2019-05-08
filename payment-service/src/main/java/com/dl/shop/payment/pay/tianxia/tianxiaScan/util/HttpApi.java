@@ -26,6 +26,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.itrus.util.MD5Utils;
+
 @SuppressWarnings("all")
 public class HttpApi {
 	private final static Logger logger = LoggerFactory.getLogger(HttpApi.class);
@@ -212,8 +214,9 @@ public class HttpApi {
 			sb.append(arrayToSort[i]);
 		}
 		String result = sb.toString() + "key=" + key;
-		logger.info("排序后加密前的签名={}", result);
+		logger.info("HTTPAPI排序后加密前的签名={}", result);
 		result = MD5.encryption(result).toUpperCase();
+//		result = MD5Utils.MD5Encrpytion(result);
 		return result;
 	}
 }

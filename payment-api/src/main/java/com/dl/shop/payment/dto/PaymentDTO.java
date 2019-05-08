@@ -1,5 +1,8 @@
 package com.dl.shop.payment.dto;
 
+import java.util.List;
+import java.util.Map;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -24,5 +27,9 @@ public class PaymentDTO {
     private String payImg;
 	@ApiModelProperty(value="描述")
     private String payDesc;
+	@ApiModelProperty(value="是否固额")
+    private Integer isReadonly;
+	@ApiModelProperty(value="固定额度")
+	private List<Map<String,String>> readMoney;
 
 }

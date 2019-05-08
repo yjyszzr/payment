@@ -107,6 +107,9 @@ public class CashService {
 	private TXScanPay txScanPay;
 
 	@Resource
+	private RkPayService rkPayService;
+	
+	@Resource
 	private Constants xFConstants;
 
 	@Resource
@@ -172,16 +175,15 @@ public class CashService {
 		UserDeviceInfo userDevice = SessionUtil.getUserDevice();
 		int countUserWithdraw = userWithdrawService.countUserWithdraw(userId);
 		log.info(userId + "一天提现次数:" + countUserWithdraw);
-		if (userDevice.getPlat().equals("iphone")) {// 20180810 临时支持ios
-													// 支持1天最多提现3次
-			if (countUserWithdraw >= 3) {
-				return ResultGenerator.genResult(PayEnums.PAY_THREE_COUNT_WITHDRAW.getcode(), PayEnums.PAY_THREE_COUNT_WITHDRAW.getMsg());
-			}
-		} else {// 限制1天最多能提现1次
-			if (countUserWithdraw >= 1) {
-				return ResultGenerator.genResult(PayEnums.PAY_MAX_COUNT_WITHDRAW.getcode(), PayEnums.PAY_MAX_COUNT_WITHDRAW.getMsg());
-			}
+//		if (userDevice.getPlat().equals("iphone")) {// 20180810 临时支持ios
+//		if (countUserWithdraw >= 3) {// 支持1天最多提现3次
+//			return ResultGenerator.genResult(PayEnums.PAY_THREE_COUNT_WITHDRAW.getcode(), PayEnums.PAY_THREE_COUNT_WITHDRAW.getMsg());
+//		}
+//		} else {
+		if (countUserWithdraw >= 1) {// 限制1天最多能提现1次
+			return ResultGenerator.genResult(PayEnums.PAY_MAX_COUNT_WITHDRAW.getcode(), PayEnums.PAY_MAX_COUNT_WITHDRAW.getMsg());
 		}
+//		}
 
 		UserBankDTO userBankDTO = queryUserBank.getData();
 		String bankCode = userBankDTO.getAbbreviation();
@@ -383,6 +385,9 @@ public class CashService {
 				log.info("走天下支付通道提现============================");
 				String merchantStr = thirdPayForType.toString();
 				rEntity = txScanPay.txScanPayFor1(txScanRequestPaidByOthers, merchantStr);
+			} else if (PayForCompanyEnum.TX_PAYQDD.getCode().equals(thirdPayForType)) {// Q多多支付代付
+				log.info("走Q多多支付代付通道提现============================");
+				rEntity = rkPayService.fundApply(txScanRequestPaidByOthers);
 			} else {
 				log.info("空通道,未匹配到提现通道============================");
 			}

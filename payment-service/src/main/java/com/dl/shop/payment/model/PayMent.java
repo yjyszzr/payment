@@ -46,7 +46,17 @@ public class PayMent {
      */
     @Column(name = "is_enable")
     private Integer isEnable;
-
+    /**
+     * 是否固额
+     */
+    @Column(name = "is_readonly")
+    private Integer isReadonly;
+    /**
+     * 是否固额
+     */
+    @Column(name = "read_money")
+    private String readMoney;
+    
     @Column(name = "pay_title")
     private String payTitle;
 
@@ -92,7 +102,23 @@ public class PayMent {
         return payCode;
     }
 
-    /**
+    public Integer getIsReadonly() {
+		return isReadonly;
+	}
+
+	public void setIsReadonly(Integer isReadonly) {
+		this.isReadonly = isReadonly;
+	}
+
+	public String getReadMoney() {
+		return readMoney;
+	}
+
+	public void setReadMoney(String readMoney) {
+		this.readMoney = readMoney;
+	}
+
+	/**
      * 设置支付方式代码
      *
      * @param payCode 支付方式代码

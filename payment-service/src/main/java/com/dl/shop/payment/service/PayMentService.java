@@ -5,7 +5,9 @@ import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -47,6 +49,7 @@ import com.dl.member.param.RecharegeParam;
 import com.dl.member.param.StrParam;
 import com.dl.member.param.SurplusPayParam;
 import com.dl.member.param.UpdateUserRechargeParam;
+import com.dl.member.param.UserAccountParamByType;
 import com.dl.member.param.UserBonusParam;
 import com.dl.member.param.UserDealActionParam;
 import com.dl.order.api.IOrderService;
@@ -78,15 +81,13 @@ import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.kuaijie.entity.KuaiJieJdPayOrderCreateResponse;
 import com.dl.shop.payment.pay.kuaijie.entity.KuaiJieQqPayOrderCreateResponse;
 import com.dl.shop.payment.pay.kuaijie.util.KuaiJiePayUtil;
+import com.dl.shop.payment.pay.lidpay.util.LidPayH5Utils;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
 import com.dl.shop.payment.pay.rongbao.entity.ReqRefundEntity;
 import com.dl.shop.payment.pay.rongbao.entity.RspRefundEntity;
-import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestOrderQuery;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestPay;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanResponsePay;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.util.TXScanPay;
-import com.dl.shop.payment.pay.tianxia.tianxiaScan.util.TdExpBasicFunctions;
-import com.dl.shop.payment.pay.xianfeng.entity.RspApplyBaseEntity;
 import com.dl.shop.payment.pay.xianfeng.util.XianFengPayUtil;
 import com.dl.shop.payment.pay.yifutong.entity.RspYFTEntity;
 import com.dl.shop.payment.pay.yifutong.util.PayYFTUtil;
@@ -96,6 +97,7 @@ import com.dl.shop.payment.utils.QrUtil;
 import com.dl.shop.payment.web.PaymentController;
 
 import lombok.extern.slf4j.Slf4j;
+import net.sf.json.util.JSONUtils;
 
 @Service
 @Slf4j
@@ -115,7 +117,10 @@ public class PayMentService extends AbstractService<PayMent> {
 
 	@Resource
 	private PayLogService payLogService;
-
+	@Resource
+	private LidPayService lidPayService;
+	@Resource
+	private LidPayH5Utils lidutil;
 	@Resource
 	private PayLogMapper payLogMapper;
 
@@ -190,6 +195,32 @@ public class PayMentService extends AbstractService<PayMent> {
 			paymentDTO.setPayType(payment.getPayType());
 			paymentDTO.setPayTitle(payment.getPayTitle());
 			paymentDTO.setPayImg(payment.getPayImg());
+			paymentDTO.setIsReadonly(payment.getIsReadonly());
+			List<Map<String,String>> maps = new ArrayList();
+			if(payment.getReadMoney()!=null && !"".equals(payment.getReadMoney())) {
+				String readMoney[]=payment.getReadMoney().split(";");
+				for (int i = 0; i < readMoney.length; i++) {
+					Map<String,String> remap = new HashMap();
+					if(readMoney[i].contains(":")) {
+						String money[] = readMoney[i].split(":");
+						if(money.length>1) {
+							remap.put("readmoney", money[0]);
+							remap.put("givemoney", money[1]);
+						} else if(money.length==1) {
+							remap.put("readmoney", money[0]);
+							remap.put("givemoney", "0");
+						} else {
+							continue;
+						}
+					}else {
+						remap.put("readmoney", readMoney[i]);
+						remap.put("givemoney", "0");
+					}
+					maps.add(remap);
+				}
+			}
+			paymentDTO.setReadMoney(maps);
+			
 			return paymentDTO;
 		}).collect(Collectors.toList());
 		return list;
@@ -403,13 +434,17 @@ public class PayMentService extends AbstractService<PayMent> {
 		// Integer tradeState = response.getTradeState();
 		if (response.isSucc()) {
 			int currentTime = DateUtil.getCurrentTimeLong();
+			String giveMoney = payLog.getPayMsg();//获取赠送金额
+			if(StringUtils.isNotEmpty(giveMoney)) {
+				giveMoney = "0";
+			}
 			PayLog updatePayLog = new PayLog();
 			updatePayLog.setPayTime(currentTime);
 			payLog.setLastTime(currentTime);
 			updatePayLog.setTradeNo(response.getTrade_no());
 			updatePayLog.setLogId(payLog.getLogId());
 			updatePayLog.setIsPaid(1);
-			updatePayLog.setPayMsg("充值成功");
+			updatePayLog.setPayMsg("充值成功，充值赠送金额："+giveMoney+"元。");
 			int updateRow = payLogMapper.updatePayLogSuccess0To1(updatePayLog);
 			logger.info("充值记录payOrderSn={},更新充值成功,updateRow={}", payLog.getPayOrderSn(), updateRow);
 			if (updateRow > 0) {
@@ -424,6 +459,7 @@ public class PayMentService extends AbstractService<PayMent> {
 				userRechargeService.updateReCharege(updateUserRechargeParam);
 				RecharegeParam recharegeParam = new RecharegeParam();
 				recharegeParam.setAmount(payLog.getOrderAmount());
+				recharegeParam.setGiveAmount(giveMoney);
 				recharegeParam.setPayId(payLog.getPayOrderSn());// 解决充值两次问题
 				String payCode = payLog.getPayCode();
 				if ("app_zfb".equals(payCode)) {
@@ -432,6 +468,8 @@ public class PayMentService extends AbstractService<PayMent> {
 					recharegeParam.setThirdPartName("微信");
 				} else if ("app_rongbao".equals(payCode)) {
 					recharegeParam.setThirdPartName("银行卡");
+				}else {
+					recharegeParam.setThirdPartName(payLog.getPayName());
 				}
 				recharegeParam.setThirdPartPaid(payLog.getOrderAmount());
 				recharegeParam.setUserId(payLog.getUserId());
@@ -510,6 +548,7 @@ public class PayMentService extends AbstractService<PayMent> {
 	 * @return
 	 */
 	public BaseResult<RspOrderQueryDTO> orderOptions(PayLog payLog, RspOrderQueryEntity response) {
+		logger.info("orderOptions()===response*******"+JSONUtils.valueToString(response));
 		int currentTime = DateUtil.getCurrentTimeLong();
 		if (response.isSucc()) {
 			// 2018-07-04
@@ -524,9 +563,9 @@ public class PayMentService extends AbstractService<PayMent> {
 			param.setOrderSn(payLog.getOrderSn());
 			BaseResult<Integer> updateOrderInfo = orderService.updateOrderPayStatus(param);
 
-			logger.info("==============支付成功订单回调[orderService]==================");
+			logger.info("orderOptions()==============支付成功订单回调[orderService]==================");
 			logger.info("payLogId:" + payLog.getLogId() + " payName:" + payLog.getPayName() + " payCode:" + payLog.getPayCode() + " payOrderSn:" + payLog.getPayOrderSn());
-			logger.info("==================================");
+			logger.info("orderOptions()==================================");
 			if (updateOrderInfo.getCode() == 0) {
 				PayLog updatePayLog = new PayLog();
 				updatePayLog.setPayTime(currentTime);
@@ -537,11 +576,13 @@ public class PayMentService extends AbstractService<PayMent> {
 				updatePayLog.setPayMsg("支付成功");
 				payLogService.update(updatePayLog);
 				updatePaybankRecord(payLog.getLogId());
+				insertThirdPayAccount(payLog);//流水记录
 			} else {
 				logger.error("payOrderSn={}" + payLog.getPayOrderSn() + " paylogid=" + "ordersn=" + payLog.getOrderSn() + "更新订单成功状态失败");
 			}
 			return ResultGenerator.genSuccessResult("订单已支付成功！", null);
 		} else if (response.isFail()) {
+			logger.info("orderOptions() isfail==============支付成功订单回调[orderService]==================");
 			// 更新order
 			UpdateOrderPayStatusParam param = new UpdateOrderPayStatusParam();
 			param.setPayStatus(2);
@@ -633,7 +674,7 @@ public class PayMentService extends AbstractService<PayMent> {
 		}
 		String payCode = payLog.getPayCode();
 		String payOrderSn = payLog.getPayOrderSn();
-		if ("app_zfb".equals(payCode)) {
+		/*if ("app_zfb".equals(payCode)) {
 			baseResult = yinHeUtil.orderQuery(true, false, payOrderSn);
 		} else if ("app_rongbao".equals(payCode)) {
 			baseResult = rongUtil.queryOrderInfo(payOrderSn);
@@ -662,6 +703,10 @@ public class PayMentService extends AbstractService<PayMent> {
 			baseResult = kuaiJiePayUtil.queryOrderStatusQQqianBao(payLog.getTradeNo());
 		} else if ("app_kuaijie_pay_jd".equals(payCode)) {
 			baseResult = kuaiJiePayUtil.queryOrderStatusJd(payLog.getTradeNo());
+		} else*/ 
+		logger.info("订单查询状态************："+payLog.getOrderSn());
+		if ("app_lidpay".equals(payCode)) {
+			baseResult = lidPayService.commonOrderQueryLid(payLog.getOrderSn());
 		}
 		if (baseResult == null || baseResult.getCode() != 0) {
 			if (baseResult != null) {
@@ -928,11 +973,36 @@ public class PayMentService extends AbstractService<PayMent> {
 		//判断用户是否有交易
 		UserDealActionParam param = new UserDealActionParam();
 		param.setUserId(SessionUtil.getUserId());
+		log.info("isShutDownPay()====userid={}", param.getUserId());
 		BaseResult<Integer> userDealAction = iSwitchConfigService.userDealAction(param);
 		Integer data = userDealAction.getData();
+		log.info("isShutDownPay()====data={}", data);
 		if(null != data && 0 == data) {
 			return true;
 		}
 		return false;
+	}
+	/**
+	 * 插入第三方支付流水
+	 * @param order
+	 */
+	private void insertThirdPayAccount(PayLog payLog) {
+		Integer userId = payLog.getUserId();
+		if(userId==null) {
+			userId = SessionUtil.getUserId();
+		}
+		
+		UserAccountParamByType userAccountParamByType = new UserAccountParamByType();
+		userAccountParamByType.setPayId(payLog.getLogId());
+		userAccountParamByType.setUserId(userId);
+		userAccountParamByType.setAccountType(Integer.valueOf(3));
+		userAccountParamByType.setAmount(payLog.getOrderAmount());
+		userAccountParamByType.setOrderSn(payLog.getOrderSn());
+		userAccountParamByType.setPaymentName(payLog.getPayName());
+		userAccountParamByType.setThirdPartName(payLog.getPayName());
+		userAccountParamByType.setThirdPartPaid(payLog.getOrderAmount());
+		userAccountParamByType.setBonusPrice(BigDecimal.ZERO);
+		logger.info("支付流水记录useraccount={}"+JSONUtils.valueToString(userAccountParamByType));
+		userAccountService.insertUserAccount(userAccountParamByType);
 	}
 }
