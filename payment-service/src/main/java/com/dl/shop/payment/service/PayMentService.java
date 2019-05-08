@@ -435,7 +435,7 @@ public class PayMentService extends AbstractService<PayMent> {
 		if (response.isSucc()) {
 			int currentTime = DateUtil.getCurrentTimeLong();
 			String giveMoney = payLog.getPayMsg();//获取赠送金额
-			if(StringUtils.isNotEmpty(giveMoney)) {
+			if(!StringUtils.isNotEmpty(giveMoney)) {
 				giveMoney = "0";
 			}
 			PayLog updatePayLog = new PayLog();
