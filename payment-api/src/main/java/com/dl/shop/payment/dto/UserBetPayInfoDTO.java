@@ -9,7 +9,10 @@ import java.util.List;
 public class UserBetPayInfoDTO {
 
 
-	@ApiModelProperty("混合投注具体玩法")
+	@ApiModelProperty(value="混合投注具体玩法")
+	private String tt;
+
+	@ApiModelProperty(value="混合投注具体玩法")
 	private String somp;
 
 	@ApiModelProperty(value="用户id")
