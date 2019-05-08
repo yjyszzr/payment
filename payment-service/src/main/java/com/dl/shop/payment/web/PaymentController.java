@@ -750,7 +750,7 @@ public class PaymentController extends AbstractBaseController {
 					List<Map<String,String>> maps = paymentdto.getReadMoney();
 					for (Map<String, String> map : maps) {
 						String readmoney = map.get("readmoney");
-						if((param.getTotalAmount()+"").equals(readmoney)) {
+						if(param.getTotalAmount()==Integer.parseInt(readmoney)) {
 							givemoney = Integer.parseInt(StringUtils.isNotEmpty(map.get("givemoney"))?"0":map.get("givemoney"));
 							break;
 						}
