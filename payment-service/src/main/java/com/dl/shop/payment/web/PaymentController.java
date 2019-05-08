@@ -1457,7 +1457,7 @@ public class PaymentController extends AbstractBaseController {
 		submitOrderParam.setPassType(dto.getBetType());
 		submitOrderParam.setPlayType("0" + dto.getPlayType());
 		submitOrderParam.setBetNum(dto.getBetNum());
-		submitOrderParam.setPlayTypeDetail(dto.getSomp());
+		submitOrderParam.setPlayTypeDetail(dto.getSy());
 		submitOrderParam.setCathectic(dto.getTimes());
 		if (lotteryPlayClassifyId != 8 && lotteryClassifyId == 1) {
 			if (ticketDetails.size() > 1) {
