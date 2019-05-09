@@ -1,5 +1,7 @@
 package com.dl.shop.payment.api;
 
+import java.util.Map;
+
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,6 +37,12 @@ public interface IpaymentService {
      */
 	@RequestMapping(path="/payment/withdraw/querUserWithDraw", method=RequestMethod.POST)
 	public BaseResult<UserWithdrawDetailDTO> querUserWithDrawDetail(@RequestBody WithDrawSnParam withDrawSnParam);
+	
+	/**
+     * 查询商户余额
+     */
+	@RequestMapping(path="/payment/getShMoney", method=RequestMethod.POST)
+	public BaseResult<Map> getShMoney();
 	
     /**
      * 根据提现单号和userId查询提现单

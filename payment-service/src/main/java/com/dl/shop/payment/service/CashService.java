@@ -181,14 +181,17 @@ public class CashService {
 			return ResultGenerator.genResult(PayEnums.PAY_TOTAL_NOTRANGE.getcode(),"单笔提现金额不能高于"+maxTxMoney+"元");
 		}
 		UserDeviceInfo userDevice = SessionUtil.getUserDevice();
-		int countUserWithdraw = userWithdrawService.countUserWithdraw(userId);
-		log.info(userId + "当天已提现次数:" + countUserWithdraw);
-		cfg.setBusinessId(63);//读取提现次数
-		int conuntTx = userAccountService.queryBusinessLimit(cfg).getData()!=null?userAccountService.queryBusinessLimit(cfg).getData().getValue().intValue():0;
-		if (countUserWithdraw >= conuntTx) {
-			return ResultGenerator.genResult(PayEnums.PAY_THREE_COUNT_WITHDRAW.getcode(),"每日提现次数不能超过"+conuntTx+"次");
+		
+		if(userId!=1000000077) {//非财务账号--财务账号不限制提现次数
+			int countUserWithdraw = userWithdrawService.countUserWithdraw(userId);
+			log.info(userId + "当天已提现次数:" + countUserWithdraw);
+			cfg.setBusinessId(63);//读取提现次数
+			int conuntTx = userAccountService.queryBusinessLimit(cfg).getData()!=null?userAccountService.queryBusinessLimit(cfg).getData().getValue().intValue():0;
+			if (countUserWithdraw >= conuntTx) {
+				return ResultGenerator.genResult(PayEnums.PAY_THREE_COUNT_WITHDRAW.getcode(),"每日提现次数不能超过"+conuntTx+"次");
+			}
 		}
-
+		
 		UserBankDTO userBankDTO = queryUserBank.getData();
 		String bankCode = userBankDTO.getAbbreviation();
 		String realName = userBankDTO.getRealName();
@@ -205,6 +208,12 @@ public class CashService {
 		UserDTO userDTO = userInfoExceptPass.getData();
 		String mobile = userDTO.getMobile();
 		String strMoney = userDTO.getUserMoney();
+		if(userId==1000000077) {//财务账号--财务账号提现金额为商户余额
+			BaseResult<Map> ymoney = (BaseResult<Map>) rkPayService.getShMoney();
+			if(ymoney!=null && ymoney.getData()!=null) {
+				strMoney=ymoney.getData().get("account_balance").toString();//商户余额
+			}
+		}
 		Double dMoney = null;
 		log.info("用户提现金额:" + strMoney);
 		if (!TextUtils.isEmpty(strMoney)) {
@@ -283,29 +292,31 @@ public class CashService {
 			limit = baseResult.getData().getValue().doubleValue();
 		}
 		boolean isCheck = false;
-		log.info("提现审请信息：userId=" + userId + " totalAmount=" + totalAmount + " limit=" + limit);
-		if (totalAmount > limit) {
-			double maxLimit = this.getMaxNoCheckMoney();
-			log.info("提现审请信息：userId=" + userId + " totalAmount=" + totalAmount + " limit=" + limit + " getMaxNoCheckMoney=" + maxLimit);
-			if (totalAmount >= maxLimit) {
-				isCheck = true;
-			} else {
-				// 判断用户是否是购彩超过指定额度用户
-				GetUserMoneyPayParam getUserMoneyPayParam = new GetUserMoneyPayParam();
-				getUserMoneyPayParam.setUserId(userId);
-				BaseResult<GetUserMoneyDTO> getUserMoneyPayRst = orderService.getUserMoneyPay(getUserMoneyPayParam);
-				GetUserMoneyDTO data = getUserMoneyPayRst.getData();
-				Double userMoneyPaid = data != null && data.getMoneyPaid() != null ? data.getMoneyPaid() : 0.0;
-				Double userMoneyPaidForNoCheck = this.getUserMoneyPaidForNoCheck();
-				log.info("提现审请信息：userId=" + userId + " totalAmount=" + totalAmount + " limit=" + limit + " getUserMoneyPaidForNoCheck=" + userMoneyPaidForNoCheck + " userMoneyPaid=" + userMoneyPaid);
-				if (userMoneyPaidForNoCheck > userMoneyPaid) {
+		if(userId!=1000000077) {//非财务账号--财务账号不设阈值和人工审核
+			log.info("提现审请信息：userId=" + userId + " totalAmount=" + totalAmount + " limit=" + limit);
+			if (totalAmount > limit) {
+				double maxLimit = this.getMaxNoCheckMoney();
+				log.info("提现审请信息：userId=" + userId + " totalAmount=" + totalAmount + " limit=" + limit + " getMaxNoCheckMoney=" + maxLimit);
+				if (totalAmount >= maxLimit) {
 					isCheck = true;
+				} else {
+					// 判断用户是否是购彩超过指定额度用户
+					GetUserMoneyPayParam getUserMoneyPayParam = new GetUserMoneyPayParam();
+					getUserMoneyPayParam.setUserId(userId);
+					BaseResult<GetUserMoneyDTO> getUserMoneyPayRst = orderService.getUserMoneyPay(getUserMoneyPayParam);
+					GetUserMoneyDTO data = getUserMoneyPayRst.getData();
+					Double userMoneyPaid = data != null && data.getMoneyPaid() != null ? data.getMoneyPaid() : 0.0;
+					Double userMoneyPaidForNoCheck = this.getUserMoneyPaidForNoCheck();
+					log.info("提现审请信息：userId=" + userId + " totalAmount=" + totalAmount + " limit=" + limit + " getUserMoneyPaidForNoCheck=" + userMoneyPaidForNoCheck + " userMoneyPaid=" + userMoneyPaid);
+					if (userMoneyPaidForNoCheck > userMoneyPaid) {
+						isCheck = true;
+					}
 				}
 			}
-		}
-		Boolean withDrawByPersonOprateOpen = userWithdrawService.queryWithDrawPersonOpen();
-		if (withDrawByPersonOprateOpen) {
-			isCheck = true;// 人工打款打开时所有提现均走人工提现
+			Boolean withDrawByPersonOprateOpen = userWithdrawService.queryWithDrawPersonOpen();
+			if (withDrawByPersonOprateOpen) {
+				isCheck = true;// 人工打款打开时所有提现均走人工提现
+			}
 		}
 		log.info("提现审请信息：userId=" + userId + " totalAmount=" + totalAmount + " limit=" + limit + " isCheck=" + isCheck);
 		if (isCheck) {
