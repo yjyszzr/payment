@@ -283,61 +283,6 @@ public class RkPayService {
 	 * @param savePayLog 支付日志
 	 * @return
 	 */
-	public BaseResult<?> getRkPayQuickUrlByCw(String amtDouble,String quick_mode,String orderSn,String orderId,String paytype,String id_no,String mobile_phone,
-			String bank_name,String user_name,String account_no) {
-		BaseResult<?> payBaseResult = null;
-		try {
-	//		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_EVEN);// 金额转换成分
-			Map<String,Object> param = new HashMap<>();
-	//		支付模式NORMAL-普通模式/YT/RK/GM
-			//NORMAL/YT/RK/GM
-			param.put("quick_mode", quick_mode);// 支付模式
-			param.put("ds_trade_no", orderSn);// 商户订单
-			param.put("pay_fee", amtDouble);// 订单金额
-			param.put("trade_subject", paytype);// 商品名称
-			param.put("trade_memo", paytype);// 商品名称
-			if("YT".equalsIgnoreCase(quick_mode)) {//YT
-				param.put("account_no", account_no);
-				param.put("account_name", user_name);
-				param.put("id_no", id_no);
-				param.put("mobile_phone", mobile_phone);
-			} else if("RK".equalsIgnoreCase(quick_mode)) {	//RK
-				param.put("bank_name", bank_name);
-			} else if("GM".equalsIgnoreCase(quick_mode)) {	//GM
-				param.put("id_no", id_no);
-				param.put("id_name", user_name);
-			}
-			String result = payQuick(param);
-	//		logger.info("Q多多参数值："+JSONUtils.toJSONString(staticv));
-			logger.info("Q多多返回结果："+result+"参数："+staticv.getDs_id());
-			param = null;
-			if (result != null && !"".equals(result)) {
-				Map<String,Object> resultMap = (Map<String, Object>) JSONUtils.parse(result);
-				if("0".equals(resultMap.get("status").toString())) {
-					param = new HashMap<>();
-					param.put("payUrl", resultMap.get("prepay_url"));
-					param.put("orderId", orderId);
-					param.put("payLogId", orderId);
-				}else {
-					param = resultMap;
-				}
-			}
-			if(param!=null) {
-				payBaseResult = ResultGenerator.genSuccessResult("succ", param);
-			}else {
-				payBaseResult = ResultGenerator.genFailResult("网银快捷支付返回数据有误");
-			}
-		}catch (Exception e) {
-			log.info("网银快捷支付返回数据有误");
-			payBaseResult = ResultGenerator.genFailResult("接口内部错误");
-		}
-		return payBaseResult;
-	}
-	/**
-	 * 网银快捷支付payQuick app_rkquick  财务专用商户充值
-	 * @param savePayLog 支付日志
-	 * @return
-	 */
 	public BaseResult<?> getShMoney() {
 		BaseResult<?> payBaseResult = null;
 		try {
