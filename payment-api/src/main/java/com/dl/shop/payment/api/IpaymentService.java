@@ -43,7 +43,7 @@ public interface IpaymentService {
      * 查询商户余额
      */
 	@RequestMapping(path="/payment/getShMoney", method=RequestMethod.POST)
-	public String getShMoney(@RequestBody RechargeParam param);
+	public BaseResult<Map<String,Object>> getShMoney(@RequestBody RechargeParam param);
 	
 	/**
      * 查询商户余额
