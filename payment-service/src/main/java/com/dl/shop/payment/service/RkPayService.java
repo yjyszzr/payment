@@ -283,8 +283,8 @@ public class RkPayService {
 	 * @param savePayLog 支付日志
 	 * @return
 	 */
-	public BaseResult<?> getShMoney() {
-		BaseResult<?> payBaseResult = null;
+	public BaseResult<Map<String,Object>> getShMoney() {
+		BaseResult<Map<String,Object>> payBaseResult = null;
 		try {
 			String result = fundAccountQuery();
 			logger.info("Q多多返回结果："+result+"参数："+staticv.getDs_id());
