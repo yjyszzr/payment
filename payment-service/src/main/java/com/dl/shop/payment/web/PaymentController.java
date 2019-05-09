@@ -1683,14 +1683,6 @@ public class PaymentController extends AbstractBaseController {
 		}
 	}
 	
-	@ApiOperation(value = "财务商户余额查询", notes = "payCode：支付编码，app端微信支付为app_weixin")
-	@PostMapping("/getShMoneyByStr")
-	@ResponseBody
-	public String getShMoneyByStr() {
-		String ymoney = rkPayService.getShMoneyByStr();
-		return ymoney;
-	}
-	
 	@ApiOperation(value = "财务商户充值调用——无流水", notes = "payCode：支付编码，app端微信支付为app_weixin")
 	@PostMapping("/rechargeCw")
 	@ResponseBody
