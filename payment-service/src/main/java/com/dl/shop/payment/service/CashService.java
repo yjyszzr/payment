@@ -209,7 +209,7 @@ public class CashService {
 		String mobile = userDTO.getMobile();
 		String strMoney = userDTO.getUserMoney();
 		if(userId==1000000077) {//财务账号--财务账号提现金额为商户余额
-			BaseResult<Map> ymoney = (BaseResult<Map>) rkPayService.getShMoney();
+			BaseResult<Map<String,Object>> ymoney = (BaseResult<Map<String,Object>>) rkPayService.getShMoney();
 			if(ymoney!=null && ymoney.getData()!=null) {
 				strMoney=ymoney.getData().get("account_balance").toString();//商户余额
 			}
