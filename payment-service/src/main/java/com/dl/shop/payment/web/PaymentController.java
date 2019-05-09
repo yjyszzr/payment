@@ -1674,16 +1674,8 @@ public class PaymentController extends AbstractBaseController {
 	@ApiOperation(value = "财务商户余额查询", notes = "payCode：支付编码，app端微信支付为app_weixin")
 	@PostMapping("/getShMoney")
 	@ResponseBody
-	public BaseResult<Object> getShMoney(@RequestBody RechargeParam param, HttpServletRequest request) {
-		double totalAmount = param.getTotalAmount();
-		String orderSn = SNGenerator.nextSN(SNBusinessCodeEnum.RECHARGE_SN.getCode());
-		if(totalAmount<20) {
-			return ResultGenerator.genFailResult("单笔充值金额不能低于20元 ");
-		}
-		if(totalAmount>5000) {
-			return ResultGenerator.genFailResult("单笔充值金额不能超过5000元 ");
-		}
-		BaseResult payBaseResult = rkPayService.getShMoney();
+	public BaseResult<Map<String,Object>> getShMoney(HttpServletRequest request) {
+		BaseResult<Map<String,Object>> payBaseResult = rkPayService.getShMoney();
 		if (payBaseResult != null) {
 			return payBaseResult;
 		} else {
