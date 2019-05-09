@@ -20,6 +20,7 @@ import com.dl.shop.payment.dto.ValidPayDTO;
 import com.dl.shop.payment.dto.YesOrNoDTO;
 import com.dl.shop.payment.param.PayLogIdParam;
 import com.dl.shop.payment.param.PayLogOrderSnParam;
+import com.dl.shop.payment.param.RechargeParam;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
 import com.dl.shop.payment.param.StrParam;
 import com.dl.shop.payment.param.UserIdParam;
@@ -42,7 +43,14 @@ public interface IpaymentService {
      * 查询商户余额
      */
 	@RequestMapping(path="/payment/getShMoney", method=RequestMethod.POST)
-	public BaseResult<Map<String,Object>> getShMoney();
+	public String getShMoney(@RequestBody RechargeParam param);
+	
+	/**
+     * 查询商户余额
+     */
+	@RequestMapping(path="/payment/getShMoneyByStr", method=RequestMethod.POST)
+	public String getShMoneyByStr();
+	
 	
     /**
      * 根据提现单号和userId查询提现单

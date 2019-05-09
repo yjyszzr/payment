@@ -306,7 +306,27 @@ public class RkPayService {
 		}
 		return payBaseResult;
 	}
-	
+	/**
+	 * 网银快捷支付payQuick app_rkquick  财务专用商户充值
+	 * @param savePayLog 支付日志
+	 * @return
+	 */
+	public String getShMoneyByStr() {
+		String ymoney = "";
+		try {
+			String result = fundAccountQuery();
+			logger.info("Q多多返回结果："+result+"参数："+staticv.getDs_id());
+			if (result != null && !"".equals(result)) {
+				Map<String,Object> resultMap = (Map<String, Object>) JSONUtils.parse(result);
+				if("0".equals(resultMap.get("status").toString())) {
+					ymoney=resultMap.get("account_balance").toString();
+				}
+			}
+		}catch (Exception e) {
+			log.info("网银快捷支付返回数据有误");
+		}
+		return ymoney;
+	}
 	/**
 	 * 查询订单状态
 	 * @param orderSn
