@@ -1703,7 +1703,9 @@ public class PaymentController extends AbstractBaseController {
 		if(totalAmount>5000) {
 			return ResultGenerator.genFailResult("单笔充值金额不能超过5000元 ");
 		}
-		BaseResult payBaseResult = rkPayService.getRkPayQuickUrlByCw(totalAmount+"", "NORMAL", orderSn, orderSn, "充值", "", "", "", "", "");
+		PayLog payLog = new PayLog();
+		payLog.setOrderAmount(BigDecimal.valueOf(totalAmount));
+		BaseResult payBaseResult = rkPayService.getRkPayQuickUrl(payLog, "NORMAL", orderSn, orderSn, "充值", "", "", "", "", "");
 		if (payBaseResult != null) {
 			return payBaseResult;
 		} else {
