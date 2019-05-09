@@ -326,6 +326,91 @@ public class CashService {
 		}
 	}
 
+	
+	public BaseResult<Object> withdrawForAppCw(@RequestBody WithdrawParam param, HttpServletRequest request) {
+		Integer userId = SessionUtil.getUserId();
+		long time1 = System.currentTimeMillis();
+		log.info("time1:" + System.currentTimeMillis());
+
+		String loggerId = "withdrawForApp_" + System.currentTimeMillis();
+		log.info(loggerId + " int /payment/withdraw, userId=" + SessionUtil.getUserId() + ", totalAmount=" + param.getTotalAmount() + ",userBankId=" + param.getUserBankId());
+		SysConfigParam cfg = new SysConfigParam();
+		// bank判断
+		int userBankId = param.getUserBankId();
+		if (userBankId < 1) {
+			log.info(loggerId + "用户很行卡信息id提供有误！");
+			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_BANK_QUERY_ERROR.getcode(), PayEnums.PAY_RONGBAO_BANK_QUERY_ERROR.getMsg());
+		}
+		IDParam idParam = new IDParam();
+		idParam.setId(userBankId);
+		BaseResult<UserBankDTO> queryUserBank = userBankService.queryUserBank(idParam);
+		if (queryUserBank.getCode() != 0) {
+			log.info(loggerId + "用户银行卡信息获取有误！");
+			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_BANK_QUERY_ERROR.getcode(), PayEnums.PAY_RONGBAO_BANK_QUERY_ERROR.getMsg());
+		}
+		String strTotalAmount = param.getTotalAmount();
+		// 长度超过1000000 -> 7位数
+		if (StringUtils.isEmpty(strTotalAmount) || strTotalAmount.length() > 10) {
+			log.info(loggerId + "输入金额超出有效范围");
+			return ResultGenerator.genResult(PayEnums.PAY_TOTAL_NOTRANGE.getcode(), PayEnums.PAY_TOTAL_NOTRANGE.getMsg());
+		}
+		Double totalAmount = null;
+		try {
+			totalAmount = Double.valueOf(strTotalAmount);
+		} catch (Exception ee) {
+			log.error("提现金额转换异常", ee);
+		}
+		if (totalAmount == null || totalAmount <= 0) {
+			log.info(loggerId + "提现金额提供有误！");
+			return ResultGenerator.genResult(PayEnums.PAY_TOTAL_NOTRANGE.getcode(), PayEnums.PAY_TOTAL_NOTRANGE.getMsg());
+		}
+		cfg.setBusinessId(64);//读取最低提现金额
+		int minTxMoney = userAccountService.queryBusinessLimit(cfg).getData()!=null?userAccountService.queryBusinessLimit(cfg).getData().getValue().intValue():0;
+		// 是否小于3元钱
+		if (totalAmount < minTxMoney) {
+			log.info(loggerId + "单笔最低提现金额大于"+minTxMoney+"元~");
+			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_LOW_LIMIT.getcode(),"单笔提现金额不能低于"+minTxMoney+"元");
+		}
+		cfg.setBusinessId(65);//读取最高提现金额
+		int maxTxMoney = userAccountService.queryBusinessLimit(cfg).getData()!=null?userAccountService.queryBusinessLimit(cfg).getData().getValue().intValue():0;
+		// 是否小于3元钱
+		if (totalAmount > maxTxMoney) {
+			log.info(loggerId + "单笔最高提现金额小于"+minTxMoney+"元~");
+			return ResultGenerator.genResult(PayEnums.PAY_TOTAL_NOTRANGE.getcode(),"单笔提现金额不能高于"+maxTxMoney+"元");
+		}
+
+		UserBankDTO userBankDTO = queryUserBank.getData();
+		String bankCode = userBankDTO.getAbbreviation();
+		String realName = userBankDTO.getRealName();
+		String cardNo = userBankDTO.getCardNo();
+		String bankName = userBankDTO.getBankName();
+		cfg.setBusinessId(8);// 提现
+		log.info("[withdrawForApp]" + " 扣除用户余额成功:" + totalAmount);
+		StrParam strParam = new StrParam();
+		strParam.setStr("");
+		BaseResult<UserDTO> userInfoExceptPass = userService.userInfoExceptPassReal(strParam);
+		if (userInfoExceptPass.getCode() != 0) {
+			return ResultGenerator.genFailResult("对不起，用户信息有误！", null);
+		}
+		UserDTO userDTO = userInfoExceptPass.getData();
+		String mobile = userDTO.getMobile();
+		String strMoney = userDTO.getUserMoney();
+		
+		String withdrawalSn = SNGenerator.nextSN(SNBusinessCodeEnum.WITHDRAW_SN.getCode());
+		RspSingleCashEntity rEntity = callThirdGetCash(withdrawalSn, totalAmount, cardNo, bankName, realName, mobile, bankCode, userId);
+		
+		long time3 = System.currentTimeMillis();
+		log.info("time3为：" + time3);
+		log.info("提现所用时间为：" + (time3 - time1));
+		if("S".equalsIgnoreCase(rEntity.status)) {
+			return ResultGenerator.genSuccessResult("提现成功");
+		}else {
+			return ResultGenerator.genFailResult("提现失败");
+		}
+		
+	}
+
+	
 	private double getMaxNoCheckMoney() {
 		double maxNoCheckMoney = userWithdrawMapper.getMaxNoCheckMoney();
 		if (maxNoCheckMoney <= 0) {

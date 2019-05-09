@@ -70,6 +70,15 @@ public class CashController {
 		return cashService.withdrawForApp(param,request);
 	}
 	
+	@ApiOperation(value="财务提现调用", notes="")
+	@PostMapping("/withdrawCw")
+	@ResponseBody
+	public BaseResult<Object> withdrawForAppByCw(@RequestBody WithdrawParam param, HttpServletRequest request){
+		//20181203 加入提示
+		//return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
+		return cashService.withdrawForAppCw(param,request);
+	}
+	
 	@ApiOperation(value="后台管理提现调用", notes="")
 	@PostMapping("/getcash")
 	@ResponseBody

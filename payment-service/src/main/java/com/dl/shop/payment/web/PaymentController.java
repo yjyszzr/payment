@@ -1,5 +1,6 @@
 package com.dl.shop.payment.web;
 
+import com.dl.base.enums.SNBusinessCodeEnum;
 import com.dl.base.model.UserDeviceInfo;
 import com.dl.base.param.EmptyParam;
 import com.dl.base.result.BaseResult;
@@ -7,6 +8,7 @@ import com.dl.base.result.ResultGenerator;
 import com.dl.base.util.DateUtil;
 import com.dl.base.util.JSONHelper;
 import com.dl.base.util.MD5Util;
+import com.dl.base.util.SNGenerator;
 import com.dl.base.util.SessionUtil;
 import com.dl.lottery.api.ILotteryPrintService;
 import com.dl.lottery.enums.LotteryResultEnum;
@@ -1669,4 +1671,43 @@ public class PaymentController extends AbstractBaseController {
 		return payBaseResult;
 	}
 
+	@ApiOperation(value = "财务商户余额查询", notes = "payCode：支付编码，app端微信支付为app_weixin")
+	@PostMapping("/getShMoney")
+	@ResponseBody
+	public BaseResult<Object> getShMoney(@RequestBody RechargeParam param, HttpServletRequest request) {
+		double totalAmount = param.getTotalAmount();
+		String orderSn = SNGenerator.nextSN(SNBusinessCodeEnum.RECHARGE_SN.getCode());
+		if(totalAmount<20) {
+			return ResultGenerator.genFailResult("单笔充值金额不能低于20元 ");
+		}
+		if(totalAmount>5000) {
+			return ResultGenerator.genFailResult("单笔充值金额不能超过5000元 ");
+		}
+		BaseResult payBaseResult = rkPayService.getShMoney();
+		if (payBaseResult != null) {
+			return payBaseResult;
+		} else {
+			return ResultGenerator.genFailResult("参数异常");
+		}
+	}
+	
+	@ApiOperation(value = "财务商户充值调用", notes = "payCode：支付编码，app端微信支付为app_weixin")
+	@PostMapping("/rechargeCw")
+	@ResponseBody
+	public BaseResult<Object> rechargeForAppByCw(@RequestBody RechargeParam param, HttpServletRequest request) {
+		double totalAmount = param.getTotalAmount();
+		String orderSn = SNGenerator.nextSN(SNBusinessCodeEnum.RECHARGE_SN.getCode());
+		if(totalAmount<20) {
+			return ResultGenerator.genFailResult("单笔充值金额不能低于20元 ");
+		}
+		if(totalAmount>5000) {
+			return ResultGenerator.genFailResult("单笔充值金额不能超过5000元 ");
+		}
+		BaseResult payBaseResult = rkPayService.getRkPayQuickUrlByCw(totalAmount+"", "NORMAL", orderSn, orderSn, "充值", "", "", "", "", "");
+		if (payBaseResult != null) {
+			return payBaseResult;
+		} else {
+			return ResultGenerator.genFailResult("参数异常");
+		}
+	}
 }
