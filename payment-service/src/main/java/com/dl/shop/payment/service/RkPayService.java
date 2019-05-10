@@ -11,6 +11,7 @@ import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,11 @@ import com.alibaba.druid.support.json.JSONUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
+import com.dl.member.api.ISMSService;
+import com.dl.member.api.IUserAccountService;
+import com.dl.member.dto.SysConfigDTO;
+import com.dl.member.param.SmsParam;
+import com.dl.member.param.SysConfigParam;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.param.StrParam;
@@ -46,6 +52,11 @@ public class RkPayService {
 	@Resource
 	private StaticV staticv;
 	
+	@Resource
+	private IUserAccountService userAccountService;
+	
+	@Resource
+	private ISMSService smsService;
 	/**WAP支付
 	 * @return
 	 */
@@ -366,6 +377,24 @@ public class RkPayService {
             String status = resultMap.get("status")!=null?resultMap.get("status").toString():"";
             if("0".equals(status)) {//接口成功，并不是提现成功
             	rspEntity.status = "S";
+            	//低于指定数额发短信通知
+            	String strMoney = "0";
+            	BaseResult<RspOrderQueryDTO> ymoney = getShMoney(null);
+    			if(ymoney!=null && ymoney.getData()!=null) {
+    				strMoney=ymoney.getData().getDonationPrice()!=null?ymoney.getData().getDonationPrice():"0";//商户余额
+    			}
+    			SysConfigParam cfg = new SysConfigParam();
+    			cfg.setBusinessId(66);//读取最低商户余额短信通知指标
+    			SysConfigDTO sysConfigDTO = userAccountService.queryBusinessLimit(cfg)!=null?userAccountService.queryBusinessLimit(cfg).getData():new SysConfigDTO();
+    			int totalYmoney = sysConfigDTO.getValue()!=null?sysConfigDTO.getValue().intValue():0;
+    			String mobile = sysConfigDTO.getValueTxt();
+    			if(totalYmoney>Double.parseDouble(strMoney)) {//发送短信
+    				SmsParam smsParam = new SmsParam();
+    				smsParam.setSmsType("4");
+    				smsParam.setMobile(mobile!=null?mobile:"");
+    				smsService.sendSmsCode(smsParam);
+    			}
+    			
             } else {//接口失败
             	rspEntity.status = "F";
             }
