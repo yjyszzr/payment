@@ -14,8 +14,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.http.util.TextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +28,7 @@ import com.alibaba.fastjson.JSON;
 import com.dl.base.constant.CommonConstants;
 import com.dl.base.enums.SNBusinessCodeEnum;
 import com.dl.base.model.UserDeviceInfo;
+import com.dl.base.param.EmptyParam;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.base.util.DateUtil;
@@ -58,6 +57,7 @@ import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dao.UserWithdrawLogMapper;
 import com.dl.shop.payment.dao.UserWithdrawMapper;
 import com.dl.shop.payment.dto.WithdrawalSnDTO;
+import com.dl.shop.payment.dto.YmoneyDTO;
 import com.dl.shop.payment.enums.CashEnums;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.enums.PayForCompanyEnum;
@@ -75,6 +75,8 @@ import com.dl.shop.payment.pay.xianfeng.cash.config.Constants;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
 import com.dl.shop.payment.pay.xianfeng.cash.util.XianFengCashUtil;
 import com.ucf.sdk.util.AESCoder;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 代支付
@@ -209,9 +211,10 @@ public class CashService {
 		String mobile = userDTO.getMobile();
 		String strMoney = userDTO.getUserMoney();
 		if(userId==1000000077) {//财务账号--财务账号提现金额为商户余额
-			BaseResult<Map<String,Object>> ymoney = (BaseResult<Map<String,Object>>) rkPayService.getShMoney();
+			EmptyParam emptyParam = new EmptyParam();
+			BaseResult<YmoneyDTO> ymoney = rkPayService.getShMoney(emptyParam);
 			if(ymoney!=null && ymoney.getData()!=null) {
-				strMoney=ymoney.getData().get("account_balance").toString();//商户余额
+				strMoney=ymoney.getData().getAccount_balance()!=null?ymoney.getData().getAccount_balance():"0";//商户余额
 			}
 		}
 		Double dMoney = null;
