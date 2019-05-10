@@ -183,8 +183,9 @@ public class CashService {
 			return ResultGenerator.genResult(PayEnums.PAY_TOTAL_NOTRANGE.getcode(),"单笔提现金额不能高于"+maxTxMoney+"元");
 		}
 		UserDeviceInfo userDevice = SessionUtil.getUserDevice();
-		
-		if(userId!=1000000077) {//非财务账号--财务账号不限制提现次数
+		cfg.setBusinessId(67);//读取财务账号id
+		int cwuserId = userAccountService.queryBusinessLimit(cfg).getData()!=null?userAccountService.queryBusinessLimit(cfg).getData().getValue().intValue():0;
+		if(userId!=cwuserId) {//非财务账号--财务账号不限制提现次数
 			int countUserWithdraw = userWithdrawService.countUserWithdraw(userId);
 			log.info(userId + "当天已提现次数:" + countUserWithdraw);
 			cfg.setBusinessId(63);//读取提现次数
@@ -210,7 +211,7 @@ public class CashService {
 		UserDTO userDTO = userInfoExceptPass.getData();
 		String mobile = userDTO.getMobile();
 		String strMoney = userDTO.getUserMoney();
-		if(userId==1000000077) {//财务账号--财务账号提现金额为商户余额
+		if(userId==cwuserId) {//财务账号--财务账号提现金额为商户余额
 			com.dl.shop.payment.param.StrParam emptyParam = new com.dl.shop.payment.param.StrParam();
 			BaseResult<RspOrderQueryDTO> ymoney = rkPayService.getShMoney(emptyParam);
 			if(ymoney!=null && ymoney.getData()!=null) {
@@ -295,7 +296,7 @@ public class CashService {
 			limit = baseResult.getData().getValue().doubleValue();
 		}
 		boolean isCheck = false;
-		if(userId!=1000000077) {//非财务账号--财务账号不设阈值和人工审核
+		if(userId!=cwuserId) {//非财务账号--财务账号不设阈值和人工审核
 			log.info("提现审请信息：userId=" + userId + " totalAmount=" + totalAmount + " limit=" + limit);
 			if (totalAmount > limit) {
 				double maxLimit = this.getMaxNoCheckMoney();

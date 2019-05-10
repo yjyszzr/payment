@@ -11,8 +11,11 @@ import com.dl.base.result.ResultGenerator;
 import com.dl.base.service.AbstractService;
 import com.dl.base.util.DateUtil;
 import com.dl.base.util.SessionUtil;
+import com.dl.member.api.IUserAccountService;
+import com.dl.member.param.SysConfigParam;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +30,9 @@ public class PayLogService extends AbstractService<PayLog> {
 	private PayLogMapper payLogMapper;
 	@Resource
 	private RkPayService rkPayService;
+	@Resource
+	private IUserAccountService userAccountService;
+	
 	public PayLog savePayLog(PayLog payLog) {
 //		PayLog existPayLog = payLogMapper.existPayLog(payLog);
 //		if(null != existPayLog && existPayLog.getLogId() != null) {
@@ -78,7 +84,10 @@ public class PayLogService extends AbstractService<PayLog> {
 	
 	public BaseResult<PayLogDTO> queryPayLogByPayLogId(Integer payLogId) {
 		Integer userId = SessionUtil.getUserId();
-		if(userId==1000000077) {//财务账号
+		SysConfigParam cfg = new SysConfigParam();
+		cfg.setBusinessId(67);//读取财务账号id
+		int cwuserId = userAccountService.queryBusinessLimit(cfg).getData()!=null?userAccountService.queryBusinessLimit(cfg).getData().getValue().intValue():0;
+		if(userId==cwuserId) {//财务账号
 			com.dl.shop.payment.param.StrParam emptyParam = new com.dl.shop.payment.param.StrParam();
 			String strMoney="0";
 			BaseResult<RspOrderQueryDTO> ymoney = rkPayService.getShMoney(emptyParam);
