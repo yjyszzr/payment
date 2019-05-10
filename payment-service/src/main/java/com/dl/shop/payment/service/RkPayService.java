@@ -16,6 +16,7 @@ import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import com.alibaba.druid.support.json.JSONUtils;
@@ -42,6 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
+@Transactional
 public class RkPayService {
 	private final static Logger logger = LoggerFactory.getLogger(PaymentController.class);
 	
