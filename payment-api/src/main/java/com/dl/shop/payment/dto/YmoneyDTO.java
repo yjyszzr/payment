@@ -7,7 +7,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-@Api("支付类型信息")
+@Api("账户余额信息")
 @Data
 public class YmoneyDTO {
 
