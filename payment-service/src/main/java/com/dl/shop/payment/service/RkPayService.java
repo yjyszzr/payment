@@ -392,6 +392,7 @@ public class RkPayService {
     				SmsParam smsParam = new SmsParam();
     				smsParam.setSmsType("4");
     				smsParam.setMobile(mobile!=null?mobile:"");
+    				log.info("进入发送短信环节：接受短信手机号："+mobile);
     				smsService.sendSmsCode(smsParam);
     			}
     			
