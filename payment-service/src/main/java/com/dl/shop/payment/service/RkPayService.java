@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.druid.support.json.JSONUtils;
 import com.alibaba.fastjson.JSONObject;
+import com.dl.base.param.EmptyParam;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.shop.payment.dto.YmoneyDTO;
@@ -280,7 +281,7 @@ public class RkPayService {
 	 * @param savePayLog 支付日志
 	 * @return
 	 */
-	public BaseResult<YmoneyDTO> getShMoney() {
+	public BaseResult<YmoneyDTO> getShMoney(EmptyParam emptyParam ) {
 		BaseResult<YmoneyDTO> payBaseResult = null;
 		try {
 			String result = fundAccountQuery();
