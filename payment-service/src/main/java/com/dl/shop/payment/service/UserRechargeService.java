@@ -25,6 +25,7 @@ import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dao.UserRechargeMapper;
 import com.dl.shop.payment.dto.DonationPriceDTO;
 import com.dl.shop.payment.dto.RechargeUserDTO;
+import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.dto.YesOrNoDTO;
 import com.dl.shop.payment.model.UserRecharge;
 
@@ -40,6 +41,8 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
     @Resource
     private IUserAccountService userAccountService;
  
+    @Resource
+	private RkPayService rkPayService;
     /**
      * 查询是否成功充值过：0-未充值过 1-充值过
      * @return
@@ -58,6 +61,13 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
     		yesOrNoDTO.setYesOrNo(ProjectConstant.hasRecharged);
     	}
     	
+    	String strMoney = "0";
+    	BaseResult<RspOrderQueryDTO> ymoney = rkPayService.getShMoney(null);
+		if(ymoney!=null && ymoney.getData()!=null) {
+			strMoney=ymoney.getData().getDonationPrice()!=null?ymoney.getData().getDonationPrice():"0";//商户余额
+		}
+		yesOrNoDTO.setYmoney(strMoney);
+		
     	return ResultGenerator.genSuccessResult("查询是否充值成功",yesOrNoDTO);
     }
     
