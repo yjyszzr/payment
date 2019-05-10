@@ -1674,7 +1674,7 @@ public class PaymentController extends AbstractBaseController {
 	@ApiOperation(value = "财务商户余额查询", notes = "payCode：支付编码，app端微信支付为app_weixin")
 	@PostMapping("/getShMoney")
 	@ResponseBody
-	public BaseResult<RspOrderQueryDTO> getShMoney(@RequestBody EmptyParam emptyParam ) {
+	public BaseResult<RspOrderQueryDTO> getShMoney(@RequestBody com.dl.shop.payment.param.StrParam emptyParam) {
 		BaseResult<RspOrderQueryDTO> payBaseResult = rkPayService.getShMoney(emptyParam);
 		if (payBaseResult != null) {
 			return payBaseResult;

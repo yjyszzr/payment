@@ -40,7 +40,7 @@ public interface IpaymentService {
      * 根据提现单号查询提现单
      */
 	@RequestMapping(path="/payment/getShMoney", method=RequestMethod.POST)
-	public BaseResult<RspOrderQueryDTO> getShMoney(@RequestBody EmptyParam emptyParam);
+	public BaseResult<RspOrderQueryDTO> getShMoney(@RequestBody StrParam strParam);
 	
     /**
      * 根据提现单号和userId查询提现单

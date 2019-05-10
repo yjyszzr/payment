@@ -16,11 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.druid.support.json.JSONUtils;
 import com.alibaba.fastjson.JSONObject;
-import com.dl.base.param.EmptyParam;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.model.PayLog;
+import com.dl.shop.payment.param.StrParam;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.rkpay.util.Client;
 import com.dl.shop.payment.pay.rkpay.util.FundApplyConfig;
@@ -281,7 +281,7 @@ public class RkPayService {
 	 * @param savePayLog 支付日志
 	 * @return
 	 */
-	public BaseResult<RspOrderQueryDTO> getShMoney(EmptyParam emptyParam ) {
+	public BaseResult<RspOrderQueryDTO> getShMoney(StrParam emptyParam ) {
 		BaseResult<RspOrderQueryDTO> payBaseResult = null;
 		try {
 			String result = fundAccountQuery();
