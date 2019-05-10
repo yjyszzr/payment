@@ -1,9 +1,6 @@
 package com.dl.shop.payment.api;
 
-import java.util.Map;
-
 import org.springframework.cloud.netflix.feign.FeignClient;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -18,9 +15,9 @@ import com.dl.shop.payment.dto.UserWithdrawDTO;
 import com.dl.shop.payment.dto.UserWithdrawDetailDTO;
 import com.dl.shop.payment.dto.ValidPayDTO;
 import com.dl.shop.payment.dto.YesOrNoDTO;
+import com.dl.shop.payment.dto.YmoneyDTO;
 import com.dl.shop.payment.param.PayLogIdParam;
 import com.dl.shop.payment.param.PayLogOrderSnParam;
-import com.dl.shop.payment.param.RechargeParam;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
 import com.dl.shop.payment.param.StrParam;
 import com.dl.shop.payment.param.UserIdParam;
@@ -40,10 +37,10 @@ public interface IpaymentService {
 	public BaseResult<UserWithdrawDetailDTO> querUserWithDrawDetail(@RequestBody WithDrawSnParam withDrawSnParam);
 	
 	/**
-     * 查询商户余额
+     * 根据提现单号查询提现单
      */
 	@RequestMapping(path="/payment/getShMoney", method=RequestMethod.POST)
-	public BaseResult<Map<String,Object>> getShMoney();
+	public BaseResult<YmoneyDTO> getShMoney(@RequestBody EmptyParam emptyParam);
 	
     /**
      * 根据提现单号和userId查询提现单

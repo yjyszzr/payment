@@ -1,28 +1,24 @@
 package com.dl.shop.payment.service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.net.MalformedURLException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 
 import javax.annotation.Resource;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import com.alibaba.druid.support.json.JSONUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
+import com.dl.shop.payment.dto.YmoneyDTO;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.rkpay.util.Client;
@@ -35,7 +31,6 @@ import com.dl.shop.payment.pay.rkpay.util.ReFundConfig;
 import com.dl.shop.payment.pay.rkpay.util.ReFundQueryConfig;
 import com.dl.shop.payment.pay.rkpay.util.StaticV;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestPaidByOthers;
-import com.dl.shop.payment.pay.tianxia.tianxiaScan.util.TdExpBasicFunctions;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
 import com.dl.shop.payment.web.PaymentController;
 
@@ -285,20 +280,28 @@ public class RkPayService {
 	 * @param savePayLog 支付日志
 	 * @return
 	 */
-	public BaseResult<Map<String,Object>> getShMoney() {
-		BaseResult<Map<String,Object>> payBaseResult = null;
+	public BaseResult<YmoneyDTO> getShMoney() {
+		BaseResult<YmoneyDTO> payBaseResult = null;
 		try {
 			String result = fundAccountQuery();
 			logger.info("Q多多返回结果："+result+"参数："+staticv.getDs_id());
 			Map<String,Object> param = null;
+			YmoneyDTO ymoneyDTO = new YmoneyDTO();
 			if (result != null && !"".equals(result)) {
 				Map<String,Object> resultMap = (Map<String, Object>) JSONUtils.parse(result);
 				if("0".equals(resultMap.get("status").toString())) {
 					param = resultMap;
+					ymoneyDTO.setStatus("0");
+					ymoneyDTO.setMessage(resultMap.get("message").toString());
+					ymoneyDTO.setAccount_balance(resultMap.get("account_balance").toString());
+				}else {
+					ymoneyDTO.setStatus("0");
+					ymoneyDTO.setMessage(resultMap.get("message").toString());
 				}
 			}
+
 			if(param!=null) {
-				payBaseResult = ResultGenerator.genSuccessResult("succ", param);
+				payBaseResult = ResultGenerator.genSuccessResult("succ", ymoneyDTO);
 			}else {
 				payBaseResult = ResultGenerator.genFailResult("商户余额查询失败");
 			}
