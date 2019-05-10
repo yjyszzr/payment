@@ -56,8 +56,8 @@ import com.dl.order.param.GetUserMoneyPayParam;
 import com.dl.shop.payment.core.ProjectConstant;
 import com.dl.shop.payment.dao.UserWithdrawLogMapper;
 import com.dl.shop.payment.dao.UserWithdrawMapper;
+import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.dto.WithdrawalSnDTO;
-import com.dl.shop.payment.dto.YmoneyDTO;
 import com.dl.shop.payment.enums.CashEnums;
 import com.dl.shop.payment.enums.PayEnums;
 import com.dl.shop.payment.enums.PayForCompanyEnum;
@@ -212,9 +212,9 @@ public class CashService {
 		String strMoney = userDTO.getUserMoney();
 		if(userId==1000000077) {//财务账号--财务账号提现金额为商户余额
 			EmptyParam emptyParam = new EmptyParam();
-			BaseResult<YmoneyDTO> ymoney = rkPayService.getShMoney(emptyParam);
+			BaseResult<RspOrderQueryDTO> ymoney = rkPayService.getShMoney(emptyParam);
 			if(ymoney!=null && ymoney.getData()!=null) {
-				strMoney=ymoney.getData().getAccount_balance()!=null?ymoney.getData().getAccount_balance():"0";//商户余额
+				strMoney=ymoney.getData().getDonationPrice()!=null?ymoney.getData().getDonationPrice():"0";//商户余额
 			}
 		}
 		Double dMoney = null;

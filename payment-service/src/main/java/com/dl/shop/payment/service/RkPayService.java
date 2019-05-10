@@ -19,7 +19,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dl.base.param.EmptyParam;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
-import com.dl.shop.payment.dto.YmoneyDTO;
+import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.rkpay.util.Client;
@@ -281,23 +281,23 @@ public class RkPayService {
 	 * @param savePayLog 支付日志
 	 * @return
 	 */
-	public BaseResult<YmoneyDTO> getShMoney(EmptyParam emptyParam ) {
-		BaseResult<YmoneyDTO> payBaseResult = null;
+	public BaseResult<RspOrderQueryDTO> getShMoney(EmptyParam emptyParam ) {
+		BaseResult<RspOrderQueryDTO> payBaseResult = null;
 		try {
 			String result = fundAccountQuery();
 			logger.info("Q多多返回结果："+result+"参数："+staticv.getDs_id());
 			Map<String,Object> param = null;
-			YmoneyDTO ymoneyDTO = new YmoneyDTO();
+			RspOrderQueryDTO ymoneyDTO = new RspOrderQueryDTO();
 			if (result != null && !"".equals(result)) {
 				Map<String,Object> resultMap = (Map<String, Object>) JSONUtils.parse(result);
 				if("0".equals(resultMap.get("status").toString())) {
 					param = resultMap;
-					ymoneyDTO.setStatus("0");
-					ymoneyDTO.setMessage(resultMap.get("message").toString());
-					ymoneyDTO.setAccount_balance(resultMap.get("account_balance").toString());
+					ymoneyDTO.setCode(0);
+					ymoneyDTO.setMsg(resultMap.get("message").toString());
+					ymoneyDTO.setDonationPrice(resultMap.get("account_balance").toString());
 				}else {
-					ymoneyDTO.setStatus("0");
-					ymoneyDTO.setMessage(resultMap.get("message").toString());
+					ymoneyDTO.setCode(1);
+					ymoneyDTO.setMsg(resultMap.get("message").toString());
 				}
 			}
 

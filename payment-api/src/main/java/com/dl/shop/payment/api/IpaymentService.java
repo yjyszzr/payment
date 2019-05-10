@@ -10,12 +10,12 @@ import com.dl.base.result.BaseResult;
 import com.dl.shop.payment.dto.PayLogDTO;
 import com.dl.shop.payment.dto.PayLogDetailDTO;
 import com.dl.shop.payment.dto.PriceDTO;
+import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.dto.UserRechargeDTO;
 import com.dl.shop.payment.dto.UserWithdrawDTO;
 import com.dl.shop.payment.dto.UserWithdrawDetailDTO;
 import com.dl.shop.payment.dto.ValidPayDTO;
 import com.dl.shop.payment.dto.YesOrNoDTO;
-import com.dl.shop.payment.dto.YmoneyDTO;
 import com.dl.shop.payment.param.PayLogIdParam;
 import com.dl.shop.payment.param.PayLogOrderSnParam;
 import com.dl.shop.payment.param.RollbackOrderAmountParam;
@@ -40,7 +40,7 @@ public interface IpaymentService {
      * 根据提现单号查询提现单
      */
 	@RequestMapping(path="/payment/getShMoney", method=RequestMethod.POST)
-	public BaseResult<YmoneyDTO> getShMoney(@RequestBody EmptyParam emptyParam);
+	public BaseResult<RspOrderQueryDTO> getShMoney(@RequestBody EmptyParam emptyParam);
 	
     /**
      * 根据提现单号和userId查询提现单
