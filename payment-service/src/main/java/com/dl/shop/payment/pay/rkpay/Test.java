@@ -173,21 +173,21 @@ public class Test {
     public static void main(String [] args){
     	Map<String,Object> configMap = new HashMap<>();
     	configMap.put("quick_mode", "NORMAL");// 支付模式
-    	configMap.put("ds_trade_no", "sfsfs");// 商户订单
-    	configMap.put("pay_fee", "20");// 订单金额
+    	configMap.put("ds_trade_no", "sfsfsdss");// 商户订单
+    	configMap.put("pay_fee", "800");// 订单金额
 		configMap.put("trade_subject", "sf");// 商品名称
 		configMap.put("trade_memo", "sf");// 商品名称
-//        Test test=new Test();
+        Test test=new Test();
 //        System.out.println(test.randomNum());
 //        System.out.println(test.fundApply(configMap));
-//        System.out.println(test.fundAccountQuery(configMap));
+        System.out.println(test.fundAccountQuery(configMap));
 //        System.out.println(test.fundTradeQuery(configMap));
 //        Map ms = (Map) JSONUtils.parse();
 //        System.out.println(test.payQuick(configMap));
 //        System.out.println(test.payWap(configMap));
 //        System.out.println(test.payQrcode(configMap));
-		DecimalFormat df = new DecimalFormat("######0.00");   
-        double fee_money = Double.parseDouble("20");
-        System.out.println(df.format(fee_money)+"");
+//		DecimalFormat df = new DecimalFormat("######0.00");   
+//        double fee_money = Double.parseDouble("20");
+//        System.out.println(df.format(fee_money)+"");
     }
 }

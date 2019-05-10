@@ -11,6 +11,4 @@ public class YesOrNoDTO {
 	@ApiModelProperty("0-未充值过 1-充值过")
     private String yesOrNo;
 
-	@ApiModelProperty("账户余额")
-    private String ymoney;
 }
