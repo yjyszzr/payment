@@ -248,7 +248,7 @@ public class CashService {
 		WithdrawalSnDTO withdrawalSnDTO = userWithdrawService.saveWithdraw(userWithdrawParam);
 		if (StringUtils.isEmpty(withdrawalSnDTO.getWithdrawalSn())) {
 			log.info(loggerId + " 生成提现单失败");
-			return ResultGenerator.genFailResult("提现失败！", null);
+			return ResultGenerator.genFailResult("网络错误，提现失败，请联系客服！", null);
 		}
 		log.info("[withdrawForApp]" + "提现单号:" + withdrawalSn + "生成提现单成功");
 		// stringRedisTemplate.delete("WS:"+String.valueOf(userId));
@@ -571,10 +571,10 @@ public class CashService {
 				userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
 				userWithdrawLog.setWithdrawSn(widthDrawSn);
 				userWithdrawLogService.save(userWithdrawLog);
-				return ResultGenerator.genResult(PayEnums.CASH_FAILURE.getcode(), "提现失败");
+				return ResultGenerator.genResult(PayEnums.CASH_FAILURE.getcode(), "提现审核中！");
 			} else {
 				log.warn("withdrawSn={},更新提现状态3to4失败", widthDrawSn);
-				return ResultGenerator.genResult(PayEnums.CASH_FAILURE.getcode(), "提现失败");
+				return ResultGenerator.genResult(PayEnums.CASH_FAILURE.getcode(), "提现审核中！");
 			}
 		} else if (rEntity.isTradeDoing()) {
 			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_APPLY_SUC.getcode(), PayEnums.PAY_WITHDRAW_APPLY_SUC.getMsg());
