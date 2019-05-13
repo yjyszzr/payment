@@ -473,6 +473,7 @@ public class PayMentService extends AbstractService<PayMent> {
 				}
 				recharegeParam.setThirdPartPaid(payLog.getOrderAmount());
 				recharegeParam.setUserId(payLog.getUserId());
+				recharegeParam.setOrderSn(payLog.getOrderSn());
 				BaseResult<String> rechargeRst = userAccountService.rechargeUserMoneyLimit(recharegeParam);
 				if (rechargeRst.getCode() != 0) {
 					logger.error(payLog.getPayOrderSn() + " 给个人用户充值：code" + rechargeRst.getCode() + "message:" + rechargeRst.getMsg());
