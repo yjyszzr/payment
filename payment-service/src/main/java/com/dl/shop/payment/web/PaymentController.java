@@ -731,7 +731,7 @@ public class PaymentController extends AbstractBaseController {
 				return ResultGenerator.genFailResult("请选择固额充值 ");
 			}
 			if(totalAmount>3000) {
-				return ResultGenerator.genFailResult("请选择固额充值 ");
+				return ResultGenerator.genFailResult("单笔充值金额不能超过3000元 ");
 			}
 		}
 		
