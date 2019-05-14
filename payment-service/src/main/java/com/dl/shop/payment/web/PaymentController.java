@@ -728,10 +728,10 @@ public class PaymentController extends AbstractBaseController {
 			}
 		} else if("app_rkwap".equals(param.getPayCode())) {
 			if(totalAmount<80) {
-				return ResultGenerator.genFailResult("单笔充值金额不能低于80元 ");
+				return ResultGenerator.genFailResult("请选择固额充值 ");
 			}
 			if(totalAmount>3000) {
-				return ResultGenerator.genFailResult("单笔充值金额不能超过3000元 ");
+				return ResultGenerator.genFailResult("请选择固额充值 ");
 			}
 		}
 		
