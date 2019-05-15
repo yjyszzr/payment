@@ -215,8 +215,6 @@ public class RkPayService {
 					param.put("payUrl", resultMap.get("prepay_url"));
 					param.put("orderId", orderId);
 					param.put("payLogId", savePayLog.getLogId());
-				}else {
-					param = resultMap;
 				}
 			}
 			if(param!=null) {
@@ -271,8 +269,6 @@ public class RkPayService {
 					param.put("payUrl", resultMap.get("prepay_url"));
 					param.put("orderId", orderId);
 					param.put("payLogId", savePayLog.getLogId());
-				}else {
-					param = resultMap;
 				}
 			}
 			if(param!=null) {

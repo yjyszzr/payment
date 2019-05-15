@@ -223,7 +223,7 @@ public class LidPayService {
 					return resultObj;
 				} else {
 					logger.info("METHOD PAY()华移支付验证签名失败");
-					return resultObj;
+					return null;
 				}
 			} else {
 				logger.info("METHOD PAY()华移支付失败");
