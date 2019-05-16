@@ -221,7 +221,7 @@ public class JhPayZFBDemo {
 		JhPayZFBDemo apay = new JhPayZFBDemo();
 		Map<String,String> param = new HashMap<>();
 		param.put("out_trade_no", "CS12347129");// 商户订单
-		param.put("price", "1");// 订单金额 单位元
+		param.put("price", "-1");// 订单金额 单位元
 		param.put("goodsname", "测试");//商品名(你们定, 不可用中文)
 		// ************订单生成，当返回result中code=1时，代表订单生成成功，需要验签************
 		apay.pay(param);

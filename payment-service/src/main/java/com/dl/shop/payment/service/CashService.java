@@ -211,7 +211,7 @@ public class CashService {
 		UserDTO userDTO = userInfoExceptPass.getData();
 		String mobile = userDTO.getMobile();
 		String strMoney = userDTO.getUserMoney();
-		if(userId==cwuserId) {//财务账号--财务账号提现金额为商户余额
+		if(userId!=null && userId==cwuserId) {//财务账号--财务账号提现金额为商户余额
 			com.dl.shop.payment.param.StrParam emptyParam = new com.dl.shop.payment.param.StrParam();
 			BaseResult<RspOrderQueryDTO> ymoney = rkPayService.getShMoney(emptyParam);
 			if(ymoney!=null && ymoney.getData()!=null) {

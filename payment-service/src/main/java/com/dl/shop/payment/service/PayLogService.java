@@ -87,7 +87,7 @@ public class PayLogService extends AbstractService<PayLog> {
 		SysConfigParam cfg = new SysConfigParam();
 		cfg.setBusinessId(67);//读取财务账号id
 		int cwuserId = userAccountService.queryBusinessLimit(cfg).getData()!=null?userAccountService.queryBusinessLimit(cfg).getData().getValue().intValue():0;
-		if(userId==cwuserId) {//财务账号
+		if(userId!=null && userId==cwuserId) {//财务账号
 			com.dl.shop.payment.param.StrParam emptyParam = new com.dl.shop.payment.param.StrParam();
 			String strMoney="0";
 			BaseResult<RspOrderQueryDTO> ymoney = rkPayService.getShMoney(emptyParam);
