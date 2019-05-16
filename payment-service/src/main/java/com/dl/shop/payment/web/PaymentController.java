@@ -138,7 +138,7 @@ public class PaymentController extends AbstractBaseController {
 	@Resource
 	private ISysConfigService iSysConfigService;
 
-//	@Resource
+//	@Resource 
 //	private IStoreUserMoneyService iStoreUserMoneyService;
 
 	@ApiOperation(value = "系统可用第三方支付方式", notes = "系统可用第三方支付方式")
