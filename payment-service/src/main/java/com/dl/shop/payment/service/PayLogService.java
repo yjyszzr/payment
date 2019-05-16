@@ -34,7 +34,7 @@ public class PayLogService extends AbstractService<PayLog> {
 	private IUserAccountService userAccountService;
 	
 	public PayLog savePayLog(PayLog payLog) {
-//		PayLog existPayLog = payLogMapper. existPayLog(payLog);
+//		PayLog existPayLog = payLogMapper.existPayLog(payLog);
 //		if(null != existPayLog && existPayLog.getLogId() != null) {
 //			return existPayLog;
 //		}
