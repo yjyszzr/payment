@@ -41,8 +41,8 @@ import com.dl.shop.payment.service.*;
 import com.dl.shop.payment.utils.DateUtilPay;
 import com.dl.shop.payment.utils.QrUtil;
 import com.dl.shop.payment.utils.WxpayUtil;
-import com.dl.store.api.IStoreUserMoneyService;
-import com.dl.store.param.FirstPayTimeParam;
+//import com.dl.store.api.IStoreUserMoneyService;
+//import com.dl.store.param.FirstPayTimeParam;
 import io.swagger.annotations.ApiOperation;
 import net.sf.json.util.JSONUtils;
 import org.apache.commons.codec.binary.Base64;
@@ -138,8 +138,8 @@ public class PaymentController extends AbstractBaseController {
 	@Resource
 	private ISysConfigService iSysConfigService;
 
-	@Resource
-	private IStoreUserMoneyService iStoreUserMoneyService;
+//	@Resource
+//	private IStoreUserMoneyService iStoreUserMoneyService;
 
 	@ApiOperation(value = "系统可用第三方支付方式", notes = "系统可用第三方支付方式")
 	@PostMapping("/allPayment")
@@ -1537,14 +1537,14 @@ public class PaymentController extends AbstractBaseController {
 					return ResultGenerator.genFailResult("支付失败！");
 				}
 
-				//单纯余额支付的时候记录第一次支付时间
-				logger.info("开始记录第一次支付时间");
-				FirstPayTimeParam firstPayTimeParam = new FirstPayTimeParam();
-				firstPayTimeParam.setOrderSn(orderSn);
-				BaseResult<String> storeUserMoneyRst = iStoreUserMoneyService.recordFirstPayTime(firstPayTimeParam);
-				if(storeUserMoneyRst.getCode() == 0){
-					logger.info(storeUserMoneyRst.getMsg());
-				}
+//				//单纯余额支付的时候记录第一次支付时间
+//				logger.info("开始记录第一次支付时间");
+//				FirstPayTimeParam firstPayTimeParam = new FirstPayTimeParam();
+//				firstPayTimeParam.setOrderSn(orderSn);
+//				BaseResult<String> storeUserMoneyRst = iStoreUserMoneyService.recordFirstPayTime(firstPayTimeParam);
+//				if(storeUserMoneyRst.getCode() == 0){
+//					logger.info(storeUserMoneyRst.getMsg());
+//				}
 
 			}
 			if (!hasThird) {
@@ -1681,15 +1681,15 @@ public class PaymentController extends AbstractBaseController {
 		logger.info("支付成功后："+JSONUtils.valueToString(payBaseResult));
 
 		//包含了第三方支付的时候记录第一次支付时间
-		if(payBaseResult.getCode() == 0){
-			logger.info("开始记录第一次支付时间");
-			FirstPayTimeParam firstPayTimeParam = new FirstPayTimeParam();
-			firstPayTimeParam.setOrderSn(orderSn);
-			BaseResult<String> storeUserMoneyRst = iStoreUserMoneyService.recordFirstPayTime(firstPayTimeParam);
-			if(storeUserMoneyRst.getCode() == 0){
-				logger.info(storeUserMoneyRst.getMsg());
-			}
-		}
+//		if(payBaseResult.getCode() == 0){
+//			logger.info("开始记录第一次支付时间");
+//			FirstPayTimeParam firstPayTimeParam = new FirstPayTimeParam();
+//			firstPayTimeParam.setOrderSn(orderSn);
+//			BaseResult<String> storeUserMoneyRst = iStoreUserMoneyService.recordFirstPayTime(firstPayTimeParam);
+//			if(storeUserMoneyRst.getCode() == 0){
+//				logger.info(storeUserMoneyRst.getMsg());
+//			}
+//		}
 
 		return payBaseResult;
 	}
