@@ -1538,7 +1538,7 @@ public class PaymentController extends AbstractBaseController {
 				}
 
 //				//单纯余额支付的时候记录第一次支付时间
-//				logger.info("开始记录第一次支付时间" );
+//				logger.info("开始记录第一次支付时间" ); 
 //				FirstPayTimeParam firstPayTimeParam = new FirstPayTimeParam();
 //				firstPayTimeParam.setOrderSn(orderSn);
 //				BaseResult<String> storeUserMoneyRst = iStoreUserMoneyService.recordFirstPayTime(firstPayTimeParam);
