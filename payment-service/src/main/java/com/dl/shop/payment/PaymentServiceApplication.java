@@ -16,10 +16,10 @@ import org.springframework.context.annotation.Import;
 @Import({RestTemplateConfig.class, Swagger2.class, WebMvcConfigurer.class, FeignConfiguration.class})
 @MapperScan(ProjectConstant.MAPPER_PACKAGE)
 @EnableEurekaClient
-@EnableFeignClients({"com.dl.order.api","com.dl.member.api","com.dl.lottery.api"})
+@EnableFeignClients({"com.dl.order.api","com.dl.member.api","com.dl.lottery.api","com.dl.store.api"})
 public class PaymentServiceApplication {
 	
     public static void main(String[] args) {
-        SpringApplication.run(PaymentServiceApplication.class, args);
+        SpringApplication.run(PaymentServiceApplication.class, args); 
     }
 }
