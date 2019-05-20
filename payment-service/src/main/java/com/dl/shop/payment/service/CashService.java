@@ -253,7 +253,7 @@ public class CashService {
 		log.info("[withdrawForApp]" + "提现单号:" + withdrawalSn + "生成提现单成功");
 		// stringRedisTemplate.delete("WS:"+String.valueOf(userId));
 		String widthDrawSn = withdrawalSnDTO.getWithdrawalSn();
-		// 保存提现进度
+		// 保存提现 进度
 		UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
 		userWithdrawLog.setLogCode(CashEnums.CASH_APPLY.getcode());
 		userWithdrawLog.setLogName(CashEnums.CASH_APPLY.getMsg());
