@@ -180,10 +180,10 @@ public class Test {
         Test test=new Test();
 //        System.out.println(test.randomNum());
 //        System.out.println(test.fundApply(configMap));
-//        System.out.println(test.fundAccountQuery(configMap));
+        System.out.println(test.fundAccountQuery(configMap));
 //        System.out.println(test.fundTradeQuery(configMap));
 //        Map ms = (Map) JSONUtils.parse();
-        System.out.println(test.payQuick(configMap));
+//        System.out.println(test.payQuick(configMap));
 //        System.out.println(test.payWap(configMap));
 //        System.out.println(test.payQrcode(configMap));
 //		DecimalFormat df = new DecimalFormat("######0.00");   
