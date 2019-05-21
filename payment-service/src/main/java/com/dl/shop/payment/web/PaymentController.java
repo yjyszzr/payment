@@ -66,6 +66,7 @@ import com.dl.member.param.StrParam;
 import com.dl.member.param.SurplusPayParam;
 import com.dl.member.param.SysConfigParam;
 import com.dl.member.param.UpdateUserRechargeParam;
+import com.dl.member.param.UserBonusIdParam;
 import com.dl.order.api.IOrderService;
 import com.dl.order.dto.OrderDTO;
 import com.dl.order.param.SubmitOrderParam;
@@ -1285,7 +1286,7 @@ public class PaymentController extends AbstractBaseController {
 					return orderMoney < minGoodsAmount ? false : true;
 				}).sorted((n1, n2) -> n2.getBonusPrice().compareTo(n1.getBonusPrice())).collect(Collectors.toList());
 				if (userBonuses.size() > 0) {
-					userBonusDto = userBonuses.get(0);
+//					userBonusDto = userBonuses.get(0);
 				}
 			}
 		}
@@ -1301,11 +1302,16 @@ public class PaymentController extends AbstractBaseController {
 			thirdPartyPaid = amountTemp - surplus;
 		}
 
+		//获取用户可用红包数量和金额
+        UserBonusIdParam userBonusIdParam = new UserBonusIdParam();
+        userBonusIdParam.setUserBonusId(SessionUtil.getUserId());
+        BaseResult<UserBonusDTO> userBonus = userBonusService.queryUserBonusNumAndPrice(userBonusIdParam);
 		// 重新缓存订单支付信息
 		betDto.setBonusAmount(bonusAmount);
 		betDto.setBonusId(bonusId);
 		betDto.setSurplus(surplus);
 		betDto.setThirdPartyPaid(thirdPartyPaid);
+		betDto.setBonusNumber(userBonus.getData()!=null?userBonus.getData().getBonusId():0);
 		String dtoJson = JSONHelper.bean2json(betDto);
 		String keyStr = "bet_info_" + SessionUtil.getUserId() + "_" + System.currentTimeMillis();
 		String key = MD5Util.crypt(keyStr);
@@ -1320,7 +1326,7 @@ public class PaymentController extends AbstractBaseController {
 		betPlayInfoDTO.setSurplus(String.format("%.2f", surplus));
 		betPlayInfoDTO.setThirdPartyPaid(String.format("%.2f", thirdPartyPaid));
 		betPlayInfoDTO.setLotteryClassifyId(betDto.getLotteryClassifyId() + "");
-
+		betPlayInfoDTO.setBonusNumber(userBonus.getData()!=null?userBonus.getData().getBonusId():0);
 		return ResultGenerator.genSuccessResult("success", betPlayInfoDTO);
 	}
 
