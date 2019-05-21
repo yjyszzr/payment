@@ -1,13 +1,15 @@
 package com.dl.shop.payment.pay.rkpay;
 
-import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
 import com.alibaba.druid.support.json.JSONUtils;
 import com.dl.shop.payment.pay.rkpay.util.Client;
+import com.dl.shop.payment.pay.rkpay.util.Config;
 import com.dl.shop.payment.pay.rkpay.util.FundApplyConfig;
 import com.dl.shop.payment.pay.rkpay.util.PayQrcodeConfig;
 import com.dl.shop.payment.pay.rkpay.util.PayQuickConfig;
@@ -177,10 +179,10 @@ public class Test {
     	configMap.put("pay_fee", "800");// 订单金额
 		configMap.put("trade_subject", "sf");// 商品名称
 		configMap.put("trade_memo", "sf");// 商品名称
-        Test test=new Test();
+//        Test test=new Test();
 //        System.out.println(test.randomNum());
 //        System.out.println(test.fundApply(configMap));
-        System.out.println(test.fundAccountQuery(configMap));
+//        System.out.println(test.fundAccountQuery(configMap));
 //        System.out.println(test.fundTradeQuery(configMap));
 //        Map ms = (Map) JSONUtils.parse();
 //        System.out.println(test.payQuick(configMap));
@@ -192,5 +194,23 @@ public class Test {
 //		int s = 5000;
 //		double m = 5544.55;
 //		System.out.println(s<m);
+		
+		
+		List<Object> list = new ArrayList();
+        HashMap<String, Object> result = new HashMap();
+        result.put("name", "活动");
+        result.put("bannerImage", "123");
+        result.put("bannerLink","435");
+        result.put("bannerName", "sgf");
+        result.put("endTime", "svs");
+        result.put("startTime", "vsd");
+        list.add(result);
+        result = new HashMap();
+        result.put("name", "红包");
+        result.put("bonusPrice", "trbrr");
+        result.put("bonusNumber", "vsd");
+        list.add(result);
+		
+		System.out.println(JSONUtils.toJSONString(list));
     }
 }

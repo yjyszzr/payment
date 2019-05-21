@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -447,13 +448,19 @@ public class APayDemo {
 //		System.out.println(giveMoney);
 //		System.out.println(JSONUtils.toJSONString(maps));
 		
-		String ipStr = "47.100.81.221;101.132.252.53";
-		String ip = "47s";
-		if(!ipStr.contains(ip)) {
-			System.out.println("IP为不合法IP");
-			return;
-		}
-		System.out.println("sf");
+//		String ipStr = "47.100.81.221;101.132.252.53";
+//		String ip = "47s";
+//		if(!ipStr.contains(ip)) {
+//			System.out.println("IP为不合法IP");
+//			return;
+//		}
+//		System.out.println("sf");
+		
+		BigDecimal ktxye = BigDecimal.valueOf(100);
+		BigDecimal bktxye = BigDecimal.valueOf(10);
+		BigDecimal kgye = BigDecimal.valueOf(30);
+		
+		System.out.println(ktxye.add(bktxye.subtract(kgye))+"^^^^^^^^^"+BigDecimal.ZERO);
 	}
 
 }
