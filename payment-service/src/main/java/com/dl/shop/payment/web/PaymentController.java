@@ -1270,7 +1270,8 @@ public class PaymentController extends AbstractBaseController {
 		if (userBonusListRst.getCode() != 0) {
 			return ResultGenerator.genResult(LottoResultEnum.OPTION_ERROR.getCode(), LottoResultEnum.OPTION_ERROR.getMsg());
 		}
-
+		
+		boolean flag = false;
 		List<UserBonusDTO> userBonusList = userBonusListRst.getData();
 		UserBonusDTO userBonusDto = null;
 		if (!CollectionUtils.isEmpty(userBonusList)) {
@@ -1280,7 +1281,8 @@ public class PaymentController extends AbstractBaseController {
 					Optional<UserBonusDTO> findFirst = userBonusList.stream().filter(dto -> dto.getUserBonusId().equals(Integer.valueOf(bonusIdStr))).findFirst();
 					userBonusDto = findFirst.isPresent() ? findFirst.get() : null;
 					if(bonusLimitConditionParam.getOrderMoneyPaid().subtract(userBonusDto.getMinAmount()).doubleValue()<0) {
-						return ResultGenerator.genFailResult("当前选择红包门槛不符合该订单！");
+						userBonusDto = null;
+						flag = true;
 					}
 				}
 			} else {// 没有传红包id
@@ -1330,6 +1332,9 @@ public class PaymentController extends AbstractBaseController {
 		betPlayInfoDTO.setThirdPartyPaid(String.format("%.2f", thirdPartyPaid));
 		betPlayInfoDTO.setLotteryClassifyId(betDto.getLotteryClassifyId() + "");
 		betPlayInfoDTO.setBonusNumber(userBonus.getData()!=null?userBonus.getData().getBonusId():0);
+		if(flag) {
+			betPlayInfoDTO.setBonusDesc("当前选择红包使用门槛不符合该订单！");
+		}
 		return ResultGenerator.genSuccessResult("success", betPlayInfoDTO);
 	}
 
