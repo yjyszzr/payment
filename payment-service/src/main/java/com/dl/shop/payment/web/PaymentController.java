@@ -1279,6 +1279,9 @@ public class PaymentController extends AbstractBaseController {
 				if (Integer.valueOf(bonusIdStr) != -1) {
 					Optional<UserBonusDTO> findFirst = userBonusList.stream().filter(dto -> dto.getUserBonusId().equals(Integer.valueOf(bonusIdStr))).findFirst();
 					userBonusDto = findFirst.isPresent() ? findFirst.get() : null;
+					if(bonusLimitConditionParam.getOrderMoneyPaid().subtract(BigDecimal.valueOf(Double.parseDouble(userBonusDto.getMinGoodsAmount()))).doubleValue()<0) {
+						return ResultGenerator.genFailResult("当前选择红包门槛不符合该订单！");
+					}
 				}
 			} else {// 没有传红包id
 				List<UserBonusDTO> userBonuses = userBonusList.stream().filter(dto -> {
