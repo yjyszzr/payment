@@ -28,4 +28,6 @@ public class UserGoPayInfoDTO {
 	private String lotteryClassifyId;
 	@ApiModelProperty(value="有效红包数量")
 	private int bonusNumber;
+	@ApiModelProperty(value="超门槛红包提示")
+	private String bonusDesc;
 }
