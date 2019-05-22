@@ -1,6 +1,8 @@
 package com.dl.shop.payment.pay.rkpay;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -196,21 +198,5 @@ public class Test {
 //		System.out.println(s<m);
 		
 		
-		List<Object> list = new ArrayList();
-        HashMap<String, Object> result = new HashMap();
-        result.put("name", "活动");
-        result.put("bannerImage", "123");
-        result.put("bannerLink","435");
-        result.put("bannerName", "sgf");
-        result.put("endTime", "svs");
-        result.put("startTime", "vsd");
-        list.add(result);
-        result = new HashMap();
-        result.put("name", "红包");
-        result.put("bonusPrice", "trbrr");
-        result.put("bonusNumber", "vsd");
-        list.add(result);
-		
-		System.out.println(JSONUtils.toJSONString(list));
     }
 }

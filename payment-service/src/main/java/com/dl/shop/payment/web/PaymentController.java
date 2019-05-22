@@ -7,6 +7,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.time.Instant;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -104,6 +106,7 @@ import com.dl.shop.payment.param.RollbackThirdOrderAmountParam;
 import com.dl.shop.payment.param.UrlBase64Param;
 import com.dl.shop.payment.param.UserIdParam;
 import com.dl.shop.payment.param.WithdrawParam;
+import com.dl.shop.payment.pay.rkpay.util.Config;
 import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
 import com.dl.shop.payment.pay.xianfeng.util.XianFengPayUtil;
@@ -1274,6 +1277,7 @@ public class PaymentController extends AbstractBaseController {
 		boolean flag = false;
 		int bonusNumber = 0;
 		List<UserBonusDTO> userBonusList = userBonusListRst.getData();
+		Collections.sort(userBonusList, Comparator.comparing(UserBonusDTO::getThisStatus).thenComparing(UserBonusDTO::getThisStatus));//根据thisStatus排序
 		UserBonusDTO userBonusDto = null;
 		if (!CollectionUtils.isEmpty(userBonusList)) {
 			for (UserBonusDTO userBonusDTO2 : userBonusList) {//遍历读取该订单可适配优惠券
