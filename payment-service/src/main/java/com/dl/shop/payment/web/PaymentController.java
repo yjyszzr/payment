@@ -1272,9 +1272,15 @@ public class PaymentController extends AbstractBaseController {
 		}
 		
 		boolean flag = false;
+		int bonusNumber = 0;
 		List<UserBonusDTO> userBonusList = userBonusListRst.getData();
 		UserBonusDTO userBonusDto = null;
 		if (!CollectionUtils.isEmpty(userBonusList)) {
+			for (UserBonusDTO userBonusDTO2 : userBonusList) {//遍历读取该订单可适配优惠券
+				if("0".equals(userBonusDTO2.getThisStatus())) {
+					bonusNumber++;
+				}
+			}
 			String bonusIdStr = param.getBonusId();
 			if (StringUtils.isNotBlank(bonusIdStr) && Integer.valueOf(bonusIdStr) != 0) {// 有红包id
 				if (Integer.valueOf(bonusIdStr) != -1) {
@@ -1286,13 +1292,13 @@ public class PaymentController extends AbstractBaseController {
 					}
 				}
 			} else {// 没有传红包id
-				List<UserBonusDTO> userBonuses = userBonusList.stream().filter(dto -> {
-					double minGoodsAmount = dto.getBonusPrice().doubleValue();
-					return orderMoney < minGoodsAmount ? false : true;
-				}).sorted((n1, n2) -> n2.getBonusPrice().compareTo(n1.getBonusPrice())).collect(Collectors.toList());
-				if (userBonuses.size() > 0) {
-//					userBonusDto = userBonuses.get(0);
-				}
+//				List<UserBonusDTO> userBonuses = userBonusList.stream().filter(dto -> {
+//					double minGoodsAmount = dto.getBonusPrice().doubleValue();
+//					return orderMoney < minGoodsAmount ? false : true;
+//				}).sorted((n1, n2) -> n2.getBonusPrice().compareTo(n1.getBonusPrice())).collect(Collectors.toList());
+//				if (userBonuses.size() > 0) {
+////					userBonusDto = userBonuses.get(0);
+//				}
 			}
 		}
 		String bonusId = userBonusDto != null ? userBonusDto.getUserBonusId().toString() : null;
@@ -1310,13 +1316,14 @@ public class PaymentController extends AbstractBaseController {
 		//获取用户可用红包数量和金额
         UserBonusIdParam userBonusIdParam = new UserBonusIdParam();
         userBonusIdParam.setUserBonusId(SessionUtil.getUserId());
-        BaseResult<UserBonusDTO> userBonus = userBonusService.queryUserBonusNumAndPrice(userBonusIdParam);
+//        BaseResult<UserBonusDTO> userBonus = userBonusService.queryUserBonusNumAndPrice(userBonusIdParam);
 		// 重新缓存订单支付信息
 		betDto.setBonusAmount(bonusAmount);
 		betDto.setBonusId(bonusId);
 		betDto.setSurplus(surplus);
 		betDto.setThirdPartyPaid(thirdPartyPaid);
-		betDto.setBonusNumber(userBonus.getData()!=null?userBonus.getData().getBonusId():0);
+		betDto.setBonusNumber(bonusNumber);
+//		betDto.setBonusNumber(userBonus.getData()!=null?userBonus.getData().getBonusId():0);
 		String dtoJson = JSONHelper.bean2json(betDto);
 		String keyStr = "bet_info_" + SessionUtil.getUserId() + "_" + System.currentTimeMillis();
 		String key = MD5Util.crypt(keyStr);
@@ -1331,7 +1338,8 @@ public class PaymentController extends AbstractBaseController {
 		betPlayInfoDTO.setSurplus(String.format("%.2f", surplus));
 		betPlayInfoDTO.setThirdPartyPaid(String.format("%.2f", thirdPartyPaid));
 		betPlayInfoDTO.setLotteryClassifyId(betDto.getLotteryClassifyId() + "");
-		betPlayInfoDTO.setBonusNumber(userBonus.getData()!=null?userBonus.getData().getBonusId():0);
+		betPlayInfoDTO.setBonusNumber(bonusNumber);
+//		betPlayInfoDTO.setBonusNumber(userBonus.getData()!=null?userBonus.getData().getBonusId():0);
 		if(flag) {
 			betPlayInfoDTO.setBonusDesc("当前选择红包使用门槛不符合该订单！");
 		}
