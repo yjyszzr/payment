@@ -17,6 +17,7 @@ import net.sf.json.util.JSONUtils;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -471,6 +472,18 @@ public class PayNotifyController {
 		} else {
 			paymentService.rechargeOptions(payLog, rspOrderEntikty);
 		}
+		writeLowerSuccess(response);
+		return;
+	}
+	
+	
+	@ApiOperation(value = "Q多多支付完成回调")
+	@GetMapping("/getRkPayNotify")
+	@ResponseBody
+	public void getRkPayNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+		request.setCharacterEncoding("UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		response.setHeader("Content-type", "text/html;charset=UTF-8");
 		writeLowerSuccess(response);
 		return;
 	}
