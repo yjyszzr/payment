@@ -482,7 +482,7 @@ public class PayMentService extends AbstractService<PayMent> {
 				RspOrderQueryDTO rspOrderQueryDTO = new RspOrderQueryDTO();
 				rspOrderQueryDTO.setIsHaveRechargeAct(0);
 				rspOrderQueryDTO.setDonationPrice("");
-
+				//活动充值送红包 begin ******************************************************
 				QFParam qfParam = new QFParam();
 				qfParam.setAct_type("1");
 				qfParam.setAct_id("3");
@@ -513,7 +513,17 @@ public class PayMentService extends AbstractService<PayMent> {
 					}
 				}
 				log.info("无活动资格");
-
+				//充值活动送红包 end ******************************************************
+				
+				//充值领取红包 begin *****************************************************
+				com.dl.member.param.PayLogIdParam payLogIdParam = new com.dl.member.param.PayLogIdParam();
+				payLogIdParam.setPayLogId(String.valueOf(payLog.getLogId()));
+				payLogIdParam.setOrderAmount(payLog.getOrderAmount());
+				payLogIdParam.setUserId(payLog.getUserId());
+				BaseResult<Integer> userbonusResult = userBonusService.createRechargeUserBonusNew(payLogIdParam);
+				logger.info("结束执行充值赠送红包逻辑NEW:"+userbonusResult.getData());
+				//充值领取红包 end *****************************************************
+				
 				log.info("放入redis：" + String.valueOf(payLog.getLogId()) + "-----------" + rspOrderQueryDTO.getDonationPrice());
 				stringRedisTemplate.opsForValue().set(String.valueOf(payLog.getLogId()), rspOrderQueryDTO.getDonationPrice(), 180, TimeUnit.SECONDS);
 				logger.info("充值成功后返回的信息：" + rspOrderQueryDTO.getIsHaveRechargeAct() + "-----" + rspOrderQueryDTO.getDonationPrice());
