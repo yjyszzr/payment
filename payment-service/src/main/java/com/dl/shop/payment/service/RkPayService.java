@@ -160,6 +160,18 @@ public class RkPayService {
         logger.info("Q多多代付账户余额返回结果为:={}", data);
         return data;
     }
+    /**代付状态查询
+     * apply_mode=RK
+	 * @return
+	 */
+    public String fundTradeQuery(String ds_trade_no){
+    	FundApplyConfig fundApplyConfig=new FundApplyConfig();
+    	fundApplyConfig.initParams(staticv.getMchid(),"",ds_trade_no);
+        Client client=new Client();
+        String data=client.request(fundApplyConfig,"/fund/tradequery",staticv);
+        logger.info("Q多多代付状态返回结果为:={}", data);
+        return data;
+    }
     /**交易状态查询
      * @return
      */
@@ -390,26 +402,35 @@ public class RkPayService {
             rspEntity.resMessage = resultMap.get("message")!=null?resultMap.get("message").toString():"";
             String status = resultMap.get("status")!=null?resultMap.get("status").toString():"";
             if("0".equals(status)) {//接口成功，并不是提现成功
-            	rspEntity.status = "S";
-            	//低于指定数额发短信通知
-            	String strMoney = "0";
-            	BaseResult<RspOrderQueryDTO> ymoney = getShMoney(null);
-    			if(ymoney!=null && ymoney.getData()!=null) {
-    				strMoney=ymoney.getData().getDonationPrice()!=null?ymoney.getData().getDonationPrice():"0";//商户余额
-    			}
-    			SysConfigParam cfg = new SysConfigParam();
-    			cfg.setBusinessId(66);//读取最低商户余额短信通知指标
-    			SysConfigDTO sysConfigDTO = userAccountService.queryBusinessLimit(cfg)!=null?userAccountService.queryBusinessLimit(cfg).getData():new SysConfigDTO();
-    			int totalYmoney = sysConfigDTO.getValue()!=null?sysConfigDTO.getValue().intValue():0;
-    			String mobile = sysConfigDTO.getValueTxt();
-    			if(totalYmoney>Double.parseDouble(strMoney)) {//发送短信
-    				SmsParam smsParam = new SmsParam();
-    				smsParam.setSmsType("4");
-    				smsParam.setMobile(mobile!=null?mobile:"");
-    				log.info("进入发送短信环节：接受短信手机号："+mobile);
-    				smsService.sendSmsCode(smsParam);
-    			}
-    			
+            	String funddata = fundTradeQuery(txScanRequestPaidByOthers.getOrderId());///查询代付状态
+            	Map<String,Object> funddataMap = (Map<String, Object>) JSONUtils.parse(funddata);
+            	if(funddataMap!=null && "0".equals(funddataMap.get("status").toString())) {//代付状态查询成功  判断代付是否成功
+            		if(funddataMap.get("trade_status").toString().equals("FAIL")) {//代付失败
+            			rspEntity.status = "F";
+            		}else {//代付成功
+                    	rspEntity.status = "S";
+                    	//低于指定数额发短信通知
+                    	String strMoney = "0";
+                    	BaseResult<RspOrderQueryDTO> ymoney = getShMoney(null);
+            			if(ymoney!=null && ymoney.getData()!=null) {
+            				strMoney=ymoney.getData().getDonationPrice()!=null?ymoney.getData().getDonationPrice():"0";//商户余额
+            			}
+            			SysConfigParam cfg = new SysConfigParam();
+            			cfg.setBusinessId(66);//读取最低商户余额短信通知指标
+            			SysConfigDTO sysConfigDTO = userAccountService.queryBusinessLimit(cfg)!=null?userAccountService.queryBusinessLimit(cfg).getData():new SysConfigDTO();
+            			int totalYmoney = sysConfigDTO.getValue()!=null?sysConfigDTO.getValue().intValue():0;
+            			String mobile = sysConfigDTO.getValueTxt();
+            			if(totalYmoney>Double.parseDouble(strMoney)) {//发送短信
+            				SmsParam smsParam = new SmsParam();
+            				smsParam.setSmsType("4");
+            				smsParam.setMobile(mobile!=null?mobile:"");
+            				log.info("进入发送短信环节：接受短信手机号："+mobile);
+            				smsService.sendSmsCode(smsParam);
+            			}
+            		}
+            	}else { ///代付查询失败
+            		rspEntity.status = "F";
+            	}
             } else {//接口失败
             	rspEntity.status = "F";
             }
