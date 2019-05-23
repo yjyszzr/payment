@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.druid.support.json.JSONUtils;
+import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -40,6 +41,7 @@ import com.dl.shop.payment.pay.rkpay.util.StaticV;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestPaidByOthers;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
 import com.dl.shop.payment.web.PaymentController;
+import com.github.pagehelper.util.StringUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -65,7 +67,10 @@ public class RkPayService {
 //        double fee_money = Double.parseDouble(configMap.get("pay_fee").toString())+randomNum();
         DecimalFormat df = new DecimalFormat("######0.00");   
 		String fee_money = df.format(Double.parseDouble(configMap.get("pay_fee").toString()));
-		String callback_url = staticv.getCallback_url()+"?ds_trade_no="+configMap.get("ds_trade_no").toString();
+		String callback_url = "";
+		if(StringUtil.isNotEmpty(staticv.getCallback_url())) {
+			callback_url = staticv.getCallback_url()+"?ds_trade_no="+configMap.get("ds_trade_no").toString();
+		}
         logger.info("payWap&&&callbackurl="+callback_url);
         payConfig.initParams(staticv.getMpid(),configMap.get("ds_trade_no").toString(),fee_money+"","AP",
         		configMap.get("trade_subject").toString(),configMap.get("trade_memo").toString(),
@@ -99,7 +104,10 @@ public class RkPayService {
         DecimalFormat df = new DecimalFormat("######0.00");   
 		String fee_money = df.format(Double.parseDouble(configMap.get("pay_fee").toString()));
         String quick_mode = configMap.get("quick_mode")!=null?configMap.get("quick_mode").toString():"";
-        String callback_url = staticv.getCallback_url()+"?ds_trade_no="+configMap.get("ds_trade_no").toString();
+        String callback_url = "";
+		if(StringUtil.isNotEmpty(staticv.getCallback_url())) {
+			callback_url = staticv.getCallback_url()+"?ds_trade_no="+configMap.get("ds_trade_no").toString();
+		}
         logger.info("payQuick&&&callbackurl="+callback_url);
         if("YT".equalsIgnoreCase(quick_mode)) {
         	payQuickConfig.initParams(staticv.getMchid(),configMap.get("ds_trade_no").toString(),
