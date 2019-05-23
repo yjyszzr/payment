@@ -67,7 +67,7 @@ public class RkPayService {
 //        double fee_money = Double.parseDouble(configMap.get("pay_fee").toString())+randomNum();
         DecimalFormat df = new DecimalFormat("######0.00");   
 		String fee_money = df.format(Double.parseDouble(configMap.get("pay_fee").toString()));
-		String callback_url = "";
+		String callback_url = null;
 		if(StringUtil.isNotEmpty(staticv.getCallback_url())) {
 			callback_url = staticv.getCallback_url()+"?ds_trade_no="+configMap.get("ds_trade_no").toString();
 		}
@@ -104,7 +104,7 @@ public class RkPayService {
         DecimalFormat df = new DecimalFormat("######0.00");   
 		String fee_money = df.format(Double.parseDouble(configMap.get("pay_fee").toString()));
         String quick_mode = configMap.get("quick_mode")!=null?configMap.get("quick_mode").toString():"";
-        String callback_url = "";
+        String callback_url = null;
 		if(StringUtil.isNotEmpty(staticv.getCallback_url())) {
 			callback_url = staticv.getCallback_url()+"?ds_trade_no="+configMap.get("ds_trade_no").toString();
 		}
