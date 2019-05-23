@@ -65,9 +65,11 @@ public class RkPayService {
 //        double fee_money = Double.parseDouble(configMap.get("pay_fee").toString())+randomNum();
         DecimalFormat df = new DecimalFormat("######0.00");   
 		String fee_money = df.format(Double.parseDouble(configMap.get("pay_fee").toString()));
+		String callback_url = staticv.getCallback_url()+"?ds_trade_no="+configMap.get("ds_trade_no").toString();
+        logger.info("payWap&&&callbackurl="+callback_url);
         payConfig.initParams(staticv.getMpid(),configMap.get("ds_trade_no").toString(),fee_money+"","AP",
         		configMap.get("trade_subject").toString(),configMap.get("trade_memo").toString(),
-        		staticv.getNotify_url(),staticv.getCallback_url(),staticv.getExpire_time());
+        		staticv.getNotify_url(),callback_url,staticv.getExpire_time());
         Client client=new Client();
         String data=client.request(payConfig,"/pay/wap",staticv);
         return data;
@@ -97,6 +99,8 @@ public class RkPayService {
         DecimalFormat df = new DecimalFormat("######0.00");   
 		String fee_money = df.format(Double.parseDouble(configMap.get("pay_fee").toString()));
         String quick_mode = configMap.get("quick_mode")!=null?configMap.get("quick_mode").toString():"";
+        String callback_url = staticv.getCallback_url()+"?ds_trade_no="+configMap.get("ds_trade_no").toString();
+        logger.info("payQuick&&&callbackurl="+callback_url);
         if("YT".equalsIgnoreCase(quick_mode)) {
         	payQuickConfig.initParams(staticv.getMchid(),configMap.get("ds_trade_no").toString(),
         			fee_money+"",
@@ -106,14 +110,14 @@ public class RkPayService {
         			configMap.get("account_name").toString(),
         			configMap.get("id_no").toString(),
         			configMap.get("mobile_phone").toString(),
-        			staticv.getNotify_url(),staticv.getCallback_url());
+        			staticv.getNotify_url(),callback_url);
         }else if("RK".equalsIgnoreCase(quick_mode)) {
         	payQuickConfig.initParams(staticv.getMchid(),configMap.get("ds_trade_no").toString(),
         			fee_money+"",
         			configMap.get("trade_subject").toString(),
         			configMap.get("trade_memo").toString(),quick_mode,
         			configMap.get("bank_name").toString(),
-        			staticv.getNotify_url(),staticv.getCallback_url());
+        			staticv.getNotify_url(),callback_url);
         }else if("GM".equalsIgnoreCase(quick_mode)) {
         	payQuickConfig.initParams(staticv.getMchid(),configMap.get("ds_trade_no").toString(),
         			fee_money+"",
@@ -121,13 +125,13 @@ public class RkPayService {
         			configMap.get("trade_memo").toString(),quick_mode,
         			configMap.get("id_no").toString(),
         			configMap.get("id_name").toString(),
-        			staticv.getNotify_url(),staticv.getCallback_url());
+        			staticv.getNotify_url(),callback_url);
         }else {
         	payQuickConfig.initParams(staticv.getMchid(),configMap.get("ds_trade_no").toString(),
         			fee_money+"",
         			configMap.get("trade_subject").toString(),
         			configMap.get("trade_memo").toString(),quick_mode,
-        			staticv.getNotify_url(),staticv.getCallback_url());
+        			staticv.getNotify_url(),callback_url);
         }
         Client client=new Client();
         String data=client.request(payQuickConfig,"/pay/quick",staticv);
