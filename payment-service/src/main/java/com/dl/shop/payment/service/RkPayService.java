@@ -385,7 +385,7 @@ public class RkPayService {
         			txScanRequestPaidByOthers.getAccountName(),staticv.getFund_notify_url());
         	Client client=new Client();
         	String data=client.request(fundApplyConfig,"/fund/apply",staticv);
-        	logger.info("Q多多代付返回结果为:={}", data);
+        	logger.info("Q多多代付操作结果为:={}", data);
             Map<String,Object> resultMap = (Map<String, Object>) JSONUtils.parse(data);
             rspEntity.resMessage = resultMap.get("message")!=null?resultMap.get("message").toString():"";
             String status = resultMap.get("status")!=null?resultMap.get("status").toString():"";
