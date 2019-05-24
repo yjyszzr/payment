@@ -1265,7 +1265,7 @@ public class PaymentController extends AbstractBaseController {
 		}
 		String totalMoney = userInfoExceptPassRst.getData().getTotalMoney();
 		Double userTotalMoney = Double.valueOf(totalMoney);
-		Double orderMoney = betDto.getOrderMoney();
+		Double orderMoney = betDto.getOrderMoney()!=null?betDto.getOrderMoney():0;
 		// 红包包
 		BonusLimitConditionParam bonusLimitConditionParam = new BonusLimitConditionParam();
 		bonusLimitConditionParam.setOrderMoneyPaid(BigDecimal.valueOf(orderMoney));
@@ -1290,7 +1290,8 @@ public class PaymentController extends AbstractBaseController {
 				if (Integer.valueOf(bonusIdStr) != -1) {
 					Optional<UserBonusDTO> findFirst = userBonusList.stream().filter(dto -> dto.getUserBonusId().equals(Integer.valueOf(bonusIdStr))).findFirst();
 					userBonusDto = findFirst.isPresent() ? findFirst.get() : null;
-					if(bonusLimitConditionParam.getOrderMoneyPaid().subtract(userBonusDto.getMinAmount()).doubleValue()<0) {
+					BigDecimal minamount = userBonusDto.getMinAmount()!=null?userBonusDto.getMinAmount():BigDecimal.ZERO;
+					if(bonusLimitConditionParam.getOrderMoneyPaid().subtract(minamount).doubleValue()<0) {
 						userBonusDto = null;
 						flag = true;
 					}
