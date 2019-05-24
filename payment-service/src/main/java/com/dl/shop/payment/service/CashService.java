@@ -141,7 +141,7 @@ public class CashService {
 
 			Boolean absent = stringRedisTemplate.opsForValue().setIfAbsent("WS:"+String.valueOf(userId), "on");
 			stringRedisTemplate.expire("WS:"+String.valueOf(userId), 7200, TimeUnit.SECONDS);
-			log.info("withdrawForApp:"+absent);
+			log.info("withdrawForApp: "+absent);
 			if(!absent) {
 				log.info("withdrawForApp:"+absent);
 				return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_REPEAT.getcode(),PayEnums.PAY_WITHDRAW_REPEAT.getMsg());
