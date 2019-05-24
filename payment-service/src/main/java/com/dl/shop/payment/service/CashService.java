@@ -136,7 +136,7 @@ public class CashService {
 //		stringRedisTemplate.opsForValue().set("WS:"+String.valueOf(userId),String.valueOf(mTime));
 
 		Boolean absent = stringRedisTemplate.opsForValue().setIfAbsent("WS:"+String.valueOf(userId), "on");
-		stringRedisTemplate.expire("WS:"+String.valueOf(userId), 10, TimeUnit.SECONDS);
+		stringRedisTemplate.expire("WS:"+String.valueOf(userId), 60, TimeUnit.SECONDS);
 		if(!absent) {
 			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_REPEAT.getcode(),PayEnums.PAY_WITHDRAW_REPEAT.getMsg());
 		}
@@ -206,7 +206,7 @@ public class CashService {
 		String cardNo = userBankDTO.getCardNo();
 		String bankName = userBankDTO.getBankName();
 		cfg.setBusinessId(8);// 提现
-		log.info("[withdrawForApp]" + " 扣除用户余额成功:" + totalAmount);
+		
 		StrParam strParam = new StrParam();
 		strParam.setStr("");
 		BaseResult<UserDTO> userInfoExceptPass = userService.userInfoExceptPassReal(strParam);
@@ -241,7 +241,7 @@ public class CashService {
 			log.info(loggerId + "提现金额超出用户可提现金额数值~");
 			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_NOT_ENOUGH.getcode(), PayEnums.PAY_RONGBAO_NOT_ENOUGH.getMsg());
 		}
-		// 满足条件，先减少账户余额
+		
 		String withdrawalSn = SNGenerator.nextSN(SNBusinessCodeEnum.WITHDRAW_SN.getCode());
 		// 生成提现单
 		UserWithdrawParam userWithdrawParam = new UserWithdrawParam();
