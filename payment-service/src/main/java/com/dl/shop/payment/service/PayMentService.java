@@ -474,10 +474,6 @@ public class PayMentService extends AbstractService<PayMent> {
 				recharegeParam.setThirdPartPaid(payLog.getOrderAmount());
 				recharegeParam.setUserId(payLog.getUserId());
 				recharegeParam.setOrderSn(payLog.getOrderSn());
-				BaseResult<String> rechargeRst = userAccountService.rechargeUserMoneyLimit(recharegeParam);
-				if (rechargeRst.getCode() != 0) {
-					logger.error(payLog.getPayOrderSn() + " 给个人用户充值：code" + rechargeRst.getCode() + "message:" + rechargeRst.getMsg());
-				}
 				// 更新paylog
 				RspOrderQueryDTO rspOrderQueryDTO = new RspOrderQueryDTO();
 				rspOrderQueryDTO.setIsHaveRechargeAct(0);
@@ -520,9 +516,18 @@ public class PayMentService extends AbstractService<PayMent> {
 				payLogIdParam.setPayLogId(String.valueOf(payLog.getLogId()));
 				payLogIdParam.setOrderAmount(payLog.getOrderAmount());
 				payLogIdParam.setUserId(payLog.getUserId());
-				BaseResult<Integer> userbonusResult = userBonusService.createRechargeUserBonusNew(payLogIdParam);
+				BaseResult<HashMap<String,Object>> userbonusResult = userBonusService.createRechargeUserBonusNew(payLogIdParam);
 				logger.info("结束执行充值赠送红包逻辑NEW:"+userbonusResult.getData());
 				//充值领取红包 end *****************************************************
+				if(userbonusResult!=null) {
+					recharegeParam.setRechargeCardId((Integer)userbonusResult.getData().get("rechargeCardId"));//充值大礼包ID
+					recharegeParam.setRechargeCardRealValue((BigDecimal)userbonusResult.getData().get("rechargeCardRealValue"));
+				}
+				BaseResult<String> rechargeRst = userAccountService.rechargeUserMoneyLimit(recharegeParam);
+				if (rechargeRst.getCode() != 0) {
+					logger.error(payLog.getPayOrderSn() + " 给个人用户充值：code" + rechargeRst.getCode() + "message:" + rechargeRst.getMsg());
+				}
+				
 				
 				log.info("放入redis：" + String.valueOf(payLog.getLogId()) + "-----------" + rspOrderQueryDTO.getDonationPrice());
 				stringRedisTemplate.opsForValue().set(String.valueOf(payLog.getLogId()), rspOrderQueryDTO.getDonationPrice(), 180, TimeUnit.SECONDS);
