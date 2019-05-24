@@ -163,13 +163,34 @@ public class RkPayService {
     /**代付状态查询
      * apply_mode=RK
 	 * @return
+     * @throws InterruptedException 
 	 */
-    public String fundTradeQuery(String ds_trade_no){
+    public String fundTradeQuery(String ds_trade_no,int count,int count2) throws InterruptedException{
     	FundApplyConfig fundApplyConfig=new FundApplyConfig();
     	fundApplyConfig.initParams(staticv.getMchid(),"",ds_trade_no);
         Client client=new Client();
         String data=client.request(fundApplyConfig,"/fund/tradequery",staticv);
         logger.info("Q多多代付状态返回结果为:={}", data);
+        Map<String,Object> funddataMap = (Map<String, Object>) JSONUtils.parse(data);
+        String status = funddataMap.get("status").toString();
+        if(status!=null && "0".equals(status)) {//代付查询成功
+        	String trade_status = funddataMap.get("trade_status").toString();
+        	if(trade_status!=null && "PROCESSING".equalsIgnoreCase(trade_status)) {//代付处理中  请稍后查询
+        		if(count>3) {
+        			return data;
+        		}
+        		Thread.sleep(3000);
+    			fundTradeQuery(ds_trade_no,count++,count2);
+        	}
+        }else { //查询失败 3秒后继续查询
+        	if(count2>3) {
+    			return data;
+    		}
+        	Thread.sleep(3000);
+			fundTradeQuery(ds_trade_no,count,count2++);
+        }
+        
+        
         return data;
     }
     /**交易状态查询
@@ -402,13 +423,11 @@ public class RkPayService {
             rspEntity.resMessage = resultMap.get("message")!=null?resultMap.get("message").toString():"";
             String status = resultMap.get("status")!=null?resultMap.get("status").toString():"";
             if("0".equals(status)) {//接口成功，并不是提现成功
-            	String funddata = fundTradeQuery(txScanRequestPaidByOthers.getOrderId());///查询代付状态
+            	String funddata = fundTradeQuery(txScanRequestPaidByOthers.getOrderId(),0,0);///查询代付状态
             	Map<String,Object> funddataMap = (Map<String, Object>) JSONUtils.parse(funddata);
             	if(funddataMap!=null && "0".equals(funddataMap.get("status").toString())) {//代付状态查询成功  判断代付是否成功
-            		if(funddataMap.get("trade_status").toString().equals("FAIL")) {//代付失败
-            			rspEntity.status = "F";
-            		}else {//代付成功
-                    	rspEntity.status = "S";
+            		if(funddataMap.get("trade_status").toString().equals("SUCCESS")) {//代付成功
+            			rspEntity.status = "S";
                     	//低于指定数额发短信通知
                     	String strMoney = "0";
                     	BaseResult<RspOrderQueryDTO> ymoney = getShMoney(null);
@@ -427,6 +446,8 @@ public class RkPayService {
             				log.info("进入发送短信环节：接受短信手机号："+mobile);
             				smsService.sendSmsCode(smsParam);
             			}
+            		}else{//代付失败
+            			rspEntity.status = "F";
             		}
             	}else { ///代付查询失败
             		rspEntity.status = "F";

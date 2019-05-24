@@ -191,18 +191,18 @@ public class Test {
 //        System.out.println(test.fundApply(configMap));
 //        System.out.println(test.fundAccountQuery(configMap));
 //        System.out.println(test.fundTradeQuery(configMap));
-        String funddata = test.fundTradeQuery(configMap);///查询代付状态
-        System.out.println(funddata);
-    	Map<String,Object> funddataMap = (Map<String, Object>) JSONUtils.parse(funddata);
-    	if(funddataMap!=null && "0".equals(funddataMap.get("status").toString())) {//代付状态查询成功  判断代付是否成功
-    		if(funddataMap.get("trade_status").toString().equals("FAIL")) {//代付失败
-    			System.out.println(false);
-    		}else {//代付成功
-    			System.out.println(true);
-    		}
-    	}else { ///代付查询失败
-    		System.out.println(false);
-    	}
+//        String funddata = test.fundTradeQuery(configMap);///查询代付状态
+//        System.out.println(funddata);
+//    	Map<String,Object> funddataMap = (Map<String, Object>) JSONUtils.parse(funddata);
+//    	if(funddataMap!=null && "0".equals(funddataMap.get("status").toString())) {//代付状态查询成功  判断代付是否成功
+//    		if(funddataMap.get("trade_status").toString().equals("FAIL")) {//代付失败
+//    			System.out.println(false);
+//    		}else {//代付成功
+//    			System.out.println(true);
+//    		}
+//    	}else { ///代付查询失败
+//    		System.out.println(false);
+//    	}
 //        Map ms = (Map) JSONUtils.parse();
 //        System.out.println(test.payQuick(configMap));
 //        System.out.println(test.payWap(configMap));
@@ -213,7 +213,5 @@ public class Test {
 //		int s = 5000;
 //		double m = 5544.55;
 //		System.out.println(s<m);
-		
-		
     }
 }
