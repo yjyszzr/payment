@@ -127,8 +127,8 @@ public class CashService {
 	private StringRedisTemplate stringRedisTemplate;
 
 	public BaseResult<Object> withdrawForApp(@RequestBody WithdrawParam param, HttpServletRequest request) {
-		rwl.readLock().lock();
-		try {
+//		rwl.readLock().lock();
+//		try {
 			Integer userId = SessionUtil.getUserId();
 			long time1 = System.currentTimeMillis();
 			log.info("time1:" + System.currentTimeMillis());
@@ -348,9 +348,9 @@ public class CashService {
 				log.info("提现所用时间为：" + (time3 - time1));
 				return operation(rEntity, widthDrawSn, userId, Boolean.TRUE);
 			}
-		} finally {
-			rwl.readLock().unlock();
-		}
+//		} finally {
+//			rwl.readLock().unlock();
+//		}
 	}
 
 	
