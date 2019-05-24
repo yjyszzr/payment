@@ -140,8 +140,9 @@ public class CashService {
 //			stringRedisTemplate.opsForValue().set("WS:"+String.valueOf(userId),String.valueOf(mTime));
 
 			Boolean absent = stringRedisTemplate.opsForValue().setIfAbsent("WS:"+String.valueOf(userId), "on");
-			stringRedisTemplate.expire("WS:"+String.valueOf(userId), 1, TimeUnit.HOURS);
+			stringRedisTemplate.expire("WS:"+String.valueOf(userId), 7200, TimeUnit.SECONDS);
 			if(!absent) {
+				log.info("withdrawForApp:"+absent);
 				return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_REPEAT.getcode(),PayEnums.PAY_WITHDRAW_REPEAT.getMsg());
 			}
 			String loggerId = "withdrawForApp_" + System.currentTimeMillis();
@@ -348,7 +349,8 @@ public class CashService {
 				return operation(rEntity, widthDrawSn, userId, Boolean.TRUE);
 			}
 		} finally {
-			stringRedisTemplate.delete("WS:"+String.valueOf(userId));
+			log.info("withdrawForApp:finally"+userId);
+//			stringRedisTemplate.delete("WS:"+String.valueOf(userId));
 //			rwl.readLock().unlock();
 		}
 	}
