@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -87,6 +88,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class CashService {
+	private ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 	@Resource
 	private IUserService userService;
 	@Resource
@@ -125,224 +127,229 @@ public class CashService {
 	private StringRedisTemplate stringRedisTemplate;
 
 	public BaseResult<Object> withdrawForApp(@RequestBody WithdrawParam param, HttpServletRequest request) {
-		Integer userId = SessionUtil.getUserId();
-		long time1 = System.currentTimeMillis();
-		log.info("time1:" + System.currentTimeMillis());
-//		Long mTime = System.currentTimeMillis();
-//		String userIdInRedis = stringRedisTemplate.opsForValue().get("WS:"+String.valueOf(userId));
-//		if(!StringUtils.isEmpty(userIdInRedis)) {
-//			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_REPEAT.getcode(),PayEnums.PAY_WITHDRAW_REPEAT.getMsg());
-//		}
-//		stringRedisTemplate.opsForValue().set("WS:"+String.valueOf(userId),String.valueOf(mTime));
-
-		Boolean absent = stringRedisTemplate.opsForValue().setIfAbsent("WS:"+String.valueOf(userId), "on");
-		stringRedisTemplate.expire("WS:"+String.valueOf(userId), 60, TimeUnit.SECONDS);
-		if(!absent) {
-			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_REPEAT.getcode(),PayEnums.PAY_WITHDRAW_REPEAT.getMsg());
-		}
-		
-		String loggerId = "withdrawForApp_" + System.currentTimeMillis();
-		log.info(loggerId + " int /payment/withdraw, userId=" + SessionUtil.getUserId() + ", totalAmount=" + param.getTotalAmount() + ",userBankId=" + param.getUserBankId());
-		SysConfigParam cfg = new SysConfigParam();
-		// bank判断
-		int userBankId = param.getUserBankId();
-		if (userBankId < 1) {
-			log.info(loggerId + "用户很行卡信息id提供有误！");
-			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_BANK_QUERY_ERROR.getcode(), PayEnums.PAY_RONGBAO_BANK_QUERY_ERROR.getMsg());
-		}
-		IDParam idParam = new IDParam();
-		idParam.setId(userBankId);
-		BaseResult<UserBankDTO> queryUserBank = userBankService.queryUserBank(idParam);
-		if (queryUserBank.getCode() != 0) {
-			log.info(loggerId + "用户银行卡信息获取有误！");
-			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_BANK_QUERY_ERROR.getcode(), PayEnums.PAY_RONGBAO_BANK_QUERY_ERROR.getMsg());
-		}
-		String strTotalAmount = param.getTotalAmount();
-		// 长度超过1000000 -> 7位数
-		if (StringUtils.isEmpty(strTotalAmount) || strTotalAmount.length() > 10) {
-			log.info(loggerId + "输入金额超出有效范围");
-			return ResultGenerator.genResult(PayEnums.PAY_TOTAL_NOTRANGE.getcode(), PayEnums.PAY_TOTAL_NOTRANGE.getMsg());
-		}
-		Double totalAmount = null;
+		rwl.readLock().lock();
 		try {
-			totalAmount = Double.valueOf(strTotalAmount);
-		} catch (Exception ee) {
-			log.error("提现金额转换异常", ee);
-		}
-		if (totalAmount == null || totalAmount <= 0) {
-			log.info(loggerId + "提现金额提供有误！");
-			return ResultGenerator.genResult(PayEnums.PAY_TOTAL_NOTRANGE.getcode(), PayEnums.PAY_TOTAL_NOTRANGE.getMsg());
-		}
-		cfg.setBusinessId(64);//读取最低提现金额
-		int minTxMoney = userAccountService.queryBusinessLimit(cfg).getData()!=null?userAccountService.queryBusinessLimit(cfg).getData().getValue().intValue():0;
-		// 是否小于3元钱
-		if (totalAmount < minTxMoney) {
-			log.info(loggerId + "单笔最低提现金额大于"+minTxMoney+"元~");
-			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_LOW_LIMIT.getcode(),"单笔提现金额不能低于"+minTxMoney+"元");
-		}
-		cfg.setBusinessId(65);//读取最高提现金额
-		int maxTxMoney = userAccountService.queryBusinessLimit(cfg).getData()!=null?userAccountService.queryBusinessLimit(cfg).getData().getValue().intValue():0;
-		// 是否小于3元钱
-		if (totalAmount > maxTxMoney) {
-			log.info(loggerId + "单笔最高提现金额小于"+minTxMoney+"元~");
-			return ResultGenerator.genResult(PayEnums.PAY_TOTAL_NOTRANGE.getcode(),"单笔提现金额不能高于"+maxTxMoney+"元");
-		}
-		UserDeviceInfo userDevice = SessionUtil.getUserDevice();
-		cfg.setBusinessId(67);//读取财务账号id
-		int cwuserId = userAccountService.queryBusinessLimit(cfg).getData()!=null?userAccountService.queryBusinessLimit(cfg).getData().getValue().intValue():0;
-		if(userId!=cwuserId) {//非财务账号--财务账号不限制提现次数
-			int countUserWithdraw = userWithdrawService.countUserWithdraw(userId);
-			log.info(userId + "当天已提现次数:" + countUserWithdraw);
-			cfg.setBusinessId(63);//读取提现次数
-			int conuntTx = userAccountService.queryBusinessLimit(cfg).getData()!=null?userAccountService.queryBusinessLimit(cfg).getData().getValue().intValue():0;
-			if (countUserWithdraw >= conuntTx) {
-				return ResultGenerator.genResult(PayEnums.PAY_THREE_COUNT_WITHDRAW.getcode(),"每日提现次数不能超过"+conuntTx+"次");
+			Integer userId = SessionUtil.getUserId();
+			long time1 = System.currentTimeMillis();
+			log.info("time1:" + System.currentTimeMillis());
+//			Long mTime = System.currentTimeMillis();
+//			String userIdInRedis = stringRedisTemplate.opsForValue().get("WS:"+String.valueOf(userId));
+//			if(!StringUtils.isEmpty(userIdInRedis)) {
+//				return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_REPEAT.getcode(),PayEnums.PAY_WITHDRAW_REPEAT.getMsg());
+//			}
+//			stringRedisTemplate.opsForValue().set("WS:"+String.valueOf(userId),String.valueOf(mTime));
+
+			Boolean absent = stringRedisTemplate.opsForValue().setIfAbsent("WS:"+String.valueOf(userId), "on");
+			stringRedisTemplate.expire("WS:"+String.valueOf(userId), 60, TimeUnit.SECONDS);
+			if(!absent) {
+				return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_REPEAT.getcode(),PayEnums.PAY_WITHDRAW_REPEAT.getMsg());
 			}
-		}
-		
-		UserBankDTO userBankDTO = queryUserBank.getData();
-		String bankCode = userBankDTO.getAbbreviation();
-		String realName = userBankDTO.getRealName();
-		String cardNo = userBankDTO.getCardNo();
-		String bankName = userBankDTO.getBankName();
-		cfg.setBusinessId(8);// 提现
-		
-		StrParam strParam = new StrParam();
-		strParam.setStr("");
-		BaseResult<UserDTO> userInfoExceptPass = userService.userInfoExceptPassReal(strParam);
-		if (userInfoExceptPass.getCode() != 0) {
-			return ResultGenerator.genFailResult("对不起，用户信息有误！", null);
-		}
-		UserDTO userDTO = userInfoExceptPass.getData();
-		String mobile = userDTO.getMobile();
-		String strMoney = userDTO.getUserMoney();
-		if(userId!=null && userId==cwuserId) {// 财务账号--财务账号提现金额为商户余额
-			com.dl.shop.payment.param.StrParam emptyParam = new com.dl.shop.payment.param.StrParam();
-			BaseResult<RspOrderQueryDTO> ymoney = rkPayService.getShMoney(emptyParam);
-			if(ymoney!=null && ymoney.getData()!=null) {
-				strMoney=ymoney.getData().getDonationPrice()!=null?ymoney.getData().getDonationPrice():"0";//商户余额
+			
+			String loggerId = "withdrawForApp_" + System.currentTimeMillis();
+			log.info(loggerId + " int /payment/withdraw, userId=" + SessionUtil.getUserId() + ", totalAmount=" + param.getTotalAmount() + ",userBankId=" + param.getUserBankId());
+			SysConfigParam cfg = new SysConfigParam();
+			// bank判断
+			int userBankId = param.getUserBankId();
+			if (userBankId < 1) {
+				log.info(loggerId + "用户很行卡信息id提供有误！");
+				return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_BANK_QUERY_ERROR.getcode(), PayEnums.PAY_RONGBAO_BANK_QUERY_ERROR.getMsg());
 			}
-		}
-		Double dMoney = null;
-		log.info("用户提现金额:" + strMoney);
-		if (!TextUtils.isEmpty(strMoney)) {
+			IDParam idParam = new IDParam();
+			idParam.setId(userBankId);
+			BaseResult<UserBankDTO> queryUserBank = userBankService.queryUserBank(idParam);
+			if (queryUserBank.getCode() != 0) {
+				log.info(loggerId + "用户银行卡信息获取有误！");
+				return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_BANK_QUERY_ERROR.getcode(), PayEnums.PAY_RONGBAO_BANK_QUERY_ERROR.getMsg());
+			}
+			String strTotalAmount = param.getTotalAmount();
+			// 长度超过1000000 -> 7位数
+			if (StringUtils.isEmpty(strTotalAmount) || strTotalAmount.length() > 10) {
+				log.info(loggerId + "输入金额超出有效范围");
+				return ResultGenerator.genResult(PayEnums.PAY_TOTAL_NOTRANGE.getcode(), PayEnums.PAY_TOTAL_NOTRANGE.getMsg());
+			}
+			Double totalAmount = null;
 			try {
-				dMoney = Double.valueOf(strMoney);
+				totalAmount = Double.valueOf(strTotalAmount);
 			} catch (Exception ee) {
-				log.error("金额转换异常", ee);
+				log.error("提现金额转换异常", ee);
 			}
-		}
-		if (dMoney == null) {
-			log.info(loggerId + "金额转换失败！");
-			return ResultGenerator.genFailResult("用户钱包金额转换失败！", null);
-		}
-		// 提现金额大于可提现金额
-		if (totalAmount > dMoney) {
-			log.info(loggerId + "提现金额超出用户可提现金额数值~");
-			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_NOT_ENOUGH.getcode(), PayEnums.PAY_RONGBAO_NOT_ENOUGH.getMsg());
-		}
-		
-		String withdrawalSn = SNGenerator.nextSN(SNBusinessCodeEnum.WITHDRAW_SN.getCode());
-		// 生成提现单
-		UserWithdrawParam userWithdrawParam = new UserWithdrawParam();
-		userWithdrawParam.setAmount(BigDecimal.valueOf(totalAmount));
-		userWithdrawParam.setCardNo(cardNo);
-		userWithdrawParam.setRealName(realName);
-		userWithdrawParam.setStatus(ProjectConstant.STATUS_UNCOMPLETE);
-		userWithdrawParam.setWithDrawSn(withdrawalSn);
-		WithdrawalSnDTO withdrawalSnDTO = userWithdrawService.saveWithdraw(userWithdrawParam);
-		if (StringUtils.isEmpty(withdrawalSnDTO.getWithdrawalSn())) {
-			log.info(loggerId + " 生成提现单失败");
-			return ResultGenerator.genFailResult("网络错误，提现失败，请联系客服！", null);
-		}
-		log.info("[withdrawForApp]" + "提现单号:" + withdrawalSn + "生成提现单成功");
-		// stringRedisTemplate.delete("WS:"+String.valueOf(userId));
-		String widthDrawSn = withdrawalSnDTO.getWithdrawalSn();
-		// 保存提现 进度
-		UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
-		userWithdrawLog.setLogCode(CashEnums.CASH_APPLY.getcode());
-		userWithdrawLog.setLogName(CashEnums.CASH_APPLY.getMsg());
-		userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
-		userWithdrawLog.setWithdrawSn(widthDrawSn);
-		userWithdrawLogService.save(userWithdrawLog);
-		log.info("[withdrawForApp]进入提现流程 userId:" + SessionUtil.getUserId() + " 扣除金额:" + totalAmount);
-		WithDrawParam withdrawParam = new WithDrawParam();
-		withdrawParam.setAmount(BigDecimal.valueOf(totalAmount));
-		withdrawParam.setPayId(withdrawalSn);
-		withdrawParam.setThirdPartName("银行卡");
-		withdrawParam.setThirdPartPaid(BigDecimal.valueOf(totalAmount));
-		withdrawParam.setUserId(SessionUtil.getUserId());
-		BaseResult<String> withdrawRst = userAccountService.withdrawUserMoney(withdrawParam);
-		if (withdrawRst == null || withdrawRst.getCode() != 0) {
-			log.info(loggerId + "用户可提现余额提现失败,用户资金钱包未变化");
-			log.info("userId={}提现扣款失败，设置提现单withdrawsn={}失败", SessionUtil.getUserId(), withdrawalSn);
-			UserWithdraw userWithdraw = new UserWithdraw();
-			userWithdraw.setWithdrawalSn(widthDrawSn);
-			userWithdraw.setPayTime(DateUtil.getCurrentTimeLong());
-			userWithdrawMapper.updateUserWithdrawStatus0To2(userWithdraw);
-			userWithdrawLog = new UserWithdrawLog();
-			userWithdrawLog.setLogCode(CashEnums.CASH_FAILURE.getcode());
-			userWithdrawLog.setLogName(CashEnums.CASH_FAILURE.getMsg());
+			if (totalAmount == null || totalAmount <= 0) {
+				log.info(loggerId + "提现金额提供有误！");
+				return ResultGenerator.genResult(PayEnums.PAY_TOTAL_NOTRANGE.getcode(), PayEnums.PAY_TOTAL_NOTRANGE.getMsg());
+			}
+			cfg.setBusinessId(64);//读取最低提现金额
+			int minTxMoney = userAccountService.queryBusinessLimit(cfg).getData()!=null?userAccountService.queryBusinessLimit(cfg).getData().getValue().intValue():0;
+			// 是否小于3元钱
+			if (totalAmount < minTxMoney) {
+				log.info(loggerId + "单笔最低提现金额大于"+minTxMoney+"元~");
+				return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_LOW_LIMIT.getcode(),"单笔提现金额不能低于"+minTxMoney+"元");
+			}
+			cfg.setBusinessId(65);//读取最高提现金额
+			int maxTxMoney = userAccountService.queryBusinessLimit(cfg).getData()!=null?userAccountService.queryBusinessLimit(cfg).getData().getValue().intValue():0;
+			// 是否小于3元钱
+			if (totalAmount > maxTxMoney) {
+				log.info(loggerId + "单笔最高提现金额小于"+minTxMoney+"元~");
+				return ResultGenerator.genResult(PayEnums.PAY_TOTAL_NOTRANGE.getcode(),"单笔提现金额不能高于"+maxTxMoney+"元");
+			}
+			UserDeviceInfo userDevice = SessionUtil.getUserDevice();
+			cfg.setBusinessId(67);//读取财务账号id
+			int cwuserId = userAccountService.queryBusinessLimit(cfg).getData()!=null?userAccountService.queryBusinessLimit(cfg).getData().getValue().intValue():0;
+			if(userId!=cwuserId) {//非财务账号--财务账号不限制提现次数
+				int countUserWithdraw = userWithdrawService.countUserWithdraw(userId);
+				log.info(userId + "当天已提现次数:" + countUserWithdraw);
+				cfg.setBusinessId(63);//读取提现次数
+				int conuntTx = userAccountService.queryBusinessLimit(cfg).getData()!=null?userAccountService.queryBusinessLimit(cfg).getData().getValue().intValue():0;
+				if (countUserWithdraw >= conuntTx) {
+					return ResultGenerator.genResult(PayEnums.PAY_THREE_COUNT_WITHDRAW.getcode(),"每日提现次数不能超过"+conuntTx+"次");
+				}
+			}
+			
+			UserBankDTO userBankDTO = queryUserBank.getData();
+			String bankCode = userBankDTO.getAbbreviation();
+			String realName = userBankDTO.getRealName();
+			String cardNo = userBankDTO.getCardNo();
+			String bankName = userBankDTO.getBankName();
+			cfg.setBusinessId(8);// 提现
+			
+			StrParam strParam = new StrParam();
+			strParam.setStr("");
+			BaseResult<UserDTO> userInfoExceptPass = userService.userInfoExceptPassReal(strParam);
+			if (userInfoExceptPass.getCode() != 0) {
+				return ResultGenerator.genFailResult("对不起，用户信息有误！", null);
+			}
+			UserDTO userDTO = userInfoExceptPass.getData();
+			String mobile = userDTO.getMobile();
+			String strMoney = userDTO.getUserMoney();
+			if(userId!=null && userId==cwuserId) {// 财务账号--财务账号提现金额为商户余额
+				com.dl.shop.payment.param.StrParam emptyParam = new com.dl.shop.payment.param.StrParam();
+				BaseResult<RspOrderQueryDTO> ymoney = rkPayService.getShMoney(emptyParam);
+				if(ymoney!=null && ymoney.getData()!=null) {
+					strMoney=ymoney.getData().getDonationPrice()!=null?ymoney.getData().getDonationPrice():"0";//商户余额
+				}
+			}
+			Double dMoney = null;
+			log.info("用户提现金额:" + strMoney);
+			if (!TextUtils.isEmpty(strMoney)) {
+				try {
+					dMoney = Double.valueOf(strMoney);
+				} catch (Exception ee) {
+					log.error("金额转换异常", ee);
+				}
+			}
+			if (dMoney == null) {
+				log.info(loggerId + "金额转换失败！");
+				return ResultGenerator.genFailResult("用户钱包金额转换失败！", null);
+			}
+			// 提现金额大于可提现金额
+			if (totalAmount > dMoney) {
+				log.info(loggerId + "提现金额超出用户可提现金额数值~");
+				return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_NOT_ENOUGH.getcode(), PayEnums.PAY_RONGBAO_NOT_ENOUGH.getMsg());
+			}
+			
+			String withdrawalSn = SNGenerator.nextSN(SNBusinessCodeEnum.WITHDRAW_SN.getCode());
+			// 生成提现单
+			UserWithdrawParam userWithdrawParam = new UserWithdrawParam();
+			userWithdrawParam.setAmount(BigDecimal.valueOf(totalAmount));
+			userWithdrawParam.setCardNo(cardNo);
+			userWithdrawParam.setRealName(realName);
+			userWithdrawParam.setStatus(ProjectConstant.STATUS_UNCOMPLETE);
+			userWithdrawParam.setWithDrawSn(withdrawalSn);
+			WithdrawalSnDTO withdrawalSnDTO = userWithdrawService.saveWithdraw(userWithdrawParam);
+			if (StringUtils.isEmpty(withdrawalSnDTO.getWithdrawalSn())) {
+				log.info(loggerId + " 生成提现单失败");
+				return ResultGenerator.genFailResult("网络错误，提现失败，请联系客服！", null);
+			}
+			log.info("[withdrawForApp]" + "提现单号:" + withdrawalSn + "生成提现单成功");
+			// stringRedisTemplate.delete("WS:"+String.valueOf(userId));
+			String widthDrawSn = withdrawalSnDTO.getWithdrawalSn();
+			// 保存提现 进度
+			UserWithdrawLog userWithdrawLog = new UserWithdrawLog();
+			userWithdrawLog.setLogCode(CashEnums.CASH_APPLY.getcode());
+			userWithdrawLog.setLogName(CashEnums.CASH_APPLY.getMsg());
 			userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
 			userWithdrawLog.setWithdrawSn(widthDrawSn);
 			userWithdrawLogService.save(userWithdrawLog);
-			log.info("扣除用户余额返回={}", withdrawRst == null ? "" : withdrawRst.getCode() + ":" + withdrawRst.getMsg() + ":" + withdrawRst.getData());
-			return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_NOT_ENOUGH.getcode(), PayEnums.PAY_RONGBAO_NOT_ENOUGH.getMsg());
-		}
-		userWithdrawLog = new UserWithdrawLog();
-		userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
-		userWithdrawLog.setLogName(CashEnums.CASH_REVIEWING.getMsg());
-		userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
-		userWithdrawLog.setWithdrawSn(widthDrawSn);
-		userWithdrawLogService.save(userWithdrawLog);
-		BaseResult<SysConfigDTO> baseResult = userAccountService.queryBusinessLimit(cfg);
-		double limit = 100; // 默认100提现阈值数
-		if (baseResult.getData() != null) {
-			limit = baseResult.getData().getValue().doubleValue();
-		}
-		boolean isCheck = false;
-		if(userId!=cwuserId) {//非财务账号--财务账号不设阈值和人工审核
-			log.info("提现审请信息：userId=" + userId + " totalAmount=" + totalAmount + " limit=" + limit);
-			if (totalAmount > limit) {
-				double maxLimit = this.getMaxNoCheckMoney();
-				log.info("提现审请信息：userId=" + userId + " totalAmount=" + totalAmount + " limit=" + limit + " getMaxNoCheckMoney=" + maxLimit);
-				if (totalAmount >= maxLimit) {
-					isCheck = true;
-				} else {
-					// 判断用户是否是购彩超过指定额度用户
-					GetUserMoneyPayParam getUserMoneyPayParam = new GetUserMoneyPayParam();
-					getUserMoneyPayParam.setUserId(userId);
-					BaseResult<GetUserMoneyDTO> getUserMoneyPayRst = orderService.getUserMoneyPay(getUserMoneyPayParam);
-					GetUserMoneyDTO data = getUserMoneyPayRst.getData();
-					Double userMoneyPaid = data != null && data.getMoneyPaid() != null ? data.getMoneyPaid() : 0.0;
-					Double userMoneyPaidForNoCheck = this.getUserMoneyPaidForNoCheck();
-					log.info("提现审请信息：userId=" + userId + " totalAmount=" + totalAmount + " limit=" + limit + " getUserMoneyPaidForNoCheck=" + userMoneyPaidForNoCheck + " userMoneyPaid=" + userMoneyPaid);
-					if (userMoneyPaidForNoCheck > userMoneyPaid) {
+			log.info("[withdrawForApp]进入提现流程 userId:" + SessionUtil.getUserId() + " 扣除金额:" + totalAmount);
+			WithDrawParam withdrawParam = new WithDrawParam();
+			withdrawParam.setAmount(BigDecimal.valueOf(totalAmount));
+			withdrawParam.setPayId(withdrawalSn);
+			withdrawParam.setThirdPartName("银行卡");
+			withdrawParam.setThirdPartPaid(BigDecimal.valueOf(totalAmount));
+			withdrawParam.setUserId(SessionUtil.getUserId());
+			BaseResult<String> withdrawRst = userAccountService.withdrawUserMoney(withdrawParam);
+			if (withdrawRst == null || withdrawRst.getCode() != 0) {
+				log.info(loggerId + "用户可提现余额提现失败,用户资金钱包未变化");
+				log.info("userId={}提现扣款失败，设置提现单withdrawsn={}失败", SessionUtil.getUserId(), withdrawalSn);
+				UserWithdraw userWithdraw = new UserWithdraw();
+				userWithdraw.setWithdrawalSn(widthDrawSn);
+				userWithdraw.setPayTime(DateUtil.getCurrentTimeLong());
+				userWithdrawMapper.updateUserWithdrawStatus0To2(userWithdraw);
+				userWithdrawLog = new UserWithdrawLog();
+				userWithdrawLog.setLogCode(CashEnums.CASH_FAILURE.getcode());
+				userWithdrawLog.setLogName(CashEnums.CASH_FAILURE.getMsg());
+				userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
+				userWithdrawLog.setWithdrawSn(widthDrawSn);
+				userWithdrawLogService.save(userWithdrawLog);
+				log.info("扣除用户余额返回={}", withdrawRst == null ? "" : withdrawRst.getCode() + ":" + withdrawRst.getMsg() + ":" + withdrawRst.getData());
+				return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_NOT_ENOUGH.getcode(), PayEnums.PAY_RONGBAO_NOT_ENOUGH.getMsg());
+			}
+			userWithdrawLog = new UserWithdrawLog();
+			userWithdrawLog.setLogCode(CashEnums.CASH_REVIEWING.getcode());
+			userWithdrawLog.setLogName(CashEnums.CASH_REVIEWING.getMsg());
+			userWithdrawLog.setLogTime(DateUtil.getCurrentTimeLong());
+			userWithdrawLog.setWithdrawSn(widthDrawSn);
+			userWithdrawLogService.save(userWithdrawLog);
+			BaseResult<SysConfigDTO> baseResult = userAccountService.queryBusinessLimit(cfg);
+			double limit = 100; // 默认100提现阈值数
+			if (baseResult.getData() != null) {
+				limit = baseResult.getData().getValue().doubleValue();
+			}
+			boolean isCheck = false;
+			if(userId!=cwuserId) {//非财务账号--财务账号不设阈值和人工审核
+				log.info("提现审请信息：userId=" + userId + " totalAmount=" + totalAmount + " limit=" + limit);
+				if (totalAmount > limit) {
+					double maxLimit = this.getMaxNoCheckMoney();
+					log.info("提现审请信息：userId=" + userId + " totalAmount=" + totalAmount + " limit=" + limit + " getMaxNoCheckMoney=" + maxLimit);
+					if (totalAmount >= maxLimit) {
 						isCheck = true;
+					} else {
+						// 判断用户是否是购彩超过指定额度用户
+						GetUserMoneyPayParam getUserMoneyPayParam = new GetUserMoneyPayParam();
+						getUserMoneyPayParam.setUserId(userId);
+						BaseResult<GetUserMoneyDTO> getUserMoneyPayRst = orderService.getUserMoneyPay(getUserMoneyPayParam);
+						GetUserMoneyDTO data = getUserMoneyPayRst.getData();
+						Double userMoneyPaid = data != null && data.getMoneyPaid() != null ? data.getMoneyPaid() : 0.0;
+						Double userMoneyPaidForNoCheck = this.getUserMoneyPaidForNoCheck();
+						log.info("提现审请信息：userId=" + userId + " totalAmount=" + totalAmount + " limit=" + limit + " getUserMoneyPaidForNoCheck=" + userMoneyPaidForNoCheck + " userMoneyPaid=" + userMoneyPaid);
+						if (userMoneyPaidForNoCheck > userMoneyPaid) {
+							isCheck = true;
+						}
 					}
 				}
+				Boolean withDrawByPersonOprateOpen = userWithdrawService.queryWithDrawPersonOpen();
+				if (withDrawByPersonOprateOpen) {
+					isCheck = true;// 人工打款打开时所有提现均走人工提现
+				}
 			}
-			Boolean withDrawByPersonOprateOpen = userWithdrawService.queryWithDrawPersonOpen();
-			if (withDrawByPersonOprateOpen) {
-				isCheck = true;// 人工打款打开时所有提现均走人工提现
+			log.info("提现审请信息：userId=" + userId + " totalAmount=" + totalAmount + " limit=" + limit + " isCheck=" + isCheck);
+			if (isCheck) {
+				log.info("单号:" + widthDrawSn + "超出提现阈值,进入审核通道  系统阈值:" + limit);
+				return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_APPLY_SUC.getcode(), PayEnums.PAY_WITHDRAW_APPLY_SUC.getMsg());
+			} else {
+				log.info("进入第三方提现流程...系统阈值:" + limit + " widthDrawSn:" + widthDrawSn);
+				UserWithdraw userWithdraw = new UserWithdraw();
+				userWithdraw.setWithdrawalSn(withdrawalSn);
+				Integer thirdPayForType = userWithdrawMapper.getThirdPayForType();
+				userWithdraw.setPayForCode(thirdPayForType);
+				userWithdrawMapper.updateUserWithdrawStatus0To3(userWithdraw);
+				RspSingleCashEntity rEntity = callThirdGetCash(widthDrawSn, totalAmount, cardNo, bankName, realName, mobile, bankCode, userId);
+				long time3 = System.currentTimeMillis();
+				log.info("time3为：" + time3);
+				log.info("提现所用时间为：" + (time3 - time1));
+				return operation(rEntity, widthDrawSn, userId, Boolean.TRUE);
 			}
-		}
-		log.info("提现审请信息：userId=" + userId + " totalAmount=" + totalAmount + " limit=" + limit + " isCheck=" + isCheck);
-		if (isCheck) {
-			log.info("单号:" + widthDrawSn + "超出提现阈值,进入审核通道  系统阈值:" + limit);
-			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_APPLY_SUC.getcode(), PayEnums.PAY_WITHDRAW_APPLY_SUC.getMsg());
-		} else {
-			log.info("进入第三方提现流程...系统阈值:" + limit + " widthDrawSn:" + widthDrawSn);
-			UserWithdraw userWithdraw = new UserWithdraw();
-			userWithdraw.setWithdrawalSn(withdrawalSn);
-			Integer thirdPayForType = userWithdrawMapper.getThirdPayForType();
-			userWithdraw.setPayForCode(thirdPayForType);
-			userWithdrawMapper.updateUserWithdrawStatus0To3(userWithdraw);
-			RspSingleCashEntity rEntity = callThirdGetCash(widthDrawSn, totalAmount, cardNo, bankName, realName, mobile, bankCode, userId);
-			long time3 = System.currentTimeMillis();
-			log.info("time3为：" + time3);
-			log.info("提现所用时间为：" + (time3 - time1));
-			return operation(rEntity, widthDrawSn, userId, Boolean.TRUE);
+		} finally {
+			rwl.readLock().unlock();
 		}
 	}
 
