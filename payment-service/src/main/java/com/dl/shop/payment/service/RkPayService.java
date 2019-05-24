@@ -176,14 +176,14 @@ public class RkPayService {
         if(status!=null && "0".equals(status)) {//代付查询成功
         	String trade_status = funddataMap.get("trade_status").toString();
         	if(trade_status!=null && "PROCESSING".equalsIgnoreCase(trade_status)) {//代付处理中  请稍后查询
-        		if(count>3) {
+        		if(count>5) {
         			return data;
         		}
         		Thread.sleep(3000);
     			fundTradeQuery(ds_trade_no,count++,count2);
         	}
         }else { //查询失败 3秒后继续查询
-        	if(count2>3) {
+        	if(count2>5) {
     			return data;
     		}
         	Thread.sleep(3000);
