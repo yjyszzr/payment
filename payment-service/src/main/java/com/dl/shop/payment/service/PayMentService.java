@@ -519,9 +519,11 @@ public class PayMentService extends AbstractService<PayMent> {
 				BaseResult<HashMap<String,Object>> userbonusResult = userBonusService.createRechargeUserBonusNew(payLogIdParam);
 				logger.info("结束执行充值赠送红包逻辑NEW:"+userbonusResult.getData());
 				//充值领取红包 end *****************************************************
-				if(userbonusResult!=null) {
-					recharegeParam.setRechargeCardId((Integer)userbonusResult.getData().get("rechargeCardId"));//充值大礼包ID
-					recharegeParam.setRechargeCardRealValue((BigDecimal)userbonusResult.getData().get("rechargeCardRealValue"));
+				if(userbonusResult!=null && userbonusResult.getData()!=null) {
+					Integer rechargeCardId = userbonusResult.getData().get("rechargeCardId")!=null?Integer.valueOf(userbonusResult.getData().get("rechargeCardId").toString()):null;
+					Double rechargeCardRealValue = userbonusResult.getData().get("rechargeCardRealValue")!=null?Double.valueOf(userbonusResult.getData().get("rechargeCardRealValue").toString()):0;
+					recharegeParam.setRechargeCardId(rechargeCardId);//充值大礼包ID
+					recharegeParam.setRechargeCardRealValue(BigDecimal.valueOf(rechargeCardRealValue));
 				}
 				BaseResult<String> rechargeRst = userAccountService.rechargeUserMoneyLimit(recharegeParam);
 				if (rechargeRst.getCode() != 0) {
