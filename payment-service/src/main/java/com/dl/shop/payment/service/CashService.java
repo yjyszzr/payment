@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -28,7 +29,6 @@ import com.alibaba.fastjson.JSON;
 import com.dl.base.constant.CommonConstants;
 import com.dl.base.enums.SNBusinessCodeEnum;
 import com.dl.base.model.UserDeviceInfo;
-import com.dl.base.param.EmptyParam;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.base.util.DateUtil;
@@ -41,6 +41,7 @@ import com.dl.member.api.IUserService;
 import com.dl.member.dto.SysConfigDTO;
 import com.dl.member.dto.UserBankDTO;
 import com.dl.member.dto.UserDTO;
+import com.dl.member.enums.MemberEnums;
 import com.dl.member.param.AddMessageParam;
 import com.dl.member.param.IDParam;
 import com.dl.member.param.MessageAddParam;
@@ -127,13 +128,19 @@ public class CashService {
 		Integer userId = SessionUtil.getUserId();
 		long time1 = System.currentTimeMillis();
 		log.info("time1:" + System.currentTimeMillis());
-		Long mTime = System.currentTimeMillis();
-		String userIdInRedis = stringRedisTemplate.opsForValue().get("WS:"+String.valueOf(userId));
-		if(!StringUtils.isEmpty(userIdInRedis)) {
+//		Long mTime = System.currentTimeMillis();
+//		String userIdInRedis = stringRedisTemplate.opsForValue().get("WS:"+String.valueOf(userId));
+//		if(!StringUtils.isEmpty(userIdInRedis)) {
+//			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_REPEAT.getcode(),PayEnums.PAY_WITHDRAW_REPEAT.getMsg());
+//		}
+//		stringRedisTemplate.opsForValue().set("WS:"+String.valueOf(userId),String.valueOf(mTime));
+
+		Boolean absent = stringRedisTemplate.opsForValue().setIfAbsent("WS:"+String.valueOf(userId), "on");
+		stringRedisTemplate.expire("WS:"+String.valueOf(userId), 10, TimeUnit.SECONDS);
+		if(!absent) {
 			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_REPEAT.getcode(),PayEnums.PAY_WITHDRAW_REPEAT.getMsg());
 		}
-		stringRedisTemplate.opsForValue().set("WS:"+String.valueOf(userId),String.valueOf(mTime));
-
+		
 		String loggerId = "withdrawForApp_" + System.currentTimeMillis();
 		log.info(loggerId + " int /payment/withdraw, userId=" + SessionUtil.getUserId() + ", totalAmount=" + param.getTotalAmount() + ",userBankId=" + param.getUserBankId());
 		SysConfigParam cfg = new SysConfigParam();
