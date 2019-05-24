@@ -350,7 +350,7 @@ public class CashService {
 			}
 		} finally {
 			log.info("withdrawForApp:finally"+userId);
-//			stringRedisTemplate.delete("WS:"+String.valueOf(userId));
+			stringRedisTemplate.delete("WS:"+String.valueOf(userId));
 //			rwl.readLock().unlock();
 		}
 	}
