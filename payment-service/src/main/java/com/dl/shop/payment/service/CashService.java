@@ -128,8 +128,8 @@ public class CashService {
 
 	public BaseResult<Object> withdrawForApp(@RequestBody WithdrawParam param, HttpServletRequest request) {
 //		rwl.readLock().lock();
-//		try {
-			Integer userId = SessionUtil.getUserId();
+		Integer userId = SessionUtil.getUserId();
+		try {
 			long time1 = System.currentTimeMillis();
 			log.info("time1:" + System.currentTimeMillis());
 //			Long mTime = System.currentTimeMillis();
@@ -140,11 +140,10 @@ public class CashService {
 //			stringRedisTemplate.opsForValue().set("WS:"+String.valueOf(userId),String.valueOf(mTime));
 
 			Boolean absent = stringRedisTemplate.opsForValue().setIfAbsent("WS:"+String.valueOf(userId), "on");
-			stringRedisTemplate.expire("WS:"+String.valueOf(userId), 60, TimeUnit.SECONDS);
+			stringRedisTemplate.expire("WS:"+String.valueOf(userId), 1, TimeUnit.HOURS);
 			if(!absent) {
 				return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_REPEAT.getcode(),PayEnums.PAY_WITHDRAW_REPEAT.getMsg());
 			}
-			
 			String loggerId = "withdrawForApp_" + System.currentTimeMillis();
 			log.info(loggerId + " int /payment/withdraw, userId=" + SessionUtil.getUserId() + ", totalAmount=" + param.getTotalAmount() + ",userBankId=" + param.getUserBankId());
 			SysConfigParam cfg = new SysConfigParam();
@@ -348,9 +347,10 @@ public class CashService {
 				log.info("提现所用时间为：" + (time3 - time1));
 				return operation(rEntity, widthDrawSn, userId, Boolean.TRUE);
 			}
-//		} finally {
+		} finally {
+			stringRedisTemplate.delete("WS:"+String.valueOf(userId));
 //			rwl.readLock().unlock();
-//		}
+		}
 	}
 
 	
