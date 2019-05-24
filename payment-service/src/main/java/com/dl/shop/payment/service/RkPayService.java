@@ -446,11 +446,13 @@ public class RkPayService {
             				log.info("进入发送短信环节：接受短信手机号："+mobile);
             				smsService.sendSmsCode(smsParam);
             			}
-            		}else{//代付失败
+            		}else if(funddataMap.get("trade_status").toString().equals("FAIL")) {//代付失败
             			rspEntity.status = "F";
+            		}else { //处理中 默认成功  如果失败 人工退款
+            			rspEntity.status = "S";
             		}
-            	}else { ///代付查询失败
-            		rspEntity.status = "F";
+            	}else { ///查询失败 默认成功  如果失败 人工退款
+            		rspEntity.status = "S";
             	}
             } else {//接口失败
             	rspEntity.status = "F";
