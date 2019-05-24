@@ -127,14 +127,12 @@ public class CashService {
 		Integer userId = SessionUtil.getUserId();
 		long time1 = System.currentTimeMillis();
 		log.info("time1:" + System.currentTimeMillis());
-		// Long mTime = System.currentTimeMillis();
-		// String userIdInRedis =
-		// stringRedisTemplate.opsForValue().get("WS:"+String.valueOf(userId));
-		// if(!StringUtils.isEmpty(userIdInRedis)) {
-		// return
-		// ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_REPEAT.getcode(),PayEnums.PAY_WITHDRAW_REPEAT.getMsg());
-		// }
-		// stringRedisTemplate.opsForValue().set("WS:"+String.valueOf(userId),String.valueOf(mTime));
+		Long mTime = System.currentTimeMillis();
+		String userIdInRedis = stringRedisTemplate.opsForValue().get("WS:"+String.valueOf(userId));
+		if(!StringUtils.isEmpty(userIdInRedis)) {
+			return ResultGenerator.genResult(PayEnums.PAY_WITHDRAW_REPEAT.getcode(),PayEnums.PAY_WITHDRAW_REPEAT.getMsg());
+		}
+		stringRedisTemplate.opsForValue().set("WS:"+String.valueOf(userId),String.valueOf(mTime));
 
 		String loggerId = "withdrawForApp_" + System.currentTimeMillis();
 		log.info(loggerId + " int /payment/withdraw, userId=" + SessionUtil.getUserId() + ", totalAmount=" + param.getTotalAmount() + ",userBankId=" + param.getUserBankId());
