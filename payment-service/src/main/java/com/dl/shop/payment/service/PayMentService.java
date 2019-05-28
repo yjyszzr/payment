@@ -14,7 +14,8 @@ import java.util.stream.Collectors;
 import com.dl.store.api.IStoreUserMoneyService;
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
-
+import com.dl.store.api.IStoreUserMoneyService;
+import com.dl.store.param.FirstPayTimeParam;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -171,6 +172,9 @@ public class PayMentService extends AbstractService<PayMent> {
 	private PayUBeyUtil payUBeyUtil;
 	@Resource
 	private ISwitchConfigService iSwitchConfigService;
+	
+	@Resource
+    private IStoreUserMoneyService iStoreUserMoneyService;
 
 	/**
 	 * 查询所有可用的支付方式
