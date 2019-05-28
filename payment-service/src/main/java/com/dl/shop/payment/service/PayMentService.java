@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
+import com.dl.store.api.IStoreUserMoneyService;
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 
@@ -569,7 +569,14 @@ public class PayMentService extends AbstractService<PayMent> {
 		logger.info("orderOptions()===response*******"+JSONUtils.valueToString(response));
 		int currentTime = DateUtil.getCurrentTimeLong();
 		if (response.isSucc()) {
-			// 2018-07-04
+			logger.info("开始记录第一次支付时间");
+            FirstPayTimeParam firstPayTimeParam = new FirstPayTimeParam();
+            firstPayTimeParam.setOrderSn(payLog.getOrderSn());
+            BaseResult<String> storeUserMoneyRst = iStoreUserMoneyService.recordFirstPayTime(firstPayTimeParam);
+            if(storeUserMoneyRst.getCode() == 0){
+                logger.info(storeUserMoneyRst.getMsg());
+            }
+			
 			// 更新order
 			UpdateOrderPayStatusParam param = new UpdateOrderPayStatusParam();
 			param.setPayStatus(1);
