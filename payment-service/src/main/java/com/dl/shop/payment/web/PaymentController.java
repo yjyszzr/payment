@@ -322,6 +322,7 @@ public class PaymentController extends AbstractBaseController {
 
 			submitOrderParam.setIssue(dto.getIssue());
 			submitOrderParam.setTicketDetails(ticketDetails);
+			submitOrderParam.setPayCode(param.getPayCode());
 			BaseResult<OrderDTO> createOrder = orderService.createOrder(submitOrderParam);
 			if (createOrder.getCode() != 0) {
 				logger.info("订单创建失败！");
@@ -1698,7 +1699,7 @@ public class PaymentController extends AbstractBaseController {
 		submitOrderParam.setIssue(dto.getIssue());
 		submitOrderParam.setTicketDetails(ticketDetails);
 		submitOrderParam.set_orderSn(param.getOrderSn());
-		
+		submitOrderParam.setPayCode(param.getPayCode());
 		if(StringUtil.isNotEmpty(param.getOrderSn())) {//修改元数据订单编号并且将订单置为无效  修改规则为 元订单编号+"1"
 			SubmitOrderParam sparam = new SubmitOrderParam();
 			sparam.set_orderSn(param.getOrderSn());
