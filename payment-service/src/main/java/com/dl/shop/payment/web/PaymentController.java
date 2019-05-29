@@ -1362,6 +1362,7 @@ public class PaymentController extends AbstractBaseController {
 		String loggerId = "payment_unifiedPayBefore" + System.currentTimeMillis();
 		String payToken = param.getPayToken();
 		String payCode = param.getPayCode();
+		logger.info("unifiedPayBefore----2"+payCode);
 		if (StringUtils.isBlank(payToken)) {
 			logger.info(loggerId + "payToken值为空！");
 			return ResultGenerator.genResult(PayEnums.PAY_TOKEN_EMPTY.getcode(), PayEnums.PAY_TOKEN_EMPTY.getMsg());
@@ -1373,7 +1374,9 @@ public class PaymentController extends AbstractBaseController {
 			return ResultGenerator.genResult(PayEnums.PAY_TOKEN_EXPRIED.getcode(), PayEnums.PAY_TOKEN_EXPRIED.getMsg());
 		}
 		if(payCode!=null && payCode.equals("app_offline")) {//线下支付不清楚token
+			logger.info("unifiedPayBefore----1");
 		}else {
+			logger.info("unifiedPayBefore----2");
 			// 清除payToken
 			stringRedisTemplate.delete(payToken);
 		}
