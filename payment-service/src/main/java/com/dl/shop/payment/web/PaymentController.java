@@ -207,10 +207,10 @@ public class PaymentController extends AbstractBaseController {
 		return ResultGenerator.genSuccessResult("success", list);
 	}
 
-	@ApiOperation(value = "系统可用第三方支付方式带有了充值活动信息", notes = "系统可用第三方支付方式")
-	@PostMapping("/allPaymentWithRecharge")
+	@ApiOperation(value = "线下支付订单生成", notes = "系统可用第三方支付方式")
+	@PostMapping("/appOfflineCreateOrder")
 	@ResponseBody
-	public BaseResult<PayWaysDTO> allPaymentInfoWithRecharge(@RequestBody AllPaymentInfoParam param) {
+	public BaseResult<String> appOfflineCreateOrder(@RequestBody AllPaymentInfoParam param) {
 		String payToken = param.getPayToken();
 		//如果支付方式为【线下支付】并且【订单号为空】则生成订单
 		if(param.getPayCode()!=null && "app_offline".equals(param.getPayCode()) && StringUtil.isEmpty(param.getOrderSn())) {
@@ -325,11 +325,17 @@ public class PaymentController extends AbstractBaseController {
 			BaseResult<OrderDTO> createOrder = orderService.createOrder(submitOrderParam);
 			if (createOrder.getCode() != 0) {
 				logger.info("订单创建失败！");
-				return ResultGenerator.genFailResult("支付失败！");
+				return ResultGenerator.genFailResult("订单创建失败！");
 			}
 
 		}
-		
+		return ResultGenerator.genSuccessResult("success", "订单创建成功");
+	}
+	
+	@ApiOperation(value = "系统可用第三方支付方式带有了充值活动信息", notes = "系统可用第三方支付方式")
+	@PostMapping("/allPaymentWithRecharge")
+	@ResponseBody
+	public BaseResult<PayWaysDTO> allPaymentInfoWithRecharge(@RequestBody AllPaymentInfoParam param) {
 		PayWaysDTO payWaysDTO = new PayWaysDTO();
 		List<PaymentDTO> paymentDTOList = paymentService.findAllDto();
 		payWaysDTO.setPaymentDTOList(paymentDTOList);
