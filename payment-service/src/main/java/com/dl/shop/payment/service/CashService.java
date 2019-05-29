@@ -128,6 +128,7 @@ public class CashService {
 
 	public BaseResult<Object> withdrawForApp(@RequestBody WithdrawParam param, HttpServletRequest request) {
 //		rwl.readLock().lock();
+		SysConfigParam cfg = new SysConfigParam();
 		Integer userId = SessionUtil.getUserId();
 		try {
 			long time1 = System.currentTimeMillis();
@@ -148,7 +149,6 @@ public class CashService {
 			}
 			String loggerId = "withdrawForApp_" + System.currentTimeMillis();
 			log.info(loggerId + " int /payment/withdraw, userId=" + SessionUtil.getUserId() + ", totalAmount=" + param.getTotalAmount() + ",userBankId=" + param.getUserBankId());
-			SysConfigParam cfg = new SysConfigParam();
 			// bank判断
 			int userBankId = param.getUserBankId();
 			if (userBankId < 1) {
