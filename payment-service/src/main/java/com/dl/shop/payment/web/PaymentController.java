@@ -217,7 +217,7 @@ public class PaymentController extends AbstractBaseController {
 			// 校验payToken的有效性
 			String jsonData = stringRedisTemplate.opsForValue().get(payToken);
 			if (StringUtils.isBlank(jsonData)) {
-				logger.info("支付信息获取为空！");
+				logger.info("订单信息获取为空！");
 				return ResultGenerator.genResult(PayEnums.PAY_TOKEN_EXPRIED.getcode(), PayEnums.PAY_TOKEN_EXPRIED.getMsg());
 			}
 			// 清除payToken
@@ -228,16 +228,16 @@ public class PaymentController extends AbstractBaseController {
 				dto = JSONHelper.getSingleBean(jsonData, UserBetPayInfoDTO.class);
 			} catch (Exception e1) {
 				logger.error("支付信息转DIZQUserBetInfoDTO对象失败！", e1);
-				return ResultGenerator.genFailResult("支付信息异常，支付失败！");
+				return ResultGenerator.genFailResult("订单信息异常，创建失败！");
 			}
 			if (null == dto) {
-				return ResultGenerator.genFailResult("支付信息异常，支付失败！");
+				return ResultGenerator.genFailResult("订单信息异常，创建失败！");
 			}
 			Integer userId = dto.getUserId();
 			Integer currentId = SessionUtil.getUserId();
 			if (!userId.equals(currentId)) {
 				logger.info("支付信息不是当前用户的待支付彩票！");
-				return ResultGenerator.genFailResult("支付信息异常，支付失败！");
+				return ResultGenerator.genFailResult("订单信息异常，创建失败！");
 			}
 			Double orderMoney = dto.getOrderMoney();
 			Integer userBonusId = 0;// form
