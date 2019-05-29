@@ -1,5 +1,6 @@
 package com.dl.shop.payment.pay.rkpay;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -213,5 +214,8 @@ public class Test {
 //		int s = 5000;
 //		double m = 5544.55;
 //		System.out.println(s<m);
+        
+        HashMap<String,Object> rmap = new HashMap();
+        System.out.println(rmap);
     }
 }

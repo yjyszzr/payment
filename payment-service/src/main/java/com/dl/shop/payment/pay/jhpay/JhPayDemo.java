@@ -34,16 +34,16 @@ import com.dl.shop.payment.utils.DateUtilPay;
  * @author
  *
  */
-public class JhPayWXDemo {
+public class JhPayDemo {
 	
 	/**
 	 * 服务端地址 
 	 */
-	private static String PATH = "http://47.98.200.178:8001";
+	private static String PATH = "http://114.118.97.120";
 	/**
 	 * 订单支付URL
 	 */
-	private String PAY_URL = "/getorder";
+	private String PAY_URL = "/gateway.php";
 	/**
 	 * 订单支付回调URL地址,需要修改为自己的异步回调地址，公网可以访问的
 	 */
@@ -60,6 +60,10 @@ public class JhPayWXDemo {
 	 * 商户密钥，正式上线需要修改为自己的商户密钥
 	 */
 	private String SECRET = "e8b0bd096de520312c2a3c6ef2f36983";
+	/**
+	 * 商户号，(自定义商户号)
+	 */
+	private String ADDUID = "7927";
 
 	/**
 	 * 发送消息体到服务端
@@ -173,52 +177,25 @@ public class JhPayWXDemo {
 	}
 
 	/**
-	 * 验签，验证返回参数签名。异步回调时，将所有post参数放入Map集合中，调用该方法即可进行参数验证
-	 * 
-	 * @param params
-	 *            返回参数
-	 * @return
-	 */
-	public boolean checkParamSign(Map<String, String> params) {
-		boolean result = false;
-		try {
-			if (params == null || params.size() == 0) {
-				return result;
-			}
-			if (params.containsKey("sign")) {
-				String sign = params.get("sign");
-				params.remove("sign");
-				String signRecieve = null;
-				StringBuilder basestring = new StringBuilder();
-				basestring.append(params.get("out_trade_no")).append("&key=");
-				signRecieve = getSign(basestring);
-				result = sign.equalsIgnoreCase(signRecieve);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return result;
-	}
-	/**
 	 * 测试订单订单生成，当返回result中code=1时，代表订单生成成功，需要验签
 	 * @throws MalformedURLException 
 	 */
 	public void pay(Map<String, String> param) throws MalformedURLException {
 		Map<String, String> params = new HashMap<>();
 		params.put("out_trade_no", param.get("out_trade_no"));// 商户订单
+		params.put("price", param.get("price"));// 订单金额
+		params.put("istype", "2");// 支付方式(1: 支付宝扫码)
+		params.put("adduid", ADDUID);// 商户id(你们定)
+		params.put("adduser", MERCHANT_NAME);//商户网站的用户名(pankou28，不可修改)
+		params.put("mct_id", MERCHANT_NO);//商户id(153,不可修改)
 		StringBuilder basestring = new StringBuilder();
-		basestring.append(params.get("out_trade_no")).append("&key=");
-		params.put("checksign", getSign(basestring));//签名只订单号+key  大写
-		params.put("payway", param.get("payway"));// WX:微信支付
-		params.put("total_fee", param.get("total_fee"));// 订单金额
-		params.put("body", param.get("body"));// 订单描述
-		Map<String, Object> jhSh = new HashMap<>();
-		jhSh.put("user_id", MERCHANT_NO);// 商户ID
-		jhSh.put("user_name", MERCHANT_NAME);// 商户名
-		jhSh.put("notify_url", NOTIFY_URL);// 异步回调地址
-		params.put("attach", JSONUtils.toJSONString(jhSh));//自定义参数
-		// ************订单生成，当返回result中code=1时，代表订单生成成功，需要验签************
+		basestring.append(params.get("out_trade_no")).append(params.get("price"))
+				.append(params.get("istype")).append(ADDUID).append(MERCHANT_NAME).append(MERCHANT_NO);
+		params.put("sign", getSign(basestring).toLowerCase());//签名 小写
+		params.put("goodsname", param.get("goodsname"));//商品名(你们定, 不可用中文)
+		params.put("adddata", param.get("goodsname"));//附加信息(你们定)
+		params.put("notify_url", NOTIFY_URL);//成功支付后的异步通知地址
+		params.put("return_url", NOTIFY_URL);//成功支付后的异步通知地址
 		System.out.println("接口传递参数："+JSONUtils.toJSONString(params));
 		String result = sendPostMessage(new URL(PATH+PAY_URL), params);
 		System.out.println("接口返回结果"+result);
@@ -241,12 +218,11 @@ public class JhPayWXDemo {
 
 
 	public static void main(String[] args) throws MalformedURLException {
-		JhPayWXDemo apay = new JhPayWXDemo();
+		JhPayDemo apay = new JhPayDemo();
 		Map<String,String> param = new HashMap<>();
-		param.put("out_trade_no", "123132123");// 商户订单
-		param.put("payway", "WX");// WX:微信支付
-		param.put("total_fee", "100");// 订单金额
-		param.put("body", "测试");// 订单描述
+		param.put("out_trade_no", "CS12347129");// 商户订单
+		param.put("price", "1");// 订单金额 单位元
+		param.put("goodsname", "测试");//商品名(你们定, 不可用中文)
 		// ************订单生成，当返回result中code=1时，代表订单生成成功，需要验签************
 		apay.pay(param);
 	}

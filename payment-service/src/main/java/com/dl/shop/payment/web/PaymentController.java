@@ -127,6 +127,7 @@ import com.dl.shop.payment.utils.QrUtil;
 import com.dl.shop.payment.utils.WxpayUtil;
 import com.dl.store.api.IStoreUserMoneyService;
 import com.dl.store.param.FirstPayTimeParam;
+import com.github.pagehelper.util.StringUtil;
 
 import io.swagger.annotations.ApiOperation;
 import net.sf.json.util.JSONUtils;
@@ -210,6 +211,125 @@ public class PaymentController extends AbstractBaseController {
 	@PostMapping("/allPaymentWithRecharge")
 	@ResponseBody
 	public BaseResult<PayWaysDTO> allPaymentInfoWithRecharge(@RequestBody AllPaymentInfoParam param) {
+		String payToken = param.getPayToken();
+		//如果支付方式为【线下支付】并且【订单号为空】则生成订单
+		if(param.getPayCode()!=null && "app_offline".equals(param.getPayCode()) && StringUtil.isEmpty(param.getOrderSn())) {
+			// 校验payToken的有效性
+			String jsonData = stringRedisTemplate.opsForValue().get(payToken);
+			if (StringUtils.isBlank(jsonData)) {
+				logger.info("支付信息获取为空！");
+				return ResultGenerator.genResult(PayEnums.PAY_TOKEN_EXPRIED.getcode(), PayEnums.PAY_TOKEN_EXPRIED.getMsg());
+			}
+			// 清除payToken
+			stringRedisTemplate.delete(payToken);
+
+			UserBetPayInfoDTO dto = null;
+			try {
+				dto = JSONHelper.getSingleBean(jsonData, UserBetPayInfoDTO.class);
+			} catch (Exception e1) {
+				logger.error("支付信息转DIZQUserBetInfoDTO对象失败！", e1);
+				return ResultGenerator.genFailResult("支付信息异常，支付失败！");
+			}
+			if (null == dto) {
+				return ResultGenerator.genFailResult("支付信息异常，支付失败！");
+			}
+			Integer userId = dto.getUserId();
+			Integer currentId = SessionUtil.getUserId();
+			if (!userId.equals(currentId)) {
+				logger.info("支付信息不是当前用户的待支付彩票！");
+				return ResultGenerator.genFailResult("支付信息异常，支付失败！");
+			}
+			Double orderMoney = dto.getOrderMoney();
+			Integer userBonusId = 0;// form
+			BigDecimal ticketAmount = BigDecimal.valueOf(orderMoney);// from
+			BigDecimal bonusAmount = BigDecimal.valueOf(dto.getBonusAmount());// from paytoken
+			BigDecimal moneyPaid = BigDecimal.valueOf(orderMoney - dto.getBonusAmount());
+			BigDecimal surplus = BigDecimal.valueOf(dto.getSurplus());// from
+			BigDecimal thirdPartyPaid = BigDecimal.valueOf(dto.getThirdPartyPaid());
+			
+			//比赛提前1h	禁止支付
+			Integer sysLimitBetTime = 3600;
+			SysConfigParam sysConfigParam = new SysConfigParam();
+			sysConfigParam.setBusinessId(4);
+			BaseResult<SysConfigDTO> sysConfigDTOBaseResult = iSysConfigService.querySysConfig(sysConfigParam);
+			if(sysConfigDTOBaseResult.isSuccess()){
+				sysLimitBetTime = sysConfigDTOBaseResult.getData().getValue().intValue();
+			}
+			List<UserBetDetailInfoDTO> userBetCellInfos = dto.getBetDetailInfos();
+			UserBetDetailInfoDTO min = userBetCellInfos.get(0);
+			if(userBetCellInfos.size() > 1) {
+				min = userBetCellInfos.stream().min((cell1,cell2)->cell1.getMatchTime()-cell2.getMatchTime()).get();
+			}
+			String strMatchTime= DateUtil.getTimeString(min.getMatchTime(), DateUtil.datetimeFormat);
+			String strNowTime= DateUtil.getTimeString(DateUtil.getCurrentTimeLong(), DateUtil.datetimeFormat);
+			
+			String seconds = DateUtilPay.dateSubtractionHours(strNowTime,strMatchTime);
+			logger.info("nUnifiedOrder()：提前售票： 比赛时间="+min.getMatchTime()+"||"+strMatchTime+"提前时间="+sysLimitBetTime+"当前时间="+DateUtil.getCurrentTimeLong()+"||"+strNowTime);
+			logger.info("nUnifiedOrder()：提前售票： 是否停止售票="+(Integer.valueOf(seconds)<=sysLimitBetTime));
+			if(Integer.valueOf(seconds)<=sysLimitBetTime) {
+				return ResultGenerator.genResult(LotteryResultEnum.BET_TIME_LIMIT.getCode(), LotteryResultEnum.BET_TIME_LIMIT.getMsg());
+			}
+
+			List<TicketDetail> ticketDetails = userBetCellInfos.stream().map(betCell -> {
+				TicketDetail ticketDetail = new TicketDetail();
+				ticketDetail.setMatch_id(betCell.getMatchId());
+				ticketDetail.setChangci(betCell.getChangci());
+				int matchTime = betCell.getMatchTime();
+				if (matchTime > 0) {
+					ticketDetail.setMatchTime(Date.from(Instant.ofEpochSecond(matchTime)));
+				}
+				ticketDetail.setMatchTeam(betCell.getMatchTeam());
+				ticketDetail.setLotteryClassifyId(betCell.getLotteryClassifyId());
+				ticketDetail.setLotteryPlayClassifyId(betCell.getLotteryPlayClassifyId());
+				ticketDetail.setTicketData(betCell.getTicketData());
+				ticketDetail.setIsDan(betCell.getIsDan());
+				ticketDetail.setIssue(betCell.getPlayCode());
+				ticketDetail.setFixedodds(betCell.getFixedodds());
+				ticketDetail.setBetType(betCell.getBetType());
+				return ticketDetail;
+			}).collect(Collectors.toList());
+			
+			// order生成
+			SubmitOrderParam submitOrderParam = new SubmitOrderParam();
+			submitOrderParam.setTicketNum(dto.getTicketNum());
+			submitOrderParam.setMoneyPaid(moneyPaid);
+			submitOrderParam.setTicketAmount(ticketAmount);
+			submitOrderParam.setSurplus(surplus);
+			submitOrderParam.setThirdPartyPaid(thirdPartyPaid);
+			submitOrderParam.setPayName("线下支付");
+			submitOrderParam.setPayName("app_offline");
+			submitOrderParam.setUserBonusId(userBonusId);
+			submitOrderParam.setBonusAmount(bonusAmount);
+			submitOrderParam.setOrderFrom(dto.getRequestFrom());
+			int lotteryClassifyId = dto.getLotteryClassifyId();
+			submitOrderParam.setLotteryClassifyId(lotteryClassifyId);
+			int lotteryPlayClassifyId = dto.getLotteryPlayClassifyId();
+			submitOrderParam.setLotteryPlayClassifyId(lotteryPlayClassifyId);
+			submitOrderParam.setPassType(dto.getBetType());
+			submitOrderParam.setPlayType("0" + dto.getPlayType());
+			submitOrderParam.setBetNum(dto.getBetNum());
+			submitOrderParam.setPlayTypeDetail(dto.getPlayTypeDetail());
+			submitOrderParam.setCathectic(dto.getTimes());
+			if (lotteryPlayClassifyId != 8 && lotteryClassifyId == 1) {
+				if (ticketDetails.size() > 1) {
+					Optional<TicketDetail> max = ticketDetails.stream().max((detail1, detail2) -> detail1.getMatchTime().compareTo(detail2.getMatchTime()));
+					submitOrderParam.setMatchTime(max.get().getMatchTime());
+				} else {
+					submitOrderParam.setMatchTime(ticketDetails.get(0).getMatchTime());
+				}
+			}
+			submitOrderParam.setForecastMoney(dto.getForecastMoney());
+
+			submitOrderParam.setIssue(dto.getIssue());
+			submitOrderParam.setTicketDetails(ticketDetails);
+			BaseResult<OrderDTO> createOrder = orderService.createOrder(submitOrderParam);
+			if (createOrder.getCode() != 0) {
+				logger.info("订单创建失败！");
+				return ResultGenerator.genFailResult("支付失败！");
+			}
+
+		}
+		
 		PayWaysDTO payWaysDTO = new PayWaysDTO();
 		List<PaymentDTO> paymentDTOList = paymentService.findAllDto();
 		payWaysDTO.setPaymentDTOList(paymentDTOList);
@@ -1357,7 +1477,8 @@ public class PaymentController extends AbstractBaseController {
 	public BaseResult<PayReturnDTO> nUnifiedOrder(@RequestBody GoPayParam param, HttpServletRequest request) {
 		//20181203 加入提示，不能用金钱购买
 //		return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
-
+		//如果有订单编号 代表是二次支付  则生成一条相同单号的订单数据  同时修改元数据的订单编号（此处只做修改操作，在新订单生成成功后删除修改后的订单,如果新订单生成失败还原原数据订单号）
+		
 		String loggerId = "payment_nUnifiedOrder_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/nUnifiedOrder, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode());
 		String payToken = param.getPayToken();
@@ -1570,8 +1691,24 @@ public class PaymentController extends AbstractBaseController {
 
 		submitOrderParam.setIssue(dto.getIssue());
 		submitOrderParam.setTicketDetails(ticketDetails);
-		BaseResult<OrderDTO> createOrder = orderService.createOrder(submitOrderParam);
-		if (createOrder.getCode() != 0) {
+		submitOrderParam.set_orderSn(param.getOrderSn());
+		
+		if(StringUtil.isNotEmpty(param.getOrderSn())) {//修改元数据订单编号并且将订单置为无效  修改规则为 元订单编号+"1"
+			SubmitOrderParam sparam = new SubmitOrderParam();
+			sparam.set_orderSn(param.getOrderSn());
+			sparam.set_orderSn_new(param.getOrderSn().concat("1"));
+			sparam.setIsDelete(1);
+			orderService.updateOrderToOrderSn(sparam);
+		}
+		BaseResult<OrderDTO> createOrder = orderService.createOrder(submitOrderParam);//创建新订单
+		if (createOrder.getCode() != 0) {//订单创建失败--还原元订单
+			if(StringUtil.isNotEmpty(param.getOrderSn())) {
+				SubmitOrderParam sparam = new SubmitOrderParam();
+				sparam.set_orderSn_new(param.getOrderSn());
+				sparam.set_orderSn(param.getOrderSn().concat("1"));
+				sparam.setIsDelete(0);
+				orderService.updateOrderToOrderSn(sparam);
+			}
 			logger.info(loggerId + "订单创建失败！");
 			return ResultGenerator.genFailResult("支付失败！");
 		}

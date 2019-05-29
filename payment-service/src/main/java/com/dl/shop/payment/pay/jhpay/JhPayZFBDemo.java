@@ -51,15 +51,15 @@ public class JhPayZFBDemo {
 	/**
 	 * 商户号，正式上线需要修改为自己的商户号
 	 */
-	private String MERCHANT_NO = "153";
+	private String MERCHANT_NO = "288540005892";
 	/**
 	 * 商户名称，正式上线需要修改为自己的商户号
 	 */
-	private String MERCHANT_NAME = "pankou28";
+	private String MERCHANT_NAME = "代销点圣合家园店";
 	/**
 	 * 商户密钥，正式上线需要修改为自己的商户密钥
 	 */
-	private String SECRET = "e9b68d9976a7be489f88b211935aec1f";
+	private String SECRET = "e8b0bd096de520312c2a3c6ef2f36983";
 	/**
 	 * 商户号，(自定义商户号)
 	 */
@@ -83,7 +83,7 @@ public class JhPayZFBDemo {
 				}
 			}
 			stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-			System.out.println("支付下单URL=" + url.toString() + "?" + stringBuilder.toString());
+			System.out.println("接口URL=" + url.toString() + "?" + stringBuilder.toString());
 			try {
 				HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 				urlConnection.setConnectTimeout(30000);
@@ -150,7 +150,7 @@ public class JhPayZFBDemo {
 	 */
 	private String getSign(StringBuilder basestring) {
 		basestring.append(SECRET);
-		System.out.println(basestring.toString());
+		System.out.println("签名前："+basestring.toString());
 //		back_url=https://www.baidu.com&channel_id=9&exter_invoke_ip=192.168.31.13&notify_url=https://www.baidu.com&partner_id=11880031&partner_order=2018050211256811330028&pay_method=&payextra_param=&sign_type=MD5&total_fee=10&user_id=2&key=e1f88b0d13031f99acd6dbce553ded1f
 		// 使用MD5对待签名串求签
 		byte[] bytes = null;
@@ -196,9 +196,9 @@ public class JhPayZFBDemo {
 		params.put("adddata", param.get("goodsname"));//附加信息(你们定)
 		params.put("notify_url", NOTIFY_URL);//成功支付后的异步通知地址
 		params.put("return_url", NOTIFY_URL);//成功支付后的异步通知地址
+		System.out.println("接口传递参数："+JSONUtils.toJSONString(params));
 		String result = sendPostMessage(new URL(PATH+PAY_URL), params);
-		System.out.println(result);
-		System.out.println(JSONUtils.toJSONString(params));
+		System.out.println("接口返回结果"+result);
 		
 //		// 校验返回值
 //		if (result != null && !"".equals(result)) {
