@@ -221,7 +221,7 @@ public class PaymentController extends AbstractBaseController {
 				return ResultGenerator.genResult(PayEnums.PAY_TOKEN_EXPRIED.getcode(), PayEnums.PAY_TOKEN_EXPRIED.getMsg());
 			}
 			// 清除payToken
-			stringRedisTemplate.delete(payToken);
+//			stringRedisTemplate.delete(payToken);
 
 			UserBetPayInfoDTO dto = null;
 			try {
@@ -323,6 +323,7 @@ public class PaymentController extends AbstractBaseController {
 			submitOrderParam.setIssue(dto.getIssue());
 			submitOrderParam.setTicketDetails(ticketDetails);
 			submitOrderParam.setPayCode(param.getPayCode());
+			submitOrderParam.setPayToken(payToken);
 			BaseResult<OrderDTO> createOrder = orderService.createOrder(submitOrderParam);
 			if (createOrder.getCode() != 0) {
 				logger.info("订单创建失败！");
