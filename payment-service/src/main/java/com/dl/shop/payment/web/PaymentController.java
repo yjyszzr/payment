@@ -1361,6 +1361,7 @@ public class PaymentController extends AbstractBaseController {
 	public BaseResult<UserGoPayInfoDTO> unifiedPayBefore(@RequestBody GoPayBeforeParam param) {
 		String loggerId = "payment_unifiedPayBefore" + System.currentTimeMillis();
 		String payToken = param.getPayToken();
+		String payCode = param.getPayCode();
 		if (StringUtils.isBlank(payToken)) {
 			logger.info(loggerId + "payToken值为空！");
 			return ResultGenerator.genResult(PayEnums.PAY_TOKEN_EMPTY.getcode(), PayEnums.PAY_TOKEN_EMPTY.getMsg());
@@ -1371,9 +1372,12 @@ public class PaymentController extends AbstractBaseController {
 			logger.info(loggerId + "支付信息获取为空！");
 			return ResultGenerator.genResult(PayEnums.PAY_TOKEN_EXPRIED.getcode(), PayEnums.PAY_TOKEN_EXPRIED.getMsg());
 		}
-		// 清除payToken
-		stringRedisTemplate.delete(payToken);
-
+		if(payCode!=null && payCode.equals("app_offline")) {//线下支付不清楚token
+		}else {
+			// 清除payToken
+			stringRedisTemplate.delete(payToken);
+		}
+		
 		UserBetPayInfoDTO betDto = null;
 		try {
 			betDto = JSONHelper.getSingleBean(jsonData, UserBetPayInfoDTO.class);
