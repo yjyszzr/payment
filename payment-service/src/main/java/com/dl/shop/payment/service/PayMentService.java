@@ -573,14 +573,6 @@ public class PayMentService extends AbstractService<PayMent> {
 		logger.info("orderOptions()===response*******"+JSONUtils.valueToString(response));
 		int currentTime = DateUtil.getCurrentTimeLong();
 		if (response.isSucc()) {
-			logger.info("开始记录第一次支付时间");
-            FirstPayTimeParam firstPayTimeParam = new FirstPayTimeParam();
-            firstPayTimeParam.setOrderSn(payLog.getOrderSn());
-            BaseResult<String> storeUserMoneyRst = iStoreUserMoneyService.recordFirstPayTime(firstPayTimeParam);
-            if(storeUserMoneyRst.getCode() == 0){
-                logger.info(storeUserMoneyRst.getMsg());
-            }
-			
 			// 更新order
 			UpdateOrderPayStatusParam param = new UpdateOrderPayStatusParam();
 			param.setPayStatus(1);
@@ -609,6 +601,15 @@ public class PayMentService extends AbstractService<PayMent> {
 			} else {
 				logger.error("payOrderSn={}" + payLog.getPayOrderSn() + " paylogid=" + "ordersn=" + payLog.getOrderSn() + "更新订单成功状态失败");
 			}
+			
+			logger.info("开始记录第一次支付时间");
+            FirstPayTimeParam firstPayTimeParam = new FirstPayTimeParam();
+            firstPayTimeParam.setOrderSn(payLog.getOrderSn());
+            BaseResult<String> storeUserMoneyRst = iStoreUserMoneyService.recordFirstPayTime(firstPayTimeParam);
+            if(storeUserMoneyRst.getCode() == 0){
+                logger.info(storeUserMoneyRst.getMsg());
+            }
+			
 			return ResultGenerator.genSuccessResult("订单已支付成功！", null);
 		} else if (response.isFail()) {
 			logger.info("orderOptions() isfail==============支付成功订单回调[orderService]==================");
