@@ -145,7 +145,7 @@ public class Test {
 	 */
     public String fundApply(Map<String,Object> configMap){
     	FundApplyConfig fundApplyConfig=new FundApplyConfig();
-    	fundApplyConfig.initParams(staticv.getMchid(),"AS1231989424818219", "提现", "提现", "RK", "22.33", "6217000010142034811", "孙泽强",staticv.getNotify_url());
+    	fundApplyConfig.initParams(staticv.getMchid(),"AS1231989424818219", "提现", "提现", "RK", "124.90", "6217000010142034811", "孙泽强",staticv.getNotify_url());
         Client client=new Client();
         String data=client.request(fundApplyConfig,"/fund/apply",staticv);
         return data;
@@ -189,7 +189,7 @@ public class Test {
 		configMap.put("trade_memo", "sf");// 商品名称
         Test test=new Test();
 //        System.out.println(test.randomNum());
-//        System.out.println(test.fundApply(configMap));
+        System.out.println(test.fundApply(configMap));
 //        System.out.println(test.fundAccountQuery(configMap));
 //        System.out.println(test.fundTradeQuery(configMap));
 //        String funddata = test.fundTradeQuery(configMap);///查询代付状态
@@ -215,7 +215,7 @@ public class Test {
 //		double m = 5544.55;
 //		System.out.println(s<m);
         
-        HashMap<String,Object> rmap = new HashMap();
-        System.out.println(rmap);
+//        HashMap<String,Object> rmap = new HashMap();
+//        System.out.println(rmap);
     }
 }
