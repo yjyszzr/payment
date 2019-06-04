@@ -214,6 +214,7 @@ public class PaymentController extends AbstractBaseController {
 		String payToken = param.getPayToken();
 		//如果支付方式为【线下支付】并且【订单号为空】则生成订单
 		if(param.getPayCode()!=null && "app_offline".equals(param.getPayCode()) && StringUtil.isEmpty(param.getOrderSn())) {
+			logger.info("appOfflineCreateOrder METHOD:="+param.getPayCode()+"^^^^^^^^^"+param.getOrderSn());
 			// 校验payToken的有效性
 			String jsonData = stringRedisTemplate.opsForValue().get(payToken);
 			if (StringUtils.isBlank(jsonData)) {
@@ -297,7 +298,7 @@ public class PaymentController extends AbstractBaseController {
 			submitOrderParam.setSurplus(surplus);
 			submitOrderParam.setThirdPartyPaid(thirdPartyPaid);
 			submitOrderParam.setPayName("线下支付");
-			submitOrderParam.setPayName("app_offline");
+			submitOrderParam.setPayCode("app_offline");
 			submitOrderParam.setUserBonusId(userBonusId);
 			submitOrderParam.setBonusAmount(bonusAmount);
 			submitOrderParam.setOrderFrom(dto.getRequestFrom());
@@ -1709,24 +1710,30 @@ public class PaymentController extends AbstractBaseController {
 		submitOrderParam.set_orderSn(param.getOrderSn());
 		submitOrderParam.setPayCode(param.getPayCode());
 		if(StringUtil.isNotEmpty(param.getOrderSn())) {//修改元数据订单编号并且将订单置为无效  修改规则为 元订单编号+"1"
+			logger.info("nUnifiedOrderNew METHOD1:="+param.getOrderSn());
 			SubmitOrderParam sparam = new SubmitOrderParam();
 			sparam.set_orderSn(param.getOrderSn());
 			sparam.set_orderSn_new(param.getOrderSn().concat("1"));
 			sparam.setIsDelete(1);
 			orderService.updateOrderToOrderSn(sparam);
+			logger.info("nUnifiedOrderNew METHOD1111:="+param.getOrderSn());
 		}
+		logger.info("nUnifiedOrderNew METHOD2:="+param.getOrderSn());
 		BaseResult<OrderDTO> createOrder = orderService.createOrder(submitOrderParam);//创建新订单
 		if (createOrder.getCode() != 0) {//订单创建失败--还原元订单
 			if(StringUtil.isNotEmpty(param.getOrderSn())) {
+				logger.info("nUnifiedOrderNew METHOD3:="+param.getOrderSn());
 				SubmitOrderParam sparam = new SubmitOrderParam();
 				sparam.set_orderSn_new(param.getOrderSn());
 				sparam.set_orderSn(param.getOrderSn().concat("1"));
 				sparam.setIsDelete(0);
 				orderService.updateOrderToOrderSn(sparam);
+				logger.info("nUnifiedOrderNew METHOD4:="+param.getOrderSn());
 			}
 			logger.info(loggerId + "订单创建失败！");
 			return ResultGenerator.genFailResult("支付失败！");
 		}
+		logger.info("nUnifiedOrderNew METHOD5:="+param.getOrderSn());
 		String orderId = createOrder.getData().getOrderId().toString();
 		String orderSn = createOrder.getData().getOrderSn();
 
