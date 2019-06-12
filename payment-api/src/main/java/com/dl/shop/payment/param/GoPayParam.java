@@ -14,4 +14,6 @@ public class GoPayParam {
 	private int innerWechat; 
 	@ApiModelProperty("是否H5打开该页   1 -> 端请求  0||null -> app端请求")
 	private String isH5;
+	@ApiModelProperty("订单编号")
+	private String orderSn;
 }

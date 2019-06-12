@@ -20,6 +20,6 @@ import org.springframework.context.annotation.Import;
 public class PaymentServiceApplication {
 	
     public static void main(String[] args) {
-        SpringApplication.run(PaymentServiceApplication.class, args);
+        SpringApplication.run(PaymentServiceApplication.class, args); 
     }
 }

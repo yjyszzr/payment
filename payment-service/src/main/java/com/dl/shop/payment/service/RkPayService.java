@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.druid.support.json.JSONUtils;
+import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -40,6 +41,7 @@ import com.dl.shop.payment.pay.rkpay.util.StaticV;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestPaidByOthers;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
 import com.dl.shop.payment.web.PaymentController;
+import com.github.pagehelper.util.StringUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -65,11 +67,17 @@ public class RkPayService {
 //        double fee_money = Double.parseDouble(configMap.get("pay_fee").toString())+randomNum();
         DecimalFormat df = new DecimalFormat("######0.00");   
 		String fee_money = df.format(Double.parseDouble(configMap.get("pay_fee").toString()));
+		String callback_url = null;
+		if(StringUtil.isNotEmpty(staticv.getCallback_url())) {
+			callback_url = staticv.getCallback_url()+"?ds_trade_no="+configMap.get("ds_trade_no").toString();
+		}
+        logger.info("payWap&&&callbackurl="+callback_url);
         payConfig.initParams(staticv.getMpid(),configMap.get("ds_trade_no").toString(),fee_money+"","AP",
         		configMap.get("trade_subject").toString(),configMap.get("trade_memo").toString(),
-        		staticv.getNotify_url(),staticv.getCallback_url(),staticv.getExpire_time());
+        		staticv.getNotify_url(),callback_url,staticv.getExpire_time());
         Client client=new Client();
         String data=client.request(payConfig,"/pay/wap",staticv);
+        logger.info("Q多多wap支付返回结果为:={}", data);
         return data;
     }
     
@@ -84,6 +92,7 @@ public class RkPayService {
     	payQrcodeConfig.initParams(staticv.getMpid(),"AD1023162143432940",fee_money+"","AP","120","test","test",staticv.getNotify_url());
         Client client=new Client();
         String data=client.request(payQrcodeConfig,"/pay/qrcode",staticv);
+        logger.info("Q多多微信扫码支付返回结果为:={}", data);
         return data;
     }
     
@@ -97,6 +106,11 @@ public class RkPayService {
         DecimalFormat df = new DecimalFormat("######0.00");   
 		String fee_money = df.format(Double.parseDouble(configMap.get("pay_fee").toString()));
         String quick_mode = configMap.get("quick_mode")!=null?configMap.get("quick_mode").toString():"";
+        String callback_url = null;
+		if(StringUtil.isNotEmpty(staticv.getCallback_url())) {
+			callback_url = staticv.getCallback_url()+"?ds_trade_no="+configMap.get("ds_trade_no").toString();
+		}
+        logger.info("payQuick&&&callbackurl="+callback_url);
         if("YT".equalsIgnoreCase(quick_mode)) {
         	payQuickConfig.initParams(staticv.getMchid(),configMap.get("ds_trade_no").toString(),
         			fee_money+"",
@@ -106,14 +120,14 @@ public class RkPayService {
         			configMap.get("account_name").toString(),
         			configMap.get("id_no").toString(),
         			configMap.get("mobile_phone").toString(),
-        			staticv.getNotify_url(),staticv.getCallback_url());
+        			staticv.getNotify_url(),callback_url);
         }else if("RK".equalsIgnoreCase(quick_mode)) {
         	payQuickConfig.initParams(staticv.getMchid(),configMap.get("ds_trade_no").toString(),
         			fee_money+"",
         			configMap.get("trade_subject").toString(),
         			configMap.get("trade_memo").toString(),quick_mode,
         			configMap.get("bank_name").toString(),
-        			staticv.getNotify_url(),staticv.getCallback_url());
+        			staticv.getNotify_url(),callback_url);
         }else if("GM".equalsIgnoreCase(quick_mode)) {
         	payQuickConfig.initParams(staticv.getMchid(),configMap.get("ds_trade_no").toString(),
         			fee_money+"",
@@ -121,16 +135,17 @@ public class RkPayService {
         			configMap.get("trade_memo").toString(),quick_mode,
         			configMap.get("id_no").toString(),
         			configMap.get("id_name").toString(),
-        			staticv.getNotify_url(),staticv.getCallback_url());
+        			staticv.getNotify_url(),callback_url);
         }else {
         	payQuickConfig.initParams(staticv.getMchid(),configMap.get("ds_trade_no").toString(),
         			fee_money+"",
         			configMap.get("trade_subject").toString(),
         			configMap.get("trade_memo").toString(),quick_mode,
-        			staticv.getNotify_url(),staticv.getCallback_url());
+        			staticv.getNotify_url(),callback_url);
         }
         Client client=new Client();
         String data=client.request(payQuickConfig,"/pay/quick",staticv);
+        logger.info("Q多多银联支付返回结果为:={}", data);
         return data;
     }
     /**代付账户余额查询
@@ -142,6 +157,40 @@ public class RkPayService {
     	fundApplyConfig.initParams(staticv.getMchid());
         Client client=new Client();
         String data=client.request(fundApplyConfig,"/fund/accountquery",staticv);
+        logger.info("Q多多代付账户余额返回结果为:={}", data);
+        return data;
+    }
+    /**代付状态查询
+     * apply_mode=RK
+	 * @return
+     * @throws InterruptedException 
+	 */
+    public String fundTradeQuery(String ds_trade_no,int count,int count2) throws InterruptedException{
+    	FundApplyConfig fundApplyConfig=new FundApplyConfig();
+    	fundApplyConfig.initParams(staticv.getMchid(),"",ds_trade_no);
+        Client client=new Client();
+        String data=client.request(fundApplyConfig,"/fund/tradequery",staticv);
+        logger.info("Q多多代付状态返回结果为:={}", data);
+        Map<String,Object> funddataMap = (Map<String, Object>) JSONUtils.parse(data);
+        String status = funddataMap.get("status").toString();
+        if(status!=null && "0".equals(status)) {//代付查询成功
+        	String trade_status = funddataMap.get("trade_status").toString();
+        	if(trade_status!=null && "PROCESSING".equalsIgnoreCase(trade_status)) {//代付处理中  请稍后查询
+        		if(count>5) {
+        			return data;
+        		}
+        		Thread.sleep(3000);
+    			fundTradeQuery(ds_trade_no,count++,count2);
+        	}
+        }else { //查询失败 3秒后继续查询
+        	if(count2>5) {
+    			return data;
+    		}
+        	Thread.sleep(3000);
+			fundTradeQuery(ds_trade_no,count,count2++);
+        }
+        
+        
         return data;
     }
     /**交易状态查询
@@ -152,6 +201,7 @@ public class RkPayService {
         queryConfig.initParams(staticv.getMchid(),"",orderSn,"");
         Client client=new Client();
         String data=client.request(queryConfig,"/pay/tradequery",staticv);
+        logger.info("Q多多代付状态返回结果为:={}", data);
         return data;
     }
     
@@ -206,7 +256,7 @@ public class RkPayService {
 			param.put("trade_subject", paytype);// 商品名称
 			param.put("trade_memo", paytype);// 商品名称
 			String result = payWap(param);
-			logger.info("Q多多返回结果："+result);
+			logger.info("Q多多wap支付返回结果："+result);
 			param = null;
 			if (result != null && !"".equals(result)) {
 				Map<String,Object> resultMap = (Map<String, Object>) JSONUtils.parse(result);
@@ -260,7 +310,7 @@ public class RkPayService {
 			}
 			String result = payQuick(param);
 	//		logger.info("Q多多参数值："+JSONUtils.toJSONString(staticv));
-			logger.info("Q多多返回结果："+result+"参数："+staticv.getDs_id());
+			logger.info("Q多多银联支付返回结果："+result+"参数："+staticv.getDs_id());
 			param = null;
 			if (result != null && !"".equals(result)) {
 				Map<String,Object> resultMap = (Map<String, Object>) JSONUtils.parse(result);
@@ -292,7 +342,7 @@ public class RkPayService {
 		BaseResult<RspOrderQueryDTO> payBaseResult = null;
 		try {
 			String result = fundAccountQuery();
-			logger.info("Q多多返回结果："+result+"参数："+staticv.getDs_id());
+			logger.info("Q多多代付账户查询返回结果："+result+"参数："+staticv.getDs_id());
 			Map<String,Object> param = null;
 			RspOrderQueryDTO ymoneyDTO = new RspOrderQueryDTO();
 			if (result != null && !"".equals(result)) {
@@ -368,30 +418,42 @@ public class RkPayService {
         			txScanRequestPaidByOthers.getAccountName(),staticv.getFund_notify_url());
         	Client client=new Client();
         	String data=client.request(fundApplyConfig,"/fund/apply",staticv);
+        	logger.info("Q多多代付操作结果为:={}", data);
             Map<String,Object> resultMap = (Map<String, Object>) JSONUtils.parse(data);
             rspEntity.resMessage = resultMap.get("message")!=null?resultMap.get("message").toString():"";
             String status = resultMap.get("status")!=null?resultMap.get("status").toString():"";
             if("0".equals(status)) {//接口成功，并不是提现成功
-            	rspEntity.status = "S";
-            	//低于指定数额发短信通知
-            	String strMoney = "0";
-            	BaseResult<RspOrderQueryDTO> ymoney = getShMoney(null);
-    			if(ymoney!=null && ymoney.getData()!=null) {
-    				strMoney=ymoney.getData().getDonationPrice()!=null?ymoney.getData().getDonationPrice():"0";//商户余额
-    			}
-    			SysConfigParam cfg = new SysConfigParam();
-    			cfg.setBusinessId(66);//读取最低商户余额短信通知指标
-    			SysConfigDTO sysConfigDTO = userAccountService.queryBusinessLimit(cfg)!=null?userAccountService.queryBusinessLimit(cfg).getData():new SysConfigDTO();
-    			int totalYmoney = sysConfigDTO.getValue()!=null?sysConfigDTO.getValue().intValue():0;
-    			String mobile = sysConfigDTO.getValueTxt();
-    			if(totalYmoney>Double.parseDouble(strMoney)) {//发送短信
-    				SmsParam smsParam = new SmsParam();
-    				smsParam.setSmsType("4");
-    				smsParam.setMobile(mobile!=null?mobile:"");
-    				log.info("进入发送短信环节：接受短信手机号："+mobile);
-    				smsService.sendSmsCode(smsParam);
-    			}
-    			
+            	String funddata = fundTradeQuery(txScanRequestPaidByOthers.getOrderId(),0,0);///查询代付状态
+            	Map<String,Object> funddataMap = (Map<String, Object>) JSONUtils.parse(funddata);
+            	if(funddataMap!=null && "0".equals(funddataMap.get("status").toString())) {//代付状态查询成功  判断代付是否成功
+            		if(funddataMap.get("trade_status").toString().equals("SUCCESS")) {//代付成功
+            			rspEntity.status = "S";
+                    	//低于指定数额发短信通知
+                    	String strMoney = "0";
+                    	BaseResult<RspOrderQueryDTO> ymoney = getShMoney(null);
+            			if(ymoney!=null && ymoney.getData()!=null) {
+            				strMoney=ymoney.getData().getDonationPrice()!=null?ymoney.getData().getDonationPrice():"0";//商户余额
+            			}
+            			SysConfigParam cfg = new SysConfigParam();
+            			cfg.setBusinessId(66);//读取最低商户余额短信通知指标
+            			SysConfigDTO sysConfigDTO = userAccountService.queryBusinessLimit(cfg)!=null?userAccountService.queryBusinessLimit(cfg).getData():new SysConfigDTO();
+            			int totalYmoney = sysConfigDTO.getValue()!=null?sysConfigDTO.getValue().intValue():0;
+            			String mobile = sysConfigDTO.getValueTxt();
+            			if(totalYmoney>Double.parseDouble(strMoney)) {//发送短信
+            				SmsParam smsParam = new SmsParam();
+            				smsParam.setSmsType("4");
+            				smsParam.setMobile(mobile!=null?mobile:"");
+            				log.info("进入发送短信环节：接受短信手机号："+mobile);
+            				smsService.sendSmsCode(smsParam);
+            			}
+            		}else if(funddataMap.get("trade_status").toString().equals("FAIL")) {//代付失败
+            			rspEntity.status = "F";
+            		}else { //处理中 默认成功  如果失败 人工退款
+            			rspEntity.status = "S";
+            		}
+            	}else { ///查询失败 默认成功  如果失败 人工退款
+            		rspEntity.status = "S";
+            	}
             } else {//接口失败
             	rspEntity.status = "F";
             }

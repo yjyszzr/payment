@@ -8,6 +8,8 @@ public class GoPayBeforeParam {
 
 	@ApiModelProperty("支付信息token")
 	private String payToken;
+	@ApiModelProperty("支付方式")
+	private String payCode;
 	@ApiModelProperty("红包id")
 	private String bonusId;
 	 

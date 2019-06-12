@@ -26,4 +26,8 @@ public class UserGoPayInfoDTO {
 	private List<UserBonusDTO> bonusList;
 	@ApiModelProperty(value="彩票种类：1:竞彩足球,2大乐透,3	竞彩篮球,4	快3,5双色球,6北京单场,7广东11选5,8更多彩种")
 	private String lotteryClassifyId;
+	@ApiModelProperty(value="有效红包数量")
+	private int bonusNumber;
+	@ApiModelProperty(value="超门槛红包提示")
+	private String bonusDesc;
 }

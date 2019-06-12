@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -383,7 +384,7 @@ public class APayDemo {
 		param.put("sign_type", "MD5");// 签名类型
 		param.put("subject", "支付");// 用户id
 		// ************订单生成，当返回result中code=1时，代表订单生成成功，需要验签************
-		apay.pay(param);
+//		apay.pay(param);
 
 		// ************订单查询，当返回result中status=1时，代表支付成功，需要验签************
 //		apay.orderQuery(param);
@@ -392,7 +393,7 @@ public class APayDemo {
 //		apay.orderRefund(param);
 		
 		//比赛提前1h	禁止支付
-		Integer sysLimitBetTime = 3600;
+//		Integer sysLimitBetTime = 3600;
 //		SysConfigParam sysConfigParam = new SysConfigParam();
 //		sysConfigParam.setBusinessId(4);
 //		BaseResult<SysConfigDTO> sysConfigDTOBaseResult = iSysConfigService.querySysConfig(sysConfigParam);
@@ -440,12 +441,26 @@ public class APayDemo {
 //				maps.add(remap);
 //			}
 //		}
-		String giveMoney = "12";
-		if(StringUtils.isNotEmpty(giveMoney)) {
-			giveMoney = "0";
-		}
-		System.out.println(giveMoney);
+//		String giveMoney = "12";
+//		if(StringUtils.isNotEmpty(giveMoney)) {
+//			giveMoney = "0";
+//		}
+//		System.out.println(giveMoney);
 //		System.out.println(JSONUtils.toJSONString(maps));
+		
+//		String ipStr = "47.100.81.221;101.132.252.53";
+//		String ip = "47s";
+//		if(!ipStr.contains(ip)) {
+//			System.out.println("IP为不合法IP");
+//			return;
+//		}
+//		System.out.println("sf");
+		
+		BigDecimal ktxye = BigDecimal.valueOf(100);
+		BigDecimal bktxye = BigDecimal.valueOf(10);
+		BigDecimal kgye = BigDecimal.valueOf(30);
+		
+		System.out.println(ktxye.add(bktxye.subtract(kgye))+"^^^^^^^^^"+BigDecimal.ZERO);
 	}
 
 }

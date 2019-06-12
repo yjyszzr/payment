@@ -11,10 +11,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
+import com.dl.store.api.IStoreUserMoneyService;
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
-
+import com.dl.store.api.IStoreUserMoneyService;
+import com.dl.store.param.FirstPayTimeParam;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -171,6 +172,9 @@ public class PayMentService extends AbstractService<PayMent> {
 	private PayUBeyUtil payUBeyUtil;
 	@Resource
 	private ISwitchConfigService iSwitchConfigService;
+	
+	@Resource
+    private IStoreUserMoneyService iStoreUserMoneyService;
 
 	/**
 	 * 查询所有可用的支付方式
@@ -474,15 +478,11 @@ public class PayMentService extends AbstractService<PayMent> {
 				recharegeParam.setThirdPartPaid(payLog.getOrderAmount());
 				recharegeParam.setUserId(payLog.getUserId());
 				recharegeParam.setOrderSn(payLog.getOrderSn());
-				BaseResult<String> rechargeRst = userAccountService.rechargeUserMoneyLimit(recharegeParam);
-				if (rechargeRst.getCode() != 0) {
-					logger.error(payLog.getPayOrderSn() + " 给个人用户充值：code" + rechargeRst.getCode() + "message:" + rechargeRst.getMsg());
-				}
 				// 更新paylog
 				RspOrderQueryDTO rspOrderQueryDTO = new RspOrderQueryDTO();
 				rspOrderQueryDTO.setIsHaveRechargeAct(0);
 				rspOrderQueryDTO.setDonationPrice("");
-
+				//活动充值送红包 begin ******************************************************
 				QFParam qfParam = new QFParam();
 				qfParam.setAct_type("1");
 				qfParam.setAct_id("3");
@@ -513,7 +513,28 @@ public class PayMentService extends AbstractService<PayMent> {
 					}
 				}
 				log.info("无活动资格");
-
+				//充值活动送红包 end ******************************************************
+				
+				//充值领取红包 begin *****************************************************
+				com.dl.member.param.PayLogIdParam payLogIdParam = new com.dl.member.param.PayLogIdParam();
+				payLogIdParam.setPayLogId(String.valueOf(payLog.getLogId()));
+				payLogIdParam.setOrderAmount(payLog.getOrderAmount());
+				payLogIdParam.setUserId(payLog.getUserId());
+				BaseResult<HashMap<String,Object>> userbonusResult = userBonusService.createRechargeUserBonusNew(payLogIdParam);
+				logger.info("结束执行充值赠送红包逻辑NEW:"+userbonusResult.getData());
+				//充值领取红包 end *****************************************************
+				if(userbonusResult!=null && userbonusResult.getData()!=null) {
+					Integer rechargeCardId = userbonusResult.getData().get("rechargeCardId")!=null?Integer.valueOf(userbonusResult.getData().get("rechargeCardId").toString()):null;
+					Double rechargeCardRealValue = userbonusResult.getData().get("rechargeCardRealValue")!=null?Double.valueOf(userbonusResult.getData().get("rechargeCardRealValue").toString()):0;
+					recharegeParam.setRechargeCardId(rechargeCardId);//充值大礼包ID
+					recharegeParam.setRechargeCardRealValue(BigDecimal.valueOf(rechargeCardRealValue));
+				}
+				BaseResult<String> rechargeRst = userAccountService.rechargeUserMoneyLimit(recharegeParam);
+				if (rechargeRst.getCode() != 0) {
+					logger.error(payLog.getPayOrderSn() + " 给个人用户充值：code" + rechargeRst.getCode() + "message:" + rechargeRst.getMsg());
+				}
+				
+				
 				log.info("放入redis：" + String.valueOf(payLog.getLogId()) + "-----------" + rspOrderQueryDTO.getDonationPrice());
 				stringRedisTemplate.opsForValue().set(String.valueOf(payLog.getLogId()), rspOrderQueryDTO.getDonationPrice(), 180, TimeUnit.SECONDS);
 				logger.info("充值成功后返回的信息：" + rspOrderQueryDTO.getIsHaveRechargeAct() + "-----" + rspOrderQueryDTO.getDonationPrice());
@@ -552,7 +573,6 @@ public class PayMentService extends AbstractService<PayMent> {
 		logger.info("orderOptions()===response*******"+JSONUtils.valueToString(response));
 		int currentTime = DateUtil.getCurrentTimeLong();
 		if (response.isSucc()) {
-			// 2018-07-04
 			// 更新order
 			UpdateOrderPayStatusParam param = new UpdateOrderPayStatusParam();
 			param.setPayStatus(1);
@@ -581,6 +601,15 @@ public class PayMentService extends AbstractService<PayMent> {
 			} else {
 				logger.error("payOrderSn={}" + payLog.getPayOrderSn() + " paylogid=" + "ordersn=" + payLog.getOrderSn() + "更新订单成功状态失败");
 			}
+			
+			logger.info("开始记录第一次支付时间");
+            FirstPayTimeParam firstPayTimeParam = new FirstPayTimeParam();
+            firstPayTimeParam.setOrderSn(payLog.getOrderSn());
+            BaseResult<String> storeUserMoneyRst = iStoreUserMoneyService.recordFirstPayTime(firstPayTimeParam);
+            if(storeUserMoneyRst.getCode() == 0){
+                logger.info(storeUserMoneyRst.getMsg());
+            }
+			
 			return ResultGenerator.genSuccessResult("订单已支付成功！", null);
 		} else if (response.isFail()) {
 			logger.info("orderOptions() isfail==============支付成功订单回调[orderService]==================");

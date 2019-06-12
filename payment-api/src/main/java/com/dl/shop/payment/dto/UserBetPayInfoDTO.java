@@ -43,6 +43,8 @@ public class UserBetPayInfoDTO {
 	private Double thirdPartyPaid;
 	@ApiModelProperty(value="1:android,2:ios")
 	private String requestFrom;
+	@ApiModelProperty(value="有效红包数量")
+	private int bonusNumber;
 	
 	@ApiModelProperty(value="用户投注详情")
 	private List<UserBetDetailInfoDTO> betDetailInfos;
