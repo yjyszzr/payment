@@ -1494,6 +1494,9 @@ public class PaymentController extends AbstractBaseController {
 		//20181203 加入提示，不能用金钱购买
 //		return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
 		//如果有订单编号 代表是二次支付  则生成一条相同单号的订单数据  同时修改元数据的订单编号（此处只做修改操作，在新订单生成成功后删除修改后的订单,如果新订单生成失败还原原数据订单号）
+		if("app_rkquick".equals(param.getPayCode())) {
+			return ResultGenerator.genResult(PayEnums.PAY_STOP.getcode(), PayEnums.PAY_STOP.getMsg());
+		}
 		
 		String loggerId = "payment_nUnifiedOrder_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/nUnifiedOrder, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode());
