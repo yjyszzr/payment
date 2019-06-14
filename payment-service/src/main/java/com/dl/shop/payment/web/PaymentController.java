@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -95,6 +96,7 @@ import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.UnifiedOrderParam;
 import com.dl.shop.payment.model.UserWithdrawLog;
 import com.dl.shop.payment.param.AllPaymentInfoParam;
+import com.dl.shop.payment.param.AuthorizParam;
 import com.dl.shop.payment.param.GoPayBeforeParam;
 import com.dl.shop.payment.param.GoPayParam;
 import com.dl.shop.payment.param.PayLogIdParam;
@@ -106,7 +108,6 @@ import com.dl.shop.payment.param.RollbackThirdOrderAmountParam;
 import com.dl.shop.payment.param.UrlBase64Param;
 import com.dl.shop.payment.param.UserIdParam;
 import com.dl.shop.payment.param.WithdrawParam;
-import com.dl.shop.payment.pay.rkpay.util.Config;
 import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
 import com.dl.shop.payment.pay.xianfeng.util.XianFengPayUtil;
@@ -199,6 +200,16 @@ public class PaymentController extends AbstractBaseController {
 	@Resource 
 	private IStoreUserMoneyService iStoreUserMoneyService;
 
+	@ApiOperation(value = "支付宝授权", notes = "支付宝授权")
+	@PostMapping("/payAuthoriz")
+	@ResponseBody
+	public BaseResult<List<PaymentDTO>> payAuthoriz(@RequestBody AuthorizParam param) {
+		//根据param.getAuth_code()调用接口获取USERID
+		//将USERID持久化到当前登录用户中——修改用户信息
+		logger.info("payAuthoriz================");
+		return ResultGenerator.genSuccessResult("success", new ArrayList());
+	}
+	
 	@ApiOperation(value = "系统可用第三方支付方式", notes = "系统可用第三方支付方式")
 	@PostMapping("/allPayment")
 	@ResponseBody
