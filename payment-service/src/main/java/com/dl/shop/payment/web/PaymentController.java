@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -201,7 +202,7 @@ public class PaymentController extends AbstractBaseController {
 	private IStoreUserMoneyService iStoreUserMoneyService;
 
 	@ApiOperation(value = "支付宝授权", notes = "支付宝授权")
-	@PostMapping("/payAuthoriz")
+	@GetMapping("/payAuthoriz")
 	@ResponseBody
 	public BaseResult<List<PaymentDTO>> payAuthoriz(@RequestBody AuthorizParam param) {
 		//根据param.getAuth_code()调用接口获取USERID
