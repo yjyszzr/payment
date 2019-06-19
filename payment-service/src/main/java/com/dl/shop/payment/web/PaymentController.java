@@ -204,7 +204,7 @@ public class PaymentController extends AbstractBaseController {
 	@ApiOperation(value = "支付宝授权", notes = "支付宝授权")
 	@GetMapping("/payAuthoriz")
 	@ResponseBody
-	public BaseResult<String> payAuthoriz(@RequestBody AuthorizParam param) {
+	public BaseResult<String> payAuthoriz() {
 		//根据param.getAuth_code()调用接口获取USERID
 		//将USERID持久化到当前登录用户中——修改用户信息
 		logger.info("payAuthoriz================");
