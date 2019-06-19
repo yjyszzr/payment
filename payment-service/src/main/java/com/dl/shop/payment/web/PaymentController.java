@@ -204,11 +204,11 @@ public class PaymentController extends AbstractBaseController {
 	@ApiOperation(value = "支付宝授权", notes = "支付宝授权")
 	@GetMapping("/payAuthoriz")
 	@ResponseBody
-	public BaseResult<List<PaymentDTO>> payAuthoriz(@RequestBody AuthorizParam param) {
+	public BaseResult<String> payAuthoriz(@RequestBody AuthorizParam param) {
 		//根据param.getAuth_code()调用接口获取USERID
 		//将USERID持久化到当前登录用户中——修改用户信息
 		logger.info("payAuthoriz================");
-		return ResultGenerator.genSuccessResult("success", new ArrayList());
+		return ResultGenerator.genSuccessResult("success", "");
 	}
 	
 	@ApiOperation(value = "系统可用第三方支付方式", notes = "系统可用第三方支付方式")
