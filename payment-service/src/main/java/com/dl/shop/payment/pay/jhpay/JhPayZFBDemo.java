@@ -52,32 +52,23 @@ public class JhPayZFBDemo {
 	 */
 	private static String PATH = "https://pay.swiftpass.cn/pay/gateway";
 	/**
-	 * 订单支付URL
-	 */
-	private String PAY_URL = "/gateway";
-	/**
-	 * 订单支付回调URL地址,需要修改为自己的异步回调地址，公网可以访问的
-	 */
-	private String NOTIFY_URL = "https://www.baidu.com";
-	/**
 	 * 商户号，正式上线需要修改为自己的商户号
 	 */
 	private String MERCHANT_NO = "288540005892";
 	/**
-	 * 商户名称，正式上线需要修改为自己的商户号
-	 */
-	private String MERCHANT_NAME = "代销点圣合家园店";
-	/**
 	 * 商户密钥，正式上线需要修改为自己的商户密钥
 	 */
 	private String KEY = "e8b0bd096de520312c2a3c6ef2f36983";
-	/**
-	 * 商户号，(自定义商户号)
-	 */
-	private String ADDUID = "7927";
 
 	@SuppressWarnings("finally")
 	public String doPostMessage(SortedMap<String, String> map){
+		
+		map.put("service", "pay.alipay.jspay");
+		map.put("mch_id", MERCHANT_NO);
+		map.put("mch_create_ip", "127.0.0.1");
+		map.put("nonce_str", String.valueOf(new Date().getTime()));
+		map.put("buyer_id", "2088702691566268");
+		
 		Map<String, String> params = SignUtils.paraFilter(map);
 		StringBuilder buf = new StringBuilder((params.size() + 1) * 10);
 		SignUtils.buildPayParams(buf, params, false);
@@ -145,15 +136,20 @@ public class JhPayZFBDemo {
 	public static void main(String[] args) throws MalformedURLException {
 		JhPayZFBDemo apay = new JhPayZFBDemo();
 		SortedMap<String,String> param = new TreeMap<>();
-		param.put("service", "pay.alipay.jspay");
-		param.put("mch_id", apay.MERCHANT_NO);
+//		param.put("service", "pay.alipay.jspay");
+//		param.put("mch_id", apay.MERCHANT_NO);
+//		param.put("out_trade_no", String.valueOf(new Date().getTime()));
+//		param.put("body", "测试支付");
+//		param.put("total_fee", "100");
+//		param.put("mch_create_ip", "127.0.0.1");
+//		param.put("notify_url", "http://www.baidu.com");
+//		param.put("nonce_str", String.valueOf(new Date().getTime()));
+//		param.put("buyer_id", "2088702691566268");
+		
 		param.put("out_trade_no", String.valueOf(new Date().getTime()));
 		param.put("body", "测试支付");
 		param.put("total_fee", "100");
-		param.put("mch_create_ip", "127.0.0.1");
 		param.put("notify_url", "http://www.baidu.com");
-		param.put("nonce_str", String.valueOf(new Date().getTime()));
-		param.put("buyer_logon_id", "");
 		// ************订单生成，当返回result中code=1时，代表订单生成成功，需要验签************
 		apay.doPostMessage(param);
 	}

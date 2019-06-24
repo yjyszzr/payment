@@ -195,7 +195,10 @@ public class PaymentController extends AbstractBaseController {
 	private String appH5QrUrl;
 	@Value("${yinhe.app_ZFB_H5_qr_url}")
 	private String appZFBH5QrUrl;
-
+	@Value("${jh.pay.zfb.private_key}")
+	private String privateKey;
+	@Value("${jh.pay.zfb.public_key}")
+	private String publicKey;
 	@Resource
 	private ISysConfigService iSysConfigService;
 
@@ -207,7 +210,7 @@ public class PaymentController extends AbstractBaseController {
 	@ResponseBody
 	public BaseResult<String> payAuthoriz(HttpServletRequest request) {
 		logger.info("payAuthoriz========auth_code========"+request.getParameter("auth_code"));
-		String userId = HttpConfig.getUserid(request.getParameter("auth_code"));
+		String userId = HttpConfig.getUserid(request.getParameter("app_id"),request.getParameter("auth_code"),privateKey,publicKey);
 		logger.info("payAuthoriz========userId========"+userId);
 		return ResultGenerator.genSuccessResult("success", "");
 	}
@@ -862,7 +865,11 @@ public class PaymentController extends AbstractBaseController {
 	public BaseResult<Object> rechargeForApp(@RequestBody RechargeParam param, HttpServletRequest request) {
 		//20181203 加入提示
 //		return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
-
+		logger.info("payAuthoriz========auth_code========"+request.getParameter("auth_code"));
+		1String payuserId = HttpConfig.getUserid(request.getParameter("app_id"),request.getParameter("auth_code"),privateKey,publicKey);
+		logger.info("payAuthoriz========userId========"+userId);
+		
+		
 		String loggerId = "rechargeForApp_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/recharge, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode() + " , totalAmount=" + param.getTotalAmount());
 		UserDeviceInfo userDeviceInfo = SessionUtil.getUserDevice();

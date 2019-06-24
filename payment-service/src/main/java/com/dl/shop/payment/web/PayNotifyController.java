@@ -27,6 +27,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dl.base.util.JSONHelper;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
+import com.dl.shop.payment.pay.jhpay.util.XmlUtils;
 import com.dl.shop.payment.pay.kuaijie.entity.KuaiJiePayNotifyEntity;
 import com.dl.shop.payment.pay.kuaijie.util.KuaiJiePayUtil;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestCallback;
@@ -485,6 +486,55 @@ public class PayNotifyController {
 		response.setCharacterEncoding("UTF-8");
 		response.setHeader("Content-type", "text/html;charset=UTF-8");
 		log.info("getRkPayNotify返回成功");
+		writeLowerSuccess(response);
+		return;
+	}
+	
+	@ApiOperation(value = "圣和支付回调")
+	@PostMapping("/ShPayNotify")
+	@ResponseBody
+	public void ShPayNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+		request.setCharacterEncoding("UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		response.setHeader("Content-type", "text/html;charset=UTF-8");
+		Map<String,String> realMap = new HashMap<>();
+		
+		realMap=XmlUtils.toMap(request);
+		
+//		log.info("ShPayNotify()返回报文*********"+jsonStr);
+		String payOrderfSn = realMap.get("out_trade_no")==null?"":realMap.get("out_trade_no").toString();
+		String status=realMap.get("status")==null?"":realMap.get("status").toString();
+		log.info("ShPayNotify()返回报文*********"+payOrderfSn+"&&&"+status);
+		if (StringUtils.isEmpty(payOrderfSn)) {
+			log.info("ShPayNotify()Q多多支付返回payOrderSn is null");
+			writeLowerSuccess(response);
+			return;
+		}
+		PayLog payLog = payLogService.findPayLogByOrderSn(payOrderfSn);
+		if (payLog == null) {
+			log.info("ShPayNotify()Q多多支付[payNotify]该支付订单查询失败 payLogSn:" + payOrderfSn);
+			writeLowerSuccess(response);
+			return;
+		} 
+		int isPaid = payLog.getIsPaid();
+		if (isPaid == 1) {
+			log.info("ShPayNotify()Q多多支付[payNotify] payOrderSn={}订单已支付...", payOrderfSn);
+			writeLowerSuccess(response);
+			return;
+		}
+		int payType = payLog.getPayType();
+		String payCode = payLog.getPayCode();
+		RspOrderQueryEntity rspOrderEntikty = new RspOrderQueryEntity();
+		rspOrderEntikty.setResult_code(status);
+		rspOrderEntikty.setPayCode(payCode);
+		rspOrderEntikty.setType(RspOrderQueryEntity.TYPE_RKPAY);
+		rspOrderEntikty.setTrade_status(status);
+		log.info("ShPayNotify()返回报文*********"+payType);
+		if (payType == 0) {
+			paymentService.orderOptions(payLog, rspOrderEntikty);
+		} else {
+			paymentService.rechargeOptions(payLog, rspOrderEntikty);
+		}
 		writeLowerSuccess(response);
 		return;
 	}
