@@ -1,9 +1,12 @@
 package com.dl.shop.payment.pay.rkpay;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -180,6 +183,7 @@ public class Test {
     	int rnum = random.nextInt(8)+1;//随机1-9的正整数
     	return rnum/100d;
     }
+  
     public static void main(String [] args){
     	Map<String,Object> configMap = new HashMap<>();
     	configMap.put("quick_mode", "NORMAL");// 支付模式
@@ -189,7 +193,7 @@ public class Test {
 		configMap.put("trade_memo", "sf");// 商品名称
         Test test=new Test();
 //        System.out.println(test.randomNum());
-        System.out.println(test.fundApply(configMap));
+//        System.out.println(test.fundApply(configMap));
 //        System.out.println(test.fundAccountQuery(configMap));
 //        System.out.println(test.fundTradeQuery(configMap));
 //        String funddata = test.fundTradeQuery(configMap);///查询代付状态
