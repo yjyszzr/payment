@@ -118,6 +118,7 @@ import com.dl.shop.payment.pay.yinhe.entity.RspYinHeEntity;
 import com.dl.shop.payment.pay.yinhe.util.PayUtil;
 import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
 import com.dl.shop.payment.service.APayService;
+import com.dl.shop.payment.service.JhPayService;
 import com.dl.shop.payment.service.LidPayService;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
@@ -157,6 +158,8 @@ public class PaymentController extends AbstractBaseController {
 	private WxpayUtil wxpayUtil;
 	@Resource
 	private YinHeUtil yinHeUtil;
+	@Resource
+	private JhPayService jhpayService;
 	@Autowired
 	private IUserAccountService userAccountService;
 	@Autowired
@@ -865,11 +868,6 @@ public class PaymentController extends AbstractBaseController {
 	public BaseResult<Object> rechargeForApp(@RequestBody RechargeParam param, HttpServletRequest request) {
 		//20181203 加入提示
 //		return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
-		logger.info("payAuthoriz========auth_code========"+request.getParameter("auth_code"));
-		1String payuserId = HttpConfig.getUserid(request.getParameter("app_id"),request.getParameter("auth_code"),privateKey,publicKey);
-		logger.info("payAuthoriz========userId========"+userId);
-		
-		
 		String loggerId = "rechargeForApp_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/recharge, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode() + " , totalAmount=" + param.getTotalAmount());
 		UserDeviceInfo userDeviceInfo = SessionUtil.getUserDevice();
@@ -940,7 +938,15 @@ public class PaymentController extends AbstractBaseController {
 			if(totalAmount>3000) {
 				return ResultGenerator.genFailResult("单笔充值金额不能超过3000元 ");
 			}
+		} else if("app_jhpay".equals(param.getPayCode())) {
+			if(totalAmount<1) {
+				return ResultGenerator.genFailResult("单笔充值金额不能低于1元");
+			}
+			if(totalAmount>3000) {
+				return ResultGenerator.genFailResult("单笔充值金额不能超过3000元 ");
+			}
 		}
+			
 		
 		BaseResult<PaymentDTO> paymentResult = paymentService.queryByCode(payCode);
 		if (paymentResult.getCode() != 0) {
@@ -1158,6 +1164,22 @@ public class PaymentController extends AbstractBaseController {
 				logger.info("生成Q多多支付宝支付payOrderSn={},url成功 url={}:", orderSn, str);
 			} else {
 				logger.info("生成Q多多支付宝支付payOrderSn={},url失败", orderSn);
+			}
+		}else if("app_jhpay".equals(param.getPayCode())) {
+			//支付宝授权
+			logger.info("payAuthoriz========auth_code========"+request.getParameter("auth_code"));
+			String payuserId = HttpConfig.getUserid(request.getParameter("app_id"),request.getParameter("auth_code"),privateKey,publicKey);
+			logger.info("payAuthoriz========userId========"+payuserId);
+			logger.info("Q多多支付宝支付url:" + " payCode:" + savePayLog.getPayCode());
+			if(com.alibaba.druid.util.StringUtils.isEmpty(payuserId)) {
+				return ResultGenerator.genFailResult("支付宝应用授权失败。");
+			}
+			payBaseResult = jhpayService.getZFBPayUrl(savePayLog, orderSn, orderSn,"充值",payuserId);
+			if (payBaseResult != null && payBaseResult.getData() != null) {
+				String str = payBaseResult.getData() + "";
+				logger.info("生成聚合支付宝支付payOrderSn={},url成功 url={}:", orderSn, str);
+			} else {
+				logger.info("生成聚合支付宝支付payOrderSn={},url失败", orderSn);
 			}
 		}
 		
