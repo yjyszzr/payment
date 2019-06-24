@@ -109,6 +109,7 @@ import com.dl.shop.payment.param.RollbackThirdOrderAmountParam;
 import com.dl.shop.payment.param.UrlBase64Param;
 import com.dl.shop.payment.param.UserIdParam;
 import com.dl.shop.payment.param.WithdrawParam;
+import com.dl.shop.payment.pay.jhpay.util.HttpConfig;
 import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
 import com.dl.shop.payment.pay.xianfeng.util.XianFengPayUtil;
@@ -205,11 +206,9 @@ public class PaymentController extends AbstractBaseController {
 	@GetMapping("/payAuthoriz")
 	@ResponseBody
 	public BaseResult<String> payAuthoriz(HttpServletRequest request) {
-		
-		//根据param.getAuth_code()调用接口获取USERID
-		//将USERID持久化到当前登录用户中——修改用户信息
-		logger.info("payAuthoriz================"+request.getParameter("app_id"));
-		logger.info("payAuthoriz================"+request.getParameter("auth_code"));
+		logger.info("payAuthoriz========auth_code========"+request.getParameter("auth_code"));
+		String userId = HttpConfig.getUserid(request.getParameter("auth_code"));
+		logger.info("payAuthoriz========userId========"+userId);
 		return ResultGenerator.genSuccessResult("success", "");
 	}
 	
