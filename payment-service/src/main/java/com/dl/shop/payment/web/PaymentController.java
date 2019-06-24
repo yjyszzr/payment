@@ -863,9 +863,10 @@ public class PaymentController extends AbstractBaseController {
 	}
 
 	@ApiOperation(value = "app充值调用", notes = "payCode：支付编码，app端微信支付为app_weixin")
-	@PostMapping("/recharge")
+	@RequestMapping("/recharge")
 	@ResponseBody
 	public BaseResult<Object> rechargeForApp(@RequestBody RechargeParam param, HttpServletRequest request) {
+		logger.info("rechargeForApp():"+request.getParameter("status"));
 		//20181203 加入提示
 //		return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
 		String loggerId = "rechargeForApp_" + System.currentTimeMillis();
