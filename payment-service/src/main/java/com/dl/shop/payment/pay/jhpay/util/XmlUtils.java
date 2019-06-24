@@ -11,6 +11,7 @@ package com.dl.shop.payment.pay.jhpay.util;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 
 import org.dom4j.Document;
+import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.xml.sax.InputSource;
@@ -120,7 +122,38 @@ public class XmlUtils {
         }
         return returnMap;
     }
-    
+    /**
+     * xml转map
+     * @param request
+     * @return
+     * @throws IOException
+     */
+    public static Map<String, String> toMap(HttpServletRequest request) {
+        Map<String, String> map = new HashMap<String, String>();
+        SAXReader reader = new SAXReader();
+        InputStream is = null;
+        Document doc = null;
+        try {
+            is = request.getInputStream();
+            doc = reader.read(is);
+            Element root = doc.getRootElement();
+            List<Element> list = root.elements();
+            for (Element e : list) {
+                map.put(e.getName(), e.getText());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (DocumentException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+				is.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+        }
+        return map;
+    }
     /**
      * 转XMLmap
      * @author  
