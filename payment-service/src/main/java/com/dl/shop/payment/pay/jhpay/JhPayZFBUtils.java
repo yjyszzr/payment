@@ -13,6 +13,11 @@ public class JhPayZFBUtils {
 	@Value("${jh.pay.zfb.url}")
 	private String PATH;
 	/**
+	 * 支付接口
+	 */
+	@Value("${jh.pay.zfb.pay_url}")
+	private String PAY_URL;
+	/**
 	 * 订单支付回调URL地址,需要修改为自己的异步回调地址，公网可以访问的
 	 */
 	@Value("${jh.pay.zfb.notifyUrl}")
@@ -23,23 +28,8 @@ public class JhPayZFBUtils {
 	@Value("${jh.pay.zfb.merchantno}")
 	private String MERCHANT_NO;
 	/**
-	 * 商户号，正式上线需要修改为自己的商户号
-	 */
-	@Value("${jh.pay.zfb.merchantname}")
-	private String MERCHANT_NAME;
-	/**
 	 * 商户密钥，正式上线需要修改为自己的商户密钥
 	 */
 	@Value("${jh.pay.zfb.secret}")
 	private String SECRET;
-	/**
-	 * 支付生成URL
-	 */
-	@Value("${jh.pay.zfb.url.paymethod}")
-	private String PAY_URL_METHOD;
-	/**
-	 * 支付生成URL
-	 */
-	@Value("${jh.pay.zfb.adduid}")
-	private String ADDUID;
 }

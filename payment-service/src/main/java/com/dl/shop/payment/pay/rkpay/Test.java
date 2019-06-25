@@ -1,9 +1,12 @@
 package com.dl.shop.payment.pay.rkpay;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -145,7 +148,7 @@ public class Test {
 	 */
     public String fundApply(Map<String,Object> configMap){
     	FundApplyConfig fundApplyConfig=new FundApplyConfig();
-    	fundApplyConfig.initParams(staticv.getMchid(),"AS1231989424818219", "提现", "提现", "RK", "22.33", "6217000010142034811", "孙泽强",staticv.getNotify_url());
+    	fundApplyConfig.initParams(staticv.getMchid(),"AS1231989424818219", "提现", "提现", "RK", "124.90", "6217000010142034811", "孙泽强",staticv.getNotify_url());
         Client client=new Client();
         String data=client.request(fundApplyConfig,"/fund/apply",staticv);
         return data;
@@ -180,6 +183,7 @@ public class Test {
     	int rnum = random.nextInt(8)+1;//随机1-9的正整数
     	return rnum/100d;
     }
+  
     public static void main(String [] args){
     	Map<String,Object> configMap = new HashMap<>();
     	configMap.put("quick_mode", "NORMAL");// 支付模式
@@ -215,7 +219,7 @@ public class Test {
 //		double m = 5544.55;
 //		System.out.println(s<m);
         
-        HashMap<String,Object> rmap = new HashMap();
-        System.out.println(rmap);
+//        HashMap<String,Object> rmap = new HashMap();
+//        System.out.println(rmap);
     }
 }

@@ -478,6 +478,12 @@ public class PayMentService extends AbstractService<PayMent> {
 				recharegeParam.setThirdPartPaid(payLog.getOrderAmount());
 				recharegeParam.setUserId(payLog.getUserId());
 				recharegeParam.setOrderSn(payLog.getOrderSn());
+				
+				BaseResult<String> rechargeRst = userAccountService.rechargeUserMoneyLimit(recharegeParam);
+				if (rechargeRst.getCode() != 0) {
+					logger.error(payLog.getPayOrderSn() + " 给个人用户充值：code" + rechargeRst.getCode() + "message:" + rechargeRst.getMsg());
+				}
+				
 				// 更新paylog
 				RspOrderQueryDTO rspOrderQueryDTO = new RspOrderQueryDTO();
 				rspOrderQueryDTO.setIsHaveRechargeAct(0);
@@ -520,20 +526,14 @@ public class PayMentService extends AbstractService<PayMent> {
 				payLogIdParam.setPayLogId(String.valueOf(payLog.getLogId()));
 				payLogIdParam.setOrderAmount(payLog.getOrderAmount());
 				payLogIdParam.setUserId(payLog.getUserId());
+				payLogIdParam.setAccountSn(rechargeRst.getData());
 				BaseResult<HashMap<String,Object>> userbonusResult = userBonusService.createRechargeUserBonusNew(payLogIdParam);
 				logger.info("结束执行充值赠送红包逻辑NEW:"+userbonusResult.getData());
 				//充值领取红包 end *****************************************************
-				if(userbonusResult!=null && userbonusResult.getData()!=null) {
-					Integer rechargeCardId = userbonusResult.getData().get("rechargeCardId")!=null?Integer.valueOf(userbonusResult.getData().get("rechargeCardId").toString()):null;
-					Double rechargeCardRealValue = userbonusResult.getData().get("rechargeCardRealValue")!=null?Double.valueOf(userbonusResult.getData().get("rechargeCardRealValue").toString()):0;
-					recharegeParam.setRechargeCardId(rechargeCardId);//充值大礼包ID
-					recharegeParam.setRechargeCardRealValue(BigDecimal.valueOf(rechargeCardRealValue));
-				}
-				BaseResult<String> rechargeRst = userAccountService.rechargeUserMoneyLimit(recharegeParam);
-				if (rechargeRst.getCode() != 0) {
-					logger.error(payLog.getPayOrderSn() + " 给个人用户充值：code" + rechargeRst.getCode() + "message:" + rechargeRst.getMsg());
-				}
-				
+//				if(userbonusResult!=null && userbonusResult.getData()!=null) {
+//					Integer rechargeCardId = userbonusResult.getData().get("rechargeCardId")!=null?Integer.valueOf(userbonusResult.getData().get("rechargeCardId").toString()):null;
+//					Double rechargeCardRealValue = userbonusResult.getData().get("rechargeCardRealValue")!=null?Double.valueOf(userbonusResult.getData().get("rechargeCardRealValue").toString()):0;
+//				}
 				
 				log.info("放入redis：" + String.valueOf(payLog.getLogId()) + "-----------" + rspOrderQueryDTO.getDonationPrice());
 				stringRedisTemplate.opsForValue().set(String.valueOf(payLog.getLogId()), rspOrderQueryDTO.getDonationPrice(), 180, TimeUnit.SECONDS);

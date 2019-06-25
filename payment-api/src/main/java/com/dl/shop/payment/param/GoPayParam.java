@@ -16,4 +16,6 @@ public class GoPayParam {
 	private String isH5;
 	@ApiModelProperty("订单编号")
 	private String orderSn;
+	@ApiModelProperty("支付宝唯一用户id")
+	private String userId;
 }
