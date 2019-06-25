@@ -120,7 +120,6 @@ public class JhPayService {
 			res = "系统异常";
 			resultMap = null;
 		} finally {
-//			System.out.println(res);
 			try {
 				if (response != null) {
 					response.close();
@@ -130,7 +129,7 @@ public class JhPayService {
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
-				resultMap = null;
+				return null;
 			}
 			return resultMap;
 		}
