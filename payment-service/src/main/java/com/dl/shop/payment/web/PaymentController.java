@@ -211,11 +211,14 @@ public class PaymentController extends AbstractBaseController {
 	@ApiOperation(value = "支付宝授权", notes = "支付宝授权")
 	@GetMapping("/payAuthoriz")
 	@ResponseBody
-	public BaseResult<String> payAuthoriz(HttpServletRequest request) {
+	public BaseResult<?> payAuthoriz(HttpServletRequest request) {
 		logger.info("payAuthoriz========auth_code========"+request.getParameter("auth_code"));
+		logger.info("payAuthoriz========status========"+request.getParameter("status"));
 		String userId = HttpConfig.getUserid(request.getParameter("app_id"),request.getParameter("auth_code"),privateKey,publicKey);
 		logger.info("payAuthoriz========userId========"+userId);
-		return ResultGenerator.genSuccessResult("success", "");
+		logger.info("payAuthoriz========pay_code========"+request.getParameter("pay_code"));
+		return ResultGenerator.genSuccessResult("success");
+//		return this.rechargeForApp(param, request);
 	}
 	
 	@ApiOperation(value = "系统可用第三方支付方式", notes = "系统可用第三方支付方式")
@@ -863,10 +866,9 @@ public class PaymentController extends AbstractBaseController {
 	}
 
 	@ApiOperation(value = "app充值调用", notes = "payCode：支付编码，app端微信支付为app_weixin")
-	@RequestMapping("/recharge")
+	@PostMapping("/recharge")
 	@ResponseBody
 	public BaseResult<Object> rechargeForApp(@RequestBody RechargeParam param, HttpServletRequest request) {
-		logger.info("rechargeForApp():"+request.getParameter("status"));
 		//20181203 加入提示
 //		return ResultGenerator.genResult(PayEnums.PAY_STOP_SERVICE.getcode(), PayEnums.PAY_STOP_SERVICE.getMsg());
 		String loggerId = "rechargeForApp_" + System.currentTimeMillis();
@@ -1167,11 +1169,11 @@ public class PaymentController extends AbstractBaseController {
 				logger.info("生成Q多多支付宝支付payOrderSn={},url失败", orderSn);
 			}
 		}else if("app_jhpay".equals(param.getPayCode())) {
-			//支付宝授权
-			logger.info("payAuthoriz========auth_code========"+request.getParameter("auth_code"));
+			logger.info("聚合支付宝支付url:" + " payCode:" + savePayLog.getPayCode());
+			logger.info("rechargeForApp():"+request.getParameter("status"));
 			String payuserId = HttpConfig.getUserid(request.getParameter("app_id"),request.getParameter("auth_code"),privateKey,publicKey);
 			logger.info("payAuthoriz========userId========"+payuserId);
-			logger.info("Q多多支付宝支付url:" + " payCode:" + savePayLog.getPayCode());
+			
 			if(com.alibaba.druid.util.StringUtils.isEmpty(payuserId)) {
 				return ResultGenerator.genFailResult("支付宝应用授权失败。");
 			}
