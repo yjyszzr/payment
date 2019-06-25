@@ -17,6 +17,7 @@ import net.sf.json.util.JSONUtils;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +27,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dl.base.util.JSONHelper;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
+import com.dl.shop.payment.pay.jhpay.util.XmlUtils;
 import com.dl.shop.payment.pay.kuaijie.entity.KuaiJiePayNotifyEntity;
 import com.dl.shop.payment.pay.kuaijie.util.KuaiJiePayUtil;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestCallback;
@@ -428,24 +430,16 @@ public class PayNotifyController {
 	@ApiOperation(value = "Q多多支付回调")
 	@PostMapping("/RkPayNotify")
 	@ResponseBody
-	public void RkPayNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+	public void RkPayNotify(@RequestBody JSONObject jsonStr,HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		response.setHeader("Content-type", "text/html;charset=UTF-8");
-		Map<?, ?> parameters = request.getParameterMap();// 保存request请求参数的临时变量
-		log.info("RkPayNotify()Q多多支付通知消息RkPayNotify={}", parameters);
-		Map<String,Object> realMap = new HashMap<String, Object>();
-		// 打印华移支付返回值
-		log.info("RkPayNotify()Q多多支付服务器端通知-接收到支付返回报文：");
-		Iterator<?> paiter = parameters.keySet().iterator();
-		while (paiter.hasNext()) {
-			String key = paiter.next().toString();
-			String[] values = (String[]) parameters.get(key);
-			log.info("RkPayNotify()*********"+key + "-------------" + values[0]);
-			realMap.put(key, values[0]);
+		Map<String,Object> realMap = new HashMap<>();
+		if(jsonStr!=null) {
+			realMap = (Map<String, Object>) com.alibaba.druid.support.json.JSONUtils.parse(jsonStr.toJSONString());
 		}
-//		aPayService.getSign(realMap); ///签名校验
-		log.info("RkPayNotify()返回报文*********"+JSONUtils.valueToString(realMap));
+		
+		log.info("RkPayNotify()返回报文*********"+jsonStr);
 		String payOrderfSn = realMap.get("ds_trade_no")==null?"":realMap.get("ds_trade_no").toString();
 		String status=realMap.get("status")==null?"":realMap.get("status").toString();
 		log.info("RkPayNotify()返回报文*********"+payOrderfSn+"&&&"+status);
@@ -483,55 +477,62 @@ public class PayNotifyController {
 		return;
 	}
 	
-	@ApiOperation(value = "Q多多代付回调")
-	@PostMapping("/RkFundNotify")
+	
+	@ApiOperation(value = "Q多多支付完成回调")
+	@GetMapping("/getRkPayNotify")
 	@ResponseBody
-	public void RkFundNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+	public void getRkPayNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		response.setHeader("Content-type", "text/html;charset=UTF-8");
-		Map<?, ?> parameters = request.getParameterMap();// 保存request请求参数的临时变量
-		log.info("RkFundNotify()Q多多代付通知消息RkFundNotify={}", parameters);
-		Map<String,Object> realMap = new HashMap<String, Object>();
-		// 打印华移支付返回值
-		log.info("RkFundNotify()Q多多代付服务器端通知-接收到支付返回报文：");
-		Iterator<?> paiter = parameters.keySet().iterator();
-		while (paiter.hasNext()) {
-			String key = paiter.next().toString();
-			String[] values = (String[]) parameters.get(key);
-			log.info("RkFundNotify()*********"+key + "-------------" + values[0]);
-			realMap.put(key, values[0]);
-		}
-//		aPayService.getSign(realMap); ///签名校验
-		log.info("RkFundNotify()返回报文*********"+JSONUtils.valueToString(realMap));
-		String payOrderfSn = realMap.get("ds_trade_no")==null?"":realMap.get("ds_trade_no").toString();
-		String status=realMap.get("status")==null?"":realMap.get("status").toString();
-		log.info("RkFundNotify()返回报文*********"+payOrderfSn+"&&&"+status);
+		log.info("getRkPayNotify返回成功");
+		writeLowerSuccess(response);
+		return;
+	}
+	
+	@ApiOperation(value = "聚合支付回调")
+	@PostMapping("/JhPayNotify")
+	@ResponseBody
+	public void JhPayNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+		request.setCharacterEncoding("UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		response.setHeader("Content-type", "text/html;charset=UTF-8");
+		Map<String,String> realMap = new HashMap<>();
+		
+		realMap=XmlUtils.toMap(request);
+		
+//		log.info("ShPayNotify()返回报文*********"+jsonStr);
+		String payOrderfSn = realMap.get("out_trade_no")==null?"":realMap.get("out_trade_no").toString();
+//		String status=realMap.get("status")==null?"":realMap.get("status").toString();
+//		String result_code=realMap.get("result_code")==null?"":realMap.get("result_code").toString();
+		String pay_result=realMap.get("pay_result")==null?"":realMap.get("pay_result").toString();
+		
+		log.info("ShPayNotify()返回报文*********"+payOrderfSn+"&&&"+pay_result);
 		if (StringUtils.isEmpty(payOrderfSn)) {
-			log.info("RkFundNotify()Q多多代付返回payOrderSn is null");
+			log.info("ShPayNotify()Q多多支付返回payOrderSn is null");
 			writeLowerSuccess(response);
 			return;
 		}
 		PayLog payLog = payLogService.findPayLogByOrderSn(payOrderfSn);
 		if (payLog == null) {
-			log.info("RkFundNotify()Q多多代付[RkFundNotify]该支付订单查询失败 payLogSn:" + payOrderfSn);
+			log.info("ShPayNotify()Q多多支付[payNotify]该支付订单查询失败 payLogSn:" + payOrderfSn);
 			writeLowerSuccess(response);
 			return;
 		} 
 		int isPaid = payLog.getIsPaid();
 		if (isPaid == 1) {
-			log.info("RkFundNotify()Q多多代付[payNotify] payOrderSn={}订单已支付...", payOrderfSn);
+			log.info("ShPayNotify()Q多多支付[payNotify] payOrderSn={}订单已支付...", payOrderfSn);
 			writeLowerSuccess(response);
 			return;
 		}
 		int payType = payLog.getPayType();
 		String payCode = payLog.getPayCode();
 		RspOrderQueryEntity rspOrderEntikty = new RspOrderQueryEntity();
-		rspOrderEntikty.setResult_code(status);
+		rspOrderEntikty.setResult_code(pay_result);
 		rspOrderEntikty.setPayCode(payCode);
-		rspOrderEntikty.setType(RspOrderQueryEntity.TYPE_RKPAY);
-		rspOrderEntikty.setTrade_status(status);
-		log.info("RkFundNotify()返回报文*********"+payType);
+		rspOrderEntikty.setType(RspOrderQueryEntity.TYPE_JHPAY);
+		rspOrderEntikty.setTrade_status(pay_result);
+		log.info("ShPayNotify()返回报文*********"+payType);
 		if (payType == 0) {
 			paymentService.orderOptions(payLog, rspOrderEntikty);
 		} else {
@@ -540,4 +541,62 @@ public class PayNotifyController {
 		writeLowerSuccess(response);
 		return;
 	}
+//	
+//	@ApiOperation(value = "Q多多代付回调")
+//	@PostMapping("/RkFundNotify")
+//	@ResponseBody
+//	public void RkFundNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+//		request.setCharacterEncoding("UTF-8");
+//		response.setCharacterEncoding("UTF-8");
+//		response.setHeader("Content-type", "text/html;charset=UTF-8");
+//		Map<?, ?> parameters = request.getParameterMap();// 保存request请求参数的临时变量
+//		log.info("RkFundNotify()Q多多代付通知消息RkFundNotify={}", parameters);
+//		Map<String,Object> realMap = new HashMap<String, Object>();
+//		// 打印华移支付返回值
+//		log.info("RkFundNotify()Q多多代付服务器端通知-接收到支付返回报文：");
+//		Iterator<?> paiter = parameters.keySet().iterator();
+//		while (paiter.hasNext()) {
+//			String key = paiter.next().toString();
+//			String[] values = (String[]) parameters.get(key);
+//			log.info("RkFundNotify()*********"+key + "-------------" + values[0]);
+//			realMap.put(key, values[0]);
+//		}
+////		aPayService.getSign(realMap); ///签名校验
+//		log.info("RkFundNotify()返回报文*********"+JSONUtils.valueToString(realMap));
+//		String payOrderfSn = realMap.get("ds_trade_no")==null?"":realMap.get("ds_trade_no").toString();
+//		String status=realMap.get("status")==null?"":realMap.get("status").toString();
+//		log.info("RkFundNotify()返回报文*********"+payOrderfSn+"&&&"+status);
+//		if (StringUtils.isEmpty(payOrderfSn)) {
+//			log.info("RkFundNotify()Q多多代付返回payOrderSn is null");
+//			writeLowerSuccess(response);
+//			return;
+//		}
+//		PayLog payLog = payLogService.findPayLogByOrderSn(payOrderfSn);
+//		if (payLog == null) {
+//			log.info("RkFundNotify()Q多多代付[RkFundNotify]该支付订单查询失败 payLogSn:" + payOrderfSn);
+//			writeLowerSuccess(response);
+//			return;
+//		} 
+//		int isPaid = payLog.getIsPaid();
+//		if (isPaid == 1) {
+//			log.info("RkFundNotify()Q多多代付[payNotify] payOrderSn={}订单已支付...", payOrderfSn);
+//			writeLowerSuccess(response);
+//			return;
+//		}
+//		int payType = payLog.getPayType();
+//		String payCode = payLog.getPayCode();
+//		RspOrderQueryEntity rspOrderEntikty = new RspOrderQueryEntity();
+//		rspOrderEntikty.setResult_code(status);
+//		rspOrderEntikty.setPayCode(payCode);
+//		rspOrderEntikty.setType(RspOrderQueryEntity.TYPE_RKPAY);
+//		rspOrderEntikty.setTrade_status(status);
+//		log.info("RkFundNotify()返回报文*********"+payType);
+//		if (payType == 0) {
+//			paymentService.orderOptions(payLog, rspOrderEntikty);
+//		} else {
+//			paymentService.rechargeOptions(payLog, rspOrderEntikty);
+//		}
+//		writeLowerSuccess(response);
+//		return;
+//	}
 }

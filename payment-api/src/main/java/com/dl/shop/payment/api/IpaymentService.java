@@ -1,7 +1,6 @@
 package com.dl.shop.payment.api;
 
 import org.springframework.cloud.netflix.feign.FeignClient;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -11,6 +10,7 @@ import com.dl.base.result.BaseResult;
 import com.dl.shop.payment.dto.PayLogDTO;
 import com.dl.shop.payment.dto.PayLogDetailDTO;
 import com.dl.shop.payment.dto.PriceDTO;
+import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.dto.UserRechargeDTO;
 import com.dl.shop.payment.dto.UserWithdrawDTO;
 import com.dl.shop.payment.dto.UserWithdrawDetailDTO;
@@ -35,6 +35,12 @@ public interface IpaymentService {
      */
 	@RequestMapping(path="/payment/withdraw/querUserWithDraw", method=RequestMethod.POST)
 	public BaseResult<UserWithdrawDetailDTO> querUserWithDrawDetail(@RequestBody WithDrawSnParam withDrawSnParam);
+	
+	/**
+     * 根据提现单号查询提现单
+     */
+	@RequestMapping(path="/payment/getShMoney", method=RequestMethod.POST)
+	public BaseResult<RspOrderQueryDTO> getShMoney(@RequestBody StrParam strParam);
 	
     /**
      * 根据提现单号和userId查询提现单

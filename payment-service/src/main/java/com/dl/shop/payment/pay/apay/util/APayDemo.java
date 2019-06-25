@@ -4,22 +4,27 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
+import com.alibaba.druid.support.json.JSONUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.util.DateUtil;
 import com.dl.shop.payment.utils.DateUtilPay;
@@ -221,7 +226,8 @@ public class APayDemo {
 		Map<String, String> params = new HashMap<>();
 		params.put("partner_id", param.get("partner_id"));// 商户编号
 		params.put("channel_id", param.get("channel_id"));//渠道编号
-		params.put("partner_order", param.get("partner_order"));// 商户订单
+//		params.put("partner_order", param.get("partner_order"));// 商户订单
+		params.put("partner_order", "sfsfsfewfwefggg");// 商户订单
 		params.put("user_id", param.get("user_id"));// 用户id
 		params.put("total_fee", param.get("total_fee"));// 订单金额
 		params.put("back_url", param.get("back_url"));//同步回调地址
@@ -240,33 +246,34 @@ public class APayDemo {
 		if (result != null && !"".equals(result)) {
 			if (!result.contains("code")) {
 				
-				Document doc = Jsoup.parse(result);
-				String url = doc.select("iframe").first().attr("src");
-				System.out.println(url);
+//				Document doc = Jsoup.parse(result);
+//				String url = doc.select("iframe").first().attr("src");
+//				System.out.println(url);
 				return;
 			}
-			@SuppressWarnings("unchecked")
-			Map<String, Object> obj = JSONObject.parseObject(result, Map.class);
-			int code = (int) obj.get("code");
-			if (code == 1)// 成功
-			{
-				@SuppressWarnings("unchecked")
-				Map<String, String> resultObj = (Map<String, String>) obj.get("result");
-				// 验证返回参数签名
-				if (checkParamSign(resultObj)) {
-					System.out.println("签名验证通过,可以在此处理订单下一步操作:");
-
-					// 获取payUrl
-					String payUrl = resultObj.get("payUrl");
-					System.out.println("payUrl=" + payUrl);
-
-				} else {
-					System.out.println("签名验证失败。。。");
-				}
-			} else {
-				String msg = (String) obj.get("msg");
-				System.out.println("失败，原因：" + msg);
-			}
+			return;
+//			@SuppressWarnings("unchecked")
+//			Map<String, Object> obj = JSONObject.parseObject(result, Map.class);
+//			int code = (int) obj.get("code");
+//			if (code == 1)// 成功
+//			{
+//				@SuppressWarnings("unchecked")
+//				Map<String, String> resultObj = (Map<String, String>) obj.get("result");
+//				// 验证返回参数签名
+//				if (checkParamSign(resultObj)) {
+//					System.out.println("签名验证通过,可以在此处理订单下一步操作:");
+//
+//					// 获取payUrl
+//					String payUrl = resultObj.get("payUrl");
+//					System.out.println("payUrl=" + payUrl);
+//
+//				} else {
+//					System.out.println("签名验证失败。。。");
+//				}
+//			} else {
+//				String msg = (String) obj.get("msg");
+//				System.out.println("失败，原因：" + msg);
+//			}
 		} else {
 			System.out.println("服务器连接异常，请重试！");
 		}
@@ -369,7 +376,7 @@ public class APayDemo {
 		param.put("notify_url", "http://39.106.18.39:8765/api/payment/payment/notify/APayNotify");// 异步回调地址
 		param.put("channel_id", "9");//渠道编号
 		param.put("pay_method", "");// 支付类型
-		param.put("partner_order", "2115561300021");// 商户订单
+		param.put("partner_order", "2115115sssf1300021");// 商户订单
 		param.put("user_id", "1000000025");// 用户id
 		param.put("total_fee", "1000");// 订单金额
 		param.put("payextra_param", "");// 扩展参数
@@ -377,7 +384,7 @@ public class APayDemo {
 		param.put("sign_type", "MD5");// 签名类型
 		param.put("subject", "支付");// 用户id
 		// ************订单生成，当返回result中code=1时，代表订单生成成功，需要验签************
-		apay.pay(param);
+//		apay.pay(param);
 
 		// ************订单查询，当返回result中status=1时，代表支付成功，需要验签************
 //		apay.orderQuery(param);
@@ -386,7 +393,7 @@ public class APayDemo {
 //		apay.orderRefund(param);
 		
 		//比赛提前1h	禁止支付
-		Integer sysLimitBetTime = 3600;
+//		Integer sysLimitBetTime = 3600;
 //		SysConfigParam sysConfigParam = new SysConfigParam();
 //		sysConfigParam.setBusinessId(4);
 //		BaseResult<SysConfigDTO> sysConfigDTOBaseResult = iSysConfigService.querySysConfig(sysConfigParam);
@@ -409,6 +416,51 @@ public class APayDemo {
 //		String surplusStr ="";
 //		surplusStr = surplusStr.substring(0, surplusStr.length()-1);
 //		System.out.println(surplusStr);
+		
+//		List<Map<String,String>> maps = new ArrayList();
+//		String str = "98:2;198:4;498:10;988:16;1988:35;2988:64";
+//		str = "98;99;100;111";
+//		str = "98:;:99;;100;111";
+//		if(str!=null && !"".equals(str)) {
+//			String readMoney[]=str.split(";");
+//			for (int i = 0; i < readMoney.length; i++) {
+//				Map<String,String> remap = new HashMap();
+//				if(readMoney[i].contains(":")) {
+//					String money[] = readMoney[i].split(":");
+//					if(money.length>1) {
+//						remap.put("readmoney", money[0]);
+//						remap.put("givemoney", money[1]);
+//					} else {
+//						remap.put("readmoney", money[0]);
+//						remap.put("givemoney", "0");
+//					}
+//				}else {
+//					remap.put("readmoney", readMoney[i]);
+//					remap.put("givemoney", "0");
+//				}
+//				maps.add(remap);
+//			}
+//		}
+//		String giveMoney = "12";
+//		if(StringUtils.isNotEmpty(giveMoney)) {
+//			giveMoney = "0";
+//		}
+//		System.out.println(giveMoney);
+//		System.out.println(JSONUtils.toJSONString(maps));
+		
+//		String ipStr = "47.100.81.221;101.132.252.53";
+//		String ip = "47s";
+//		if(!ipStr.contains(ip)) {
+//			System.out.println("IP为不合法IP");
+//			return;
+//		}
+//		System.out.println("sf");
+		
+		BigDecimal ktxye = BigDecimal.valueOf(100);
+		BigDecimal bktxye = BigDecimal.valueOf(10);
+		BigDecimal kgye = BigDecimal.valueOf(30);
+		
+		System.out.println(ktxye.add(bktxye.subtract(kgye))+"^^^^^^^^^"+BigDecimal.ZERO);
 	}
 
 }

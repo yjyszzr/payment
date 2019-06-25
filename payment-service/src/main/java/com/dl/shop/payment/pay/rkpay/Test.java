@@ -1,12 +1,27 @@
 package com.dl.shop.payment.pay.rkpay;
 
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
 import com.alibaba.druid.support.json.JSONUtils;
+import com.dl.base.result.BaseResult;
+import com.dl.member.dto.SysConfigDTO;
+import com.dl.member.param.SmsParam;
+import com.dl.member.param.SysConfigParam;
+import com.dl.shop.payment.dto.RspOrderQueryDTO;
 import com.dl.shop.payment.pay.rkpay.util.Client;
+import com.dl.shop.payment.pay.rkpay.util.Config;
+import com.dl.shop.payment.pay.rkpay.util.FundApplyConfig;
 import com.dl.shop.payment.pay.rkpay.util.PayQrcodeConfig;
 import com.dl.shop.payment.pay.rkpay.util.PayQuickConfig;
 import com.dl.shop.payment.pay.rkpay.util.PayWapConfig;
@@ -127,6 +142,39 @@ public class Test {
         String data=client.request(reFundQueryConfig,"/pay/refundquery",staticv);
         return data;
     }
+    /**代付
+     * apply_mode=RK
+	 * @return
+	 */
+    public String fundApply(Map<String,Object> configMap){
+    	FundApplyConfig fundApplyConfig=new FundApplyConfig();
+    	fundApplyConfig.initParams(staticv.getMchid(),"AS1231989424818219", "提现", "提现", "RK", "124.90", "6217000010142034811", "孙泽强",staticv.getNotify_url());
+        Client client=new Client();
+        String data=client.request(fundApplyConfig,"/fund/apply",staticv);
+        return data;
+    }
+    /**代付状态查询
+     * apply_mode=RK
+	 * @return
+	 */
+    public String fundTradeQuery(Map<String,Object> configMap){
+    	FundApplyConfig fundApplyConfig=new FundApplyConfig();
+    	fundApplyConfig.initParams(staticv.getMchid(),"","2019052221181328290789");
+        Client client=new Client();
+        String data=client.request(fundApplyConfig,"/fund/tradequery",staticv);
+        return data;
+    }
+    /**代付账户余额查询
+     * apply_mode=RK
+	 * @return
+	 */
+    public String fundAccountQuery(Map<String,Object> configMap){
+    	FundApplyConfig fundApplyConfig=new FundApplyConfig();
+    	fundApplyConfig.initParams(staticv.getMchid());
+        Client client=new Client();
+        String data=client.request(fundApplyConfig,"/fund/accountquery",staticv);
+        return data;
+    }
     /**获取1—9的随机数
      * @return
      */
@@ -135,11 +183,12 @@ public class Test {
     	int rnum = random.nextInt(8)+1;//随机1-9的正整数
     	return rnum/100d;
     }
+  
     public static void main(String [] args){
     	Map<String,Object> configMap = new HashMap<>();
     	configMap.put("quick_mode", "NORMAL");// 支付模式
-    	configMap.put("ds_trade_no", "sfsfs");// 商户订单
-    	configMap.put("pay_fee", "20");// 订单金额
+    	configMap.put("ds_trade_no", "sfsfsdss");// 商户订单
+    	configMap.put("pay_fee", "800");// 订单金额
 		configMap.put("trade_subject", "sf");// 商品名称
 		configMap.put("trade_memo", "sf");// 商品名称
         Test test=new Test();
@@ -147,11 +196,30 @@ public class Test {
 //        System.out.println(test.fundApply(configMap));
 //        System.out.println(test.fundAccountQuery(configMap));
 //        System.out.println(test.fundTradeQuery(configMap));
+//        String funddata = test.fundTradeQuery(configMap);///查询代付状态
+//        System.out.println(funddata);
+//    	Map<String,Object> funddataMap = (Map<String, Object>) JSONUtils.parse(funddata);
+//    	if(funddataMap!=null && "0".equals(funddataMap.get("status").toString())) {//代付状态查询成功  判断代付是否成功
+//    		if(funddataMap.get("trade_status").toString().equals("FAIL")) {//代付失败
+//    			System.out.println(false);
+//    		}else {//代付成功
+//    			System.out.println(true);
+//    		}
+//    	}else { ///代付查询失败
+//    		System.out.println(false);
+//    	}
 //        Map ms = (Map) JSONUtils.parse();
-        System.out.println(test.payQuick(configMap));
+//        System.out.println(test.payQuick(configMap));
 //        System.out.println(test.payWap(configMap));
 //        System.out.println(test.payQrcode(configMap));
-//        double fee_money = Integer.parseInt("20.0")+test.randomNum();
-//        System.out.println(fee_money+"");
+//		DecimalFormat df = new DecimalFormat("######0.00");   
+//        double fee_money = Double.parseDouble("20");
+//        System.out.println(df.format(fee_money)+"");
+//		int s = 5000;
+//		double m = 5544.55;
+//		System.out.println(s<m);
+        
+//        HashMap<String,Object> rmap = new HashMap();
+//        System.out.println(rmap);
     }
 }

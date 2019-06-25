@@ -8,10 +8,14 @@ public class RechargeParam {
 
 	@ApiModelProperty("充值金额")
 	private int totalAmount;
+	@ApiModelProperty("赠送金额:可不传")
+	private int giveAmount;
 	@ApiModelProperty("支付方式编码")
 	private String payCode;
 	@ApiModelProperty("是否在微信内部打开支付？0不是微信内部 1微信内部")
 	private int innerWechat;
 	@ApiModelProperty("是否H5打开该页 1->h5请求，0||null->app端请求")
 	private String isH5;
+	@ApiModelProperty("支付宝唯一用户id")
+	private String userId;
 }

@@ -41,6 +41,7 @@ public class RspOrderQueryEntity implements Serializable {
 	public static final int TYPE_LID = 6; //华移支付
 	public static final int TYPE_APAY = 7;//艾支付
 	public static final int TYPE_RKPAY = 8;//Q多多支付
+	public static final int TYPE_JHPAY = 9;//Q多多支付
 	
 	public boolean isSucc() {
 		if (!TextUtils.isEmpty(result_code) && type == TYPE_YINHE) {
@@ -61,7 +62,10 @@ public class RspOrderQueryEntity implements Serializable {
 			return !StringUtils.isEmpty(result_code) &&  "1001".equalsIgnoreCase(result_code);// 成功
 		} else if (!TextUtils.isEmpty(result_code) && type == TYPE_RKPAY) {
 			return !StringUtils.isEmpty(result_code) &&  "0".equalsIgnoreCase(result_code);// 成功
+		} else if (!TextUtils.isEmpty(result_code) && type == TYPE_JHPAY) {
+			return !StringUtils.isEmpty(result_code) &&  "0".equalsIgnoreCase(result_code);// 成功
 		}
+		
 		return false;
 	}
 
@@ -82,6 +86,8 @@ public class RspOrderQueryEntity implements Serializable {
 		} else if (!TextUtils.isEmpty(result_code) && type == TYPE_APAY) {
 			return !StringUtils.isEmpty(result_code) &&  "1012".equalsIgnoreCase(result_code);// 等待支付
 		} else if (!TextUtils.isEmpty(result_code) && type == TYPE_RKPAY) {
+			return !StringUtils.isEmpty(result_code) &&  "".equalsIgnoreCase(result_code);// 等待支付
+		} else if (!TextUtils.isEmpty(result_code) && type == TYPE_JHPAY) {
 			return !StringUtils.isEmpty(result_code) &&  "".equalsIgnoreCase(result_code);// 等待支付
 		}
 		return false;
@@ -106,6 +112,8 @@ public class RspOrderQueryEntity implements Serializable {
 		} else if (!TextUtils.isEmpty(result_code) && type == TYPE_APAY) {
 			return !StringUtils.isEmpty(result_code) &&  "1014".equalsIgnoreCase(result_code);// 失败
 		} else if (!TextUtils.isEmpty(result_code) && type == TYPE_RKPAY) {
+			return !StringUtils.isEmpty(result_code) &&  !"0".equalsIgnoreCase(result_code);// 失败
+		} else if (!TextUtils.isEmpty(result_code) && type == TYPE_JHPAY) {
 			return !StringUtils.isEmpty(result_code) &&  !"0".equalsIgnoreCase(result_code);// 失败
 		}
 		return false;
