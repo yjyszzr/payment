@@ -16,4 +16,6 @@ public class RechargeParam {
 	private int innerWechat;
 	@ApiModelProperty("是否H5打开该页 1->h5请求，0||null->app端请求")
 	private String isH5;
+	@ApiModelProperty("支付宝唯一用户id")
+	private String userId;
 }

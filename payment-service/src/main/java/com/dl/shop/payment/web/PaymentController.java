@@ -210,15 +210,22 @@ public class PaymentController extends AbstractBaseController {
 	public BaseResult<?> payAuthoriz(HttpServletRequest request) {
 		String userId = HttpConfig.getUserid(request.getParameter("app_id"),request.getParameter("auth_code"));
 		logger.info("payAuthoriz========userId========"+userId);
+		if(com.alibaba.druid.util.StringUtils.isEmpty(userId)) {
+			return ResultGenerator.genFailResult("支付宝应用授权失败。");
+		}
 		logger.info("payAuthoriz========pay_type========"+request.getParameter("payType"));
 		String pay_type = request.getParameter("payType");
 		if("zf".equals(pay_type)) {
+			logger.info("payAuthoriz========支付userId========"+userId);
 			GoPayParam param = new GoPayParam();
 			param.setPayToken(request.getParameter("payToken"));
+			param.setUserId(userId);
 			return this.nUnifiedOrder(param,request);
 		}else if("cz".equals(pay_type)) {
+			logger.info("payAuthoriz========充值userId========"+userId);
 			RechargeParam param = new RechargeParam();
 			param.setTotalAmount(Integer.parseInt(request.getParameter("payToken")));
+			param.setUserId(userId);
 			return this.rechargeForApp(param, request);
 		}else {
 			return ResultGenerator.genFailResult("参数错误");
@@ -1174,14 +1181,7 @@ public class PaymentController extends AbstractBaseController {
 			}
 		}else if("app_jhpay".equals(param.getPayCode())) {
 			logger.info("聚合支付宝支付url:" + " payCode:" + savePayLog.getPayCode());
-			logger.info("rechargeForApp():"+request.getParameter("status"));
-			String payuserId = "";//HttpConfig.getUserid(request.getParameter("app_id"),request.getParameter("auth_code"),privateKey,publicKey);
-			logger.info("rechargeForApp========userId========"+payuserId);
-			
-			if(com.alibaba.druid.util.StringUtils.isEmpty(payuserId)) {
-				return ResultGenerator.genFailResult("支付宝应用授权失败。");
-			}
-			payBaseResult = jhpayService.getZFBPayUrl(savePayLog, orderSn, orderSn,"充值",payuserId);
+			payBaseResult = jhpayService.getZFBPayUrl(savePayLog, orderSn, orderSn,"充值",param.getUserId());
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
 				logger.info("生成聚合支付宝支付payOrderSn={},url成功 url={}:", orderSn, str);
