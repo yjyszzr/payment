@@ -167,7 +167,7 @@ public class JhPayService {
 			e.printStackTrace();
 		}
 		if (resultMap != null) {
-			payBaseResult = ResultGenerator.genSuccessResult("succ", param);
+			payBaseResult = ResultGenerator.genSuccessResult("succ", resultMap);
 		} else {
 			payBaseResult = ResultGenerator.genFailResult("聚合支付返回数据有误");
 		}
