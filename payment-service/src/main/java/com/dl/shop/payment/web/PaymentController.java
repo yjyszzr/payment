@@ -38,6 +38,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.dl.base.constant.CommonConstants;
+import com.dl.base.context.BaseContextHandler;
 import com.dl.base.enums.SNBusinessCodeEnum;
 import com.dl.base.model.UserDeviceInfo;
 import com.dl.base.param.EmptyParam;
@@ -2040,6 +2042,11 @@ public class PaymentController extends AbstractBaseController {
 		logger.info("payAuthoriz======UserDTO========="+ruserdto+"&&&"+(ruserdto!=null?ruserdto.getData():"111"));
 		if(ruserdto!=null && ruserdto.getData()!=null) {
 			userId = ruserdto.getData().getUserId();
+		}
+		if(userId==null) {
+			return ResultGenerator.genFailResult("参数错误！");
+		}else {
+			BaseContextHandler.set(CommonConstants.CONTEXT_KEY_USER_ID, userId);
 		}
 		logger.info(loggerId + " int /payment/recharge, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode() + " , totalAmount=" + param.getTotalAmount());
 		String appCodeName = "11";
