@@ -220,12 +220,14 @@ public class PaymentController extends AbstractBaseController {
 			GoPayParam param = new GoPayParam();
 			param.setPayToken(request.getParameter("payToken"));
 			param.setUserId(userId);
+			param.setPayCode("app_jhpay");
 			return this.nUnifiedOrder(param,request);
 		}else if("cz".equals(pay_type)) {
 			logger.info("payAuthoriz========充值userId========"+userId);
 			RechargeParam param = new RechargeParam();
 			param.setTotalAmount(Integer.parseInt(request.getParameter("payToken")));
 			param.setUserId(userId);
+			param.setPayCode("app_jhpay");
 			return this.rechargeForApp(param, request);
 		}else {
 			return ResultGenerator.genFailResult("参数错误");
