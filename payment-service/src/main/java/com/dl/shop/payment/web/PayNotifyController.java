@@ -490,10 +490,10 @@ public class PayNotifyController {
 		return;
 	}
 	
-	@ApiOperation(value = "圣和支付回调")
-	@PostMapping("/ShPayNotify")
+	@ApiOperation(value = "聚合支付回调")
+	@PostMapping("/JhPayNotify")
 	@ResponseBody
-	public void ShPayNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+	public void JhPayNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		response.setHeader("Content-type", "text/html;charset=UTF-8");
@@ -503,8 +503,11 @@ public class PayNotifyController {
 		
 //		log.info("ShPayNotify()返回报文*********"+jsonStr);
 		String payOrderfSn = realMap.get("out_trade_no")==null?"":realMap.get("out_trade_no").toString();
-		String status=realMap.get("status")==null?"":realMap.get("status").toString();
-		log.info("ShPayNotify()返回报文*********"+payOrderfSn+"&&&"+status);
+//		String status=realMap.get("status")==null?"":realMap.get("status").toString();
+//		String result_code=realMap.get("result_code")==null?"":realMap.get("result_code").toString();
+		String pay_result=realMap.get("pay_result")==null?"":realMap.get("pay_result").toString();
+		
+		log.info("ShPayNotify()返回报文*********"+payOrderfSn+"&&&"+pay_result);
 		if (StringUtils.isEmpty(payOrderfSn)) {
 			log.info("ShPayNotify()Q多多支付返回payOrderSn is null");
 			writeLowerSuccess(response);
@@ -525,10 +528,10 @@ public class PayNotifyController {
 		int payType = payLog.getPayType();
 		String payCode = payLog.getPayCode();
 		RspOrderQueryEntity rspOrderEntikty = new RspOrderQueryEntity();
-		rspOrderEntikty.setResult_code(status);
+		rspOrderEntikty.setResult_code(pay_result);
 		rspOrderEntikty.setPayCode(payCode);
-		rspOrderEntikty.setType(RspOrderQueryEntity.TYPE_RKPAY);
-		rspOrderEntikty.setTrade_status(status);
+		rspOrderEntikty.setType(RspOrderQueryEntity.TYPE_JHPAY);
+		rspOrderEntikty.setTrade_status(pay_result);
 		log.info("ShPayNotify()返回报文*********"+payType);
 		if (payType == 0) {
 			paymentService.orderOptions(payLog, rspOrderEntikty);
