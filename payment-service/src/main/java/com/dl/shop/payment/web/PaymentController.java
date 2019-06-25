@@ -2027,10 +2027,9 @@ public class PaymentController extends AbstractBaseController {
 	 * @return
 	 */
 	public BaseResult<Object> rechargeForAppNew(RechargeParam param, HttpServletRequest request) {
-		String loggerId = "rechargeForApp_" + System.currentTimeMillis();
+		String loggerId = "rechargeForAppNew_" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/recharge, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode() + " , totalAmount=" + param.getTotalAmount());
-		UserDeviceInfo userDeviceInfo = SessionUtil.getUserDevice();
-		String appCodeName = userDeviceInfo.getAppCodeName();
+		String appCodeName = "11";
 		logger.info("当前平台是====appCodeName=" + appCodeName);
 		if(!"11".equals(appCodeName)) {
 			if(paymentService.isShutDownPay()) {
