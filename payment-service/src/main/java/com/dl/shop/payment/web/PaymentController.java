@@ -217,7 +217,7 @@ public class PaymentController extends AbstractBaseController {
 		logger.info("payAuthoriz========privateKey========"+privateKey);
 		logger.info("payAuthoriz========publicKey========"+publicKey);
 		logger.info("payAuthoriz========app_id========"+request.getParameter("app_id"));
-		String userId = HttpConfig.getUserid(request.getParameter("app_id"),request.getParameter("auth_code"),privateKey,publicKey);
+		String userId = HttpConfig.getUserid(request.getParameter("app_id"),request.getParameter("auth_code"));
 		logger.info("payAuthoriz========userId========"+userId);
 		logger.info("payAuthoriz========pay_code========"+request.getParameter("pay_code"));
 		return ResultGenerator.genSuccessResult("success");
@@ -1174,8 +1174,8 @@ public class PaymentController extends AbstractBaseController {
 		}else if("app_jhpay".equals(param.getPayCode())) {
 			logger.info("聚合支付宝支付url:" + " payCode:" + savePayLog.getPayCode());
 			logger.info("rechargeForApp():"+request.getParameter("status"));
-			String payuserId = HttpConfig.getUserid(request.getParameter("app_id"),request.getParameter("auth_code"),privateKey,publicKey);
-			logger.info("payAuthoriz========userId========"+payuserId);
+			String payuserId = "";//HttpConfig.getUserid(request.getParameter("app_id"),request.getParameter("auth_code"),privateKey,publicKey);
+			logger.info("rechargeForApp========userId========"+payuserId);
 			
 			if(com.alibaba.druid.util.StringUtils.isEmpty(payuserId)) {
 				return ResultGenerator.genFailResult("支付宝应用授权失败。");
