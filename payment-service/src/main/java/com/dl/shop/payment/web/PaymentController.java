@@ -70,6 +70,7 @@ import com.dl.member.param.MobileAndPassParam;
 import com.dl.member.param.StrParam;
 import com.dl.member.param.SurplusPayParam;
 import com.dl.member.param.SysConfigParam;
+import com.dl.member.param.TokenParam;
 import com.dl.member.param.UpdateUserRechargeParam;
 import com.dl.member.param.UserBonusIdParam;
 import com.dl.order.api.IOrderService;
@@ -222,7 +223,7 @@ public class PaymentController extends AbstractBaseController {
 			param.setPayToken(request.getParameter("payToken"));
 			param.setUserId(userId);
 			param.setPayCode("app_jhpay");
-			param.setMobile(request.getParameter("mobile"));
+			param.setUserToken(request.getParameter("userToken"));
 			return this.nUnifiedOrder(param,request);
 		}else if("cz".equals(pay_type)) {
 			logger.info("payAuthoriz========充值userId========"+userId);
@@ -230,7 +231,7 @@ public class PaymentController extends AbstractBaseController {
 			param.setTotalAmount(Integer.parseInt(request.getParameter("payToken")));
 			param.setUserId(userId);
 			param.setPayCode("app_jhpay");
-			param.setMobile(request.getParameter("mobile"));
+			param.setUserToken(request.getParameter("userToken"));
 			return this.rechargeForAppNew(param, request);
 		}else {
 			return ResultGenerator.genFailResult("参数错误");
@@ -2032,12 +2033,12 @@ public class PaymentController extends AbstractBaseController {
 	public BaseResult<Object> rechargeForAppNew(RechargeParam param, HttpServletRequest request) {
 		String loggerId = "rechargeForAppNew_" + System.currentTimeMillis();
 		Integer userId = null;
-//		MobileAndPassParam mp = new MobileAndPassParam();
-//		mp.setMobile(param.getMobile());
-//		BaseResult<UserDTO> ruserdto = userService.queryUserByMobile(mp);
-//		if(ruserdto!=null && ruserdto.getData()!=null) {
-//			userId = ruserdto.getData().getUserId();
-//		}
+		TokenParam mp = new TokenParam();
+		mp.setUserToken(param.getUserToken());
+		BaseResult<UserDTO> ruserdto = userService.queryUserInfoByToken(mp);
+		if(ruserdto!=null && ruserdto.getData()!=null) {
+			userId = ruserdto.getData().getUserId();
+		}
 		logger.info(loggerId + " int /payment/recharge, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode() + " , totalAmount=" + param.getTotalAmount());
 		String appCodeName = "11";
 		logger.info("当前平台是====appCodeName=" + appCodeName);

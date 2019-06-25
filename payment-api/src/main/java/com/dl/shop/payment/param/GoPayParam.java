@@ -18,6 +18,6 @@ public class GoPayParam {
 	private String orderSn;
 	@ApiModelProperty("支付宝唯一用户id")
 	private String userId;
-	@ApiModelProperty("当前登录用户手机号")
-	private String mobile;
+	@ApiModelProperty("当前登录用户userToken")
+	private String userToken;
 }
