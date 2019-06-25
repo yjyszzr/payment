@@ -198,10 +198,6 @@ public class PaymentController extends AbstractBaseController {
 	private String appH5QrUrl;
 	@Value("${yinhe.app_ZFB_H5_qr_url}")
 	private String appZFBH5QrUrl;
-	@Value("${jh.pay.zfb.private_key}")
-	private String privateKey;
-	@Value("${jh.pay.zfb.public_key}")
-	private String publicKey;
 	@Resource
 	private ISysConfigService iSysConfigService;
 
@@ -212,16 +208,21 @@ public class PaymentController extends AbstractBaseController {
 	@GetMapping("/payAuthoriz")
 	@ResponseBody
 	public BaseResult<?> payAuthoriz(HttpServletRequest request) {
-		logger.info("payAuthoriz========auth_code========"+request.getParameter("auth_code"));
-		logger.info("payAuthoriz========status========"+request.getParameter("status"));
-		logger.info("payAuthoriz========privateKey========"+privateKey);
-		logger.info("payAuthoriz========publicKey========"+publicKey);
-		logger.info("payAuthoriz========app_id========"+request.getParameter("app_id"));
 		String userId = HttpConfig.getUserid(request.getParameter("app_id"),request.getParameter("auth_code"));
 		logger.info("payAuthoriz========userId========"+userId);
-		logger.info("payAuthoriz========pay_code========"+request.getParameter("pay_code"));
-		return ResultGenerator.genSuccessResult("success");
-//		return this.rechargeForApp(param, request);
+		logger.info("payAuthoriz========pay_type========"+request.getParameter("payType"));
+		String pay_type = request.getParameter("payType");
+		if("zf".equals(pay_type)) {
+			GoPayParam param = new GoPayParam();
+			param.setPayToken(request.getParameter("payToken"));
+			return this.nUnifiedOrder(param,request);
+		}else if("cz".equals(pay_type)) {
+			RechargeParam param = new RechargeParam();
+			param.setTotalAmount(Integer.parseInt(request.getParameter("payToken")));
+			return this.rechargeForApp(param, request);
+		}else {
+			return ResultGenerator.genFailResult("参数错误");
+		}
 	}
 	
 	@ApiOperation(value = "系统可用第三方支付方式", notes = "系统可用第三方支付方式")
