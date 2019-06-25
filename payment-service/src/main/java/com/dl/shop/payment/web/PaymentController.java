@@ -228,7 +228,7 @@ public class PaymentController extends AbstractBaseController {
 			param.setTotalAmount(Integer.parseInt(request.getParameter("payToken")));
 			param.setUserId(userId);
 			param.setPayCode("app_jhpay");
-			return this.rechargeForApp(param, request);
+			return this.rechargeForAppNew(param, request);
 		}else {
 			return ResultGenerator.genFailResult("参数错误");
 		}
@@ -2020,4 +2020,136 @@ public class PaymentController extends AbstractBaseController {
 			return ResultGenerator.genFailResult("参数异常");
 		}
 	}
+	/**
+	 * 支付宝授权充值
+	 * @param param
+	 * @param request
+	 * @return
+	 */
+	public BaseResult<Object> rechargeForAppNew(RechargeParam param, HttpServletRequest request) {
+		String loggerId = "rechargeForApp_" + System.currentTimeMillis();
+		logger.info(loggerId + " int /payment/recharge, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode() + " , totalAmount=" + param.getTotalAmount());
+		UserDeviceInfo userDeviceInfo = SessionUtil.getUserDevice();
+		String appCodeName = userDeviceInfo.getAppCodeName();
+		logger.info("当前平台是====appCodeName=" + appCodeName);
+		if(!"11".equals(appCodeName)) {
+			if(paymentService.isShutDownPay()) {
+				return ResultGenerator.genResult(PayEnums.PAY_STOP.getcode(), PayEnums.PAY_STOP.getMsg());
+			}
+		}
+		double totalAmount = param.getTotalAmount();
+		// 支付方式
+		String payCode = param.getPayCode();
+		if (StringUtils.isBlank(payCode)) {
+			logger.info(loggerId + "订单第三支付没有提供paycode！");
+			return ResultGenerator.genResult(PayEnums.RECHARGE_PAY_STYLE_EMPTY.getcode(), PayEnums.RECHARGE_PAY_STYLE_EMPTY.getMsg());
+		}
+		
+		if("app_jhpay".equals(param.getPayCode())) {
+			if(totalAmount<1) {
+				return ResultGenerator.genFailResult("单笔充值金额不能低于1元");
+			}
+			if(totalAmount>3000) {
+				return ResultGenerator.genFailResult("单笔充值金额不能超过3000元 ");
+			}
+		}
+			
+		
+		BaseResult<PaymentDTO> paymentResult = paymentService.queryByCode(payCode);
+		if (paymentResult.getCode() != 0) {
+			logger.info(loggerId + "订单第三方支付提供paycode有误！");
+			return ResultGenerator.genResult(PayEnums.RECHARGE_PAY_STYLE_EMPTY.getcode(), PayEnums.RECHARGE_PAY_STYLE_EMPTY.getMsg());
+		}
+		// 生成充值记录payLog
+		String payName = paymentResult.getData().getPayName();
+		// 生成充值单 金额由充值金额和赠送金额组成
+		int givemoney = 0;
+		if ("app_rkwap".equals(payCode)) {//Q多多支付宝快捷支付附加固额充值赠送
+			PaymentDTO paymentdto = paymentResult.getData();
+			if(paymentdto!=null) {
+				int isreadonly=paymentdto.getIsReadonly();
+				if(isreadonly==1) {//固额充值赠送
+					List<Map<String,String>> maps = paymentdto.getReadMoney();
+					for (Map<String, String> map : maps) {
+						String readmoney = map.get("readmoney");
+						if(param.getTotalAmount()==Integer.parseInt(readmoney)) {
+							givemoney = Integer.parseInt(!StringUtils.isNotEmpty(map.get("givemoney"))?"0":map.get("givemoney"));
+							break;
+						}
+					}
+				}
+			}
+		}
+		logger.info(loggerId + "赠送金额为"+givemoney);
+		String rechargeSn = userRechargeService.saveReCharege(BigDecimal.valueOf(totalAmount+givemoney), payCode, payName);
+		if (StringUtils.isEmpty(rechargeSn)) {
+			logger.info(loggerId + "生成充值单失败");
+			return ResultGenerator.genFailResult("充值失败！", null);
+		}
+		String orderSn = rechargeSn;
+		String payIp = this.getIpAddr(request);
+		Integer userId = SessionUtil.getUserId();
+		PayLog payLog = super.newPayLog(userId, orderSn, BigDecimal.valueOf(totalAmount), 1, payCode, payName, payIp,givemoney+"");
+		PayLog savePayLog = payLogService.savePayLog(payLog);
+		if (null == savePayLog) {
+			logger.info(loggerId + " payLog对象保存失败！");
+			return ResultGenerator.genFailResult("请求失败！", null);
+		} else {
+			logger.info("save paylog succ:" + " id:" + payLog.getLogId() + " paycode:" + payCode + " payOrderSn:" + payLog.getPayOrderSn());
+		}
+		// 第三方支付调用
+		UnifiedOrderParam unifiedOrderParam = new UnifiedOrderParam();
+		unifiedOrderParam.setBody("余额充值");
+		unifiedOrderParam.setSubject("余额充值");
+		unifiedOrderParam.setTotalAmount(totalAmount);
+		unifiedOrderParam.setIp(payIp);
+		unifiedOrderParam.setOrderNo(savePayLog.getLogId());
+		// url下发后，服务器开始主动轮序订单状态
+		// PayManager.getInstance().addReqQueue(orderSn,savePayLog.getPayOrderSn(),payCode);
+		BaseResult payBaseResult = null;
+		if("app_jhpay".equals(param.getPayCode())) {
+			logger.info("聚合支付宝支付url:" + " payCode:" + savePayLog.getPayCode());
+			payBaseResult = jhpayService.getZFBPayUrl(savePayLog, orderSn, orderSn,"充值",param.getUserId());
+			if (payBaseResult != null && payBaseResult.getData() != null) {
+				String str = payBaseResult.getData() + "";
+				logger.info("生成聚合支付宝支付payOrderSn={},url成功 url={}:", orderSn, str);
+			} else {
+				logger.info("生成聚合支付宝支付payOrderSn={},url失败", orderSn);
+			}
+		}
+		
+		// 处理支付失败的情况
+		if (null == payBaseResult || payBaseResult.getCode() != 0) {
+			// 充值失败逻辑
+			// 更改充值单状态
+			UpdateUserRechargeParam updateUserParams = new UpdateUserRechargeParam();
+			updateUserParams.setPaymentCode(payLog.getPayCode());
+			updateUserParams.setPaymentId(payLog.getLogId() + "");
+			updateUserParams.setPaymentName(payLog.getPayName());
+			updateUserParams.setPayTime(DateUtil.getCurrentTimeLong());
+			updateUserParams.setRechargeSn(rechargeSn);
+			updateUserParams.setStatus("2");
+			BaseResult<String> baseResult = userRechargeService.updateReCharege(updateUserParams);
+			logger.info(loggerId + " 充值失败更改充值单返回信息：status=" + baseResult.getCode() + " , message=" + baseResult.getMsg());
+			if (baseResult.getCode() == 0) {
+				// 更改流水信息
+				try {
+					PayLog updatePayLog = new PayLog();
+					updatePayLog.setLogId(savePayLog.getLogId());
+					updatePayLog.setIsPaid(0);
+					updatePayLog.setPayMsg(baseResult.getMsg());
+					payLogService.updatePayMsg(updatePayLog);
+				} catch (Exception e) {
+					logger.error(loggerId + "paylogid=" + savePayLog.getLogId() + " , paymsg=" + baseResult.getMsg() + "保存失败记录时出错", e);
+				}
+			}
+		}
+		if (payBaseResult != null) {
+			logger.info(loggerId + " result: code=" + payBaseResult.getCode() + " , msg=" + payBaseResult.getMsg());
+			return payBaseResult;
+		} else {
+			return ResultGenerator.genFailResult("参数异常");
+		}
+	}
+	
 }
