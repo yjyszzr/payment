@@ -2032,12 +2032,12 @@ public class PaymentController extends AbstractBaseController {
 	public BaseResult<Object> rechargeForAppNew(RechargeParam param, HttpServletRequest request) {
 		String loggerId = "rechargeForAppNew_" + System.currentTimeMillis();
 		Integer userId = null;
-		MobileAndPassParam mp = new MobileAndPassParam();
-		mp.setMobile(param.getMobile());
-		BaseResult<UserDTO> ruserdto = userService.queryUserByMobile(mp);
-		if(ruserdto!=null && ruserdto.getData()!=null) {
-			userId = ruserdto.getData().getUserId();
-		}
+//		MobileAndPassParam mp = new MobileAndPassParam();
+//		mp.setMobile(param.getMobile());
+//		BaseResult<UserDTO> ruserdto = userService.queryUserByMobile(mp);
+//		if(ruserdto!=null && ruserdto.getData()!=null) {
+//			userId = ruserdto.getData().getUserId();
+//		}
 		logger.info(loggerId + " int /payment/recharge, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode() + " , totalAmount=" + param.getTotalAmount());
 		String appCodeName = "11";
 		logger.info("当前平台是====appCodeName=" + appCodeName);
