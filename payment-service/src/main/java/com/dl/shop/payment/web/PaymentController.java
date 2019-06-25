@@ -2031,11 +2031,13 @@ public class PaymentController extends AbstractBaseController {
 	 * @return
 	 */
 	public BaseResult<Object> rechargeForAppNew(RechargeParam param, HttpServletRequest request) {
+		logger.info("payAuthoriz======userToken========="+param.getUserToken());
 		String loggerId = "rechargeForAppNew_" + System.currentTimeMillis();
 		Integer userId = null;
 		TokenParam mp = new TokenParam();
 		mp.setUserToken(param.getUserToken());
 		BaseResult<UserDTO> ruserdto = userService.queryUserInfoByToken(mp);
+		logger.info("payAuthoriz======UserDTO========="+ruserdto+"&&&"+(ruserdto!=null?ruserdto.getData():"111"));
 		if(ruserdto!=null && ruserdto.getData()!=null) {
 			userId = ruserdto.getData().getUserId();
 		}
