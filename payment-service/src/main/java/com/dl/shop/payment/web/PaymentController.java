@@ -66,6 +66,7 @@ import com.dl.member.dto.UserBonusDTO;
 import com.dl.member.dto.UserDTO;
 import com.dl.member.param.BonusLimitConditionParam;
 import com.dl.member.param.IDParam;
+import com.dl.member.param.MobileAndPassParam;
 import com.dl.member.param.StrParam;
 import com.dl.member.param.SurplusPayParam;
 import com.dl.member.param.SysConfigParam;
@@ -221,6 +222,7 @@ public class PaymentController extends AbstractBaseController {
 			param.setPayToken(request.getParameter("payToken"));
 			param.setUserId(userId);
 			param.setPayCode("app_jhpay");
+			param.setMobile(request.getParameter("mobile"));
 			return this.nUnifiedOrder(param,request);
 		}else if("cz".equals(pay_type)) {
 			logger.info("payAuthoriz========充值userId========"+userId);
@@ -228,6 +230,7 @@ public class PaymentController extends AbstractBaseController {
 			param.setTotalAmount(Integer.parseInt(request.getParameter("payToken")));
 			param.setUserId(userId);
 			param.setPayCode("app_jhpay");
+			param.setMobile(request.getParameter("mobile"));
 			return this.rechargeForAppNew(param, request);
 		}else {
 			return ResultGenerator.genFailResult("参数错误");
@@ -2028,6 +2031,13 @@ public class PaymentController extends AbstractBaseController {
 	 */
 	public BaseResult<Object> rechargeForAppNew(RechargeParam param, HttpServletRequest request) {
 		String loggerId = "rechargeForAppNew_" + System.currentTimeMillis();
+		Integer userId = null;
+		MobileAndPassParam mp = new MobileAndPassParam();
+		mp.setMobile(param.getMobile());
+		BaseResult<UserDTO> ruserdto = userService.queryUserByMobile(mp);
+		if(ruserdto!=null && ruserdto.getData()!=null) {
+			userId = ruserdto.getData().getUserId();
+		}
 		logger.info(loggerId + " int /payment/recharge, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode() + " , totalAmount=" + param.getTotalAmount());
 		String appCodeName = "11";
 		logger.info("当前平台是====appCodeName=" + appCodeName);
@@ -2087,7 +2097,6 @@ public class PaymentController extends AbstractBaseController {
 		}
 		String orderSn = rechargeSn;
 		String payIp = this.getIpAddr(request);
-		Integer userId = SessionUtil.getUserId();
 		PayLog payLog = super.newPayLog(userId, orderSn, BigDecimal.valueOf(totalAmount), 1, payCode, payName, payIp,givemoney+"");
 		PayLog savePayLog = payLogService.savePayLog(payLog);
 		if (null == savePayLog) {
