@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
 import com.dl.base.constant.CommonConstants;
 import com.dl.base.context.BaseContextHandler;
 import com.dl.base.enums.SNBusinessCodeEnum;
@@ -244,7 +245,16 @@ public class PaymentController extends AbstractBaseController {
 	@PostMapping("/allPayment")
 	@ResponseBody
 	public BaseResult<List<PaymentDTO>> allPaymentInfo(@RequestBody AllPaymentInfoParam param) {
-		List<PaymentDTO> list = paymentService.findAllDto();
+		String deviceUnique = "";
+        UserDeviceInfo userDevice = SessionUtil.getUserDevice();
+        if ("android".equals(userDevice.getPlat())){
+            deviceUnique = userDevice.getAndroidid();
+        }else if("iphone".equals(userDevice.getPlat())){
+            deviceUnique = userDevice.getIDFA();
+        }else if("h5".equals(userDevice.getPlat())){
+            deviceUnique = "h5";
+        }
+		List<PaymentDTO> list = paymentService.findAllDto(deviceUnique);
 		return ResultGenerator.genSuccessResult("success", list);
 	}
 
@@ -380,8 +390,17 @@ public class PaymentController extends AbstractBaseController {
 	@PostMapping("/allPaymentWithRecharge")
 	@ResponseBody
 	public BaseResult<PayWaysDTO> allPaymentInfoWithRecharge(@RequestBody AllPaymentInfoParam param) {
+		String deviceUnique = "";
+        UserDeviceInfo userDevice = SessionUtil.getUserDevice();
+        if ("android".equals(userDevice.getPlat())){
+            deviceUnique = userDevice.getAndroidid();
+        }else if("iphone".equals(userDevice.getPlat())){
+            deviceUnique = userDevice.getIDFA();
+        }else if("h5".equals(userDevice.getPlat())){
+            deviceUnique = "h5";
+        }
 		PayWaysDTO payWaysDTO = new PayWaysDTO();
-		List<PaymentDTO> paymentDTOList = paymentService.findAllDto();
+		List<PaymentDTO> paymentDTOList = paymentService.findAllDto(deviceUnique);
 		payWaysDTO.setPaymentDTOList(paymentDTOList);
 
 		StrParam strParam = new StrParam();
