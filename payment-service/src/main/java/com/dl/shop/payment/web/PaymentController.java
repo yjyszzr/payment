@@ -38,6 +38,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
+import com.dl.base.constant.CommonConstants;
+import com.dl.base.context.BaseContextHandler;
 import com.dl.base.enums.SNBusinessCodeEnum;
 import com.dl.base.model.UserDeviceInfo;
 import com.dl.base.param.EmptyParam;
@@ -66,9 +69,11 @@ import com.dl.member.dto.UserBonusDTO;
 import com.dl.member.dto.UserDTO;
 import com.dl.member.param.BonusLimitConditionParam;
 import com.dl.member.param.IDParam;
+import com.dl.member.param.MobileAndPassParam;
 import com.dl.member.param.StrParam;
 import com.dl.member.param.SurplusPayParam;
 import com.dl.member.param.SysConfigParam;
+import com.dl.member.param.TokenParam;
 import com.dl.member.param.UpdateUserRechargeParam;
 import com.dl.member.param.UserBonusIdParam;
 import com.dl.order.api.IOrderService;
@@ -208,6 +213,7 @@ public class PaymentController extends AbstractBaseController {
 	@GetMapping("/payAuthoriz")
 	@ResponseBody
 	public BaseResult<?> payAuthoriz(HttpServletRequest request) {
+		logger.info("payAuthoriz========app_id========"+request.getParameter("app_id"));
 		String userId = HttpConfig.getUserid(request.getParameter("app_id"),request.getParameter("auth_code"));
 		logger.info("payAuthoriz========userId========"+userId);
 		if(com.alibaba.druid.util.StringUtils.isEmpty(userId)) {
@@ -221,6 +227,7 @@ public class PaymentController extends AbstractBaseController {
 			param.setPayToken(request.getParameter("payToken"));
 			param.setUserId(userId);
 			param.setPayCode("app_jhpay");
+			param.setUserToken(request.getParameter("userToken"));
 			return this.nUnifiedOrder(param,request);
 		}else if("cz".equals(pay_type)) {
 			logger.info("payAuthoriz========充值userId========"+userId);
@@ -228,6 +235,7 @@ public class PaymentController extends AbstractBaseController {
 			param.setTotalAmount(Integer.parseInt(request.getParameter("payToken")));
 			param.setUserId(userId);
 			param.setPayCode("app_jhpay");
+			param.setUserToken(request.getParameter("userToken"));
 			return this.rechargeForAppNew(param, request);
 		}else {
 			return ResultGenerator.genFailResult("参数错误");
@@ -238,7 +246,16 @@ public class PaymentController extends AbstractBaseController {
 	@PostMapping("/allPayment")
 	@ResponseBody
 	public BaseResult<List<PaymentDTO>> allPaymentInfo(@RequestBody AllPaymentInfoParam param) {
-		List<PaymentDTO> list = paymentService.findAllDto();
+		String deviceUnique = "";
+        UserDeviceInfo userDevice = SessionUtil.getUserDevice();
+        if ("android".equals(userDevice.getPlat())){
+            deviceUnique = userDevice.getAndroidid();
+        }else if("iphone".equals(userDevice.getPlat())){
+            deviceUnique = userDevice.getIDFA();
+        }else if("h5".equals(userDevice.getPlat())){
+            deviceUnique = "h5";
+        }
+		List<PaymentDTO> list = paymentService.findAllDto(deviceUnique);
 		return ResultGenerator.genSuccessResult("success", list);
 	}
 
@@ -374,8 +391,17 @@ public class PaymentController extends AbstractBaseController {
 	@PostMapping("/allPaymentWithRecharge")
 	@ResponseBody
 	public BaseResult<PayWaysDTO> allPaymentInfoWithRecharge(@RequestBody AllPaymentInfoParam param) {
+		String deviceUnique = "";
+        UserDeviceInfo userDevice = SessionUtil.getUserDevice();
+        if ("android".equals(userDevice.getPlat())){
+            deviceUnique = userDevice.getAndroidid();
+        }else if("iphone".equals(userDevice.getPlat())){
+            deviceUnique = userDevice.getIDFA();
+        }else if("h5".equals(userDevice.getPlat())){
+            deviceUnique = "h5";
+        }
 		PayWaysDTO payWaysDTO = new PayWaysDTO();
-		List<PaymentDTO> paymentDTOList = paymentService.findAllDto();
+		List<PaymentDTO> paymentDTOList = paymentService.findAllDto(deviceUnique);
 		payWaysDTO.setPaymentDTOList(paymentDTOList);
 
 		StrParam strParam = new StrParam();
@@ -2027,10 +2053,23 @@ public class PaymentController extends AbstractBaseController {
 	 * @return
 	 */
 	public BaseResult<Object> rechargeForAppNew(RechargeParam param, HttpServletRequest request) {
-		String loggerId = "rechargeForApp_" + System.currentTimeMillis();
+		logger.info("payAuthoriz======userToken========="+param.getUserToken());
+		String loggerId = "rechargeForAppNew_" + System.currentTimeMillis();
+		Integer userId = null;
+		TokenParam mp = new TokenParam();
+		mp.setUserToken(param.getUserToken());
+		BaseResult<UserDTO> ruserdto = userService.queryUserInfoByToken(mp);
+		logger.info("payAuthoriz======UserDTO========="+ruserdto+"&&&"+(ruserdto!=null?ruserdto.getData():"111"));
+		if(ruserdto!=null && ruserdto.getData()!=null) {
+			userId = ruserdto.getData().getUserId();
+		}
+		if(userId==null) {
+			return ResultGenerator.genFailResult("参数错误！");
+		}else {
+			BaseContextHandler.set(CommonConstants.CONTEXT_KEY_USER_ID, userId);
+		}
 		logger.info(loggerId + " int /payment/recharge, userId=" + SessionUtil.getUserId() + " ,payCode=" + param.getPayCode() + " , totalAmount=" + param.getTotalAmount());
-		UserDeviceInfo userDeviceInfo = SessionUtil.getUserDevice();
-		String appCodeName = userDeviceInfo.getAppCodeName();
+		String appCodeName = "11";
 		logger.info("当前平台是====appCodeName=" + appCodeName);
 		if(!"11".equals(appCodeName)) {
 			if(paymentService.isShutDownPay()) {
@@ -2088,7 +2127,6 @@ public class PaymentController extends AbstractBaseController {
 		}
 		String orderSn = rechargeSn;
 		String payIp = this.getIpAddr(request);
-		Integer userId = SessionUtil.getUserId();
 		PayLog payLog = super.newPayLog(userId, orderSn, BigDecimal.valueOf(totalAmount), 1, payCode, payName, payIp,givemoney+"");
 		PayLog savePayLog = payLogService.savePayLog(payLog);
 		if (null == savePayLog) {

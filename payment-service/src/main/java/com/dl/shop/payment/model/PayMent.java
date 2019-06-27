@@ -62,8 +62,18 @@ public class PayMent {
 
     @Column(name = "pay_img")
     private String payImg;
+    @Column(name = "is_h5")
+    private String isH5;
 
-    /**
+    public String getIsH5() {
+		return isH5;
+	}
+
+	public void setIsH5(String isH5) {
+		this.isH5 = isH5;
+	}
+
+	/**
      * 支付配置
      */
     @Column(name = "pay_config")

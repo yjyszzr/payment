@@ -67,7 +67,6 @@ public class JhPayZFBDemo {
 		map.put("mch_id", MERCHANT_NO);
 		map.put("mch_create_ip", "127.0.0.1");
 		map.put("nonce_str", String.valueOf(new Date().getTime()));
-		map.put("buyer_id", "2088702691566268");
 		
 		Map<String, String> params = SignUtils.paraFilter(map);
 		StringBuilder buf = new StringBuilder((params.size() + 1) * 10);
@@ -150,6 +149,7 @@ public class JhPayZFBDemo {
 		param.put("body", "测试支付");
 		param.put("total_fee", "100");
 		param.put("notify_url", "http://www.baidu.com");
+		param.put("buyer_id", "2088702691566268");
 		// ************订单生成，当返回result中code=1时，代表订单生成成功，需要验签************
 		apay.doPostMessage(param);
 	}

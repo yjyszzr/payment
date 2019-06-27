@@ -229,7 +229,64 @@ public class PayMentService extends AbstractService<PayMent> {
 		}).collect(Collectors.toList());
 		return list;
 	}
-
+	/**
+	 * 查询所有H5页面可用的支付方式 
+	 * 
+	 * @return
+	 */
+	public List<PaymentDTO> findAllDto(String isH5) {
+		List<PayMent> payments = super.findAll();
+		if (CollectionUtils.isEmpty(payments)) {
+			return new ArrayList<PaymentDTO>();
+		}
+		List<PaymentDTO> list = payments.stream().filter(payment -> {
+			if("h5".equalsIgnoreCase(isH5)) {
+				Boolean isEnable = (payment.getIsEnable() == 1 && isH5.equalsIgnoreCase(payment.getIsH5()));
+				return isEnable;
+			}else {
+				Boolean isEnable = payment.getIsEnable() == 1;
+				return isEnable;
+			}
+		}).map(payment -> {
+			PaymentDTO paymentDTO = new PaymentDTO();
+			paymentDTO.setPayCode(payment.getPayCode());
+			paymentDTO.setPayDesc(payment.getPayDesc());
+			paymentDTO.setPayId(payment.getPayId());
+			paymentDTO.setPayName(payment.getPayName());
+			paymentDTO.setPaySort(payment.getPaySort());
+			paymentDTO.setPayType(payment.getPayType());
+			paymentDTO.setPayTitle(payment.getPayTitle());
+			paymentDTO.setPayImg(payment.getPayImg());
+			paymentDTO.setIsReadonly(payment.getIsReadonly());
+			List<Map<String,String>> maps = new ArrayList();
+			if(payment.getReadMoney()!=null && !"".equals(payment.getReadMoney())) {
+				String readMoney[]=payment.getReadMoney().split(";");
+				for (int i = 0; i < readMoney.length; i++) {
+					Map<String,String> remap = new HashMap();
+					if(readMoney[i].contains(":")) {
+						String money[] = readMoney[i].split(":");
+						if(money.length>1) {
+							remap.put("readmoney", money[0]);
+							remap.put("givemoney", money[1]);
+						} else if(money.length==1) {
+							remap.put("readmoney", money[0]);
+							remap.put("givemoney", "0");
+						} else {
+							continue;
+						}
+					}else {
+						remap.put("readmoney", readMoney[i]);
+						remap.put("givemoney", "0");
+					}
+					maps.add(remap);
+				}
+			}
+			paymentDTO.setReadMoney(maps);
+			
+			return paymentDTO;
+		}).collect(Collectors.toList());
+		return list;
+	}
 	/**
 	 * 通过payCode读取可用支付方式
 	 * 
