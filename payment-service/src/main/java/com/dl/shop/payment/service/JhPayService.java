@@ -40,6 +40,7 @@ import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.pay.jhpay.JhPayZFBUtils;
+import com.dl.shop.payment.pay.jhpay.util.JsonUtil;
 import com.dl.shop.payment.pay.jhpay.util.MD5;
 import com.dl.shop.payment.pay.jhpay.util.SignUtils;
 import com.dl.shop.payment.pay.jhpay.util.XmlUtils;
@@ -63,7 +64,7 @@ public class JhPayService {
 	 * @return
 	 */
 	@SuppressWarnings("finally")
-	public Map jhAliPay(SortedMap<String, String> map){
+	public String jhAliPay(SortedMap<String, String> map){
 		
 		map.put("service", zfbutil.getPAY_URL());
 		map.put("mch_id", zfbutil.getMERCHANT_NO());
@@ -82,7 +83,8 @@ public class JhPayService {
 		System.out.println("reqUrl：" + reqUrl);
 		CloseableHttpResponse response = null;
 		CloseableHttpClient client = null;
-		String res = null;
+//		String res = null;
+		String tradeNO=null;
 		Map<String, String> resultMap = null;
 		try {
 			HttpPost httpPost = new HttpPost(reqUrl);
@@ -92,33 +94,28 @@ public class JhPayService {
 			response = client.execute(httpPost);
 			if (response != null && response.getEntity() != null) {
 				resultMap = XmlUtils.toMap(EntityUtils.toByteArray(response.getEntity()), "utf-8");
-				res = XmlUtils.toXml(resultMap);
+//				res = XmlUtils.toXml(resultMap);
 
 				if (resultMap.containsKey("sign")) {
 					if (!SignUtils.checkParam(resultMap, zfbutil.getSECRET())) {
-						res = "验证签名不通过";
-						resultMap = null;
+//						res = "验证签名不通过";
 					} else {
 						if ("0".equals(resultMap.get("status")) && "0".equals(resultMap.get("result_code"))) {
 //							Map<String, String> orderResult = new HashMap<String, String>(); // 用来存储订单的交易状态(key:订单号，value:状态(0:未支付，1：已支付)) ---- 这里可以根据需要存储在数据库中
 //							orderResult.put(map.get("out_trade_no"), "0");// 初始状态
-//							String pay_info = resultMap.get("pay_info");
-//							Map payInfo = JsonUtil.jsonToMap(pay_info);
-//							String tradeNO = (String) payInfo.get("tradeNO");
+							String pay_info = resultMap.get("pay_info");
+							Map payInfo = JsonUtil.jsonToMap(pay_info);
+							tradeNO = (String) payInfo.get("tradeNO");
 //							String code_img_url = resultMap.get("code_img_url");
-						} else {
-							resultMap = null;
 						}
 					}
 				}
 			} else {
-				res = "操作失败";
-				resultMap = null;
+//				res = "操作失败";
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			res = "系统异常";
-			resultMap = null;
+//			res = "系统异常";
 		} finally {
 			try {
 				if (response != null) {
@@ -131,7 +128,7 @@ public class JhPayService {
 				e.printStackTrace();
 				return null;
 			}
-			return resultMap;
+			return tradeNO;
 		}
 	}
 
@@ -153,24 +150,25 @@ public class JhPayService {
 		param.put("body", paytype);
 		param.put("total_fee", bigD.toString());
 		param.put("buyer_id", payUserId);
-		Map<String,Object> resultMap = null;
+//		Map<String,Object> resultMap = null;
+		String result = null;
 		try {
-			Map<String,Object> result = jhAliPay(param);
-			if (result != null) {
-				resultMap = new HashMap<>();
-				resultMap.put("payUrl", result.get("pay_url"));
-				resultMap.put("orderId", orderId);
-				resultMap.put("payLogId", savePayLog.getLogId());
-			}
+//			Map<String,Object> result = jhAliPay(param);
+//			if (result != null) {
+//				resultMap = new HashMap<>();
+//				resultMap.put("payUrl", result.get("pay_url"));
+//				resultMap.put("orderId", orderId);
+//				resultMap.put("payLogId", savePayLog.getLogId());
+//			}
+			result = jhAliPay(param);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		if (resultMap != null) {
-			payBaseResult = ResultGenerator.genSuccessResult("succ", resultMap);
+		if (result != null) {
+			payBaseResult = ResultGenerator.genSuccessResult("succ", result);
 		} else {
 			payBaseResult = ResultGenerator.genFailResult("聚合支付返回数据有误");
 		}
-		logger.info("加工前返回APP结果 "+JSONUtils.valueToString(payBaseResult));
 		return payBaseResult;
 	}
 	
