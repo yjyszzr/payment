@@ -213,6 +213,7 @@ public class PaymentController extends AbstractBaseController {
 	@GetMapping("/payAuthoriz")
 	@ResponseBody
 	public BaseResult<?> payAuthoriz(HttpServletRequest request) {
+		logger.info("payAuthoriz========app_id========"+request.getParameter("app_id"));
 		String userId = HttpConfig.getUserid(request.getParameter("app_id"),request.getParameter("auth_code"));
 		logger.info("payAuthoriz========userId========"+userId);
 		if(com.alibaba.druid.util.StringUtils.isEmpty(userId)) {
