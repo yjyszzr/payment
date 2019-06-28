@@ -1056,7 +1056,7 @@ public class PaymentController extends AbstractBaseController {
 		BaseResult payBaseResult = null;
 		if("app_jhpay".equals(param.getPayCode())) {
 			Map<String,Object> jhmap = new HashMap<>();
-			jhmap.put("orderId", orderSn);
+			jhmap.put("orderSn", orderSn);
 			jhmap.put("payLogId", savePayLog.getLogId());
 			payBaseResult = ResultGenerator.genSuccessResult("succ", jhmap);
 			return payBaseResult;
@@ -1857,7 +1857,7 @@ public class PaymentController extends AbstractBaseController {
 		}*/ 
 		if("app_jhpay".equals(param.getPayCode())) {
 			Map<String,Object> jhmap = new HashMap<>();
-			jhmap.put("orderId", orderSn);
+			jhmap.put("orderSn", orderSn);
 			jhmap.put("payLogId", savePayLog.getLogId());
 			payBaseResult = ResultGenerator.genSuccessResult("succ", jhmap);
 			return payBaseResult;
