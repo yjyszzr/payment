@@ -220,6 +220,7 @@ public class PaymentController extends AbstractBaseController {
 			return ResultGenerator.genFailResult("支付宝应用授权失败。");
 		}
 		logger.info("payAuthoriz========pay_type========"+request.getParameter("payType"));
+		logger.info("payAuthoriz========orderSn========"+request.getParameter("orderSn"));
 		String pay_type = request.getParameter("payType");
 		if("zf".equals(pay_type)) {
 			logger.info("payAuthoriz========支付userId========"+userId);

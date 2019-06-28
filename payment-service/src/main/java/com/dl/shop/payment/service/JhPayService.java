@@ -66,33 +66,8 @@ public class JhPayService {
 	@Resource
 	private JhPayZFBUtils zfbutil;
 	private String baseUrl="http://pcrapi.test.swiftpass.cn/auth";
-	private String privateKey = "MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDokHNqfrAPfa+7\r\n" + 
-			"hSKgBnP/iPyU48ZzlE72MSAexXNwL9TzRQTQ7LoKJRmD6OFbiW8OwABiJczjrjDI\r\n" + 
-			"8eosreelgtckXcI/NXkLae7FE4asY13D/3DyyXze7ApUuS3FHAXcj/mdrRWO3q+W\r\n" + 
-			"iMNLcXYKf4DhwwUGS2IzK4TQJA2sQQi0QjLplXNGcCLhHQFqBUiWUOZ11UEArkpf\r\n" + 
-			"WAFAeqOqxs21Xv9X+IpOINIFmJZt1wNe4pdd2MGg95boHnLiT5YcI+X45cVYSKvb\r\n" + 
-			"D1FbC49kYMq+V1Ydw3OES+XeEiGvZDK6IUjkMHT2ea+l+d8Am5uAPbWDQI3jjvlh\r\n" + 
-			"lgTyeRcXAgMBAAECggEAd3pGoS6Gut6iWp8yQ64tB9nTkZZXTOejjV19l/FutfMM\r\n" + 
-			"3xHVQJRtm2ql6hvJMyKvGI/RYpry4QGLdKC74spRGLnYV4mHkrug/RkmHr9CT+wY\r\n" + 
-			"runbmA+lhE0VnaMo/XvBEygwYC4cxjJnWNnYIzkeIJSSnOl4+lveDlXMPLZZA+XG\r\n" + 
-			"ogYLPquHzPxDn0ICP0Dn3UaPF+rdl+WdJUJr9+/2FfQo3akDPys5pNsFBEXxKVPl\r\n" + 
-			"ZJoqBAEa1JuWM1tdckupIn9LQKedj+x6ly0lhJcanT+YmlXnhhdqQa0BGquXScDu\r\n" + 
-			"V/iKYwkJl+M3hv6q7ZS52e3itulxJDULQs8B1JoccQKBgQD0mGiXY+QjVAhMiLfy\r\n" + 
-			"KQNTurgU8jbKxbb410n2VIkuUv0o4Uuds0LRa+OqPBv6G5QkUAWpfbHf30IRiW6a\r\n" + 
-			"7ogYCaEKxg+b5SSxSwKqRp25xThfxOeJ7R03CCeqjXJNkhOWU6IzLpVPMmG6Vbgn\r\n" + 
-			"e3cMnCSb3pREIDRZ3dyYPO0yKQKBgQDzaG8sL/VAxDq+iuZKku0F+MSiWqES0ymV\r\n" + 
-			"nwVAWSbfUAfB91Vw1Wvk7/sZBs0Y5ss5zxDi6QBZUqZv7bnZ5r0Sjv3GduNnyzfp\r\n" + 
-			"Or+d8zhZsM+7iIOmuGi8r4veQFr0/TgYw0wV+o7wcZUjVeG7UeX2ooctgzd55zH2\r\n" + 
-			"x8AMy3mnPwKBgQDhLFHVVSuYbmr5cj/NWn5qnZGMDvPsNppceW3orShhEhtngAkp\r\n" + 
-			"0/ambul3NcEXvj3iNB0STNns3E6pcFj3nrKBVpQAJBgIj6n44bJBaaMYe3yLhe0W\r\n" + 
-			"J8jmecZyl6brzJflo3bGIZNpBlu7u+A90MbnP/Pf3sel8/Pd64aCTEydCQKBgQDQ\r\n" + 
-			"9cjrAEjlzxA3X/sP7k55H/V/A5rgFFPQ1PGnKmIKuCPQysqY0T+NDNBdzc7pH8k7\r\n" + 
-			"2Z2/jxPzmtazpDw26rVKZ2NJq+rRwk4/dWXm7VRk+zt63VlYGVwhD/tdU5ZCV9h+\r\n" + 
-			"ubpp6+4mUPwdl67wJwDq2OB/m/RWPLpSB23CDjRj9QKBgQC/l2bbNYgFRfyv9hQ+\r\n" + 
-			"Tq3rZBv7qBFdx/3WXY1WNDYSZCcoPA2+Bk3o4eodCX/D2QRhL8C9lc5ASQwWVjQR\r\n" + 
-			"Oy5H7EaV71Z5re6rWV94idBpncLVOSQCm73CO/am5n89jkDKbI4h6BcMsLLD6XhJ\r\n" + 
-			"W0Y7vFedTfKaUdR34DzWKTFcVw==";
-	private String publicKey="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhz/sY09mWmmx8fA48MArLgO6fMQNWriqSS6fUPKP/ysWoa0MgJGdusRGOxldGYQlV2bPGiE74wcrV1b0VH6YdjETIkfTD5UwN/v+2G3gAfQffsy3EZ5U5oCNR7n5fBdIvBYqQ4js4bB5BERCpbhpqqqfw8fNcolWL5dPPlX9rVBpqKYBjp18e66v03hVLp7q9NIpGNZSJMgkMp9pIgKsyH1W928k/fn6RTP1VHVzeHl9/lJwturo66KyN98iCGsLSpMlZa6vRFescLHjrz/Nf29TI0VRmIlMrNsBG4Ic2AYXMJ5IjT7apb9XGQALgEEK41z9LKvcq7f9IyNb4us3cQIDAQAB";
+	private String privateKey = "MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCBoB8DaBh3n2ORIpHz9IZaGca5ODkf8KOZ4yIAGdoqtuJ3DKcO0U4cCQ4i3WA/NbY2jRFsdugAGAB31jxBJU0hW9/8/nkprTkBUjGLvo0qM/6QA3LAz6ftMb4Wy4n9IJdG7flWp/dfq43mBMhMGFQnzdQsTAGNf0thIT3r7vni4VaV+6d498hKomHEmaGd5entMbWMzUxmUBRATrI0D19q4Pmb3s0zZ1KAPvsgP3dX4Ob7vGtPDIS1gnfcVF+X5k9Qh+AiRcItkufovdNZKIhpOOSegw69tlkN0+IC5s+vKgdf/Df653UyOkbowEAiXHCbHdhZeBl3JnlzRvsGP+o5AgMBAAECggEALSpQhAxaMhwMQj6sYjc6NNy0XEcVyGY9ato0N5rKZIWypM54yvXs5GHXVhiSd5PMeHdwsb1Amv/B8f9ooT5RAKWVhv5X00izCx3Le6iaYTEaqq0456uzFDd3x1OGMfeQHju+3A3MaL5Kw/G4pKL5d6EFI6YcCGRpLF+7xqBO21ksWH1w/YbdtwupHimFw3b1yECC/NgR6BWOpTM/5BAHsnjk270JaOD5HtwKbJIKmVT4Wp9ix/0MTMu9l6n6uGMgSi1V4S1F7/+XOsdPAmboTAYZFc1T6MuqbaAKRMeJt9XPKJHiGpw8/QfKcWrlGq0P5sGuKkUnfqakVcHrNJr1AQKBgQDlIf4lpJ7bRLeyHIwoYthXmW+ANUFbb8j4M5d2g+u1UXOgt4YRtW5t6FWCux6dIOnuNjaqtiGxR+uP/ZSOHSS1Hp2RPKCwXtZLDiwee2Fjt1LrFUmA2gxwbeZWM906M1vJ3kac6sUMAWd5ne65qiC6tT2sUoEfU49B5G8PMgRlmQKBgQCQ0ylhjcPxKTFvohqL10HM21EqpJCKXuVLh8dO+nq7DkQFMiD06kDvFrGdVtRKog5Cn0Bi3s7F6NdaRbyvpvk+1ZNbKs2KG7dAWU1J/Ddg7n/0Zw+KCAlYH+rEW7xkPcf+8iGl/9GbhkOOMfit0Dm1YmCA6pkCo5hCgar3UHVNoQKBgFydgtbAVZ2XhxCtTVG9smimElWmMQa+hmMcp2o2JH4jsDMUO1LJHRu7v2SaMeOdPDEXJL2X5MJ9qY+IFhXjXcT/3PypnuHrU37++YJQqKrfnNp8vjsg58pCAcpyKEewHrfX6n7evkr9/k9AMRBG3ffZ7lXK+3ooEk22AdYIh5JxAoGAaB64WH+AiMhR121W4oTutKZU03Cezixtc4D5pOlmBUe7VXT1xr8H0hyhs3myhLm/wNwXgT2osRa2hRswDaTg+vC30UqTnSBR/jx12aQv+EtfyMmznUwr06SWt3cwmWzldYCE+oBSJRtBRGDe5a+XXbWNpgGD4ibVl7L7xHSe8SECgYB8tS8TZG65XRo3UpYHiPf+wAVCfwYeBxUjCoKptXZZ/q5Pkx+bY8Ifxs8DEDtToFvo/1dc7QFkhm95rv1CKyNbLgMf4K1PJTyFFLOJSk2ZNs7RFjP9A4YNqM68fcsne2HRFWxcvyw3g0dcun2iV2hy51H1LOPGpVh3gEHzhuK1RA==";
+	private String publicKey="MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC2Kkh9RtTow6vZmarWD96snudqD69brU339nbrTIiv6tR61s7n1vTSLLDkZ6a21DC8P6xZHPkI2caa5LOudGWvBPz1vQN/+amw0V3ZfSZWWFbFzfHqndaeYyC+xEAdIW9rEOcgvkiZjQn2OvNhYrAShBDLFLUb+G9ZkQ3+N3Vu7QIDAQAB";
 	/**
 	 * 发送消息体到服务端
 	 * 
@@ -213,8 +188,10 @@ public class JhPayService {
 	
 	
 	private SftPayBaseResponse call(SftPayBaseRequest req, String method, Class<? extends SftPayBaseResponse> clazz) {
-        req.setMchNo(zfbutil.getMERCHANT_NO());
-        req.setAuthMchNo(zfbutil.getMERCHANT_NO());
+//        req.setMchNo(zfbutil.getMERCHANT_NO());
+//        req.setAuthMchNo(zfbutil.getMERCHANT_NO());
+        req.setMchNo("100530000003");
+        req.setAuthMchNo("100530000003");
         req.setCharset("UTF-8");
         req.setMchKeyVer(1);
         req.setPlatKeyVer(1);
@@ -397,6 +374,40 @@ public class JhPayService {
         return rspEntity;
     }
 
+    /**
+     * 代付
+     *
+     * @throws JsonProcessingException
+     * @throws InterruptedException 
+     */
+    public SftPayPayResponse testPayFor() throws JsonProcessingException, UnsupportedEncodingException, InterruptedException {
+        SftPayPayRequest req = new SftPayPayRequest();
+        String key = UUID.randomUUID().toString();
+        // 生成支付者信息
+        Map<String, String> payerInfoMap = new HashMap<String, String>();
+        payerInfoMap.put("id_no", "32058219870706111X");
+        payerInfoMap.put("phone", "13500000000");
+        payerInfoMap.put("name", "全渠道");
+        payerInfoMap.put("account_no","6216261000000000018");
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setSerializationInclusion(Include.NON_NULL);
+        String payerInfo = objectMapper.writeValueAsString(payerInfoMap);
+        req.setOutTradeNo("123123123123");
+        req.setTotalFee(300L);
+        // 加密支付者信息
+        req.setPayerInfo(new String(
+                Base64.getEncoder()
+                        .encode(TripleDesUtil.encrypt(TripleDesUtil.CipherSuite.ECB_PKCS5PADDING,
+                                payerInfo.getBytes(CharsetUtil.UTF_8), key.getBytes(CharsetUtil.UTF_8))),
+                CharsetUtil.UTF_8));
+        // 加密对称密钥
+        req.setEncryptedKey(new String(
+                Base64.getEncoder()
+                        .encode(RSAUtil.encrypt(RSAUtil.CipherSuite.ECB_PKCS1PADDING, key.getBytes(CharsetUtil.UTF_8),
+                                publicKey)),
+                CharsetUtil.UTF_8));
+        return payfor(req,0);
+    }
 
     /**
      * 统一订单查询
@@ -406,7 +417,7 @@ public class JhPayService {
      */
     public SftPayQueryOrderResponse testQueryOrder() throws InterruptedException {
         SftPayQueryOrderRequest req = new SftPayQueryOrderRequest();
-        req.setOutTradeNo("1548296247390");
+        req.setOutTradeNo("123123123123");
         req.setBankcardNo("6225880171378335");
         return queryOrder(req,0);
     }
@@ -435,5 +446,18 @@ public class JhPayService {
 			return true;
 		}
 		return false;
+	}
+	public static void main(String[] args) {
+		DrLimitAmountRequest request = new DrLimitAmountRequest();
+		JhPayService s = new JhPayService();
+		
+		try {
+			SftPayPayResponse d = s.testPayFor();
+			System.out.println(d.getStatus());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 }
