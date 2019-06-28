@@ -228,7 +228,7 @@ public class PaymentController extends AbstractBaseController {
 			param.setUserId(userId);
 			param.setPayCode("app_jhpay");
 			param.setUserToken(request.getParameter("userToken"));
-			return this.nUnifiedOrder(param,request);
+			return this.nUnifiedOrderNew(param,request);
 		}else if("cz".equals(pay_type)) {
 			logger.info("payAuthoriz========充值userId========"+userId);
 			RechargeParam param = new RechargeParam();
@@ -2189,5 +2189,303 @@ public class PaymentController extends AbstractBaseController {
 			return ResultGenerator.genFailResult("参数异常");
 		}
 	}
+	
+	public BaseResult<Object> nUnifiedOrderNew(GoPayParam param, HttpServletRequest request) {
+		String loggerId = "payment_nUnifiedOrder_" + System.currentTimeMillis();
+		Integer currentId = null;
+		TokenParam mp = new TokenParam();
+		mp.setUserToken(param.getUserToken());
+		BaseResult<UserDTO> ruserdto = userService.queryUserInfoByToken(mp);
+		logger.info("payAuthoriz======UserDTO========="+ruserdto+"&&&"+(ruserdto!=null?ruserdto.getData():"111"));
+		if(ruserdto!=null && ruserdto.getData()!=null) {
+			currentId = ruserdto.getData().getUserId();
+		}
+		if(currentId==null) {
+			return ResultGenerator.genFailResult("参数错误！");
+		}else {
+			BaseContextHandler.set(CommonConstants.CONTEXT_KEY_USER_ID, currentId);
+		}
+		logger.info(loggerId + " int /payment/nUnifiedOrder, userId=" + currentId + " ,payCode=" + param.getPayCode());
+		String payToken = param.getPayToken();
+		if (StringUtils.isBlank(payToken)) {
+			logger.info(loggerId + "payToken值为空！");
+			return ResultGenerator.genResult(PayEnums.PAY_TOKEN_EMPTY.getcode(), PayEnums.PAY_TOKEN_EMPTY.getMsg());
+		}
+		// 校验payToken的有效性
+		String jsonData = stringRedisTemplate.opsForValue().get(payToken);
+		if (StringUtils.isBlank(jsonData)) {
+			logger.info(loggerId + "支付信息获取为空！");
+			return ResultGenerator.genResult(PayEnums.PAY_TOKEN_EXPRIED.getcode(), PayEnums.PAY_TOKEN_EXPRIED.getMsg());
+		}
+		if("app_jhpay".equals(param.getPayCode())) {
+			boolean bomin = jhpayService.checkMinAmount(jsonData,param.getPayCode());
+			if(bomin) {
+				return ResultGenerator.genFailResult("单笔支付仅支持大于1元");
+			}
+			boolean bomax = jhpayService.checkMaxAmount(jsonData,param.getPayCode());
+			if(bomax) {
+				return ResultGenerator.genFailResult("单笔支付仅支持小于3000元 ");
+			}
+		}
+		
+		// 清除payToken
+		stringRedisTemplate.delete(payToken);
+
+		UserBetPayInfoDTO dto = null;
+		try {
+			dto = JSONHelper.getSingleBean(jsonData, UserBetPayInfoDTO.class);
+		} catch (Exception e1) {
+			logger.error(loggerId + "支付信息转DIZQUserBetInfoDTO对象失败！", e1);
+			return ResultGenerator.genFailResult("支付信息异常，支付失败！");
+		}
+		if (null == dto) {
+			return ResultGenerator.genFailResult("支付信息异常，支付失败！");
+		}
+
+		Integer userId = dto.getUserId();
+		if (!userId.equals(currentId)) {
+			logger.info(loggerId + "支付信息不是当前用户的待支付彩票！");
+			return ResultGenerator.genFailResult("支付信息异常，支付失败！");
+		}
+		Double orderMoney = dto.getOrderMoney();
+		Integer userBonusId = StringUtils.isBlank(dto.getBonusId()) ? 0 : Integer.valueOf(dto.getBonusId());// form
+		BigDecimal ticketAmount = BigDecimal.valueOf(orderMoney);// from
+		BigDecimal bonusAmount = BigDecimal.valueOf(dto.getBonusAmount());// from paytoken
+		BigDecimal moneyPaid = BigDecimal.valueOf(orderMoney - dto.getBonusAmount());
+		BigDecimal surplus = BigDecimal.valueOf(dto.getSurplus());// from
+		BigDecimal thirdPartyPaid = BigDecimal.valueOf(dto.getThirdPartyPaid());
+		
+		List<UserBetDetailInfoDTO> userBetCellInfos = dto.getBetDetailInfos();
+		UserBetDetailInfoDTO min = userBetCellInfos.get(0);
+		if(userBetCellInfos.size() > 1) {
+			min = userBetCellInfos.stream().min((cell1,cell2)->cell1.getMatchTime()-cell2.getMatchTime()).get();
+		}
+
+		//比赛提前1h	禁止支付
+		Integer sysLimitBetTime = 3600;
+		SysConfigParam sysConfigParam = new SysConfigParam();
+		sysConfigParam.setBusinessId(4);
+		BaseResult<SysConfigDTO> sysConfigDTOBaseResult = iSysConfigService.querySysConfig(sysConfigParam);
+		if(sysConfigDTOBaseResult.isSuccess()){
+			sysLimitBetTime = sysConfigDTOBaseResult.getData().getValue().intValue();
+		}
+		
+		String strMatchTime= DateUtil.getTimeString(min.getMatchTime(), DateUtil.datetimeFormat);
+		String strNowTime= DateUtil.getTimeString(DateUtil.getCurrentTimeLong(), DateUtil.datetimeFormat);
+		
+		String seconds = DateUtilPay.dateSubtractionHours(strNowTime,strMatchTime);
+		if(Integer.valueOf(seconds)<=sysLimitBetTime) {
+			return ResultGenerator.genResult(LotteryResultEnum.BET_TIME_LIMIT.getCode(), LotteryResultEnum.BET_TIME_LIMIT.getMsg());
+		}
+
+		List<TicketDetail> ticketDetails = userBetCellInfos.stream().map(betCell -> {
+			TicketDetail ticketDetail = new TicketDetail();
+			ticketDetail.setMatch_id(betCell.getMatchId());
+			ticketDetail.setChangci(betCell.getChangci());
+			int matchTime = betCell.getMatchTime();
+			if (matchTime > 0) {
+				ticketDetail.setMatchTime(Date.from(Instant.ofEpochSecond(matchTime)));
+			}
+			ticketDetail.setMatchTeam(betCell.getMatchTeam());
+			ticketDetail.setLotteryClassifyId(betCell.getLotteryClassifyId());
+			ticketDetail.setLotteryPlayClassifyId(betCell.getLotteryPlayClassifyId());
+			ticketDetail.setTicketData(betCell.getTicketData());
+			ticketDetail.setIsDan(betCell.getIsDan());
+			ticketDetail.setIssue(betCell.getPlayCode());
+			ticketDetail.setFixedodds(betCell.getFixedodds());
+			ticketDetail.setBetType(betCell.getBetType());
+			return ticketDetail;
+		}).collect(Collectors.toList());
+		// 余额支付
+		boolean hasSurplus = false;
+		if ((surplus != null && surplus.doubleValue() > 0) || (bonusAmount != null && bonusAmount.doubleValue() > 0)) {
+			hasSurplus = true;
+		}
+		// 临时添加
+		boolean isSurplus = false;
+		if (surplus != null && surplus.doubleValue() > 0) {
+			isSurplus = true;
+		}
+		// 第三方支付
+		boolean hasThird = false;
+		if (thirdPartyPaid != null && thirdPartyPaid.doubleValue() > 0) {
+			hasThird = true;
+			String payCode = param.getPayCode();
+			if (StringUtils.isBlank(payCode)) {
+				logger.info(loggerId + "第三方支付，paycode为空~");
+				return ResultGenerator.genResult(PayEnums.PAY_CODE_BLANK.getcode(), PayEnums.PAY_CODE_BLANK.getMsg());
+			}
+		}
+		PaymentDTO paymentDto = null;
+		String payName = null;
+		if (hasThird) {
+			// 支付方式校验
+			String payCode = param.getPayCode();
+			if (StringUtils.isBlank(payCode)) {
+				logger.info(loggerId + "订单第三支付没有提供paycode！");
+				return ResultGenerator.genFailResult("对不起，您还没有选择第三方支付！", null);
+			}
+			BaseResult<PaymentDTO> paymentResult = paymentService.queryByCode(payCode);
+			if (paymentResult.getCode() != 0) {
+				logger.info(loggerId + "订单第三方支付提供paycode有误！payCode=" + payCode);
+				return ResultGenerator.genFailResult("请选择有效的支付方式！", null);
+			}
+			paymentDto = paymentResult.getData();
+			payName = paymentDto.getPayName();
+		}
+		// order生成
+		SubmitOrderParam submitOrderParam = new SubmitOrderParam();
+		submitOrderParam.setTicketNum(dto.getTicketNum());
+		submitOrderParam.setMoneyPaid(moneyPaid);
+		submitOrderParam.setTicketAmount(ticketAmount);
+		submitOrderParam.setSurplus(surplus);
+		submitOrderParam.setThirdPartyPaid(thirdPartyPaid);
+		submitOrderParam.setPayName(payName);
+		submitOrderParam.setUserBonusId(userBonusId);
+		submitOrderParam.setBonusAmount(bonusAmount);
+		submitOrderParam.setOrderFrom(dto.getRequestFrom());
+		int lotteryClassifyId = dto.getLotteryClassifyId();
+		String lotteryClassifyIdStr = lotteryClassifyId + "";
+		submitOrderParam.setLotteryClassifyId(lotteryClassifyId);
+		int lotteryPlayClassifyId = dto.getLotteryPlayClassifyId();
+		submitOrderParam.setLotteryPlayClassifyId(lotteryPlayClassifyId);
+		submitOrderParam.setPassType(dto.getBetType());
+		submitOrderParam.setPlayType("0" + dto.getPlayType());
+		submitOrderParam.setBetNum(dto.getBetNum());
+		submitOrderParam.setPlayTypeDetail(dto.getPlayTypeDetail());
+		submitOrderParam.setCathectic(dto.getTimes());
+		if (lotteryPlayClassifyId != 8 && lotteryClassifyId == 1) {
+			if (ticketDetails.size() > 1) {
+				Optional<TicketDetail> max = ticketDetails.stream().max((detail1, detail2) -> detail1.getMatchTime().compareTo(detail2.getMatchTime()));
+				submitOrderParam.setMatchTime(max.get().getMatchTime());
+			} else {
+				submitOrderParam.setMatchTime(ticketDetails.get(0).getMatchTime());
+			}
+		}
+		submitOrderParam.setForecastMoney(dto.getForecastMoney());
+
+		submitOrderParam.setIssue(dto.getIssue());
+		submitOrderParam.setTicketDetails(ticketDetails);
+		submitOrderParam.setPayCode(param.getPayCode());
+		BaseResult<OrderDTO> createOrder = orderService.createOrder(submitOrderParam);//创建新订单
+		if (createOrder.getCode() != 0) {//订单创建失败--还原元订单
+			logger.info(loggerId + "订单创建失败！");
+			return ResultGenerator.genFailResult("支付失败！");
+		}
+		String orderId = createOrder.getData().getOrderId().toString();
+		String orderSn = createOrder.getData().getOrderSn();
+
+		if (hasSurplus) {
+			// 用户余额扣除
+			SurplusPayParam surplusPayParam = new SurplusPayParam();
+			surplusPayParam.setOrderSn(orderSn);
+			surplusPayParam.setSurplus(surplus);
+			surplusPayParam.setBonusMoney(bonusAmount);
+			int payType1 = 2;
+			if (hasThird) {
+				payType1 = 3;
+
+			}
+			surplusPayParam.setPayType(payType1);
+			surplusPayParam.setMoneyPaid(surplus);
+			surplusPayParam.setThirdPartName("");
+			surplusPayParam.setThirdPartPaid(BigDecimal.ZERO);
+			if (isSurplus) {
+				BaseResult<SurplusPaymentCallbackDTO> changeUserAccountByPay = userAccountService.changeUserAccountByPay(surplusPayParam);
+				if (changeUserAccountByPay.getCode() != 0) {
+					logger.info(loggerId + "用户余额扣减失败！");
+					return ResultGenerator.genFailResult("支付失败！");
+				}
+				// 更新余额支付信息到订单
+				BigDecimal userSurplus = changeUserAccountByPay.getData().getUserSurplus();
+				BigDecimal userSurplusLimit = changeUserAccountByPay.getData().getUserSurplusLimit();
+				UpdateOrderInfoParam updateOrderInfoParam = new UpdateOrderInfoParam();
+				updateOrderInfoParam.setOrderSn(orderSn);
+				updateOrderInfoParam.setUserSurplus(userSurplus);
+				updateOrderInfoParam.setUserSurplusLimit(userSurplusLimit);
+				BaseResult<String> updateOrderInfo = orderService.updateOrderInfo(updateOrderInfoParam);
+				if (updateOrderInfo.getCode() != 0) {
+					logger.info(loggerId + "订单回写用户余额扣减详情失败！");
+					BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
+					logger.info(loggerId + " orderSn=" + orderSn + " , Surplus=" + surplus.doubleValue() + " 在回滚用户余额结束！ 订单回调返回结果：status=" + rollbackUserAccountChangeByPay.getCode() + " , message=" + rollbackUserAccountChangeByPay.getMsg());
+					if (rollbackUserAccountChangeByPay.getCode() != 0) {
+						logger.info(loggerId + " orderSn=" + orderSn + " , Surplus=" + surplus.doubleValue() + " 在回滚用户余额时出错！");
+					}
+					return ResultGenerator.genFailResult("支付失败！");
+				}
+
+				//单纯余额支付的时候记录第一次支付时间
+				logger.info("开始记录第一次支付时间" );  
+				FirstPayTimeParam firstPayTimeParam = new FirstPayTimeParam();
+				firstPayTimeParam.setOrderSn(orderSn);
+				BaseResult<String> storeUserMoneyRst = iStoreUserMoneyService.recordFirstPayTime(firstPayTimeParam);
+				if(storeUserMoneyRst.getCode() == 0){
+					logger.info(storeUserMoneyRst.getMsg());
+				}
+
+			}
+			if (!hasThird) {
+				// 回调order,更新支付状态,余额支付成功
+				UpdateOrderPayStatusParam param1 = new UpdateOrderPayStatusParam();
+				param1.setPayStatus(1);
+				int currentTime = DateUtil.getCurrentTimeLong();
+				param1.setPayTime(currentTime);
+				param1.setOrderSn(orderSn);
+				param1.setPayCode("");
+				param1.setPayName("");
+				param1.setPaySn("");
+				BaseResult<Integer> baseResult = orderService.updateOrderPayStatus(param1);
+				logger.info(loggerId + " 订单成功状态更新回调返回结果：status=" + baseResult.getCode() + " , message=" + baseResult.getMsg() + "data=" + baseResult.getData());
+				if (baseResult.getCode() != 0 && isSurplus && !Integer.valueOf(1).equals(baseResult.getData())) {
+					BaseResult<SurplusPaymentCallbackDTO> rollbackUserAccountChangeByPay = userAccountService.rollbackUserAccountChangeByPay(surplusPayParam);
+					logger.info(loggerId + " orderSn=" + orderSn + " , Surplus=" + surplus.doubleValue() + " 在订单成功状态更新回滚用户余额结束！ 订单回调返回结果：status=" + rollbackUserAccountChangeByPay.getCode() + " , message=" + rollbackUserAccountChangeByPay.getMsg());
+					if (rollbackUserAccountChangeByPay.getCode() != 0) {
+						logger.info(loggerId + " orderSn=" + orderSn + " , Surplus=" + surplus.doubleValue() + " 在订单成功状态更新回滚用户余额时出错！");
+					}
+					return ResultGenerator.genFailResult("支付失败！");
+				}
+				logger.info(loggerId + "订单没有需要第三方支付金额，完全余额支付成功！");
+				PayReturnDTO payReturnDTO = new PayReturnDTO();
+				payReturnDTO.setOrderId(orderId);
+				// payReturnDTO.setLotteryClassifyId(lotteryClassifyIdStr);
+				return ResultGenerator.genSuccessResult("支付成功！", payReturnDTO);
+			}
+		}
+		// payCode处理
+		String payCode = paymentDto.getPayCode();
+		String payIp = this.getIpAddr(request);
+		PayLog payLog = super.newPayLog(currentId, orderSn, thirdPartyPaid, 0, payCode, paymentDto.getPayName(), payIp);
+		PayLog savePayLog = payLogService.savePayLog(payLog);
+		if (null == savePayLog) {
+			logger.info(loggerId + " payLog对象保存失败！");
+			return ResultGenerator.genFailResult("请求失败！", null);
+		} else {
+			logger.info("paylog save succ:" + " payLogId:" + payLog.getPayIp() + " paycode:" + payLog.getPayCode() + " payname:" + payLog.getPayName());
+		}
+		BaseResult payBaseResult = null;
+		if("app_jhpay".equals(param.getPayCode())) {
+			logger.info("聚合支付宝支付url:" + " payCode:" + savePayLog.getPayCode());
+			payBaseResult = jhpayService.getZFBPayUrl(savePayLog, orderSn, orderSn,"充值",param.getUserId());
+			if (payBaseResult != null && payBaseResult.getData() != null) {
+				String str = payBaseResult.getData() + "";
+				logger.info("生成聚合支付宝支付payOrderSn={},url成功 url={}:", orderSn, str);
+			} else {
+				logger.info("生成聚合支付宝支付payOrderSn={},url失败", orderSn);
+			}
+		}
+
+		if(payBaseResult.getCode() == 0){
+			logger.info("开始记录第一次支付时间");
+			FirstPayTimeParam firstPayTimeParam = new FirstPayTimeParam();
+			firstPayTimeParam.setOrderSn(orderSn);
+			BaseResult<String> storeUserMoneyRst = iStoreUserMoneyService.recordFirstPayTime(firstPayTimeParam);
+			if(storeUserMoneyRst.getCode() == 0){
+				logger.info(storeUserMoneyRst.getMsg());
+			}
+		}
+
+		return payBaseResult;
+	}
+	
 	
 }
