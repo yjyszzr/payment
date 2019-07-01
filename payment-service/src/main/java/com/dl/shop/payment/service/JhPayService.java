@@ -10,6 +10,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -76,9 +77,21 @@ public class JhPayService {
 	 */
 	@SuppressWarnings("finally")
 	public String jhAliPay(SortedMap<String, String> map){
-		
+		String key = zfbutil.getSECRET_A();
+		String mch_id = zfbutil.getMERCHANT_NO_A();
+		int rnumber = new Random().nextInt(4)+1;
+		if(rnumber%4==0) {
+			key = zfbutil.getSECRET_D();
+			mch_id = zfbutil.getMERCHANT_NO_D();
+		}else if(rnumber%3==0) {
+			key = zfbutil.getSECRET_C();
+			mch_id = zfbutil.getMERCHANT_NO_C();
+		}else if(rnumber%2==0) {
+			key = zfbutil.getSECRET_B();
+			mch_id = zfbutil.getMERCHANT_NO_B();
+		}
 		map.put("service", zfbutil.getPAY_URL());
-		map.put("mch_id", zfbutil.getMERCHANT_NO());
+		map.put("mch_id", mch_id);
 		map.put("mch_create_ip", "127.0.0.1");
 		map.put("notify_url", zfbutil.getNOTIFY_URL());
 		map.put("nonce_str", String.valueOf(new Date().getTime()));
@@ -87,7 +100,7 @@ public class JhPayService {
 		StringBuilder buf = new StringBuilder((params.size() + 1) * 10);
 		SignUtils.buildPayParams(buf, params, false);
 		String preStr = buf.toString();
-		String sign = MD5.sign(preStr, "&key=" + zfbutil.getSECRET(), "utf-8");
+		String sign = MD5.sign(preStr, "&key=" + key, "utf-8");
 		map.put("sign", sign);
 
 		String reqUrl = zfbutil.getPATH();
@@ -108,7 +121,7 @@ public class JhPayService {
 //				res = XmlUtils.toXml(resultMap);
 
 				if (resultMap.containsKey("sign")) {
-					if (!SignUtils.checkParam(resultMap, zfbutil.getSECRET())) {
+					if (!SignUtils.checkParam(resultMap, key)) {
 //						res = "验证签名不通过";
 					} else {
 						if ("0".equals(resultMap.get("status")) && "0".equals(resultMap.get("result_code"))) {
@@ -449,16 +462,25 @@ public class JhPayService {
 		return false;
 	}
 	public static void main(String[] args) {
-		DrLimitAmountRequest request = new DrLimitAmountRequest();
-		JhPayService s = new JhPayService();
-		
-		try {
-			SftPayPayResponse d = s.testPayFor();
-			System.out.println(d.getStatus());
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		for (int i = 0; i < 100; i++) {
+//			int rnumber = new Random().nextInt(4)+1;
+//			System.out.println(rnumber);
+			int _4 = 0,_3=0,_2=0,_1=0;
+			for (int j = 0; j < 100; j++) {
+				int rnumber = new Random().nextInt(4)+1;
+				if(rnumber%4==0) {
+					_4++;
+				}else if(rnumber%3==0) {
+					_3++;
+				}else if(rnumber%2==0) {
+					_2++;
+				}else{
+					_1++;
+				}
+			}
+			
+			System.out.println("随机数生成次数："+_4+"_"+_3+"_"+_2+"_"+_1);
+
 		}
-		
 	}
 }
