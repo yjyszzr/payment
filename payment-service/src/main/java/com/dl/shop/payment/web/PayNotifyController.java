@@ -494,6 +494,7 @@ public class PayNotifyController {
 	@PostMapping("/JhPayNotify")
 	@ResponseBody
 	public void JhPayNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+		log.info("ShPayNotify()返回报文*********");
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		response.setHeader("Content-type", "text/html;charset=UTF-8");
