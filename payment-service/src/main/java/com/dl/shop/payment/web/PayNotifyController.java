@@ -506,7 +506,7 @@ public class PayNotifyController {
 //		String status=realMap.get("status")==null?"":realMap.get("status").toString();
 //		String result_code=realMap.get("result_code")==null?"":realMap.get("result_code").toString();
 		String pay_result=realMap.get("pay_result")==null?"":realMap.get("pay_result").toString();
-		
+		log.info("ShPayNotify()返回报文***realMap******"+JSONUtils.valueToString(realMap));
 		log.info("ShPayNotify()返回报文*********"+payOrderfSn+"&&&"+pay_result);
 		if (StringUtils.isEmpty(payOrderfSn)) {
 			log.info("ShPayNotify()Q多多支付返回payOrderSn is null");
