@@ -1934,15 +1934,15 @@ public class PaymentController extends AbstractBaseController {
 		logger.info("支付成功后："+JSONUtils.valueToString(payBaseResult));
 
 //		包含了第三方支付的时候记录第一次支付时间
-		if(payBaseResult.getCode() == 0){
-			logger.info("开始记录第一次支付时间");
-			FirstPayTimeParam firstPayTimeParam = new FirstPayTimeParam();
-			firstPayTimeParam.setOrderSn(orderSn);
-			BaseResult<String> storeUserMoneyRst = iStoreUserMoneyService.recordFirstPayTime(firstPayTimeParam);
-			if(storeUserMoneyRst.getCode() == 0){
-				logger.info(storeUserMoneyRst.getMsg());
-			}
-		}
+//		if(payBaseResult.getCode() == 0){
+//			logger.info("开始记录第一次支付时间");
+//			FirstPayTimeParam firstPayTimeParam = new FirstPayTimeParam();
+//			firstPayTimeParam.setOrderSn(orderSn);
+//			BaseResult<String> storeUserMoneyRst = iStoreUserMoneyService.recordFirstPayTime(firstPayTimeParam);
+//			if(storeUserMoneyRst.getCode() == 0){
+//				logger.info(storeUserMoneyRst.getMsg());
+//			}
+//		}
 
 		return payBaseResult;
 	}
@@ -2051,16 +2051,16 @@ public class PaymentController extends AbstractBaseController {
 				logger.info("生成聚合支付宝支付payOrderSn={},url失败", orderSn);
 			}
 		}
-
-		if(payBaseResult.getCode() == 0){
-			logger.info("开始记录第一次支付时间");
-			FirstPayTimeParam firstPayTimeParam = new FirstPayTimeParam();
-			firstPayTimeParam.setOrderSn(orderSn);
-			BaseResult<String> storeUserMoneyRst = iStoreUserMoneyService.recordFirstPayTime(firstPayTimeParam);
-			if(storeUserMoneyRst.getCode() == 0){
-				logger.info(storeUserMoneyRst.getMsg());
-			}
-		}
+//
+//		if(payBaseResult.getCode() == 0){
+//			logger.info("开始记录第一次支付时间");
+//			FirstPayTimeParam firstPayTimeParam = new FirstPayTimeParam();
+//			firstPayTimeParam.setOrderSn(orderSn);
+//			BaseResult<String> storeUserMoneyRst = iStoreUserMoneyService.recordFirstPayTime(firstPayTimeParam);
+//			if(storeUserMoneyRst.getCode() == 0){
+//				logger.info(storeUserMoneyRst.getMsg());
+//			}
+//		}
 
 		return payBaseResult;
 	}
