@@ -983,8 +983,8 @@ public class PaymentController extends AbstractBaseController {
 			if(totalAmount<1) {
 				return ResultGenerator.genFailResult("单笔充值金额不能低于1元");
 			}
-			if(totalAmount>3000) {
-				return ResultGenerator.genFailResult("单笔充值金额不能超过3000元 ");
+			if(totalAmount>10000) {
+				return ResultGenerator.genFailResult("单笔充值金额不能超过10000元 ");
 			}
 		}
 			
@@ -1566,7 +1566,7 @@ public class PaymentController extends AbstractBaseController {
 			}
 			boolean bomax = jhpayService.checkMaxAmount(jsonData,param.getPayCode());
 			if(bomax) {
-				return ResultGenerator.genFailResult("单笔支付仅支持小于3000元，建议充值后使用账户余额下单  ");
+				return ResultGenerator.genFailResult("单笔支付仅支持小于10000元，建议充值后使用账户余额下单  ");
 			}
 		}
 		

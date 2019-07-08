@@ -456,7 +456,7 @@ public class JhPayService {
 		JSONObject josn = (JSONObject) JSONObject.parse(payToken);
 		BigDecimal thirdPartyPaid = new BigDecimal(josn.getString("thirdPartyPaid"));
 		int paid = thirdPartyPaid.intValue();
-		if(paid>3000) {
+		if(paid>10000) {
 			return true;
 		}
 		return false;
