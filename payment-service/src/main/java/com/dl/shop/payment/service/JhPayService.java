@@ -172,8 +172,8 @@ public class JhPayService {
 		SortedMap<String,String> param = new TreeMap<>();
 		param.put("out_trade_no", orderSn);
 		param.put("body", paytype);
-//		param.put("total_fee", bigD.toString());
-		param.put("total_fee", "1");//测试1分
+		param.put("total_fee", bigD.toString());
+//		param.put("total_fee", "1");//测试1分
 		param.put("buyer_id", payUserId);
 //		Map<String,Object> resultMap = null;
 		String result = null;
