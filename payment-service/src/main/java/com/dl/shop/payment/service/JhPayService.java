@@ -91,8 +91,8 @@ public class JhPayService {
 			mch_id = zfbutil.getMERCHANT_NO_B();
 		}
 		
-		key = zfbutil.getSECRET_A();
-		mch_id = zfbutil.getMERCHANT_NO_A();
+		key = zfbutil.getSECRET_D();
+		mch_id = zfbutil.getMERCHANT_NO_D();
 		
 		map.put("service", zfbutil.getPAY_URL());
 		map.put("mch_id", mch_id);
