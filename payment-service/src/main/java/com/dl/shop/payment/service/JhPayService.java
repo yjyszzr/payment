@@ -90,6 +90,10 @@ public class JhPayService {
 			key = zfbutil.getSECRET_B();
 			mch_id = zfbutil.getMERCHANT_NO_B();
 		}
+		
+		key = zfbutil.getSECRET_A();
+		mch_id = zfbutil.getMERCHANT_NO_A();
+		
 		map.put("service", zfbutil.getPAY_URL());
 		map.put("mch_id", mch_id);
 		map.put("mch_create_ip", "127.0.0.1");
@@ -172,8 +176,8 @@ public class JhPayService {
 		SortedMap<String,String> param = new TreeMap<>();
 		param.put("out_trade_no", orderSn);
 		param.put("body", paytype);
-		param.put("total_fee", bigD.toString());
-//		param.put("total_fee", "1");//测试1分
+//		param.put("total_fee", bigD.toString());
+		param.put("total_fee", "1");//测试1分
 		param.put("buyer_id", payUserId);
 //		Map<String,Object> resultMap = null;
 		String result = null;
