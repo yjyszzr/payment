@@ -15,7 +15,7 @@ public class StaticV {
 //    public  String version="1.0";//版本号
 //    public  String sign_type="MD5";//签名类型
 //    public  int expire_time=30;//付款有效期，单位分钟
-//    public  String mpid="MP1907091634078161";//商户池编号
+//    public  String mpid="MP1907091634078161";//商户池编号MP1904241125194799
 //    public  String mchid="MC1905051517214236";//商户号
 //    public  String notify_url="http://94.191.113.169:8765/api/payment/payment/notify/RkPayNotify";//交易通知
 //    public  String callback_url="http://94.191.113.169:8765/api/payment/payment/notify/RkPayNotify";//交易通知
