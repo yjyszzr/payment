@@ -1518,6 +1518,7 @@ public class PaymentController extends AbstractBaseController {
 		}
 		// 校验payToken的有效性
 		String jsonData = stringRedisTemplate.opsForValue().get(payToken);
+		logger.info("app支付jsonData="+jsonData);
 		if (StringUtils.isBlank(jsonData)) {
 			logger.info(loggerId + "支付信息获取为空！");
 			return ResultGenerator.genResult(PayEnums.PAY_TOKEN_EXPRIED.getcode(), PayEnums.PAY_TOKEN_EXPRIED.getMsg());
