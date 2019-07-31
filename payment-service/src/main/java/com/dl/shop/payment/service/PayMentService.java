@@ -541,6 +541,9 @@ public class PayMentService extends AbstractService<PayMent> {
 					logger.error(payLog.getPayOrderSn() + " 给个人用户充值：code" + rechargeRst.getCode() + "message:" + rechargeRst.getMsg());
 				}
 				
+				//推广活动流程begin
+				
+				//推广活动流程end
 				// 更新paylog
 				RspOrderQueryDTO rspOrderQueryDTO = new RspOrderQueryDTO();
 				rspOrderQueryDTO.setIsHaveRechargeAct(0);
