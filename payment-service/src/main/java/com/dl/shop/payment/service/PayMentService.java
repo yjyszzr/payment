@@ -37,6 +37,7 @@ import com.dl.base.util.SessionUtil;
 import com.dl.lottery.api.ILotteryPrintService;
 import com.dl.member.api.IActivityService;
 import com.dl.member.api.ISwitchConfigService;
+import com.dl.member.api.ISysConfigService;
 import com.dl.member.api.IUserAccountService;
 import com.dl.member.api.IUserBonusService;
 import com.dl.member.api.IUserQualificationService;
@@ -44,11 +45,13 @@ import com.dl.member.dto.DonationPriceDTO;
 import com.dl.member.dto.QFDTO;
 import com.dl.member.dto.RechargeDataActivityDTO;
 import com.dl.member.dto.SurplusPaymentCallbackDTO;
+import com.dl.member.dto.SysConfigDTO;
 import com.dl.member.param.MemRollParam;
 import com.dl.member.param.QFParam;
 import com.dl.member.param.RecharegeParam;
 import com.dl.member.param.StrParam;
 import com.dl.member.param.SurplusPayParam;
+import com.dl.member.param.SysConfigParam;
 import com.dl.member.param.UpdateUserRechargeParam;
 import com.dl.member.param.UserAccountParamByType;
 import com.dl.member.param.UserBonusParam;
@@ -177,7 +180,8 @@ public class PayMentService extends AbstractService<PayMent> {
 	private PayUBeyUtil payUBeyUtil;
 	@Resource
 	private ISwitchConfigService iSwitchConfigService;
-	
+	@Resource
+	private ISysConfigService sysConfigService;
 	@Resource
     private IStoreUserMoneyService iStoreUserMoneyService;
 
@@ -547,7 +551,14 @@ public class PayMentService extends AbstractService<PayMent> {
 				}
 				
 				//推广活动流程begin
-				if(payLog.getOrderAmount().doubleValue()>=103) {
+				double rechargMoney = 103; //充值多少算邀请成功  默认103
+				SysConfigParam sysConfigParam = new SysConfigParam();
+				sysConfigParam.setBusinessId(110);
+				BaseResult<SysConfigDTO> returnDto = sysConfigService.querySysConfig(sysConfigParam);
+				if(returnDto!=null && returnDto.getData()!=null) {
+					rechargMoney = returnDto.getData().getValue()==null?0:returnDto.getData().getValue().doubleValue();
+				}
+				if(payLog.getOrderAmount().doubleValue()>=rechargMoney) {
 					activiService.invitationNumAndReward(new com.dl.activity.param.StrParam());
 				}
 				//推广活动流程end
@@ -676,7 +687,21 @@ public class PayMentService extends AbstractService<PayMent> {
             if(storeUserMoneyRst.getCode() == 0){
                 logger.info(storeUserMoneyRst.getMsg());
             }
-			
+            
+    		//推广活动begin
+            OrderSnParam snParam = new OrderSnParam();
+            snParam.setOrderSn(payLog.getOrderSn());
+            BaseResult<OrderDTO> returnDto = orderService.getOrderInfoByOrderSn(snParam);
+            com.dl.activity.param.StrParam strparam = new com.dl.activity.param.StrParam();
+            if(returnDto!=null && returnDto.getData()!=null) {
+            	OrderDTO orderD = returnDto.getData();
+            	strparam.setStr(orderD.getSurplus().add(orderD.getThirdPartyPaid()).toString());//购彩金额 不包含优惠券  所用余额+第三方支付金额
+            }else {
+            	strparam.setStr(payLog.getOrderAmount().toString());//购彩金额 不包含优惠券  所用余额+第三方支付金额
+            }
+    		activiService.buyLotteryRerurnReward(strparam);
+    		//推广活动end
+            
 			return ResultGenerator.genSuccessResult("订单已支付成功！", null);
 		} else if (response.isFail()) {
 			logger.info("orderOptions() isfail==============支付成功订单回调[orderService]==================");

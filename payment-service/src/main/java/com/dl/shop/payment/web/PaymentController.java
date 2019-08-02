@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.dl.activity.api.IActiviService;
 import com.dl.base.constant.CommonConstants;
 import com.dl.base.context.BaseContextHandler;
 import com.dl.base.enums.SNBusinessCodeEnum;
@@ -149,6 +150,8 @@ public class PaymentController extends AbstractBaseController {
 	private final static Logger logger = LoggerFactory.getLogger(PaymentController.class);
 	@Resource
 	private PayLogService payLogService;
+	@Resource
+	private IActiviService activiService;
 	@Resource
 	private PayMentService paymentService;
 	@Resource
@@ -1800,15 +1803,6 @@ public class PaymentController extends AbstractBaseController {
 					return ResultGenerator.genFailResult("支付失败！");
 				}
 
-				//单纯余额支付的时候记录第一次支付时间
-				logger.info("开始记录第一次支付时间" );  
-				FirstPayTimeParam firstPayTimeParam = new FirstPayTimeParam();
-				firstPayTimeParam.setOrderSn(orderSn);
-				BaseResult<String> storeUserMoneyRst = iStoreUserMoneyService.recordFirstPayTime(firstPayTimeParam);
-				if(storeUserMoneyRst.getCode() == 0){
-					logger.info(storeUserMoneyRst.getMsg());
-				}
-
 			}
 			if (!hasThird) {
 				// 回调order,更新支付状态,余额支付成功
@@ -1833,6 +1827,22 @@ public class PaymentController extends AbstractBaseController {
 				logger.info(loggerId + "订单没有需要第三方支付金额，完全余额支付成功！");
 				PayReturnDTO payReturnDTO = new PayReturnDTO();
 				payReturnDTO.setOrderId(orderId);
+				
+				//单纯余额支付的时候记录第一次支付时间
+				logger.info("开始记录第一次支付时间" );  
+				FirstPayTimeParam firstPayTimeParam = new FirstPayTimeParam();
+				firstPayTimeParam.setOrderSn(orderSn);
+				BaseResult<String> storeUserMoneyRst = iStoreUserMoneyService.recordFirstPayTime(firstPayTimeParam);
+				if(storeUserMoneyRst.getCode() == 0){
+					logger.info(storeUserMoneyRst.getMsg());
+				}
+				
+				//推广活动begin
+				com.dl.activity.param.StrParam strparam = new com.dl.activity.param.StrParam();
+				strparam.setStr(surplus.toString());//购彩金额 不包含优惠券
+				activiService.buyLotteryRerurnReward(strparam);
+				//推广活动end
+				
 				// payReturnDTO.setLotteryClassifyId(lotteryClassifyIdStr);
 				return ResultGenerator.genSuccessResult("支付成功！", payReturnDTO);
 			}
@@ -1951,7 +1961,7 @@ public class PaymentController extends AbstractBaseController {
 		}
 		logger.info(loggerId + " result: code=" + payBaseResult.getCode() + " , msg=" + payBaseResult.getMsg());
 		logger.info("支付成功后："+JSONUtils.valueToString(payBaseResult));
-
+		
 //		包含了第三方支付的时候记录第一次支付时间
 //		if(payBaseResult.getCode() == 0){
 //			logger.info("开始记录第一次支付时间");
