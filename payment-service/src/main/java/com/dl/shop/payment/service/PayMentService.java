@@ -11,11 +11,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import com.dl.store.api.IStoreUserMoneyService;
+
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
-import com.dl.store.api.IStoreUserMoneyService;
-import com.dl.store.param.FirstPayTimeParam;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
+import com.dl.activity.api.IActiviService;
 import com.dl.base.model.UserDeviceInfo;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -96,6 +96,8 @@ import com.dl.shop.payment.pay.yinhe.util.YinHeUtil;
 import com.dl.shop.payment.pay.youbei.util.PayUBeyUtil;
 import com.dl.shop.payment.utils.QrUtil;
 import com.dl.shop.payment.web.PaymentController;
+import com.dl.store.api.IStoreUserMoneyService;
+import com.dl.store.param.FirstPayTimeParam;
 
 import lombok.extern.slf4j.Slf4j;
 import net.sf.json.util.JSONUtils;
@@ -142,6 +144,9 @@ public class PayMentService extends AbstractService<PayMent> {
 
 	@Resource
 	private IActivityService activityService;
+	
+	@Resource
+	private IActiviService activiService;
 
 	@Resource
 	private IUserBonusService userBonusService;
@@ -542,7 +547,9 @@ public class PayMentService extends AbstractService<PayMent> {
 				}
 				
 				//推广活动流程begin
-				
+				if(payLog.getOrderAmount().doubleValue()>=103) {
+					activiService.invitationNumAndReward(new com.dl.activity.param.StrParam());
+				}
 				//推广活动流程end
 				// 更新paylog
 				RspOrderQueryDTO rspOrderQueryDTO = new RspOrderQueryDTO();
