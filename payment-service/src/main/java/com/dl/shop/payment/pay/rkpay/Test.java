@@ -189,10 +189,13 @@ public class Test {
 	 * 
 	 * @return
 	 */
-	public double randomNum() {
+	public int randomNum() {
 		Random random = new Random();
-		int rnum = random.nextInt(8) + 1;// 随机1-9的正整数
-		return rnum / 100d;
+		int rnum = random.nextInt(5) + 1;// 随机1-9的正整数
+		if(rnum==2) {
+			return randomNum();
+		}
+		return rnum;
 	}
 
 	public static void main(String[] args) {
@@ -203,6 +206,9 @@ public class Test {
 		configMap.put("trade_subject", "sf");// 商品名称
 		configMap.put("trade_memo", "sf");// 商品名称
 		Test test = new Test();
+		for (int i = 0; i < 10; i++) {
+			System.out.println(test.randomNum());
+		}
 //        System.out.println(test.randomNum());
 //        System.out.println(test.fundApply(configMap));
 //        System.out.println(test.fundAccountQuery(configMap));

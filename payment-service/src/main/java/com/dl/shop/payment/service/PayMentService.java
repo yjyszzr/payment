@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -101,6 +102,7 @@ import com.dl.shop.payment.utils.QrUtil;
 import com.dl.shop.payment.web.PaymentController;
 import com.dl.store.api.IStoreUserMoneyService;
 import com.dl.store.param.FirstPayTimeParam;
+import com.github.pagehelper.util.StringUtil;
 
 import lombok.extern.slf4j.Slf4j;
 import net.sf.json.util.JSONUtils;
@@ -274,17 +276,29 @@ public class PayMentService extends AbstractService<PayMent> {
 					Map<String,String> remap = new HashMap();
 					if(readMoney[i].contains(":")) {
 						String money[] = readMoney[i].split(":");
+						int readmoney = Integer.parseInt(StringUtil.isEmpty(money[0])?"0":money[0]);
+						if(readmoney==103) {
+							readmoney=readmoney+randomNumOne();
+						}else {
+							readmoney=readmoney+randomNum();
+						}
 						if(money.length>1) {
-							remap.put("readmoney", money[0]);
+							remap.put("readmoney", readmoney+"");
 							remap.put("givemoney", money[1]);
 						} else if(money.length==1) {
-							remap.put("readmoney", money[0]);
+							remap.put("readmoney", readmoney+"");
 							remap.put("givemoney", "0");
 						} else {
 							continue;
 						}
 					}else {
-						remap.put("readmoney", readMoney[i]);
+						int readmoney = Integer.parseInt(StringUtil.isEmpty(readMoney[i])?"0":readMoney[i]);
+						if(readmoney==103) {
+							readmoney=readmoney+randomNumOne();
+						}else {
+							readmoney=readmoney+randomNum();
+						}
+						remap.put("readmoney", readmoney+"");
 						remap.put("givemoney", "0");
 					}
 					maps.add(remap);
@@ -296,6 +310,33 @@ public class PayMentService extends AbstractService<PayMent> {
 		}).collect(Collectors.toList());
 		return list;
 	}
+	/**
+	 * 获取0-2的随机数
+	 * 
+	 * @return
+	 */
+	public int randomNumOne() {
+		Random random = new Random();
+		int rnum = random.nextInt(3);
+		if(rnum==1) {
+			return randomNumOne();
+		}
+		return rnum;
+	}
+	/**
+	 * 获取1345的随机数
+	 * 
+	 * @return
+	 */
+	public int randomNum() {
+		Random random = new Random();
+		int rnum = random.nextInt(5) + 1;// 随机1-9的正整数
+		if(rnum==2) {
+			return randomNum();
+		}
+		return rnum;
+	}
+	
 	/**
 	 * 通过payCode读取可用支付方式
 	 * 
