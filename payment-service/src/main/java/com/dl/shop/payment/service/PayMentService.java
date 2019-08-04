@@ -280,7 +280,7 @@ public class PayMentService extends AbstractService<PayMent> {
 						if(readmoney==103) {
 							readmoney=readmoney+randomNumOne();
 						}else {
-							readmoney=readmoney+randomNum();
+							readmoney=readmoney+randomNum(); 
 						}
 						if(money.length>1) {
 							remap.put("readmoney", readmoney+"");
