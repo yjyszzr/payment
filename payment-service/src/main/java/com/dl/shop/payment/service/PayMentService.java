@@ -276,28 +276,28 @@ public class PayMentService extends AbstractService<PayMent> {
 					Map<String,String> remap = new HashMap();
 					if(readMoney[i].contains(":")) {
 						String money[] = readMoney[i].split(":");
-//						int readmoney = Integer.parseInt(StringUtil.isEmpty(money[0])?"0":money[0]);
-//						if(readmoney==103) {
-//							readmoney=readmoney+randomNumOne();
-//						}else {
-//							readmoney=readmoney+randomNum(); 
-//						}
+						int readmoney = Integer.parseInt(StringUtil.isEmpty(money[0])?"0":money[0]);
+						if(readmoney==103) {
+							readmoney=readmoney+randomNumOne();
+						}else {
+							readmoney=readmoney+randomNum();
+						}
 						if(money.length>1) {
-							remap.put("readmoney", money[0]);
+							remap.put("readmoney", readmoney+"");
 							remap.put("givemoney", money[1]);
 						} else if(money.length==1) {
-							remap.put("readmoney", money[0]);
+							remap.put("readmoney", readmoney+"");
 							remap.put("givemoney", "0");
 						} else {
 							continue;
 						}
 					}else {
 						int readmoney = Integer.parseInt(StringUtil.isEmpty(readMoney[i])?"0":readMoney[i]);
-//						if(readmoney==103) {
-//							readmoney=readmoney+randomNumOne();
-//						}else {
-//							readmoney=readmoney+randomNum();
-//						}
+						if(readmoney==103) {
+							readmoney=readmoney+randomNumOne();
+						}else {
+							readmoney=readmoney+randomNum();
+						}
 						remap.put("readmoney", readmoney+"");
 						remap.put("givemoney", "0");
 					}
