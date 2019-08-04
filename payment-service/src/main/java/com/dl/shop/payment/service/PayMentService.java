@@ -730,16 +730,16 @@ public class PayMentService extends AbstractService<PayMent> {
             }
             
     		//推广活动begin
-            OrderSnParam snParam = new OrderSnParam();
-            snParam.setOrderSn(payLog.getOrderSn());
-            BaseResult<OrderDTO> returnDto = orderService.getOrderInfoByOrderSn(snParam);
-            com.dl.activity.param.StrParam strparam = new com.dl.activity.param.StrParam();
-            if(returnDto!=null && returnDto.getData()!=null) {
-            	OrderDTO orderD = returnDto.getData();
-            	strparam.setStr(orderD.getSurplus().add(orderD.getThirdPartyPaid()).toString());//购彩金额 不包含优惠券  所用余额+第三方支付金额
-            }else {
-            	strparam.setStr(payLog.getOrderAmount().toString());//购彩金额 不包含优惠券  所用余额+第三方支付金额
-            }
+//            OrderSnParam snParam = new OrderSnParam();
+//            snParam.setOrderSn(payLog.getOrderSn());
+//            BaseResult<OrderDTO> returnDto = orderService.getOrderInfoByOrderSn(snParam);
+//            com.dl.activity.param.StrParam strparam = new com.dl.activity.param.StrParam();
+//            if(returnDto!=null && returnDto.getData()!=null) {
+//            	OrderDTO orderD = returnDto.getData();
+//            	strparam.setStr(orderD.getSurplus().add(orderD.getThirdPartyPaid()).toString());//购彩金额 不包含优惠券  所用余额+第三方支付金额
+//            }else {
+//            	strparam.setStr(payLog.getOrderAmount().toString());//购彩金额 不包含优惠券  所用余额+第三方支付金额
+//            }
 //    		activiService.buyLotteryRerurnReward(strparam);
     		//推广活动end
             
