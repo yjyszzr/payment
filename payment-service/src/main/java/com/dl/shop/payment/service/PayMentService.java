@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
-import com.dl.activity.api.IActiviService;
+//import com.dl.activity.api.IActiviService;
 import com.dl.base.model.UserDeviceInfo;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -150,8 +150,8 @@ public class PayMentService extends AbstractService<PayMent> {
 	@Resource
 	private IActivityService activityService;
 	
-	@Resource
-	private IActiviService activiService;
+//	@Resource
+//	private IActiviService activiService;
 
 	@Resource
 	private IUserBonusService userBonusService;
@@ -600,7 +600,7 @@ public class PayMentService extends AbstractService<PayMent> {
 					rechargMoney = returnDto.getData().getValue()==null?0:returnDto.getData().getValue().doubleValue();
 				}
 				if(payLog.getOrderAmount().doubleValue()>=rechargMoney) {
-					activiService.invitationNumAndReward(new com.dl.activity.param.StrParam());
+//					activiService.invitationNumAndReward(new com.dl.activity.param.StrParam());
 				}
 				//推广活动流程end
 				// 更新paylog
@@ -740,7 +740,7 @@ public class PayMentService extends AbstractService<PayMent> {
             }else {
             	strparam.setStr(payLog.getOrderAmount().toString());//购彩金额 不包含优惠券  所用余额+第三方支付金额
             }
-    		activiService.buyLotteryRerurnReward(strparam);
+//    		activiService.buyLotteryRerurnReward(strparam);
     		//推广活动end
             
 			return ResultGenerator.genSuccessResult("订单已支付成功！", null);
