@@ -1026,8 +1026,11 @@ public class PaymentController extends AbstractBaseController {
 				if(isreadonly==1) {//固额充值赠送
 					List<Map<String,String>> maps = paymentdto.getReadMoney();
 					for (Map<String, String> map : maps) {
-						String readmoney = map.get("readmoney");
-						if(param.getTotalAmount()>=Integer.parseInt(readmoney)) {
+						String readmoney = map.get("readmoney"); 
+						if(StringUtil.isEmpty(readmoney)) {
+							readmoney="0";//103  298
+						}
+						if(param.getTotalAmount()>=Integer.parseInt(readmoney) && param.getTotalAmount()<=(Integer.parseInt(readmoney)+5)) {
 							givemoney = Integer.parseInt(!StringUtils.isNotEmpty(map.get("givemoney"))?"0":map.get("givemoney"));
 							break; 
 						}
