@@ -592,16 +592,16 @@ public class PayMentService extends AbstractService<PayMent> {
 				}
 				
 				//推广活动流程begin
-				double rechargMoney = 103; //充值多少算邀请成功  默认103
-				SysConfigParam sysConfigParam = new SysConfigParam();
-				sysConfigParam.setBusinessId(110);
-				BaseResult<SysConfigDTO> returnDto = sysConfigService.querySysConfig(sysConfigParam);
-				if(returnDto!=null && returnDto.getData()!=null) {
-					rechargMoney = returnDto.getData().getValue()==null?0:returnDto.getData().getValue().doubleValue();
-				}
-				if(payLog.getOrderAmount().doubleValue()>=rechargMoney) {
+//				double rechargMoney = 103; //充值多少算邀请成功  默认103
+//				SysConfigParam sysConfigParam = new SysConfigParam();
+//				sysConfigParam.setBusinessId(110);
+//				BaseResult<SysConfigDTO> returnDto = sysConfigService.querySysConfig(sysConfigParam);
+//				if(returnDto!=null && returnDto.getData()!=null) {
+//					rechargMoney = returnDto.getData().getValue()==null?0:returnDto.getData().getValue().doubleValue();
+//				}
+//				if(payLog.getOrderAmount().doubleValue()>=rechargMoney) {
 //					activiService.invitationNumAndReward(new com.dl.activity.param.StrParam());
-				}
+//				}
 				//推广活动流程end
 				// 更新paylog
 				RspOrderQueryDTO rspOrderQueryDTO = new RspOrderQueryDTO();
