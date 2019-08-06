@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.alibaba.druid.support.json.JSONUtils;
 import com.dl.base.result.BaseResult;
@@ -239,13 +241,37 @@ public class Test {
 //        HashMap<String,Object> rmap = new HashMap();
 //        System.out.println(rmap);
 
-		List<Integer> intList = new ArrayList<>();
-		intList.add(1);
-		intList.add(3);
-		intList.add(4);
-		intList.add(2);
-
-//        intList.stream().sorted(Comparator.comparingInt(Integer::intValue).reversed())
+		Map<String,String> rmap = new HashMap<>();
+		rmap.put("r1", "1");
+		rmap.put("s1", "1");
+		Map<String,String> rmap1 = new HashMap<>();
+		rmap.put("r1", "3");
+		rmap.put("s1", "3");
+		Map<String,String> rmap2 = new HashMap<>();
+		rmap.put("r1", "2");
+		rmap.put("s1", "2");
+		Map<String,String> rmap3 = new HashMap<>();
+		rmap.put("r1", "4");
+		rmap.put("s1", "4");
+ 		List<Map<String,String>> intList = new ArrayList<>();
+ 		intList.add(rmap);
+ 		intList.add(rmap1);
+ 		intList.add(rmap2);
+ 		intList.add(rmap3);
+//		intList.add(1);
+//		intList.add(3);
+//		intList.add(4);
+//		intList.add(2);
+ 		List<Map> is = new ArrayList<>();
+ 		Map mas = null;
+ 		for (Map<String,String> map : intList) {
+			int im = Integer.parseInt(map.get("r1"));
+			
+		}
+//        intList.stream().sorted(Comparator.comparing(Map::rmap.get("r1")).reversed())
+// 		intList = intList.stream().sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+// 		map.entrySet().stream().sorted(Collections.reverseOrder(Map.Entry.comparingByKey())).forEach(System.out::println);
+// 		intList = intList.stream().sorted(Collections.reverseOrder(Map.Entry.comparingByKey())).collect(Collectors.toList());
 //		intList.stream().filter(dto -> {
 //			if (dto.intValue() == 4) {
 //				return false;

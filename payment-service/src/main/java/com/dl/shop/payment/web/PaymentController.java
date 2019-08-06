@@ -39,7 +39,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
-//import com.dl.activity.api.IActiviService;
+import com.dl.activity.api.IActiviService;
 import com.dl.base.constant.CommonConstants;
 import com.dl.base.context.BaseContextHandler;
 import com.dl.base.enums.SNBusinessCodeEnum;
@@ -150,8 +150,8 @@ public class PaymentController extends AbstractBaseController {
 	private final static Logger logger = LoggerFactory.getLogger(PaymentController.class);
 	@Resource
 	private PayLogService payLogService;
-//	@Resource
-//	private IActiviService activiService;
+	@Resource
+	private IActiviService activiService;
 	@Resource
 	private PayMentService paymentService;
 	@Resource
@@ -1841,9 +1841,9 @@ public class PaymentController extends AbstractBaseController {
 				}
 				
 				//推广活动begin
-//				com.dl.activity.param.StrParam strparam = new com.dl.activity.param.StrParam();
-//				strparam.setStr(surplus.toString());//购彩金额 不包含优惠券
-//				activiService.buyLotteryRerurnReward(strparam);
+				com.dl.activity.param.StrParam strparam = new com.dl.activity.param.StrParam();
+				strparam.setStr(surplus.toString());//购彩金额 不包含优惠券
+				activiService.buyLotteryRerurnReward(strparam);
 				//推广活动end
 				
 				// payReturnDTO.setLotteryClassifyId(lotteryClassifyIdStr);
