@@ -208,8 +208,8 @@ public class YunPayService {
 			{
 				Map<String,String> checkMap = new HashMap<>();
 				checkMap.put("sign", obj.get("sign").toString());
-				checkMap.put("checksign", getSign(autil.getMERCHANT_NO()+autil.getSECRET()+param.get("sp_billno")+obj.get("listid").toString()+param.get("tran_amt")+param.get("tran_time")));
-				if(checkParamSign(params)) {
+				checkMap.put("checksign", autil.getMERCHANT_NO()+autil.getSECRET()+obj.get("sp_billno")+obj.get("listid").toString()+obj.get("tran_amt")+obj.get("transferDate"));
+				if(checkParamSign(checkMap)) {
 					return obj;
 				}else {
 					log.info("云闪付支付失败：原因：返回结果验签失败");
@@ -234,7 +234,7 @@ public class YunPayService {
 	 * @param paytype 商品名称 支付/充值
 	 * @return
 	 */
-	public BaseResult<?> getYunPayUrl(PayLog savePayLog, String orderSn,String orderId,Integer userId,String channel_id,String exter_invoke_ip,String paytype) {
+	public BaseResult<?> getYunPayUrl(PayLog savePayLog, String orderSn,String orderId,String channel_id,String paytype) {
 		BaseResult<?> payBaseResult = null;
 		BigDecimal amtDouble = savePayLog.getOrderAmount();
 //		BigDecimal bigD = amtDouble.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_EVEN);// 金额转换成分

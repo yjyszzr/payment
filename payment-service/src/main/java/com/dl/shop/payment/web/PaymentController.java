@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -38,10 +37,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.fastjson.JSON;
 import com.dl.activity.api.IActiviService;
-import com.dl.base.constant.CommonConstants;
-import com.dl.base.context.BaseContextHandler;
 import com.dl.base.enums.SNBusinessCodeEnum;
 import com.dl.base.model.UserDeviceInfo;
 import com.dl.base.param.EmptyParam;
@@ -70,11 +66,9 @@ import com.dl.member.dto.UserBonusDTO;
 import com.dl.member.dto.UserDTO;
 import com.dl.member.param.BonusLimitConditionParam;
 import com.dl.member.param.IDParam;
-import com.dl.member.param.MobileAndPassParam;
 import com.dl.member.param.StrParam;
 import com.dl.member.param.SurplusPayParam;
 import com.dl.member.param.SysConfigParam;
-import com.dl.member.param.TokenParam;
 import com.dl.member.param.UpdateUserRechargeParam;
 import com.dl.member.param.UserBonusIdParam;
 import com.dl.order.api.IOrderService;
@@ -103,7 +97,6 @@ import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.model.UnifiedOrderParam;
 import com.dl.shop.payment.model.UserWithdrawLog;
 import com.dl.shop.payment.param.AllPaymentInfoParam;
-import com.dl.shop.payment.param.AuthorizParam;
 import com.dl.shop.payment.param.GoPayBeforeParam;
 import com.dl.shop.payment.param.GoPayParam;
 import com.dl.shop.payment.param.PayLogIdParam;
@@ -132,6 +125,7 @@ import com.dl.shop.payment.service.RkPayService;
 import com.dl.shop.payment.service.UbeyPayService;
 import com.dl.shop.payment.service.UserRechargeService;
 import com.dl.shop.payment.service.UserWithdrawLogService;
+import com.dl.shop.payment.service.YunPayService;
 import com.dl.shop.payment.utils.DateUtilPay;
 import com.dl.shop.payment.utils.QrUtil;
 import com.dl.shop.payment.utils.WxpayUtil;
@@ -158,6 +152,8 @@ public class PaymentController extends AbstractBaseController {
 	private UbeyPayService ubeyPayService;
 	@Resource
 	private LidPayService lidPayService;
+	@Resource
+	private YunPayService yunPayService;
 	@Resource
 	private APayService aPayService;
 	@Resource
@@ -1007,6 +1003,13 @@ public class PaymentController extends AbstractBaseController {
 			if(totalAmount>5000) {
 				return ResultGenerator.genFailResult("单笔充值金额不能超过5000元 ");
 			}
+		} else if("app_yunpay".equals(param.getPayCode())) {
+//			if(totalAmount<1) {
+//				return ResultGenerator.genFailResult("单笔充值金额不能低于1元");
+//			}
+//			if(totalAmount>5000) {
+//				return ResultGenerator.genFailResult("单笔充值金额不能超过5000元 ");
+//			}
 		}
 			
 		
@@ -1155,6 +1158,16 @@ public class PaymentController extends AbstractBaseController {
 				logger.info("生成Q多多支付宝支付payOrderSn={},url成功 url={}:", orderSn, str);
 			} else {
 				logger.info("生成Q多多支付宝支付payOrderSn={},url失败", orderSn);
+			}
+		} else if("app_yunpay".equals(param.getPayCode())) {
+			logger.info("云闪付支付url:" + " payCode:" + savePayLog.getPayCode());
+			
+			payBaseResult = yunPayService.getYunPayUrl(savePayLog, orderSn, orderSn, "yunshanfu", "充值");
+			if (payBaseResult != null && payBaseResult.getData() != null) {
+				String str = payBaseResult.getData() + "";
+				logger.info("生成云闪付支付payOrderSn={},url成功 url={}:", orderSn, str);
+			} else {
+				logger.info("生成云闪付支付payOrderSn={},url失败", orderSn);
 			}
 		}
 		

@@ -211,7 +211,7 @@ public class YunPayDemo {
 		params.put("notify_url", NOTIFY_URL);// 异步回调地址
 		params.put("pay_type", "yunshanfu");// 支付类型：支付宝-alipay 微信-wx 云闪付-yunshanfu
 		params.put("sp_billno", param.get("sp_billno"));// 商户订单
-		params.put("pay_type", param.get("pay_type"));// 支付类型：支付宝-alipay 微信-wx 云闪付-yunshanfu
+//		params.put("pay_type", param.get("pay_type"));// 支付类型：支付宝-alipay 微信-wx 云闪付-yunshanfu
 		params.put("tran_time", param.get("tran_time"));// 发起交易时间
 		params.put("tran_amt", param.get("tran_amt"));// 订单金额
 		params.put("cur_type", "CNY");// 币种类型
@@ -219,6 +219,7 @@ public class YunPayDemo {
 		params.put("item_attach", "");//商品附加数据
 		// ************订单生成，当返回result中code=1时，代表订单生成成功，需要验签************
 		String result = sendPostMessage(new URL(PATH+PAY_URL_METHOD), params);
+		System.out.println("result="+result);
 		// 校验返回值
 		if (result != null && !"".equals(result)) {
 			System.out.println(result);
@@ -228,13 +229,15 @@ public class YunPayDemo {
 			if ("0".equals(code))// 成功
 			{
 				@SuppressWarnings("unchecked")
-				Map<String, String> resultObj = (Map<String, String>) obj.get("result");
+				Map<String,String> checkMap = new HashMap<>();
+				checkMap.put("sign", obj.get("sign").toString());
+				checkMap.put("checksign", MERCHANT_NO+SECRET+obj.get("sp_billno")+obj.get("listid").toString()+obj.get("tran_amt")+obj.get("transferDate"));
 				// 验证返回参数签名
-				if (checkParamSign(resultObj)) {
+				if (checkParamSign(checkMap)) {
 					System.out.println("签名验证通过,可以在此处理订单下一步操作:");
 
 					// 获取payUrl
-					String payUrl = resultObj.get("payUrl");
+					String payUrl = obj.get("aliPayUrl").toString();
 					System.out.println("payUrl=" + payUrl);
 
 				} else {
@@ -262,8 +265,7 @@ public class YunPayDemo {
 		// ************订单查询，当返回result中status=1时，代表支付成功，需要验签************
 		// status状态：0:等待支付；1：支付成功；2：支付失败；3：订单已撤销；4：订单已退款
 		String result = sendPostMessage(new URL(PATH+QUERY_URL_METHOD), params);
-
-		System.out.println(result);
+		System.out.println("result="+result);
 		// 校验返回值
 		if (result != null && !"".equals(result)) {
 			@SuppressWarnings("unchecked")
@@ -301,12 +303,12 @@ public class YunPayDemo {
 		YunPayDemo apay = new YunPayDemo();
 		Map<String,String> param = new HashMap<>();
 //		签名规则md5(商户号+秘钥+订单金额+商户订单号+发起交易时间) . toUpperCase
-		param.put("sp_billno", "211511511300021");// 商户订单
+		param.put("sp_billno", "211csbbscss01");// 商户订单
 		long nowTime=System.currentTimeMillis();//取得当前系统时间戳
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
 		String date = sdf.format(new Date(nowTime));
 		param.put("tran_time", date);// 发起交易时间
-		param.put("tran_amt", "0.01");// 订单金额
+		param.put("tran_amt", "0.18");// 订单金额
 		param.put("item_name", "支付");//商品描述
 		// ************订单生成，当返回result中code=1时，代表订单生成成功，需要验签************
 		apay.pay(param);
