@@ -33,6 +33,7 @@ import com.dl.base.model.UserDeviceInfo;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
 import com.dl.base.util.DateUtil;
+import com.dl.base.util.MD5Util;
 import com.dl.base.util.SNGenerator;
 import com.dl.base.util.SessionUtil;
 import com.dl.member.api.IUserAccountService;
@@ -211,6 +212,10 @@ public class CashService {
 			String realName = userBankDTO.getRealName();
 			String cardNo = userBankDTO.getCardNo();
 			String bankName = userBankDTO.getBankName();
+			if(userBankDTO.getPassword()==null || !userBankDTO.getPassword().equalsIgnoreCase(MD5Util.crypt("*"+userId+"#@"+realName+"$%"+cardNo+"^&"+bankName+"*"))) {
+				log.info(loggerId + "用户银行卡信息获取有误！");
+				return ResultGenerator.genResult(PayEnums.PAY_RONGBAO_BANK_ERROR.getcode(), PayEnums.PAY_RONGBAO_BANK_ERROR.getMsg());
+			}
 			cfg.setBusinessId(8);// 提现
 			
 			StrParam strParam = new StrParam();
