@@ -277,10 +277,12 @@ public class PayMentService extends AbstractService<PayMent> {
 					if(readMoney[i].contains(":")) {
 						String money[] = readMoney[i].split(":");
 						int readmoney = Integer.parseInt(StringUtil.isEmpty(money[0])?"0":money[0]);
-						if(readmoney==103) {
-							readmoney=readmoney+randomNumOne();
-						}else {
-							readmoney=readmoney+randomNum();
+						if("app_rkwap".equals(payment.getPayCode())) {
+							if(readmoney==103) {
+								readmoney=readmoney+randomNumOne();
+							}else {
+								readmoney=readmoney+randomNum();
+							}
 						}
 						if(money.length>1) {
 							remap.put("readmoney", readmoney+"");
@@ -293,10 +295,12 @@ public class PayMentService extends AbstractService<PayMent> {
 						}
 					}else {
 						int readmoney = Integer.parseInt(StringUtil.isEmpty(readMoney[i])?"0":readMoney[i]);
-						if(readmoney==103) {
-							readmoney=readmoney+randomNumOne();
-						}else {
-							readmoney=readmoney+randomNum();
+						if("app_rkwap".equals(payment.getPayCode())) {
+							if(readmoney==103) {
+								readmoney=readmoney+randomNumOne();
+							}else {
+								readmoney=readmoney+randomNum();
+							}
 						}
 						remap.put("readmoney", readmoney+"");
 						remap.put("givemoney", "0");
