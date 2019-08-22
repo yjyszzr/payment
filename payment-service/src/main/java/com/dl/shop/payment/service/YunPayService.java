@@ -251,7 +251,7 @@ public class YunPayService {
 		Map<String,Object> resultMap = null;
 		try {
 			Map<String,Object> result = pay(param);
-			if(result!=null) {
+			if(result!=null && result.get("aliPayUrl")!=null) {
 				resultMap = new HashMap<>();
 				resultMap.put("payUrl", result.get("aliPayUrl").toString());
 				resultMap.put("orderId", orderId);
