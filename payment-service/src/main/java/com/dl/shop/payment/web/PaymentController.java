@@ -1162,7 +1162,7 @@ public class PaymentController extends AbstractBaseController {
 		} else if("app_yunpay".equals(param.getPayCode())) {
 			logger.info("云闪付支付url:" + " payCode:" + savePayLog.getPayCode());
 			
-			payBaseResult = yunPayService.getYunPayUrl(savePayLog, orderSn, orderSn, "yunshanfu", "充值");
+			payBaseResult = yunPayService.getYunPayUrl(savePayLog, orderSn, orderSn, "alipay", "充值");
 			if (payBaseResult != null && payBaseResult.getData() != null) {
 				String str = payBaseResult.getData() + "";
 				logger.info("生成云闪付支付payOrderSn={},url成功 url={}:", orderSn, str);
