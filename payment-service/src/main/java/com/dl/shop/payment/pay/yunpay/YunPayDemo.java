@@ -303,7 +303,7 @@ public class YunPayDemo {
 		YunPayDemo apay = new YunPayDemo();
 		Map<String,String> param = new HashMap<>();
 //		签名规则md5(商户号+秘钥+订单金额+商户订单号+发起交易时间) . toUpperCase
-		param.put("sp_billno", "211csbbscss01");// 商户订单
+		param.put("sp_billno", "211csbbscsss01");// 商户订单
 		long nowTime=System.currentTimeMillis();//取得当前系统时间戳
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
 		String date = sdf.format(new Date(nowTime));

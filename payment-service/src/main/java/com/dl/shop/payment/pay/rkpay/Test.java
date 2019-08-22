@@ -35,7 +35,7 @@ import com.dl.shop.payment.pay.rkpay.util.StaticV;
 public class Test {
 
 	private StaticV staticv = new StaticV();
-
+	double s;
 	/**
 	 * WAP支付
 	 * 
@@ -208,9 +208,9 @@ public class Test {
 		configMap.put("trade_subject", "sf");// 商品名称
 		configMap.put("trade_memo", "sf");// 商品名称
 		Test test = new Test();
-		for (int i = 0; i < 10; i++) {
-			System.out.println(test.randomNum());
-		}
+//		for (int i = 0; i < 10; i++) {
+//			System.out.println(test.randomNum());
+//		}
 //        System.out.println(test.randomNum());
 //        System.out.println(test.fundApply(configMap));
 //        System.out.println(test.fundAccountQuery(configMap));
@@ -241,33 +241,33 @@ public class Test {
 //        HashMap<String,Object> rmap = new HashMap();
 //        System.out.println(rmap);
 
-		Map<String,String> rmap = new HashMap<>();
-		rmap.put("r1", "1");
-		rmap.put("s1", "1");
-		Map<String,String> rmap1 = new HashMap<>();
-		rmap.put("r1", "3");
-		rmap.put("s1", "3");
-		Map<String,String> rmap2 = new HashMap<>();
-		rmap.put("r1", "2");
-		rmap.put("s1", "2");
-		Map<String,String> rmap3 = new HashMap<>();
-		rmap.put("r1", "4");
-		rmap.put("s1", "4");
- 		List<Map<String,String>> intList = new ArrayList<>();
- 		intList.add(rmap);
- 		intList.add(rmap1);
- 		intList.add(rmap2);
- 		intList.add(rmap3);
-//		intList.add(1);
-//		intList.add(3);
-//		intList.add(4);
-//		intList.add(2);
- 		List<Map> is = new ArrayList<>();
- 		Map mas = null;
- 		for (Map<String,String> map : intList) {
-			int im = Integer.parseInt(map.get("r1"));
-			
-		}
+//		Map<String,String> rmap = new HashMap<>();
+//		rmap.put("r1", "1");
+//		rmap.put("s1", "1");
+//		Map<String,String> rmap1 = new HashMap<>();
+//		rmap.put("r1", "3");
+//		rmap.put("s1", "3");
+//		Map<String,String> rmap2 = new HashMap<>();
+//		rmap.put("r1", "2");
+//		rmap.put("s1", "2");
+//		Map<String,String> rmap3 = new HashMap<>();
+//		rmap.put("r1", "4");
+//		rmap.put("s1", "4");
+// 		List<Map<String,String>> intList = new ArrayList<>();
+// 		intList.add(rmap);
+// 		intList.add(rmap1);
+// 		intList.add(rmap2);
+// 		intList.add(rmap3);
+////		intList.add(1);
+////		intList.add(3);
+////		intList.add(4);
+////		intList.add(2);
+// 		List<Map> is = new ArrayList<>();
+// 		Map mas = null;
+// 		for (Map<String,String> map : intList) {
+//			int im = Integer.parseInt(map.get("r1"));
+//			
+//		}
 //        intList.stream().sorted(Comparator.comparing(Map::rmap.get("r1")).reversed())
 // 		intList = intList.stream().sorted(Comparator.reverseOrder()).collect(Collectors.toList());
 // 		map.entrySet().stream().sorted(Collections.reverseOrder(Map.Entry.comparingByKey())).forEach(System.out::println);
@@ -291,5 +291,19 @@ public class Test {
 //		System.out.println("1.3.0".compareTo("1.1.0"));
 //		System.out.println("1.3.0".compareTo("1.2.9"));
 //		System.out.println("1.3.0".compareTo("1.3.0"));
+		
+//		Integer id = 1213;
+//		System.out.println(id.toString());
+		System.out.println(test.s);
+		
+//		System.out.println(test.hideMobile("18201349590"));
+//		   String pd="{\"gear_position\":[\"10\",\"20\"],\"gear_position_money\":[\"20\",\"30\"]}";
+//		   Map map = (Map)JSONUtils.parse(pd);
+//		   List list = (ArrayList)JSONUtils.parse(map.get("gear_position").toString());
+//		   System.out.println(list.size());
 	}
+	
+	 public String hideMobile(String mobile) {
+    	return mobile.substring(0,3)+"****"+mobile.substring(7);
+    }
 }
