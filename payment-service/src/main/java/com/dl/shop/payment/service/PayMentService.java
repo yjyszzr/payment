@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
-//import com.dl.activity.api.IActiviService;
+import com.dl.activity.api.IActiviService;
 import com.dl.base.model.UserDeviceInfo;
 import com.dl.base.result.BaseResult;
 import com.dl.base.result.ResultGenerator;
@@ -150,8 +150,8 @@ public class PayMentService extends AbstractService<PayMent> {
 	@Resource
 	private IActivityService activityService;
 	
-//	@Resource
-//	private IActiviService activiService;
+	@Resource
+	private IActiviService activiService;
 
 	@Resource
 	private IUserBonusService userBonusService;
@@ -592,10 +592,10 @@ public class PayMentService extends AbstractService<PayMent> {
 				}
 				
 				//推广活动流程begin
-//				com.dl.activity.param.ActivityParam actparam = new com.dl.activity.param.ActivityParam();
-//				actparam.setMoney(payLog.getOrderAmount().doubleValue());
-//				actparam.setUserId(SessionUtil.getUserId());
-//				activiService.invitationNumAndReward(actparam);
+				com.dl.activity.param.ActivityParam actparam = new com.dl.activity.param.ActivityParam();
+				actparam.setMoney(payLog.getOrderAmount().doubleValue());
+				actparam.setUserId(SessionUtil.getUserId());
+				activiService.invitationNumAndReward(actparam);
 				//推广活动流程end
 				// 更新paylog
 				RspOrderQueryDTO rspOrderQueryDTO = new RspOrderQueryDTO();
@@ -724,17 +724,17 @@ public class PayMentService extends AbstractService<PayMent> {
             }
             
     		//推广活动begin
-//            OrderSnParam snParam = new OrderSnParam();
-//            snParam.setOrderSn(payLog.getOrderSn());
-//            BaseResult<OrderDTO> returnDto = orderService.getOrderInfoByOrderSn(snParam);
-//            com.dl.activity.param.StrParam strparam = new com.dl.activity.param.StrParam();
-//            if(returnDto!=null && returnDto.getData()!=null) {
-//            	OrderDTO orderD = returnDto.getData();
-//            	strparam.setStr(orderD.getSurplus().add(orderD.getThirdPartyPaid()).toString());//购彩金额 不包含优惠券  所用余额+第三方支付金额
-//            }else {
-//            	strparam.setStr(payLog.getOrderAmount().toString());//购彩金额 不包含优惠券  所用余额+第三方支付金额
-//            }
-//    		activiService.buyLotteryRerurnReward(strparam);
+            OrderSnParam snParam = new OrderSnParam();
+            snParam.setOrderSn(payLog.getOrderSn());
+            BaseResult<OrderDTO> returnDto = orderService.getOrderInfoByOrderSn(snParam);
+            com.dl.activity.param.StrParam strparam = new com.dl.activity.param.StrParam();
+            if(returnDto!=null && returnDto.getData()!=null) {
+            	OrderDTO orderD = returnDto.getData();
+            	strparam.setStr(orderD.getSurplus().add(orderD.getThirdPartyPaid()).toString());//购彩金额 不包含优惠券  所用余额+第三方支付金额
+            }else {
+            	strparam.setStr(payLog.getOrderAmount().toString());//购彩金额 不包含优惠券  所用余额+第三方支付金额
+            }
+    		activiService.buyLotteryRerurnReward(strparam);
     		//推广活动end
             
 			return ResultGenerator.genSuccessResult("订单已支付成功！", null);
