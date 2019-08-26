@@ -245,7 +245,7 @@ public class YunPayService {
 		String date = sdf.format(new Date(nowTime));
 		param.put("tran_time", date);// 发起交易时间
 //		param.put("tran_amt", amtDouble.toString());// 订单金额
-		param.put("tran_amt", "0.1");// 订单金额
+		param.put("tran_amt", "10");// 订单金额
 		param.put("item_name", paytype);//商品描述
 		param.put("pay_type", channel_id);// 支付类型：支付宝-alipay 微信-wx 云闪付-yunshanfu
 		Map<String,Object> resultMap = null;

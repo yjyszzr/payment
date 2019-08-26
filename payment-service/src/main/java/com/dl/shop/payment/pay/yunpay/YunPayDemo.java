@@ -209,7 +209,7 @@ public class YunPayDemo {
 		params.put("sign", getSign(MERCHANT_NO+SECRET+param.get("tran_amt")+param.get("sp_billno")+param.get("tran_time")));
 		params.put("spid", MERCHANT_NO);// 商户编号
 		params.put("notify_url", NOTIFY_URL);// 异步回调地址
-		params.put("pay_type", "yunshanfu");// 支付类型：支付宝-alipay 微信-wx 云闪付-yunshanfu
+		params.put("pay_type", "alipay");// 支付类型：支付宝-alipay 微信-wx 云闪付-yunshanfu
 		params.put("sp_billno", param.get("sp_billno"));// 商户订单
 //		params.put("pay_type", param.get("pay_type"));// 支付类型：支付宝-alipay 微信-wx 云闪付-yunshanfu
 		params.put("tran_time", param.get("tran_time"));// 发起交易时间
@@ -303,12 +303,12 @@ public class YunPayDemo {
 		YunPayDemo apay = new YunPayDemo();
 		Map<String,String> param = new HashMap<>();
 //		签名规则md5(商户号+秘钥+订单金额+商户订单号+发起交易时间) . toUpperCase
-		param.put("sp_billno", "211csbbscsss01");// 商户订单
+		param.put("sp_billno", "232SscGNNHF");// 商户订单
 		long nowTime=System.currentTimeMillis();//取得当前系统时间戳
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
 		String date = sdf.format(new Date(nowTime));
 		param.put("tran_time", date);// 发起交易时间
-		param.put("tran_amt", "0.18");// 订单金额
+		param.put("tran_amt", "1");// 订单金额
 		param.put("item_name", "支付");//商品描述
 		// ************订单生成，当返回result中code=1时，代表订单生成成功，需要验签************
 		apay.pay(param);
