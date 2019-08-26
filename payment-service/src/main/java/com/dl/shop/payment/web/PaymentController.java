@@ -256,7 +256,7 @@ public class PaymentController extends AbstractBaseController {
 		List<PaymentDTO> list = paymentService.findAllDto(deviceUnique);
 		if("1.3.0".compareTo(userDevice.getAppv())>0) {//1.3.0以前版本隐藏聚合支付
 			list = list.stream().filter(dto -> {
-				if("app_jhpay".equalsIgnoreCase(dto.getPayCode())) {
+				if("app_jhpay".equalsIgnoreCase(dto.getPayCode()) || "app_yunpay".equalsIgnoreCase(dto.getPayCode())) {
 					return false;
 				}
 				return true;
@@ -411,7 +411,7 @@ public class PaymentController extends AbstractBaseController {
 		
 		if("1.3.0".compareTo(userDevice.getAppv())>0) {//1.3.0以前版本隐藏聚合支付
 			paymentDTOList = paymentDTOList.stream().filter(dto -> {
-				if("app_jhpay".equalsIgnoreCase(dto.getPayCode())) {
+				if("app_jhpay".equalsIgnoreCase(dto.getPayCode()) || "app_yunpay".equalsIgnoreCase(dto.getPayCode())) {
 					return false;
 				}
 				return true;
