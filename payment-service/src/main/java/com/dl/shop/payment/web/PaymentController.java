@@ -1051,7 +1051,7 @@ public class PaymentController extends AbstractBaseController {
 					for (Map<String, String> map : maps) {
 						String readmoney = map.get("readmoney"); 
 						if(StringUtil.isEmpty(readmoney)) {
-							readmoney="0";//103  298
+							readmoney="0";
 						}
 						if(param.getTotalAmount()==Integer.parseInt(readmoney)) {
 							givemoney = Integer.parseInt(!StringUtils.isNotEmpty(map.get("givemoney"))?"0":map.get("givemoney"));
