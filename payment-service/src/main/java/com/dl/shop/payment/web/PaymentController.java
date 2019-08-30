@@ -1022,7 +1022,7 @@ public class PaymentController extends AbstractBaseController {
 		String payName = paymentResult.getData().getPayName();
 		// 生成充值单 金额由充值金额和赠送金额组成
 		int givemoney = 0; 
-		if ("app_rkwap".equals(payCode)) {//Q多多支付宝快捷支付附加固额充值赠送
+		if ("app_rkwap".equals(payCode) || "app_jhpay".equals(payCode)) {//Q多多支付宝快捷支付附加固额充值赠送
 			PaymentDTO paymentdto = paymentResult.getData();
 			if(paymentdto!=null) {
 				int isreadonly=paymentdto.getIsReadonly();

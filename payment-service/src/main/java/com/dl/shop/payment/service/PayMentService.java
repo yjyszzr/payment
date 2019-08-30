@@ -277,7 +277,7 @@ public class PayMentService extends AbstractService<PayMent> {
 					if(readMoney[i].contains(":")) {
 						String money[] = readMoney[i].split(":");
 						int readmoney = Integer.parseInt(StringUtil.isEmpty(money[0])?"0":money[0]);
-						if("app_rkwap".equals(payment.getPayCode())) {
+						if("app_rkwap".equals(payment.getPayCode()) || "app_jhpay".equals(payment.getPayCode())) {
 							if(readmoney==103) {
 								readmoney=readmoney+randomNumOne();
 							}else {
@@ -295,7 +295,7 @@ public class PayMentService extends AbstractService<PayMent> {
 						}
 					}else {
 						int readmoney = Integer.parseInt(StringUtil.isEmpty(readMoney[i])?"0":readMoney[i]);
-						if("app_rkwap".equals(payment.getPayCode())) {
+						if("app_rkwap".equals(payment.getPayCode()) || "app_jhpay".equals(payment.getPayCode())) {
 							if(readmoney==103) {
 								readmoney=readmoney+randomNumOne();
 							}else {
