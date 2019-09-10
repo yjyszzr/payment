@@ -24,6 +24,9 @@ public class UserBetDetailInfoDTO {
 	@ApiModelProperty("让球数")
 	private String fixedodds;
 	
+	@ApiModelProperty(value="预设总分")
+	 public String forecastScore;
+	
 	@ApiModelProperty(value="投注选项详情")
 	private String ticketData;
 	@ApiModelProperty(value = "投注方式：大乐透:0单式，1复式，2胆拖")
