@@ -25,7 +25,7 @@ public class ReapalH5Config {
 	// ↓↓↓↓↓↓↓↓↓↓请在这里配置您的基本信息↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
 	// 需要更换的信息
 	@Value("${rongbao.app_url_pay}")
-	private String URL_PAY = "http://39.106.18.39:8082/reapal-h5-api/h5/indexH5.jsp";
+	private String URL_PAY = "http://49.232.65.109:8082/reapal-h5-api/h5/indexH5.jsp";
 	
 	// 商户ID，由纯数字组成的字符串
 	@Value("${rongbao.app_merchant_id}")
@@ -45,7 +45,7 @@ public class ReapalH5Config {
 	
 	// 返回地址，由商户提供 http://123.57.34.133:9090/reapal-h5-api/return.jsp
 	@Value("${rongbao.app_return_url}")
-	private String return_url = "http://39.106.18.39:8082/reapal-h5-api/return.jsp";
+	private String return_url = "http://49.232.65.109:8082/reapal-h5-api/return.jsp";
 	
 	// 商户私钥                /usr/local/cert
 	@Value("${rongbao.app_private_key}")

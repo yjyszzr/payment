@@ -365,15 +365,15 @@ public class APayDemo {
 //		user_id=1000000025, 
 //		subject=支付, 
 //		total_fee=1000, 
-//		back_url=http://39.106.18.39:8765/api/payment/payment/notify/APayNotify, 
+//		back_url=http://49.232.65.109:8765/api/payment/payment/notify/APayNotify, 
 //		sign=17cca74344c23dbc6641ae236b31ecba, 
 //		exter_invoke_ip=127.0.0.1, 
-//		notify_url=http://39.106.18.39:8765/api/payment/payment/notify/APayNotify, 
+//		notify_url=http://49.232.65.109:8765/api/payment/payment/notify/APayNotify, 
 //		channel_id=9, 
 //		sign_type=MD5}" 
 		param.put("partner_id", "11880031");// 商户编号
-		param.put("back_url", "http://39.106.18.39:8765/api/payment/payment/notify/APayNotify");//同步回调地址
-		param.put("notify_url", "http://39.106.18.39:8765/api/payment/payment/notify/APayNotify");// 异步回调地址
+		param.put("back_url", "http://49.232.65.109:8765/api/payment/payment/notify/APayNotify");//同步回调地址
+		param.put("notify_url", "http://49.232.65.109:8765/api/payment/payment/notify/APayNotify");// 异步回调地址
 		param.put("channel_id", "9");//渠道编号
 		param.put("pay_method", "");// 支付类型
 		param.put("partner_order", "2115115sssf1300021");// 商户订单

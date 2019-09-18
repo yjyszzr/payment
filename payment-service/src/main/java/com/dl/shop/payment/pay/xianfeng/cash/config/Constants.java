@@ -13,7 +13,7 @@ public class Constants {
 	private Boolean IS_DEBUBG;
 	@Value("${xianfeng.testMode}")
 	private Boolean TESTMODE;
-//	http://39.106.18.39:9805/user/quickinfo?id=89348
+//	http://49.232.65.109:9805/user/quickinfo?id=89348
 	@Value("${xianfeng.pay_h5_url}")
 	private String PayH5Url;
 	
@@ -35,7 +35,7 @@ public class Constants {
 	
 //	public static String RETURN_URL = "http://1.2.7.1:8080/withdraw/ReceiveReturn";
 	
-//	public static String NOTICE_URL = "http://39.106.18.39:7076/cash/notify";
+//	public static String NOTICE_URL = "http://49.232.65.109:7076/cash/notify";
 	@Value("${xianfeng.app_notice_url}")
 	private String NOTICE_URL;
 	

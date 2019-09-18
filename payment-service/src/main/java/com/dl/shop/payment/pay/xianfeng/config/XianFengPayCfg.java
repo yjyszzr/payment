@@ -25,7 +25,7 @@
 //	
 //	public static final String CERTIFICATETYPE = "0";	//证件类型
 //	
-//	public static final String NOTIFY_URL = "http://39.106.18.39:7076/payment/xianfeng/notify";
+//	public static final String NOTIFY_URL = "http://49.232.65.109:7076/payment/xianfeng/notify";
 //	
 ////	public static final String RSA_KEY = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQChFetx5+VKDoEXzZ+5Wozt3MfWMM/TiKMlWmAKXBViv8/e6j6SU/lSlWkMajd59aiWczs+qf9dMuRpe/l9Qke9DnVMn24JNLXjWD+y+w3yKRwd3CTtF7gx8/ToZl5XqFIT5YB1QfQCdAf8Z18IdQrJIijs8ssczY/RfqKZLo+KLQIDAQAB";
 //	public static final String RSA_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoGpZSnEDar2rd4xzxeUMWQTXk+Mr8aLeGX2YJUpP+5HB/5IGDhit4IeglL8QU+dwZg4FEMrHH+AvxplR8Y7RNKlgZXVylFs9oRPQnNG+dJx2tWXAMXgeH+C4AA8KRkMlKo/PYLG3LasIk1eXyK2xc7LsMCVcfLjzEn99ua+JwG1ApTLXA9wcZ2naIOvwK3mevxaxasnqINQ96HBmwzJSXfz0ShIF6BAlFUlmFw1GLmQrChNUePZaSxsbAAPMuSOcvkbnKTLrKa3dXS6S23AZvpsN3cWAGLF36PFyo2oEXvcrOVM0Id/at4jolQKNf7NXt9Q9xJivXPvGJj3EFkaAWwIDAQAB";
