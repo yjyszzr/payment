@@ -220,7 +220,7 @@ public class PayMentService extends AbstractService<PayMent> {
 						String money[] = readMoney[i].split(":");
 						if(money.length>1) {
 							remap.put("readmoney", money[0]);
-							remap.put("givemoney", money[1]);
+							remap.put("givemoney", money[1]+"元券");
 						} else if(money.length==1) {
 							remap.put("readmoney", money[0]);
 							remap.put("givemoney", "0");
@@ -234,32 +234,7 @@ public class PayMentService extends AbstractService<PayMent> {
 					maps.add(remap);
 				}
 			}
-			paymentDTO.setReadMoneyCi(maps);
-			
-			List<Map<String,String>> mapstwo = new ArrayList();
-			if(payment.getReadMoney()!=null && !"".equals(payment.getReadMoney())) {
-				String readMoney[]=payment.getReadMoney().split(";");
-				for (int i = 0; i < readMoney.length; i++) {
-					Map<String,String> remaptwo = new HashMap();
-					if(readMoney[i].contains(":")) {
-						String money[] = readMoney[i].split(":");
-						if(money.length>1) {
-							remaptwo.put("readmoney", money[0]);
-							remaptwo.put("givemoney", money[1]+"券");
-						} else if(money.length==1) {
-							remaptwo.put("readmoney", money[0]);
-							remaptwo.put("givemoney", "0");
-						} else {
-							continue;
-						}
-					}else {
-						remaptwo.put("readmoney", readMoney[i]);
-						remaptwo.put("givemoney", "0");
-					}
-					mapstwo.add(remaptwo);
-				}
-			}
-			paymentDTO.setReadMoney(mapstwo);
+			paymentDTO.setReadMoney(maps);
 			
 			return paymentDTO;
 		}).collect(Collectors.toList());
@@ -311,7 +286,7 @@ public class PayMentService extends AbstractService<PayMent> {
 						}
 						if(money.length>1) {
 							remap.put("readmoney", readmoney+"");
-							remap.put("givemoney", money[1]);
+							remap.put("givemoney", money[1]+"元券");
 						} else if(money.length==1) {
 							remap.put("readmoney", readmoney+"");
 							remap.put("givemoney", "0");
@@ -333,32 +308,7 @@ public class PayMentService extends AbstractService<PayMent> {
 					maps.add(remap);
 				}
 			}
-			paymentDTO.setReadMoneyCi(maps);
-			
-			List<Map<String,String>> mapstwo = new ArrayList();
-			if(payment.getReadMoney()!=null && !"".equals(payment.getReadMoney())) {
-				String readMoney[]=payment.getReadMoney().split(";");
-				for (int i = 0; i < readMoney.length; i++) {
-					Map<String,String> remaptwo = new HashMap();
-					if(readMoney[i].contains(":")) {
-						String money[] = readMoney[i].split(":");
-						if(money.length>1) {
-							remaptwo.put("readmoney", money[0]);
-							remaptwo.put("givemoney", money[1]+"券");
-						} else if(money.length==1) {
-							remaptwo.put("readmoney", money[0]);
-							remaptwo.put("givemoney", "0");
-						} else {
-							continue;
-						}
-					}else {
-						remaptwo.put("readmoney", readMoney[i]);
-						remaptwo.put("givemoney", "0");
-					}
-					mapstwo.add(remaptwo);
-				}
-			}
-			paymentDTO.setReadMoney(mapstwo);
+			paymentDTO.setReadMoney(maps);
 			
 			return paymentDTO;
 		}).collect(Collectors.toList());
