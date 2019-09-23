@@ -1050,7 +1050,7 @@ public class PaymentController extends AbstractBaseController {
 			if (paymentdto != null) {
 				int isreadonly = paymentdto.getIsReadonly();
 				if (isreadonly == 1) {// 固额充值赠送
-					List<Map<String, String>> maps = paymentdto.getReadMoney();
+					List<Map<String, String>> maps = paymentdto.getReadMoneyCi();
 					for (Map<String, String> map : maps) {
 						String readmoney = map.get("readmoney");
 						if (StringUtil.isEmpty(readmoney)) {
@@ -1076,7 +1076,7 @@ public class PaymentController extends AbstractBaseController {
 			if (paymentdto != null) {
 				int isreadonly = paymentdto.getIsReadonly();
 				if (isreadonly == 1) {// 固额充值赠送
-					List<Map<String, String>> maps = paymentdto.getReadMoney();
+					List<Map<String, String>> maps = paymentdto.getReadMoneyCi();
 					for (Map<String, String> map : maps) {
 						String readmoney = map.get("readmoney");
 						if (StringUtil.isEmpty(readmoney)) {
