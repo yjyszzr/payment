@@ -220,7 +220,7 @@ public class PayMentService extends AbstractService<PayMent> {
 						String money[] = readMoney[i].split(":");
 						if(money.length>1) {
 							remap.put("readmoney", money[0]);
-							remap.put("givemoney", money[1]+"元券");
+							remap.put("givemoney", money[1]);
 						} else if(money.length==1) {
 							remap.put("readmoney", money[0]);
 							remap.put("givemoney", "0");
@@ -286,7 +286,7 @@ public class PayMentService extends AbstractService<PayMent> {
 						}
 						if(money.length>1) {
 							remap.put("readmoney", readmoney+"");
-							remap.put("givemoney", money[1]+"元券");
+							remap.put("givemoney", money[1]);
 						} else if(money.length==1) {
 							remap.put("readmoney", readmoney+"");
 							remap.put("givemoney", "0");

@@ -1045,55 +1045,55 @@ public class PaymentController extends AbstractBaseController {
 		String payName = paymentResult.getData().getPayName();
 		// 生成充值单 金额由充值金额和赠送金额组成
 		int givemoney = 0;
-//		if ("app_rkwap".equals(payCode) || "app_jhpay".equals(payCode)) {// Q多多支付宝快捷支付附加固额充值赠送
-//			PaymentDTO paymentdto = paymentResult.getData();
-//			if (paymentdto != null) {
-//				int isreadonly = paymentdto.getIsReadonly();
-//				if (isreadonly == 1) {// 固额充值赠送
-//					List<Map<String, String>> maps = paymentdto.getReadMoneyCi();
-//					for (Map<String, String> map : maps) {
-//						String readmoney = map.get("readmoney");
-//						if (StringUtil.isEmpty(readmoney)) {
-//							readmoney = "0";// 103 298
-//						}
-//						if (param.getTotalAmount() >= Integer
-//								.parseInt(readmoney)
-//								&& param.getTotalAmount() <= (Integer
-//										.parseInt(readmoney) + 5)) {
-//							givemoney = Integer.parseInt(!StringUtils
-//									.isNotEmpty(map.get("givemoney"))
-//											? "0"
-//											: map.get("givemoney"));
-//							break;
-//						}
-//					}
-//				}
-//			}
-//		}
-//
-//		if ("app_yunpay".equals(payCode)) {// 云闪付大额支付宝快捷支付附加固额充值赠送
-//			PaymentDTO paymentdto = paymentResult.getData();
-//			if (paymentdto != null) {
-//				int isreadonly = paymentdto.getIsReadonly();
-//				if (isreadonly == 1) {// 固额充值赠送
-//					List<Map<String, String>> maps = paymentdto.getReadMoney();
-//					for (Map<String, String> map : maps) {
-//						String readmoney = map.get("readmoney");
-//						if (StringUtil.isEmpty(readmoney)) {
-//							readmoney = "0";
-//						}
-//						if (param.getTotalAmount() == Integer
-//								.parseInt(readmoney)) {
-//							givemoney = Integer.parseInt(!StringUtils
-//									.isNotEmpty(map.get("givemoney"))
-//											? "0"
-//											: map.get("givemoney"));
-//							break;
-//						}
-//					}
-//				}
-//			}
-//		}
+		if ("app_rkwap".equals(payCode) || "app_jhpay".equals(payCode)) {// Q多多支付宝快捷支付附加固额充值赠送
+			PaymentDTO paymentdto = paymentResult.getData();
+			if (paymentdto != null) {
+				int isreadonly = paymentdto.getIsReadonly();
+				if (isreadonly == 1) {// 固额充值赠送
+					List<Map<String, String>> maps = paymentdto.getReadMoney();
+					for (Map<String, String> map : maps) {
+						String readmoney = map.get("readmoney");
+						if (StringUtil.isEmpty(readmoney)) {
+							readmoney = "0";// 103 298
+						}
+						if (param.getTotalAmount() >= Integer
+								.parseInt(readmoney)
+								&& param.getTotalAmount() <= (Integer
+										.parseInt(readmoney) + 5)) {
+							givemoney = Integer.parseInt(!StringUtils
+									.isNotEmpty(map.get("givemoney"))
+											? "0"
+											: map.get("givemoney"));
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		if ("app_yunpay".equals(payCode)) {// 云闪付大额支付宝快捷支付附加固额充值赠送
+			PaymentDTO paymentdto = paymentResult.getData();
+			if (paymentdto != null) {
+				int isreadonly = paymentdto.getIsReadonly();
+				if (isreadonly == 1) {// 固额充值赠送
+					List<Map<String, String>> maps = paymentdto.getReadMoney();
+					for (Map<String, String> map : maps) {
+						String readmoney = map.get("readmoney");
+						if (StringUtil.isEmpty(readmoney)) {
+							readmoney = "0";
+						}
+						if (param.getTotalAmount() == Integer
+								.parseInt(readmoney)) {
+							givemoney = Integer.parseInt(!StringUtils
+									.isNotEmpty(map.get("givemoney"))
+											? "0"
+											: map.get("givemoney"));
+							break;
+						}
+					}
+				}
+			}
+		}
 
 		logger.info(loggerId + "赠送金额为" + givemoney);
 		String rechargeSn = userRechargeService.saveReCharege(
