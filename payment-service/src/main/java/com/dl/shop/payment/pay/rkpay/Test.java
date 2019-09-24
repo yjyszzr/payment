@@ -2,6 +2,8 @@ package com.dl.shop.payment.pay.rkpay;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -294,8 +296,8 @@ public class Test {
 		
 //		Integer id = 1213;
 //		System.out.println(id.toString());
-		System.out.println(test.s);
-		
+    	int nowWeekDay = LocalDateTime.ofInstant(new Date().toInstant(), ZoneId.systemDefault()).getDayOfWeek().getValue();;
+		System.out.println(nowWeekDay);
 //		System.out.println(test.hideMobile("18201349590"));
 //		   String pd="{\"gear_position\":[\"10\",\"20\"],\"gear_position_money\":[\"20\",\"30\"]}";
 //		   Map map = (Map)JSONUtils.parse(pd);
