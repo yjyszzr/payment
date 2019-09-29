@@ -954,6 +954,12 @@ public class PaymentController extends AbstractBaseController {
 		if(userid==null) {
 			return ResultGenerator.genFailResult("获取用户信息失败。");
 		}
+		com.dl.member.param.UserIdParam params = new com.dl.member.param.UserIdParam();
+		params.setUserId(userid);
+		BaseResult<UserDTO> resultUser = userService.queryUserInfo(params);
+		if(resultUser==null || resultUser.getData()==null) {
+			return ResultGenerator.genFailResult("获取用户信息失败。");
+		}
 		String loggerId = "forPayPage" + System.currentTimeMillis();
 		logger.info(loggerId + " int /payment/forPayPage, userId="
 				+ userid + " ,payCode=" + param.getPayCode()
@@ -981,7 +987,7 @@ public class PaymentController extends AbstractBaseController {
 		String cardNoHide=userBank.getCardNo().substring(0,4)+"*********"+userBank.getCardNo().substring(userBank.getCardNo().length()-4);
 		PaymentDTO paymentDTO = resultPayment.getData();
 		Map<String, String> paramMap = new HashMap<String, String>();
-		paramMap.put("payUrl",paymentDTO.getPayUrl()+"?merCustId="+userid+"&amount="+totalAmount+"&cardNoHide="+cardNoHide);//h5链接
+		paramMap.put("payUrl",paymentDTO.getPayUrl()+"?merCustId="+userid+"&amount="+totalAmount+"&cardNoHide="+cardNoHide+"&phone="+resultUser.getData().getRealmobile());//h5链接
 		payBaseResult = ResultGenerator.genSuccessResult("succ", paramMap);
 		return payBaseResult;
 	}
