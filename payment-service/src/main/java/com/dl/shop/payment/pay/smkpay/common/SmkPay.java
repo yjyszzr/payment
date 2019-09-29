@@ -14,9 +14,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.stereotype.Service;
+
 /**
  * Function: 支付接口-快捷支付
  **/
+@Service
 public class SmkPay {
 	/**
 	 * 银行卡签约
