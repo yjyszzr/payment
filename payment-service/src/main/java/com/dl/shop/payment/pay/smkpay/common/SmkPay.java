@@ -230,7 +230,7 @@ public class SmkPay {
 		String respStr = HttpUtil.postReq(requestMap.get("requestUrl"), message);
 		JSONObject json = JSON.parseObject(respStr);
 		//验签
-		if ("true".equals(json.getString("success"))) {
+		if ("true".equals(json.getString("success"))) { 
 			Map<String, String> checkMap = new HashMap<String, String>();
 			checkMap.put("reqSeq", reqSeq);
 			checkMap.put("sign_param", "success,value");
