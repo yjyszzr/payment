@@ -975,7 +975,7 @@ public class PaymentController extends AbstractBaseController {
 		ubqp.setBankCardCode(userid+"");//此处赋值是为了通过model校验，实际参数未用到
 		BaseResult<UserBankDTO>  resultBank = userBankService.queryUserBankByUserId(ubqp);
 		if(resultBank==null || resultBank.getData()==null) {
-			return ResultGenerator.genFailResult("银行卡信息获取失败。");
+			return ResultGenerator.genFailResult("获取银行卡信息失败,请核实是否已绑定银行卡。");
 		}
 		//获取支付链接
 		BaseResult<PaymentDTO> resultPayment = paymentService.queryByCode("app_smk");
