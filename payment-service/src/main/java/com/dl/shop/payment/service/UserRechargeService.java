@@ -105,6 +105,32 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
     }
     
     /**
+     * 创建充值单
+     * @param amount
+     * @return
+     */
+    @Transactional
+    public String saveReCharege(BigDecimal amount,String payCode,String payName,String rechargeSn){
+    	Integer userId = SessionUtil.getUserId();
+    	UserRecharge userRecharge = new UserRecharge();
+    	userRecharge.setRechargeSn(rechargeSn);
+    	userRecharge.setAmount(amount);
+    	userRecharge.setUserId(userId);
+    	userRecharge.setAddTime(DateUtil.getCurrentTimeLong());
+    	userRecharge.setStatus(ProjectConstant.NOT_FINISH);
+    	userRecharge.setPaymentCode(payCode);
+    	userRecharge.setPaymentName(payName);
+    	int rst = userRechargeMapper.insertUserRecharge(userRecharge);
+    	if(1 != rst) {
+    		log.error("保存数据库充值单失败");
+    		throw new ServiceException(MemberEnums.COMMON_ERROR.getcode(), "保存数据库充值单失败");
+    	}
+
+		return rechargeSn;
+    }
+    
+    
+    /**
      * 根据充值单号查询充值单
      */
     public BaseResult<UserRecharge> queryUserRecharge(String rechargeSn){

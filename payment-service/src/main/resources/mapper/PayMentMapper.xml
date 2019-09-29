@@ -17,6 +17,7 @@
     <result column="pay_config" jdbcType="LONGVARCHAR" property="payConfig" />
     <result column="pay_desc" jdbcType="LONGVARCHAR" property="payDesc" />
     <result column="is_h5" jdbcType="VARCHAR" property="isH5" />
+    <result column="pay_url" jdbcType="VARCHAR" property="payUrl" />
   </resultMap>
   <select id="selectJianLianConfig" resultType="java.lang.Integer">
     select value from dl_sys_config where business_id=11

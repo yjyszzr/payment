@@ -21,8 +21,6 @@ import java.security.NoSuchAlgorithmException;
 /**
  * AES加密工具
  * 采用AES/ECB/PKCS5Padding，128位加密
- *
- * @author jianghm
  */
 public class AESUtil {
 	/**

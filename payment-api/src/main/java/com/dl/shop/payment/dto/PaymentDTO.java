@@ -31,5 +31,7 @@ public class PaymentDTO {
     private Integer isReadonly;
 	@ApiModelProperty(value="固定额度")
 	private List<Map<String,String>> readMoney;
+	@ApiModelProperty(value="H5链接")
+	private String payUrl;
 
 }

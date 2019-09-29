@@ -20,4 +20,15 @@ public class RechargeParam {
 	private String userId;
 	@ApiModelProperty("订单编号")
 	private String orderSn;
+	//市民卡/惠民支付转有参数列
+	@ApiModelProperty("用户Id")
+	private Integer merCustId;
+	@ApiModelProperty("用户手机号")
+	private String phone;
+	@ApiModelProperty("手机验证码")
+	private String verCode;
+	@ApiModelProperty("四要素令牌")
+	private String tonken;
+	@ApiModelProperty("验证码令牌")
+	private String phoneToken;
 }

@@ -15,10 +15,9 @@ import java.util.*;
 
 /**
  * RSA签名工具类
- * Created by 刘志强 on 2017/4/24.
  */
 public class RSAUtil {
-
+	
     private static final int DEFAULT_BUFFER_SIZE = 8192;
 
     private static final String SIGN_CHARSET = "UTF-8";
@@ -110,8 +109,8 @@ public class RSAUtil {
      */
     public static String rsaSign(Map<String, String> map) throws Exception {
         String content = getSignContent(map);
-        String globalSeq = map.get("globalSeq");
-        PrivateKey priKey = getPrivateKeyFromPKCS8(new ByteArrayInputStream(SDKConfig.getConfig().getSignPrivateKey().getBytes()));
+        String signPrivateKey = map.get("signPrivateKey");
+        PrivateKey priKey = getPrivateKeyFromPKCS8(new ByteArrayInputStream(signPrivateKey.getBytes()));
         Signature signature = Signature.getInstance(SIGN_SHA256RSA_ALGORITHMS);
         signature.initSign(priKey);
         signature.update(content.getBytes(SIGN_CHARSET));
@@ -129,7 +128,6 @@ public class RSAUtil {
      */
     public static String rsaSignByCert(Map<String, String> map,String certPath,String certPwd) throws Exception {
         String content = getSignContent(map);
-        String globalSeq = map.get("globalSeq");
 
         // 获取证书
         X509Certificate x509 = (X509Certificate) getCertformPfx(certPath, certPwd);
@@ -153,7 +151,6 @@ public class RSAUtil {
      */
     public static boolean rsaCheck(Map<String, String> map) throws Exception {
         String content = getSignContent(map);
-        String globalSeq = map.get("globalSeq");
         String sign = map.get("sign");
         String publicKey = map.get("publicKey");
         PublicKey pubKey = getPublicKeyFromX509(new ByteArrayInputStream(publicKey.getBytes()));

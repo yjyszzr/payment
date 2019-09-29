@@ -2,6 +2,8 @@ package com.dl.shop.payment.model;
 
 import javax.persistence.*;
 
+import io.swagger.annotations.ApiModelProperty;
+
 @Table(name = "dl_payment")
 public class PayMent {
     /**
@@ -64,8 +66,18 @@ public class PayMent {
     private String payImg;
     @Column(name = "is_h5")
     private String isH5;
+    @Column(name = "pay_url")
+	private String payUrl;
 
-    public String getIsH5() {
+    public String getPayUrl() {
+		return payUrl;
+	}
+
+	public void setPayUrl(String payUrl) {
+		this.payUrl = payUrl;
+	}
+
+	public String getIsH5() {
 		return isH5;
 	}
 
