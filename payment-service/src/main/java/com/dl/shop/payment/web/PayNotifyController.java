@@ -601,6 +601,19 @@ public class PayNotifyController {
 		return;
 	}
 	
+	@ApiOperation(value = "惠民代付完成回调")
+	@GetMapping("/SmkPayNotify")
+	@ResponseBody
+	public void SmkPayNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+		request.setCharacterEncoding("UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		response.setHeader("Content-type", "text/html;charset=UTF-8");
+		log.info("SmkPayNotify返回成功");
+		writeLowerSuccess(response);
+		return;
+	}
+	
+	
 //	@ApiOperation(value = "Q多多代付回调")
 //	@PostMapping("/RkFundNotify")
 //	@ResponseBody
