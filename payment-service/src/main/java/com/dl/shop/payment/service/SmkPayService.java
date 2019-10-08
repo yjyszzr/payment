@@ -1,6 +1,7 @@
 package com.dl.shop.payment.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -170,7 +171,7 @@ public class SmkPayService {
 	 * @return
 	 * @throws Exception
 	 */
-	public Map<String,String> agentQueryBalance() throws Exception{
+	public double agentQueryBalance() throws Exception{
 		Map<String,String> requestMap = new HashMap<String,String>();
 		requestMap.put("merCode", smkParam.getMerCode());
 		requestMap.put("appId", smkParam.getAppId());
@@ -178,7 +179,13 @@ public class SmkPayService {
 		requestMap.put("certPwd", smkParam.getCertPwd());
 		requestMap.put("requestUrl", smkParam.getRequestUrl());
 		requestMap.put("vertifyPublicKey", smkParam.getVertifyPublicKey());
-		return smkAgent.agentQueryBalance(requestMap);
+		Map<String,String> resultMap = smkAgent.agentQueryBalance(requestMap);
+		if(resultMap!=null && resultMap.get("accBalance")!=null) {
+			BigDecimal accBalance = BigDecimal.valueOf(Double.valueOf(resultMap.get("accBalance")));
+			double accBalanceStr = accBalance.divide(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_EVEN).doubleValue();// 金额分转换成元
+			return accBalanceStr;
+		}
+		return 0d;
 
 	}
 	//校验最小金额
