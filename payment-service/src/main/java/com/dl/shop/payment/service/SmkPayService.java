@@ -32,7 +32,6 @@ public class SmkPayService {
 	private SmkAgent smkAgent;
 	/**
 	 * 银行卡签约--暂时不用
-	 * @param requestMap
 	 * @return
 	 * @throws Exception
 	 */
@@ -59,7 +58,6 @@ public class SmkPayService {
 	
 	/**
 	 * 银行卡解约--暂时不用
-	 * @param requestMap
 	 * @return
 	 * @throws Exception
 	 */
@@ -131,7 +129,7 @@ public class SmkPayService {
 	
 	/**
 	 * 支付结果查询
-	 * @param requestMap
+	 * @param orderNo-订单编号
 	 * @return
 	 * @throws Exception
 	 */
@@ -148,14 +146,20 @@ public class SmkPayService {
 	}
 	/**
 	 * 单笔实时代付
-	 * @param requestMap
+	 * @param orderNo-订单号
+	 * @param amount-提现金额
+	 * @param accName-收款人
+	 * @param accNo-收款账户
+	 * @param count-重调接口次数
 	 * @return
 	 * @throws Exception
 	 */
-	public RspSingleCashEntity agentSinglePay(String orderNo,String amount,int count) throws Exception {
+	public RspSingleCashEntity agentSinglePay(String orderNo,String amount,String accName,String accNo,int count) throws Exception {
 		RspSingleCashEntity rspEntity = new RspSingleCashEntity();
 		Map<String,String> requestMap = new HashMap<String,String>();
 		requestMap.put("orderNo", orderNo);
+		requestMap.put("actacn", accNo);
+		requestMap.put("toname", accName);
 		requestMap.put("amount", amount);
 		requestMap.put("merCode", smkParam.getMerCode());
 		requestMap.put("appId", smkParam.getAppId());
@@ -174,7 +178,7 @@ public class SmkPayService {
 				rspEntity.status = "F";
 			}else if(Integer.valueOf(status)==4) {
 				if(count<3) {
-					agentSinglePay(orderNo,amount,count++);
+					agentSinglePay(orderNo,amount,accName,accNo,count++);
 				}else {
 					rspEntity.status = "S";
 					rspEntity.resMessage = "提现处理中！";
@@ -191,7 +195,6 @@ public class SmkPayService {
 
 	/**
 	 * 账户余额查询
-	 * @param requestMap
 	 * @return
 	 * @throws Exception
 	 */

@@ -517,8 +517,8 @@ public class CashService {
 				log.info("走聚合付代付通道提现============================");
 				rEntity = jhpayService.fundApply(txScanRequestPaidByOthers);
 			} else if (PayForCompanyEnum.TX_PAYSMK.getCode().equals(thirdPayForType)) {// Q多多支付代付
-				log.info("走Q多多支付代付通道提现============================");
-				rEntity = smkPayService.agentSinglePay(orderSn, totalAmount+"",1);
+				log.info("走惠民代付通道提现============================");
+				rEntity = smkPayService.agentSinglePay(orderSn, totalAmount+"",accName,accNo,1);
 			} else {
 				log.info("空通道,未匹配到提现通道============================");
 			}

@@ -45,8 +45,8 @@ public class SmkAgent {
 		messageMap.put("orderNo",requestMap.get("orderNo"));//订单号	string (32)	必输	订单号，查询时使用，不超过32位
 		messageMap.put("busType", "TOPRV");//业务类型	string (8)	必输	TOPUB：对公，TOPRV：对私
 		messageMap.put("toibkn", "");//收款方联行号	string (12)	非必输 对公必输,对私避免填错导致入账失败,不填
-		messageMap.put("actacn",  AESUtil.encryptToHex("6222020000000000000", randomKey));//收款方账号	string (35)	必输	需加密
-		messageMap.put("toname",AESUtil.encryptToHex("叶继秋", randomKey));//收款方姓名	string (70)	必输	需加密
+		messageMap.put("actacn",  AESUtil.encryptToHex(requestMap.get("actacn"), randomKey));//收款方账号	string (35)	必输	需加密
+		messageMap.put("toname",AESUtil.encryptToHex(requestMap.get("toname"), randomKey));//收款方姓名	string (70)	必输	需加密
 		messageMap.put("toaddr", "");//非必输    收款方地址
 		messageMap.put("tobknm", "");//非必输   收款方开户行名称
 		messageMap.put("amount", requestMap.get("amount"));//交易金额	string (12)	必输	单位：元
