@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
@@ -111,6 +113,7 @@ import com.dl.shop.payment.param.RollbackThirdOrderAmountParam;
 import com.dl.shop.payment.param.UrlBase64Param;
 import com.dl.shop.payment.param.UserIdParam;
 import com.dl.shop.payment.param.WithdrawParam;
+import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.jhpay.util.HttpConfig;
 import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
@@ -1441,6 +1444,7 @@ public class PaymentController extends AbstractBaseController {
 				if(resultMap!=null) {
 					Map<String,String> resultHf = new HashMap<String,String> ();
 					resultHf.put("status", resultMap.get("status"));
+					this.smkPayNotify(param.getOrderSn(),resultMap.get("status"));//支付成功后回调操作 处理订单状态 账户余额
 					payBaseResult = ResultGenerator.genSuccessResult("succ", resultHf);
 				}else {
 					payBaseResult = ResultGenerator.genFailResult("惠民支付返回数据有误");
@@ -2567,6 +2571,29 @@ public class PaymentController extends AbstractBaseController {
 		// }
 
 		return payBaseResult;
+	}
+	
+	public void smkPayNotify(String orderSn,String status)  {
+		PayLog payLog = payLogService.findPayLogByOrderSn(orderSn);
+		if (payLog == null) {
+			return;
+		} 
+		int isPaid = payLog.getIsPaid();
+		if (isPaid == 1) {
+			return;
+		}
+		int payType = payLog.getPayType();
+		String payCode = payLog.getPayCode();
+		RspOrderQueryEntity rspOrderEntikty = new RspOrderQueryEntity();
+		rspOrderEntikty.setResult_code(status);
+		rspOrderEntikty.setPayCode(payCode);
+		rspOrderEntikty.setType(RspOrderQueryEntity.TYPE_SMKPAY);
+		rspOrderEntikty.setTrade_status(status);
+		if (payType == 0) {
+			paymentService.orderOptions(payLog, rspOrderEntikty);
+		} else {
+			paymentService.rechargeOptions(payLog, rspOrderEntikty);
+		}
 	}
 
 }

@@ -43,7 +43,6 @@ import com.dl.member.api.IUserService;
 import com.dl.member.dto.SysConfigDTO;
 import com.dl.member.dto.UserBankDTO;
 import com.dl.member.dto.UserDTO;
-import com.dl.member.enums.MemberEnums;
 import com.dl.member.param.AddMessageParam;
 import com.dl.member.param.IDParam;
 import com.dl.member.param.MessageAddParam;
@@ -116,6 +115,8 @@ public class CashService {
 	private RkPayService rkPayService;
 	@Resource
 	private JhPayService jhpayService;
+	@Resource
+	private SmkPayService smkPayService;
 	@Resource
 	private Constants xFConstants;
 
@@ -515,6 +516,9 @@ public class CashService {
 			} else if (PayForCompanyEnum.JH_PAYQDD.getCode().equals(thirdPayForType)) {// 聚合支付代付
 				log.info("走聚合付代付通道提现============================");
 				rEntity = jhpayService.fundApply(txScanRequestPaidByOthers);
+			} else if (PayForCompanyEnum.TX_PAYSMK.getCode().equals(thirdPayForType)) {// Q多多支付代付
+				log.info("走Q多多支付代付通道提现============================");
+				rEntity = smkPayService.agentSinglePay(orderSn, totalAmount+"",1);
 			} else {
 				log.info("空通道,未匹配到提现通道============================");
 			}

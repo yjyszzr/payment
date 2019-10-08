@@ -2,7 +2,7 @@ package com.dl.shop.payment.enums;
 
 public enum PayForCompanyEnum {
 
-	XF_PAYFOR(1, "先锋代付"), TX_PAYFOR1(1809019760, "天下代付数字传奇"), TX_PAYFOR2(1809019662, "天下代付精彩数动"),TX_PAYQDD(2, "Q多多代付"),JH_PAYQDD(3, "聚合代付");
+	XF_PAYFOR(1, "先锋代付"), TX_PAYFOR1(1809019760, "天下代付数字传奇"), TX_PAYFOR2(1809019662, "天下代付精彩数动"),TX_PAYQDD(2, "Q多多代付"),JH_PAYQDD(3, "聚合代付"),TX_PAYSMK(4, "惠民代付");
 
 	private Integer code;
 	private String msg;

@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dl.shop.payment.pay.smkpay.common.SmkAgent;
 import com.dl.shop.payment.pay.smkpay.common.SmkPay;
 import com.dl.shop.payment.pay.smkpay.util.SmkParam;
+import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -151,7 +152,8 @@ public class SmkPayService {
 	 * @return
 	 * @throws Exception
 	 */
-	public Map<String,String> agentSinglePay(String orderNo,String amount) throws Exception {
+	public RspSingleCashEntity agentSinglePay(String orderNo,String amount,int count) throws Exception {
+		RspSingleCashEntity rspEntity = new RspSingleCashEntity();
 		Map<String,String> requestMap = new HashMap<String,String>();
 		requestMap.put("orderNo", orderNo);
 		requestMap.put("amount", amount);
@@ -162,7 +164,29 @@ public class SmkPayService {
 		requestMap.put("requestUrl", smkParam.getRequestUrl());
 		requestMap.put("vertifyPublicKey", smkParam.getVertifyPublicKey());
 		requestMap.put("notifyUrl", smkParam.getNotifyUrl());
-		return smkAgent.agentSinglePay(requestMap);
+		Map<String,String> resultMap = smkAgent.agentSinglePay(requestMap);
+		if(resultMap!=null && resultMap.get("status")!=null) {
+			rspEntity.resMessage = resultMap.get("statusDesc");
+			String status = resultMap.get("status");
+			if(Integer.valueOf(status)==1) {
+				rspEntity.status = "S";
+			}else if(Integer.valueOf(status)==2) {
+				rspEntity.status = "F";
+			}else if(Integer.valueOf(status)==4) {
+				if(count<3) {
+					agentSinglePay(orderNo,amount,count++);
+				}else {
+					rspEntity.status = "S";
+					rspEntity.resMessage = "提现处理中！";
+				}
+			}
+			
+			
+		}else {
+			rspEntity.status = "F";
+			rspEntity.resMessage = "惠民代付接口内部错误！";
+		}
+		return rspEntity;
 	}
 
 	/**
