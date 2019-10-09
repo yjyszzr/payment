@@ -3,6 +3,10 @@ package com.dl.shop.payment.pay.smkpay.util;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.dl.shop.payment.pay.smkpay.common.SmkPay;
 
 import java.io.*;
 import java.security.*;
@@ -17,7 +21,7 @@ import java.util.*;
  * RSA签名工具类
  */
 public class RSAUtil {
-	
+	private final static Logger logger = LoggerFactory.getLogger(RSAUtil.class);
     private static final int DEFAULT_BUFFER_SIZE = 8192;
 
     private static final String SIGN_CHARSET = "UTF-8";
@@ -133,9 +137,10 @@ public class RSAUtil {
         X509Certificate x509 = (X509Certificate) getCertformPfx(certPath, certPwd);
         // 构建签名,由证书指定签名算法
         Signature sa = Signature.getInstance(SIGN_SHA256RSA_ALGORITHMS);
+        logger.info("SMK====111");
         // 获取私匙
         PrivateKey privateKey = getPvkformPfx(certPath, certPwd);
-
+        logger.info("SMK====222");
         sa.initSign(privateKey);
         sa.update(content.getBytes(SIGN_CHARSET));
         String sign = new String(Base64.encodeBase64(sa.sign()));
