@@ -137,19 +137,28 @@ public class RSAUtil {
         X509Certificate x509 = (X509Certificate) getCertformPfx(certPath, certPwd);
         // 构建签名,由证书指定签名算法
         Signature sa = Signature.getInstance(SIGN_SHA256RSA_ALGORITHMS);
-        logger.info("SMK====111");
         // 获取私匙
         PrivateKey privateKey = getPvkformPfx(certPath, certPwd);
         logger.info("SMK====222===="+privateKey);
         sa.initSign(privateKey);
-        logger.info("SMK====333");
         sa.update(content.getBytes(SIGN_CHARSET));
-        logger.info("SMK====444");
         String sign = new String(Base64.encodeBase64(sa.sign()));
-        logger.info("SMK====555===="+sign);
         return sign;
     }
-
+    public static String rsaSignByCert(String certPath,String certPwd) throws Exception {
+        // 获取私匙
+        PrivateKey privateKey = getPvkformPfx(certPath, certPwd);
+        System.out.println("privateKey============="+privateKey);
+        return null;
+    }
+	public static void main(String[] args) {
+		try {
+			rsaSignByCert("src/main/resources/AHSD.pfx","ahsd@cxm");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
     /**
      * RSA2验签
      *
