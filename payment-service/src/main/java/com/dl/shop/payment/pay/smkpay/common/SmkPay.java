@@ -4,6 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import lombok.extern.slf4j.Slf4j;
+
 import com.dl.shop.payment.pay.smkpay.util.AESUtil;
 import com.dl.shop.payment.pay.smkpay.util.HttpUtil;
 import com.dl.shop.payment.pay.smkpay.util.RSAUtil;
@@ -22,9 +25,10 @@ import org.springframework.stereotype.Service;
 /**
  * Function: 支付接口-快捷支付
  **/
+@Slf4j
 @Service
 public class SmkPay {
-	private final static Logger logger = LoggerFactory.getLogger(SmkPayService.class);
+	private final static Logger logger = LoggerFactory.getLogger(SmkPay.class);
 	/**
 	 * 银行卡签约
 	 * @param requestMap
