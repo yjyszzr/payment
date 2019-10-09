@@ -1056,19 +1056,21 @@ public class PaymentController extends AbstractBaseController {
 		if(userbank.getIsSign()==1) {
 			isSign = true;
 		}
-		Map<String, String> resultMap = null;
 		String rechargeSn = SNGenerator.nextSN(SNBusinessCodeEnum.RECHARGE_SN.getCode());
 		Map<String, String> paramMap = new HashMap<String, String>();
 		Map<String, String> resultHFMap = new HashMap<String, String>();
 		resultHFMap.put("orderNo", rechargeSn);
+		Map<String, String> resultMap = null;
 		try {
 			if(isSign) {
+				logger.info("SMK####isSign=true");
 				paramMap.put("merCustId", userid+"");//用户ID
 				paramMap.put("orderNo", rechargeSn);
 				paramMap.put("amount", totalAmount+"");
 				resultMap = smkPayService.bqpPay(paramMap);//银行卡信息已经签约，直接支付
 				resultHFMap.put("phoneToken", resultMap.get("phoneToken"));
 			}else {
+				logger.info("SMK####isSign=false");
 				UserIdRealParam ureal = new UserIdRealParam();
 				ureal.setUserId(userid);
 				BaseResult<UserRealDTO> resultUserReal = userService.queryUserRealByUserId(ureal);
@@ -1089,6 +1091,7 @@ public class PaymentController extends AbstractBaseController {
 				resultHFMap.put("token", resultMap.get("token"));
 				resultHFMap.put("phoneToken", resultMap.get("phoneToken"));
 			}
+			logger.info("SMK####resultMap="+resultMap);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
