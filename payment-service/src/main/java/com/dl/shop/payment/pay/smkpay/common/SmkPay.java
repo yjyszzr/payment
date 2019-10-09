@@ -142,7 +142,6 @@ public class SmkPay {
 	 * @throws Exception
 	 */
 	public Map<String, String> bqpSignAndPay(Map<String,String> requestMap) throws Exception {
-		logger.info("SMK签约并支付返回开始=======111==========：");
 		String reqSeq = setReqSeq();
 		String randomKey = setRandomKey();
 		Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
@@ -171,9 +170,7 @@ public class SmkPay {
 		messageMap.put("phoneToken",requestMap.get("phoneToken"));//验证码令牌	String(32)	非必输	第一次交互非必输，应答报文中smsFlag为1时可输
 		messageMap.put("accSplitData","");//分账域	String	非必输
 		messageMap.put("reserved","");//reserved	保留域	String	非必输	
-		logger.info("SMK签约并支付返回开始========222=========：");
 		String messageMapStr = gson.toJson(messageMap);
-		logger.info("SMK签约并支付返回开始========333=========：");
 		//请求开放平台数据
 		Map<String, String> openMap = new HashMap<String, String>();
 		openMap.put("reqSeq", reqSeq);
@@ -183,7 +180,6 @@ public class SmkPay {
 		openMap.put("sign_param", "appId,method,bizContent");
 		//加签
 		openMap.put("sign", RSAUtil.rsaSignByCert(openMap,requestMap.get("certPath"),requestMap.get("certPwd")));
-		logger.info("SMK签约并支付返回开始========444=========：");
 		String message = gson.toJson(openMap);
 		String respStr = HttpUtil.postReq(requestMap.get("requestUrl"), message);
 		logger.info("SMK签约并支付返回结果："+respStr);
