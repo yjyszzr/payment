@@ -140,7 +140,7 @@ public class RSAUtil {
         logger.info("SMK====111");
         // 获取私匙
         PrivateKey privateKey = getPvkformPfx(certPath, certPwd);
-        logger.info("SMK====222");
+        logger.info("SMK====222===="+privateKey);
         sa.initSign(privateKey);
         logger.info("SMK====333");
         sa.update(content.getBytes(SIGN_CHARSET));
