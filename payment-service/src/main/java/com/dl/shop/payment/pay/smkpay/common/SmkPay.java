@@ -8,12 +8,15 @@ import com.dl.shop.payment.pay.smkpay.util.AESUtil;
 import com.dl.shop.payment.pay.smkpay.util.HttpUtil;
 import com.dl.shop.payment.pay.smkpay.util.RSAUtil;
 import com.dl.shop.payment.pay.smkpay.util.TimeUtil;
+import com.dl.shop.payment.service.SmkPayService;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -21,6 +24,7 @@ import org.springframework.stereotype.Service;
  **/
 @Service
 public class SmkPay {
+	private final static Logger logger = LoggerFactory.getLogger(SmkPayService.class);
 	/**
 	 * 银行卡签约
 	 * @param requestMap
@@ -175,6 +179,7 @@ public class SmkPay {
 		openMap.put("sign", RSAUtil.rsaSignByCert(openMap,requestMap.get("certPath"),requestMap.get("certPwd")));
 		String message = gson.toJson(openMap);
 		String respStr = HttpUtil.postReq(requestMap.get("requestUrl"), message);
+		logger.info("SMK签约并支付返回结果："+respStr);
 		JSONObject json = JSON.parseObject(respStr);
 		//验签
 		if ("true".equals(json.getString("success"))) {
@@ -191,7 +196,7 @@ public class SmkPay {
 			}
 		}
 		Map<String, String> resultMap = new HashMap<String, String>();
-		resultMap.put("status", json.getString("55"));
+		resultMap.put("status", "55");
 		resultMap.put("respCode", json.getString("respCode"));
 		resultMap.put("respDesc", json.getString("respDesc"));
 		return resultMap;
@@ -235,6 +240,7 @@ public class SmkPay {
 		openMap.put("sign", RSAUtil.rsaSignByCert(openMap,requestMap.get("certPath"),requestMap.get("certPwd")));
 		String message = gson.toJson(openMap);
 		String respStr = HttpUtil.postReq(requestMap.get("requestUrl"), message);
+		logger.info("SMK支付返回结果："+respStr);
 		JSONObject json = JSON.parseObject(respStr);
 		//验签
 		if ("true".equals(json.getString("success"))) { 
@@ -251,7 +257,7 @@ public class SmkPay {
 			}
 		}
 		Map<String, String> resultMap = new HashMap<String, String>();
-		resultMap.put("status", json.getString("55"));
+		resultMap.put("status", "55");
 		resultMap.put("respCode", json.getString("respCode"));
 		resultMap.put("respDesc", json.getString("respDesc"));
 		return resultMap;
