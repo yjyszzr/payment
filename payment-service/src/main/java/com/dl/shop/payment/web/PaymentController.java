@@ -1095,6 +1095,9 @@ public class PaymentController extends AbstractBaseController {
 			if(resultMap==null) {
 				return ResultGenerator.genFailResult("充值失败 ");
 			}
+			if("55".equals(resultMap.get("status"))){
+				return ResultGenerator.genFailResult(resultMap.get("respDesc"));
+			}
 		}
 		payBaseResult = ResultGenerator.genSuccessResult("succ", resultHFMap);
 		return payBaseResult;
@@ -1469,9 +1472,13 @@ public class PaymentController extends AbstractBaseController {
 			} finally {
 				if(resultMap!=null) {
 					Map<String,String> resultHf = new HashMap<String,String> ();
-					resultHf.put("status", resultMap.get("status"));
-					this.smkPayNotify(param.getOrderSn(),resultMap.get("status"));//支付成功后回调操作 处理订单状态 账户余额
-					payBaseResult = ResultGenerator.genSuccessResult("succ", resultHf);
+					if("55".equals(resultMap.get("status"))){
+						payBaseResult = ResultGenerator.genFailResult(resultMap.get("respDesc"));
+					}else {
+						resultHf.put("status", resultMap.get("status"));
+						this.smkPayNotify(param.getOrderSn(),resultMap.get("status"));//支付成功后回调操作 处理订单状态 账户余额
+						payBaseResult = ResultGenerator.genSuccessResult("succ", resultHf);
+					}
 				}else {
 					payBaseResult = ResultGenerator.genFailResult("惠民支付返回数据有误");
 				}

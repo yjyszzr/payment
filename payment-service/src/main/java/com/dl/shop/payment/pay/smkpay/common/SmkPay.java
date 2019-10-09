@@ -190,7 +190,11 @@ public class SmkPay {
 				return resultMap;
 			}
 		}
-		return null;
+		Map<String, String> resultMap = new HashMap<String, String>();
+		resultMap.put("status", json.getString("55"));
+		resultMap.put("respCode", json.getString("respCode"));
+		resultMap.put("respDesc", json.getString("respDesc"));
+		return resultMap;
 	}
 	
 	/**
@@ -246,7 +250,11 @@ public class SmkPay {
 				return resultMap;
 			}
 		}
-		return null;
+		Map<String, String> resultMap = new HashMap<String, String>();
+		resultMap.put("status", json.getString("55"));
+		resultMap.put("respCode", json.getString("respCode"));
+		resultMap.put("respDesc", json.getString("respDesc"));
+		return resultMap;
 	}
 	
 	
