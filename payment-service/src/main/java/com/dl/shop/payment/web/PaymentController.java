@@ -972,6 +972,38 @@ public class PaymentController extends AbstractBaseController {
 		if (totalAmount < 1) {
 			return ResultGenerator.genFailResult("请选择固额充值。");
 		}
+		
+		//获取支付链接
+		BaseResult<PaymentDTO> resultPayment = paymentService.queryByCode("app_smk");
+		if(resultPayment==null || resultPayment.getData()==null) {
+			return ResultGenerator.genFailResult("获取第三方支付方式失败。");
+		}
+		
+		PaymentDTO paymentDTO = resultPayment.getData();
+		Map<String, String> paramMap = new HashMap<String, String>();
+		paramMap.put("payUrl",paymentDTO.getPayUrl()+"?merCustId="+userid+"&amount="+totalAmount);//h5链接
+		payBaseResult = ResultGenerator.genSuccessResult("succ", paramMap);
+		return payBaseResult;
+	}
+	
+	@ApiOperation(value = "根据用户id获取页面展示信息", notes = "payCode：支付编码")
+	@PostMapping("/forPageInfo")
+	@ResponseBody
+	public BaseResult<Object> forPageInfo(@RequestBody RechargeParam param,HttpServletRequest request) {
+		Integer userid = param.getMerCustId();
+		if(userid==null) {
+			userid = SessionUtil.getUserId();
+			if(userid==null) {
+				return ResultGenerator.genFailResult("获取用户信息失败。");
+			}
+		}
+		com.dl.member.param.UserIdParam params = new com.dl.member.param.UserIdParam();
+		params.setUserId(userid);
+		BaseResult<UserDTO> resultUser = userService.queryUserInfo(params);
+		if(resultUser==null || resultUser.getData()==null) {
+			return ResultGenerator.genFailResult("获取用户信息失败。");
+		}
+		BaseResult<Object> payBaseResult = null;
 		//获取当前用户身份证及默认银行卡信息
 		UserBankQueryParam ubqp = new UserBankQueryParam();
 		ubqp.setUserId(userid);
@@ -980,17 +1012,11 @@ public class PaymentController extends AbstractBaseController {
 		if(resultBank==null || resultBank.getData()==null) {
 			return ResultGenerator.genFailResult("获取银行卡信息失败,请核实是否已绑定银行卡。");
 		}
-		//获取支付链接
-		BaseResult<PaymentDTO> resultPayment = paymentService.queryByCode("app_smk");
-		if(resultPayment==null || resultPayment.getData()==null) {
-			return ResultGenerator.genFailResult("获取第三方支付方式失败。");
-		}
-		
 		UserBankDTO userBank = resultBank.getData();
 		String cardNoHide=userBank.getCardNo().substring(0,4)+"*********"+userBank.getCardNo().substring(userBank.getCardNo().length()-4);
-		PaymentDTO paymentDTO = resultPayment.getData();
 		Map<String, String> paramMap = new HashMap<String, String>();
-		paramMap.put("payUrl",paymentDTO.getPayUrl()+"?merCustId="+userid+"&amount="+totalAmount+"&cardNoHide="+cardNoHide+"&phone="+resultUser.getData().getRealmobile());//h5链接
+		paramMap.put("cardNoHide", cardNoHide);
+		paramMap.put("phone", resultUser.getData().getRealmobile());
 		payBaseResult = ResultGenerator.genSuccessResult("succ", paramMap);
 		return payBaseResult;
 	}
