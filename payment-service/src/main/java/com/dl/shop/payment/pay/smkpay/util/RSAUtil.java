@@ -142,8 +142,11 @@ public class RSAUtil {
         PrivateKey privateKey = getPvkformPfx(certPath, certPwd);
         logger.info("SMK====222");
         sa.initSign(privateKey);
+        logger.info("SMK====333");
         sa.update(content.getBytes(SIGN_CHARSET));
+        logger.info("SMK====444");
         String sign = new String(Base64.encodeBase64(sa.sign()));
+        logger.info("SMK====555===="+sign);
         return sign;
     }
 
