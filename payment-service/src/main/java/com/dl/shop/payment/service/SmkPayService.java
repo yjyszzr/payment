@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class SmkPayService {
-	private final static Logger logger = LoggerFactory.getLogger(SmkPayService.class);
 	@Resource
 	private SmkParam smkParam;
 	@Resource

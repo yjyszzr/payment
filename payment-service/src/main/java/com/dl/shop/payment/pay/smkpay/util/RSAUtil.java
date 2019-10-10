@@ -21,7 +21,6 @@ import java.util.*;
  * RSA签名工具类
  */
 public class RSAUtil {
-	private final static Logger logger = LoggerFactory.getLogger(RSAUtil.class);
     private static final int DEFAULT_BUFFER_SIZE = 8192;
 
     private static final String SIGN_CHARSET = "UTF-8";
@@ -139,7 +138,6 @@ public class RSAUtil {
         Signature sa = Signature.getInstance(SIGN_SHA256RSA_ALGORITHMS);
         // 获取私匙
         PrivateKey privateKey = getPvkformPfx(certPath, certPwd);
-        logger.info("SMK====222===="+privateKey);
         sa.initSign(privateKey);
         sa.update(content.getBytes(SIGN_CHARSET));
         String sign = new String(Base64.encodeBase64(sa.sign()));

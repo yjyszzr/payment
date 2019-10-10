@@ -195,7 +195,6 @@ public class SmkPay {
 			checkMap.put("publicKey", requestMap.get("vertifyPublicKey"));
 			logger.info("SMK签约并支付返回结果："+checkMap);
 			if(RSAUtil.rsaCheck(checkMap)) {
-				log.info("SMK+++++++@@@222");
 				Map<String, String> resultMap = (Map<String, String>) json.parse(json.getString("value"));
 				return resultMap;
 			}

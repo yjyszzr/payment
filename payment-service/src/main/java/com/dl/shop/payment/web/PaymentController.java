@@ -1091,7 +1091,6 @@ public class PaymentController extends AbstractBaseController {
 				resultHFMap.put("token", resultMap.get("token"));
 				resultHFMap.put("phoneToken", resultMap.get("phoneToken"));
 			}
-			logger.info("SMK####resultMap="+resultMap);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -1471,6 +1470,7 @@ public class PaymentController extends AbstractBaseController {
 					paramMap.put("verCode", param.getVerCode());
 					paramMap.put("token", param.getTonken());
 					paramMap.put("phoneToken", param.getPhoneToken());
+					logger.info("SMK=======paramMap=="+paramMap);
 					resultMap = smkPayService.bqpSignAndPay(paramMap);//银行卡信息未签约并支付
 				}
 			} catch (Exception e) {
