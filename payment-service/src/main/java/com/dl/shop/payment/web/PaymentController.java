@@ -1016,7 +1016,7 @@ public class PaymentController extends AbstractBaseController {
 		String cardNoHide=userBank.getCardNo().substring(0,4)+"*********"+userBank.getCardNo().substring(userBank.getCardNo().length()-4);
 		Map<String, String> paramMap = new HashMap<String, String>();
 		paramMap.put("cardNoHide", cardNoHide);
-		paramMap.put("phone", resultUser.getData().getRealmobile());
+//		paramMap.put("phone", resultUser.getData().getRealmobile());
 		payBaseResult = ResultGenerator.genSuccessResult("succ", paramMap);
 		return payBaseResult;
 	}
@@ -1445,9 +1445,9 @@ public class PaymentController extends AbstractBaseController {
 					paramMap.put("merCustId", userid+"");//用户ID
 					paramMap.put("orderNo", param.getOrderSn());
 					paramMap.put("amount", totalAmount+"");
+					paramMap.put("verCode", param.getVerCode());
 					paramMap.put("phoneToken", param.getPhoneToken());
 					resultMap = smkPayService.bqpPay(paramMap);//银行卡信息已经签约，直接支付
-					
 				}else {
 					UserIdRealParam ureal = new UserIdRealParam();
 					ureal.setUserId(userid);
@@ -1465,10 +1465,10 @@ public class PaymentController extends AbstractBaseController {
 					paramMap.put("cardNo", userbank.getCardNo());
 					paramMap.put("orderNo", param.getOrderSn());
 					paramMap.put("amount", totalAmount+"");
+					paramMap.put("verCode", param.getVerCode());
 					paramMap.put("token", param.getTonken());
 					paramMap.put("phoneToken", param.getPhoneToken());
 					resultMap = smkPayService.bqpSignAndPay(paramMap);//银行卡信息未签约并支付
-					
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
