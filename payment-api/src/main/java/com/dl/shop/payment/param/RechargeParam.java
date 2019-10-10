@@ -28,7 +28,7 @@ public class RechargeParam {
 	@ApiModelProperty("手机验证码")
 	private String verCode;
 	@ApiModelProperty("四要素令牌")
-	private String tonken;
+	private String token;
 	@ApiModelProperty("验证码令牌")
 	private String phoneToken;
 }

@@ -1468,7 +1468,7 @@ public class PaymentController extends AbstractBaseController {
 					paramMap.put("orderNo", param.getOrderSn());
 					paramMap.put("amount", totalAmount+"");
 					paramMap.put("verCode", param.getVerCode());
-					paramMap.put("token", param.getTonken());
+					paramMap.put("token", param.getToken());
 					paramMap.put("phoneToken", param.getPhoneToken());
 					logger.info("SMK=======paramMap=="+paramMap);
 					resultMap = smkPayService.bqpSignAndPay(paramMap);//银行卡信息未签约并支付
