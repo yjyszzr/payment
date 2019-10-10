@@ -79,18 +79,6 @@ public class SmkPayService {
 	 * @throws Exception
 	 */
 	public Map<String, String> bqpSignAndPay(Map<String,String> requestMap) throws Exception {
-		requestMap.put("merCustId", requestMap.get("merCustId"));//用户ID
-		requestMap.put("name", requestMap.get("name"));
-		requestMap.put("certType", requestMap.get("certType"));
-		requestMap.put("certNo", requestMap.get("certNo"));
-		requestMap.put("phone", requestMap.get("phone"));
-		requestMap.put("cardType", requestMap.get("cardType"));
-		requestMap.put("cardNo", requestMap.get("cardNo"));
-		requestMap.put("orderNo", requestMap.get("orderNo"));
-		requestMap.put("amount", requestMap.get("amount"));
-		requestMap.put("verCode", requestMap.get("verCode"));
-		requestMap.put("token", requestMap.get("token"));
-		requestMap.put("phoneToken", requestMap.get("phoneToken"));
 		requestMap.put("goods", "充值");
 		requestMap.put("merCode", smkParam.getMerCode());
 		requestMap.put("appId", smkParam.getAppId());
@@ -108,12 +96,6 @@ public class SmkPayService {
 	 * @throws Exception
 	 */
 	public Map<String,String> bqpPay(Map<String,String> requestMap) throws Exception{
-		requestMap.put("merCustId", requestMap.get("merCustId"));//用户ID
-		requestMap.put("orderNo", requestMap.get("orderNo"));
-		requestMap.put("shortCardNo", requestMap.get("shortCardNo"));
-		requestMap.put("amount", requestMap.get("amount"));
-		requestMap.put("verCode", requestMap.get("verCode"));
-		requestMap.put("phoneToken", requestMap.get("phoneToken"));
 		requestMap.put("goods", "充值");
 		requestMap.put("merCode", smkParam.getMerCode());
 		requestMap.put("appId", smkParam.getAppId());

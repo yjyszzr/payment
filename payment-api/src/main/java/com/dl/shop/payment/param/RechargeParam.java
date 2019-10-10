@@ -23,6 +23,9 @@ public class RechargeParam {
 	//市民卡/惠民支付转有参数列
 	@ApiModelProperty("用户Id")
 	private Integer merCustId;
+	private String reqSeq;
+	private String randomKey;
+	private String dateTime;
 	@ApiModelProperty("用户手机号")
 	private String phone;
 	@ApiModelProperty("手机验证码")

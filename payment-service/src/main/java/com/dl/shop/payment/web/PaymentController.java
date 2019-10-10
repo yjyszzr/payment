@@ -6,6 +6,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Comparator;
@@ -117,6 +118,7 @@ import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.jhpay.util.HttpConfig;
 import com.dl.shop.payment.pay.rongbao.config.ReapalH5Config;
 import com.dl.shop.payment.pay.rongbao.demo.RongUtil;
+import com.dl.shop.payment.pay.smkpay.util.TimeUtil;
 import com.dl.shop.payment.pay.xianfeng.util.XianFengPayUtil;
 import com.dl.shop.payment.pay.yinhe.config.ConfigerPay;
 import com.dl.shop.payment.pay.yinhe.entity.RspYinHeEntity;
@@ -1061,13 +1063,20 @@ public class PaymentController extends AbstractBaseController {
 		Map<String, String> resultHFMap = new HashMap<String, String>();
 		resultHFMap.put("orderNo", rechargeSn);
 		Map<String, String> resultMap = null;
+		String reqSeq = this.setReqSeq();
+		String dateTime = this.setDateTime();
+		String randomKey = this.setRandomKey();
 		try {
 			if(isSign) {
 				logger.info("SMK####isSign=true");
 				paramMap.put("merCustId", userid+"");//用户ID
 				paramMap.put("orderNo", rechargeSn);
 				paramMap.put("amount", totalAmount+"");
+				paramMap.put("reqSeq", reqSeq);
+				paramMap.put("dateTime", dateTime);
 				resultMap = smkPayService.bqpPay(paramMap);//银行卡信息已经签约，直接支付
+				resultHFMap.put("reqSeq", reqSeq);
+				resultHFMap.put("dateTime", dateTime);
 				resultHFMap.put("phoneToken", resultMap.get("phoneToken"));
 			}else {
 				logger.info("SMK####isSign=false");
@@ -1087,7 +1096,13 @@ public class PaymentController extends AbstractBaseController {
 				paramMap.put("cardNo", userbank.getCardNo());
 				paramMap.put("orderNo", rechargeSn);
 				paramMap.put("amount", totalAmount+"");
+				paramMap.put("reqSeq", reqSeq);
+				paramMap.put("randomKey", randomKey);
+				paramMap.put("dateTime", dateTime);
 				resultMap = smkPayService.bqpSignAndPay(paramMap);//银行卡信息未签约并支付
+				resultHFMap.put("reqSeq", reqSeq);
+				resultHFMap.put("randomKey", randomKey);
+				resultHFMap.put("dateTime", dateTime);
 				resultHFMap.put("token", resultMap.get("token"));
 				resultHFMap.put("phoneToken", resultMap.get("phoneToken"));
 			}
@@ -1447,6 +1462,8 @@ public class PaymentController extends AbstractBaseController {
 					paramMap.put("merCustId", userid+"");//用户ID
 					paramMap.put("orderNo", param.getOrderSn());
 					paramMap.put("amount", totalAmount+"");
+					paramMap.put("reqSeq", param.getReqSeq());
+					paramMap.put("dateTime", param.getDateTime());
 					paramMap.put("verCode", param.getVerCode());
 					paramMap.put("phoneToken", param.getPhoneToken());
 					resultMap = smkPayService.bqpPay(paramMap);//银行卡信息已经签约，直接支付
@@ -1467,6 +1484,9 @@ public class PaymentController extends AbstractBaseController {
 					paramMap.put("cardNo", userbank.getCardNo());
 					paramMap.put("orderNo", param.getOrderSn());
 					paramMap.put("amount", totalAmount+"");
+					paramMap.put("reqSeq", param.getReqSeq());
+					paramMap.put("randomKey", param.getRandomKey());
+					paramMap.put("dateTime", param.getDateTime());
 					paramMap.put("verCode", param.getVerCode());
 					paramMap.put("token", param.getToken());
 					paramMap.put("phoneToken", param.getPhoneToken());
@@ -2634,5 +2654,30 @@ public class PaymentController extends AbstractBaseController {
 			paymentService.rechargeOptions(payLog, rspOrderEntikty);
 		}
 	}
-
+	public String setTotalDate() {
+		return TimeUtil.dateToString(new Date(), TimeUtil.FORMAT_STRING6);
+	}
+	public String setTotalTime() {
+		return TimeUtil.dateToString(new Date(), TimeUtil.FORMAT_STRING7);
+	}
+	public String setDateTime() {
+		return TimeUtil.dateToString(new Date(), TimeUtil.FORMAT_STRING1);
+	}
+	public String setRandomKey() {
+	    int random = (int) (Math.random()*10000);
+	    if(random < 10000){
+	    	random =random +1000000000;
+	    }
+	    String randomKey =new SimpleDateFormat("yyyyMMddHHmmssSSSSSSSS").format(new Date()) + random;
+	    return randomKey;
+	}
+	public String setReqSeq() {
+		int random = (int) (Math.random()*10000);
+	    if(random < 10000){
+	    	random =random +1000000;
+	    }
+	    String reqSeq ="D"+new SimpleDateFormat("yyyyMMddHHmmssSSSSSSSS").format(new Date()) + random;
+	    return reqSeq;
+	}
+	
 }

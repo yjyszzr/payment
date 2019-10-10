@@ -36,8 +36,8 @@ public class SmkPay {
 	 * @throws Exception
 	 */
 	public Map<String,String> bqpSign(Map<String,String> requestMap) throws Exception {
-		String reqSeq = setReqSeq();
-		String randomKey = setRandomKey();
+		String reqSeq = requestMap.get("reqSeq");//setReqSeq();
+		String randomKey = requestMap.get("randomKey");//setRandomKey();
 		Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 		Map<String, String> messageMap = new HashMap<String, String>();
 		messageMap.put("version","1.0.0");//版本号	String(7)	必输	目前版本号：1.0.0
@@ -95,7 +95,7 @@ public class SmkPay {
 	 * @throws Exception
 	 */
 	public Map<String,String> bqpUnSign(Map<String,String> requestMap) throws Exception{
-		String reqSeq = setReqSeq();
+		String reqSeq = requestMap.get("reqSeq");//setReqSeq();
 		Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 		Map<String, String> messageMap = new HashMap<String, String>();
 		messageMap.put("version","1.0.0");//版本号	String(7)	必输	目前版本号：1.0.0
@@ -142,8 +142,9 @@ public class SmkPay {
 	 * @throws Exception
 	 */
 	public Map<String, String> bqpSignAndPay(Map<String,String> requestMap) throws Exception {
-		String reqSeq = setReqSeq();
-		String randomKey = setRandomKey();
+		String reqSeq = requestMap.get("reqSeq");//setReqSeq();
+		String randomKey = requestMap.get("randomKey");//setRandomKey();
+		String dateTime = requestMap.get("dateTime");//setRandomKey();
 		Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 		Map<String, String> messageMap = new HashMap<String, String>();
 		messageMap.put("version","1.0.0");//版本号	String(7)	必输	目前版本号：1.0.0
@@ -162,7 +163,7 @@ public class SmkPay {
 		messageMap.put("validDate","");//有效期	String(256)	非必输	MMYY，需加密
 		messageMap.put("cvv2","");//cvv2	String(256)	非必输	需加密
 		messageMap.put("orderNo",requestMap.get("orderNo"));//订单号	String(32)	必输	商户订单号
-		messageMap.put("dateTime",TimeUtil.dateToString(new Date(), TimeUtil.FORMAT_STRING1));//交易时间	String(17)	必输	YYYYMMDD HH:MM:SS
+		messageMap.put("dateTime",dateTime);//交易时间	String(17)	必输	YYYYMMDD HH:MM:SS
 		messageMap.put("amount",requestMap.get("amount"));//交易金额	String(11)	必输	以元为单位，保留小数点后2位
 		messageMap.put("goods",requestMap.get("goods"));//商品信息	String(30)	必输	商品信息描述
 		messageMap.put("verCode",requestMap.get("verCode"));//手机验证码	String(6)	非必输	第一次交互非必输，应答报文中smsFlag为1时可输
@@ -218,7 +219,8 @@ public class SmkPay {
 	 * @throws Exception
 	 */
 	public Map<String,String> bqpPay(Map<String,String> requestMap) throws Exception{
-		String reqSeq = setReqSeq();
+		String reqSeq = requestMap.get("reqSeq");//setReqSeq();
+		String dateTime = requestMap.get("dateTime");//setRandomKey();
 		Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 		Map<String, String> messageMap = new HashMap<String, String>();
 		messageMap.put("version","1.0.0");//版本号	String(7)	必输	目前版本号：1.0.0
@@ -229,7 +231,7 @@ public class SmkPay {
 		messageMap.put("merCustId",requestMap.get("merCustId"));//商户客户号	String(32)	必输	商户系统内部客户编号（唯一）
 		messageMap.put("orderNo",requestMap.get("orderNo"));//订单号	String(32)	必输	商户订单号
 		messageMap.put("shortCardNo",requestMap.get("shortCardNo"));//短卡号	String(10)	必输	由卡号前六后四位组成
-		messageMap.put("dateTime",TimeUtil.dateToString(new Date(), TimeUtil.FORMAT_STRING1));//交易时间	String(17)	必输	YYYYMMDD HH:MM:SS
+		messageMap.put("dateTime",dateTime);//交易时间	String(17)	必输	YYYYMMDD HH:MM:SS
 		messageMap.put("amount",requestMap.get("amount"));//交易金额	String(11)	必输	以元为单位，保留小数点后2位
 		messageMap.put("goods",requestMap.get("goods"));//商品信息	String(30)	必输	商品信息描述
 		messageMap.put("verCode",requestMap.get("verCode"));//手机验证码	String(6)	非必输	第一次交互非必输，应答报文中smsFlag为1时可输
@@ -280,7 +282,8 @@ public class SmkPay {
 	 * @throws Exception
 	 */
 	public Map<String,String> bqpPayQuery(Map<String,String> requestMap) throws Exception {
-		String reqSeq = setReqSeq();
+		String reqSeq = requestMap.get("reqSeq");//setReqSeq();
+		String dateTime = requestMap.get("dateTime");//setReqSeq();
 		Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 		Map<String, String> messageMap = new HashMap<String, String>();
 		messageMap.put("version","1.0.0");//版本号	String(7)	必输	目前版本号：1.0.0
@@ -290,7 +293,7 @@ public class SmkPay {
 		messageMap.put("chainNo","004");//渠道号	String(4)	必输	默认004
 		messageMap.put("serialNo","");//支付流水号	String(32)	非必输	支付平台返回的流水号
 		messageMap.put("orderNo",requestMap.get("orderNo"));//交易订单号	String(30)	非必输	商户订单号
-		messageMap.put("dateTime",TimeUtil.dateToString(new Date(), TimeUtil.FORMAT_STRING1));//交易时间	String(17)	必输	YYYYMMDD HH:MM:SS
+		messageMap.put("dateTime",dateTime);//交易时间	String(17)	必输	YYYYMMDD HH:MM:SS
 
 		String messageMapStr = gson.toJson(messageMap);
 		//请求开放平台数据
@@ -320,21 +323,5 @@ public class SmkPay {
 			}
 		}
 		return null;
-	}
-	public String setRandomKey() {
-	    int random = (int) (Math.random()*10000);
-	    if(random < 10000){
-	    	random =random +1000000000;
-	    }
-	    String randomKey =new SimpleDateFormat("yyyyMMddHHmmssSSSSSSSS").format(new Date()) + random;
-	    return randomKey;
-	}
-	public String setReqSeq() {
-		int random = (int) (Math.random()*10000);
-	    if(random < 10000){
-	    	random =random +1000000;
-	    }
-	    String reqSeq ="D"+new SimpleDateFormat("yyyyMMddHHmmssSSSSSSSS").format(new Date()) + random;
-	    return reqSeq;
 	}
 }
