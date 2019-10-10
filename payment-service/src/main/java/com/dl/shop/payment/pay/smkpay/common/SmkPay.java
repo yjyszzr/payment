@@ -194,6 +194,7 @@ public class SmkPay {
 			checkMap.put("sign", json.getString("sign"));
 			checkMap.put("publicKey", requestMap.get("vertifyPublicKey"));
 			if(RSAUtil.rsaCheck(checkMap)) {
+				log.info("SMK+++++++@@@222");
 				Map<String, String> resultMap = (Map<String, String>) json.parse(json.getString("value"));
 				return resultMap;
 			}
@@ -204,7 +205,12 @@ public class SmkPay {
 		resultMap.put("respDesc", json.getString("respDesc"));
 		return resultMap;
 	}
-	
+	public static void main(String[] args) {
+		String respStr="{\"success\":true,\"respDesc\":null,\"respCode\":null,\"value\":\"{\\\"respSeq\\\":\\\"D20191010150639000003911008204\\\",\\\"serialNo\\\":\\\"1920191010150640000144470019\\\",\\\"smsFlag\\\":\\\"1\\\",\\\"token\\\":\\\"20191010150640000144470018\\\"}\",\"sign\":\"Nc09dg9qWNM8fn1eKRp6McG9D86jSP0RJmFewXV6Te188FDcaq+r9leShmsx6cLagBDJ61R1PNduOeq2Qs4QUXmImRtKl5qoR2PRx3/+S+VRRUgp2GuQttsra/Ayaa6I2BPFUFZBPH0DNAGqrs+6IyOUU8tCr+Zt/OILkvOnkpZ1oszoK/+YWoi8gqTsVC2wWw77fb8QBxaCLOpegmJD86HYT+Qm17vLdmXVW+tQ4L7a8eNc93Fr9U9+GW/z7pPloDfQtT6jn/dfo2MFYD7g1bwg9mRIDx7DyK9hPTlV32N8vSRvlyp6dI1N+JU+GYWD42yoHmKhemTJBfS6wr2ehg==\"}";
+		JSONObject json = JSON.parseObject(respStr);
+		Map<String, String> resultMap = (Map<String, String>) json.parse(json.getString("value"));
+		System.out.println(resultMap);
+	}
 	/**
 	 * 支付
 	 * @param requestMap

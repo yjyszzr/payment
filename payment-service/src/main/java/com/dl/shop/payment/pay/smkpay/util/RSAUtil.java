@@ -170,11 +170,17 @@ public class RSAUtil {
         String content = getSignContent(map);
         String sign = map.get("sign");
         String publicKey = map.get("publicKey");
+        logger.info("SMK+++++++@@@333="+publicKey);
         PublicKey pubKey = getPublicKeyFromX509(new ByteArrayInputStream(publicKey.getBytes()));
+        logger.info("SMK+++++++@@@444="+pubKey);
         Signature signature = Signature.getInstance(SIGN_SHA256RSA_ALGORITHMS);
+        logger.info("SMK+++++++@@@555="+signature);
         signature.initVerify(pubKey);
+        logger.info("SMK+++++++@@@666");
         signature.update(content.getBytes(SIGN_CHARSET));
+        logger.info("SMK+++++++@@@777");
         boolean signResult = signature.verify(Base64.decodeBase64(sign.getBytes()));
+        logger.info("SMK+++++++@@@888="+signResult);
         return signResult;
     }
 
