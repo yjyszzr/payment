@@ -153,7 +153,7 @@ public class RSAUtil {
     }
 	public static void main(String[] args) {
 		try {
-			rsaSignByCert("src/main/resources/AHSD.pfx","ahsd@cxm");
+			rsaSignByCert("C:\\Users\\DELL\\Desktop/AHSD.pfx","ahsd@cxm");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
