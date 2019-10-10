@@ -212,6 +212,8 @@ public class PayMentService extends AbstractService<PayMent> {
 			paymentDTO.setPayImg(payment.getPayImg());
 			paymentDTO.setIsReadonly(payment.getIsReadonly());
 			paymentDTO.setPayUrl(payment.getPayUrl());
+			paymentDTO.setPayCn(payment.getPayCn());
+			paymentDTO.setPaySt(payment.getPaySt());
 			List<Map<String,String>> maps = new ArrayList();
 			if(payment.getReadMoney()!=null && !"".equals(payment.getReadMoney())) {
 				String readMoney[]=payment.getReadMoney().split(";");
@@ -271,6 +273,8 @@ public class PayMentService extends AbstractService<PayMent> {
 			paymentDTO.setPayImg(payment.getPayImg());
 			paymentDTO.setIsReadonly(payment.getIsReadonly());
 			paymentDTO.setPayUrl(payment.getPayUrl());
+			paymentDTO.setPayCn(payment.getPayCn());
+			paymentDTO.setPaySt(payment.getPaySt());
 			List<Map<String,String>> maps = new ArrayList();
 			if(payment.getReadMoney()!=null && !"".equals(payment.getReadMoney())) {
 				String readMoney[]=payment.getReadMoney().split(";");

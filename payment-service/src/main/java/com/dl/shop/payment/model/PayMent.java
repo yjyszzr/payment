@@ -68,8 +68,28 @@ public class PayMent {
     private String isH5;
     @Column(name = "pay_url")
 	private String payUrl;
+    @Column(name = "pay_cn")
+	private String payCn;
+	@Column(name = "pay_st")
+	private Integer paySt;
+	
+    public String getPayCn() {
+		return payCn;
+	}
 
-    public String getPayUrl() {
+	public void setPayCn(String payCn) {
+		this.payCn = payCn;
+	}
+
+	public Integer getPaySt() {
+		return paySt;
+	}
+
+	public void setPaySt(Integer paySt) {
+		this.paySt = paySt;
+	}
+
+	public String getPayUrl() {
 		return payUrl;
 	}
 

@@ -33,5 +33,9 @@ public class PaymentDTO {
 	private List<Map<String,String>> readMoney;
 	@ApiModelProperty(value="H5链接")
 	private String payUrl;
+	@ApiModelProperty(value="角标展示汉字")
+	private String payCn;
+	@ApiModelProperty(value="赠送方式0-现金1-代金券")
+	private Integer paySt;
 
 }
