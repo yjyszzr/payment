@@ -1438,10 +1438,9 @@ public class PaymentController extends AbstractBaseController {
 			boolean isSign = false;
 			//获取当前用户身份证及默认银行卡信息
 			UserBankQueryParam ubqp = new UserBankQueryParam();
-			Integer userid = param.getMerCustId();
-			if(userid==null) {
-				userid = userId;
-				if(userid==null) {
+			if(userId==null) {
+				userId = param.getMerCustId();;
+				if(userId==null) {
 					return ResultGenerator.genFailResult("用户信息获取失败。");
 				}
 			}
@@ -1459,23 +1458,24 @@ public class PaymentController extends AbstractBaseController {
 			Map<String, String> resultMap = new HashMap<String, String>();
 			try {
 				if(isSign) {
-					paramMap.put("merCustId", userid+"");//用户ID
+					paramMap.put("merCustId", userId+"");//用户ID
 					paramMap.put("orderNo", param.getOrderSn());
 					paramMap.put("amount", totalAmount+"");
 					paramMap.put("reqSeq", param.getReqSeq());
 					paramMap.put("dateTime", param.getDateTime());
 					paramMap.put("verCode", param.getVerCode());
 					paramMap.put("phoneToken", param.getPhoneToken());
+					logger.info("SMK=======paramMap=="+paramMap);
 					resultMap = smkPayService.bqpPay(paramMap);//银行卡信息已经签约，直接支付
 				}else {
 					UserIdRealParam ureal = new UserIdRealParam();
-					ureal.setUserId(userid);
+					ureal.setUserId(userId);
 					BaseResult<UserRealDTO> resultUserReal = userService.queryUserRealByUserId(ureal);
 					if(resultUserReal==null || resultUserReal.getData()==null) {
 						return ResultGenerator.genFailResult("用户实名认证信息获取失败。");
 					}
 					UserRealDTO userDto = resultUserReal.getData();
-					paramMap.put("merCustId", SessionUtil.getUserId()+"");//用户ID
+					paramMap.put("merCustId", userId+"");//用户ID
 					paramMap.put("name", userbank.getRealName());
 					paramMap.put("certType", "0");//身份证
 					paramMap.put("certNo", userDto.getIdCode());
@@ -1501,6 +1501,11 @@ public class PaymentController extends AbstractBaseController {
 					if("55".equals(resultMap.get("status"))){
 						payBaseResult = ResultGenerator.genFailResult(resultMap.get("respDesc"));
 					}else {
+						//修改银行卡为已签约
+						UserBankQueryParam ubqpParam = new UserBankQueryParam();
+						ubqpParam.setUserId(userId);
+						ubqpParam.setBankCardCode(userId+"");//参数没用，避免校验为空
+						userBankService.updateUserBankIsSign(ubqpParam);
 						resultHf.put("status", resultMap.get("status"));
 						this.smkPayNotify(param.getOrderSn(),resultMap.get("status"));//支付成功后回调操作 处理订单状态 账户余额
 						payBaseResult = ResultGenerator.genSuccessResult("succ", resultHf);
