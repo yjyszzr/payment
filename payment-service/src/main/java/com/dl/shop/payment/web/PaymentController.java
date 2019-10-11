@@ -1461,6 +1461,7 @@ public class PaymentController extends AbstractBaseController {
 					paramMap.put("merCustId", userId+"");//用户ID
 					paramMap.put("orderNo", param.getOrderSn());
 					paramMap.put("amount", totalAmount+"");
+					paramMap.put("shortCardNo", userbank.getCardNo().substring(0,6)+userbank.getCardNo().substring(userbank.getCardNo().length()-4));
 					paramMap.put("reqSeq", param.getReqSeq());
 					paramMap.put("dateTime", param.getDateTime());
 					paramMap.put("verCode", param.getVerCode());
