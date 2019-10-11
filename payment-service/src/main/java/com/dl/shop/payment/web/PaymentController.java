@@ -1072,6 +1072,7 @@ public class PaymentController extends AbstractBaseController {
 				paramMap.put("merCustId", userid+"");//用户ID
 				paramMap.put("orderNo", rechargeSn);
 				paramMap.put("amount", totalAmount+"");
+				paramMap.put("shortCardNo", userbank.getCardNo().substring(0,6)+userbank.getCardNo().substring(userbank.getCardNo().length()-4));
 				paramMap.put("reqSeq", reqSeq);
 				paramMap.put("dateTime", dateTime);
 				resultMap = smkPayService.bqpPay(paramMap);//银行卡信息已经签约，直接支付
