@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +24,7 @@ import com.google.gson.GsonBuilder;
  */
 @Service
 public class SmkAgent {
-	
+	private final static Logger logger = LoggerFactory.getLogger(SmkAgent.class);
 	/**
 	 * 单笔实时代付
 	 * @param requestMap
@@ -65,6 +67,7 @@ public class SmkAgent {
 		openMap.put("sign", RSAUtil.rsaSignByCert(openMap,requestMap.get("certPath"),requestMap.get("certPwd")));
 		String message = gson.toJson(openMap);
 		String respStr = HttpUtil.postReq(requestMap.get("requestUrl"), message);
+		logger.info("SMK提现="+respStr);
 		JSONObject json = JSON.parseObject(respStr);
 		// 验签
 		if ("true".equals(json.getString("success"))) {
