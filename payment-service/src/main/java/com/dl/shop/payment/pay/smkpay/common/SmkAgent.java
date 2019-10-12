@@ -55,6 +55,7 @@ public class SmkAgent {
 		messageMap.put("currency", "CNY");//币种	string (3)	必输	非空3位大写字母、数字，只支持 001或者 CNY
 		messageMap.put("remark", "");//备注	string (20)	非必输	格式为{"mobile":"手机号(需加密)","useage":"用途"}
     	messageMap.put("notifyUrl", requestMap.get("notifyUrl"));//服务端通知地址	string	非必输
+    	logger.info("SMK提现messageMap="+messageMap);
 		String messageMapStr = gson.toJson(messageMap);
 		// 请求开放平台数据
 		Map<String, String> openMap = new HashMap<String, String>();
@@ -67,7 +68,7 @@ public class SmkAgent {
 		openMap.put("sign", RSAUtil.rsaSignByCert(openMap,requestMap.get("certPath"),requestMap.get("certPwd")));
 		String message = gson.toJson(openMap);
 		String respStr = HttpUtil.postReq(requestMap.get("requestUrl"), message);
-		logger.info("SMK提现="+respStr);
+		logger.info("SMK提现resultStr="+respStr);
 		JSONObject json = JSON.parseObject(respStr);
 		// 验签
 		if ("true".equals(json.getString("success"))) {
