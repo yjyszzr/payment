@@ -3,6 +3,7 @@ package com.dl.shop.payment.service;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -482,6 +483,7 @@ public class CashService {
 		// phone = "18100000000";
 		// bankNo = "CCB";
 		// // ======================
+		DecimalFormat df = new DecimalFormat("######0.00");
 		BigDecimal bigDec = BigDecimal.valueOf(totalAmount);
 		BigDecimal bigFen = bigDec.multiply(new BigDecimal(100));
 		RspSingleCashEntity rEntity = new RspSingleCashEntity();
@@ -518,7 +520,7 @@ public class CashService {
 				rEntity = jhpayService.fundApply(txScanRequestPaidByOthers);
 			} else if (PayForCompanyEnum.TX_PAYSMK.getCode().equals(thirdPayForType)) {// Q多多支付代付
 				log.info("走惠民代付通道提现============================");
-				rEntity = smkPayService.agentSinglePay(orderSn, totalAmount+"",accName,accNo,1);
+				rEntity = smkPayService.agentSinglePay(orderSn, df.format(totalAmount)+"",accName,accNo,1);
 			} else {
 				log.info("空通道,未匹配到提现通道============================");
 			}
