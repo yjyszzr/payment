@@ -642,7 +642,6 @@ public class PayNotifyController {
 		resultMap.put("merCode", realMap.get("merCode"));
 		resultMap.put("respCode", "00");
 		resultMap.put("respDesc", "OK");
-		writeLowerSuccess(response);
 		return JSONUtils.valueToString(resultMap);
 	}
 	
