@@ -606,6 +606,7 @@ public class PayNotifyController {
 	@PostMapping("/SmkPayNotify")
 	@ResponseBody
 	public void SmkPayNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+		log.info("SmkPayNotify()云闪付支付通知消息begin");
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		response.setHeader("Content-type", "text/html;charset=UTF-8");
