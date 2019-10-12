@@ -158,12 +158,7 @@ public class SmkPayService {
 			}else if(Integer.valueOf(status)==2) {
 				rspEntity.status = "F";
 			}else if(Integer.valueOf(status)==4) {
-				if(count<3) {
-					agentSinglePay(orderNo,amount,accName,accNo,count++);
-				}else {
-					rspEntity.status = "S";
-					rspEntity.resMessage = "提现处理中！";
-				}
+				rspEntity.resMessage = "提现处理中！";
 			}
 			
 			

@@ -33,6 +33,7 @@ import com.dl.shop.payment.pay.kuaijie.util.KuaiJiePayUtil;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestCallback;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestCallback.TXCallback;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.util.TXScanPay;
+import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
 import com.dl.shop.payment.pay.yifutong.entity.RespYFTnotifyEntity;
 import com.dl.shop.payment.pay.yifutong.util.PayYFTUtil;
 import com.dl.shop.payment.pay.youbei.entity.RespUBeyNotifyEntity;
@@ -608,8 +609,23 @@ public class PayNotifyController {
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		response.setHeader("Content-type", "text/html;charset=UTF-8");
-		log.info("SmkPayNotify返回成功");
+		Map<?, ?> parameters = request.getParameterMap();// 保存request请求参数的临时变量
+		log.info("SmkPayNotify()云闪付支付通知消息LidPayNotify={}", parameters);
+		Map<String,Object> realMap = new HashMap<String, Object>();
+		// 打印惠民代付回调结果
+		log.info("SmkPayNotify()云闪付支付服务器端通知-接收到云闪付支付返回报文：");
+		Iterator<?> paiter = parameters.keySet().iterator();
+		while (paiter.hasNext()) {
+			String key = paiter.next().toString();
+			String[] values = (String[]) parameters.get(key);
+			log.info("SmkPayNotify()*********"+key + "-------------" + values[0]);
+			realMap.put(key, values[0]);
+		}
+		log.info("SmkPayNotify返回成功realMap="+realMap);
 		writeLowerSuccess(response);
+		
+//		RspSingleCashEntity rEntity = callThirdGetCash(widthDrawSn, totalAmount, cardNo, bankName, realName, mobile, bankCode, userId);
+//		return operation(rEntity, widthDrawSn, userId, Boolean.TRUE);
 		return;
 	}
 	
