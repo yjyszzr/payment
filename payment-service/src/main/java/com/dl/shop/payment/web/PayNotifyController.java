@@ -631,9 +631,11 @@ public class PayNotifyController {
 		RspSingleCashEntity rspEntity = new RspSingleCashEntity();
 		if("01".equals(status)) {
 			rspEntity.status = "S";
+			rspEntity.resCode = realMap.get("respCode");
 			rspEntity.resMessage = "提现成功！";
 		}else {
 			rspEntity.status = "F";
+			rspEntity.resCode = realMap.get("respCode");
 			rspEntity.resMessage = realMap.get("respDesc");
 		}
 		cashService.operation(rspEntity, widthDrawSn, SessionUtil.getUserId(), Boolean.TRUE);
