@@ -603,7 +603,7 @@ public class PayNotifyController {
 	}
 	
 	@ApiOperation(value = "惠民代付完成回调")
-	@GetMapping("/SmkPayNotify")
+	@PostMapping("/SmkPayNotify")
 	@ResponseBody
 	public void SmkPayNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
 		request.setCharacterEncoding("UTF-8");
