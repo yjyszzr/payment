@@ -1,7 +1,5 @@
 package com.dl.shop.payment.web;
 
-import io.swagger.annotations.ApiOperation;
-
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
@@ -11,9 +9,6 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import lombok.extern.slf4j.Slf4j;
-import net.sf.json.util.JSONUtils;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -25,10 +20,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
 import com.dl.base.util.JSONHelper;
+import com.dl.base.util.SessionUtil;
 import com.dl.shop.payment.model.PayLog;
 import com.dl.shop.payment.pay.common.RspOrderQueryEntity;
 import com.dl.shop.payment.pay.jhpay.util.XmlUtils;
-import com.dl.shop.payment.pay.kuaijie.entity.KuaiJiePayNotifyEntity;
 import com.dl.shop.payment.pay.kuaijie.util.KuaiJiePayUtil;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestCallback;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanRequestCallback.TXCallback;
@@ -40,8 +35,13 @@ import com.dl.shop.payment.pay.youbei.entity.RespUBeyNotifyEntity;
 import com.dl.shop.payment.pay.youbei.entity.RespUBeyRSAEntity;
 import com.dl.shop.payment.pay.youbei.util.PayUBeyUtil;
 import com.dl.shop.payment.service.APayService;
+import com.dl.shop.payment.service.CashService;
 import com.dl.shop.payment.service.PayLogService;
 import com.dl.shop.payment.service.PayMentService;
+
+import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
+import net.sf.json.util.JSONUtils;
 
 @Controller
 @RequestMapping("/payment/notify")
@@ -66,7 +66,9 @@ public class PayNotifyController {
 	private KuaiJiePayUtil kuaiJiePayUtil;
 	@Resource
 	private TXScanPay txScanPay;
-
+	@Resource
+	private CashService cashService;
+	
 	@ApiOperation(value = "易富通支付回调")
 	@PostMapping("/YFTNotify")
 	@ResponseBody
@@ -605,14 +607,14 @@ public class PayNotifyController {
 	@ApiOperation(value = "惠民代付完成回调")
 	@PostMapping("/SmkPayNotify")
 	@ResponseBody
-	public void SmkPayNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+	public String SmkPayNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
 		log.info("SmkPayNotify()云闪付支付通知消息begin");
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		response.setHeader("Content-type", "text/html;charset=UTF-8");
 		Map<?, ?> parameters = request.getParameterMap();// 保存request请求参数的临时变量
 		log.info("SmkPayNotify()云闪付支付通知消息LidPayNotify={}", parameters);
-		Map<String,Object> realMap = new HashMap<String, Object>();
+		Map<String,String> realMap = new HashMap<String, String>();
 		// 打印惠民代付回调结果
 		log.info("SmkPayNotify()云闪付支付服务器端通知-接收到云闪付支付返回报文：");
 		Iterator<?> paiter = parameters.keySet().iterator();
@@ -623,11 +625,25 @@ public class PayNotifyController {
 			realMap.put(key, values[0]);
 		}
 		log.info("SmkPayNotify返回成功realMap="+realMap);
+//		writeLowerSuccess(response);
+		String widthDrawSn = realMap.get("orderNo");
+		String status = realMap.get("status");
+		RspSingleCashEntity rspEntity = new RspSingleCashEntity();
+		if("01".equals(status)) {
+			rspEntity.status = "S";
+			rspEntity.resMessage = "提现成功！";
+		}else {
+			rspEntity.status = "F";
+			rspEntity.resMessage = realMap.get("respDesc");
+		}
+		cashService.operation(rspEntity, widthDrawSn, SessionUtil.getUserId(), Boolean.TRUE);
+		Map<String,String> resultMap = new HashMap<String,String>();
+		resultMap.put("respSeq", realMap.get("respSeq"));
+		resultMap.put("merCode", realMap.get("merCode"));
+		resultMap.put("respCode", "00");
+		resultMap.put("respDesc", "OK");
 		writeLowerSuccess(response);
-		
-//		RspSingleCashEntity rEntity = callThirdGetCash(widthDrawSn, totalAmount, cardNo, bankName, realName, mobile, bankCode, userId);
-//		return operation(rEntity, widthDrawSn, userId, Boolean.TRUE);
-		return;
+		return JSONUtils.valueToString(resultMap);
 	}
 	
 	
