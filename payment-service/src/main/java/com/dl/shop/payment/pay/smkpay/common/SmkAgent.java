@@ -51,7 +51,7 @@ public class SmkAgent {
 		messageMap.put("toname",AESUtil.encryptToHex(requestMap.get("toname"), randomKey));//收款方姓名	string (70)	必输	需加密
 		messageMap.put("toaddr", "");//非必输    收款方地址
 		messageMap.put("tobknm", "");//非必输   收款方开户行名称
-		messageMap.put("amount", requestMap.get("amount"));//交易金额	string (12)	必输	单位：元
+		messageMap.put("amount", "1");//交易金额	string (12)	必输	单位：元
 		messageMap.put("currency", "CNY");//币种	string (3)	必输	非空3位大写字母、数字，只支持 001或者 CNY
 		messageMap.put("remark", "");//备注	string (20)	非必输	格式为{"mobile":"手机号(需加密)","useage":"用途"}
     	messageMap.put("notifyUrl", requestMap.get("notifyUrl"));//服务端通知地址	string	非必输
