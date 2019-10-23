@@ -968,9 +968,7 @@ public class PaymentController extends AbstractBaseController {
 		logger.info(loggerId + " int /payment/forPayPage, userId="
 				+ userid + " ,payCode=" + param.getPayCode()
 				+ " , totalAmount=" + param.getTotalAmount());
-		double totalAmount = param.getTotalAmount();
-		DecimalFormat df= new DecimalFormat("######0.00");  
-		String totalAmountF = df.format(totalAmount); 
+		int totalAmount = param.getTotalAmount();
 		BaseResult<Object> payBaseResult = null;
 		if (totalAmount < 1) {
 			return ResultGenerator.genFailResult("请选择固额充值。");
@@ -984,7 +982,7 @@ public class PaymentController extends AbstractBaseController {
 		
 		PaymentDTO paymentDTO = resultPayment.getData();
 		Map<String, String> paramMap = new HashMap<String, String>();
-		paramMap.put("payUrl",paymentDTO.getPayUrl()+"?merCustId="+userid+"&amount="+totalAmountF);//h5链接
+		paramMap.put("payUrl",paymentDTO.getPayUrl()+"?merCustId="+userid+"&amount="+totalAmount);//h5链接
 		payBaseResult = ResultGenerator.genSuccessResult("succ", paramMap);
 		return payBaseResult;
 	}
