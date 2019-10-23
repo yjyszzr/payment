@@ -6,13 +6,13 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URLEncoder;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
@@ -1039,6 +1038,8 @@ public class PaymentController extends AbstractBaseController {
 				+ userid + " ,payCode=" + param.getPayCode()
 				+ " , totalAmount=" + param.getTotalAmount());
 		double totalAmount = param.getTotalAmount();
+		DecimalFormat df= new DecimalFormat("######0.00");  
+		String totalAmountF = df.format(totalAmount); 
 		BaseResult<Object> payBaseResult = null;
 		if (totalAmount < 1) {
 			return ResultGenerator.genFailResult("请选择固额充值 ");
@@ -1071,7 +1072,7 @@ public class PaymentController extends AbstractBaseController {
 				logger.info("SMK####isSign=true");
 				paramMap.put("merCustId", userid+"");//用户ID
 				paramMap.put("orderNo", rechargeSn);
-				paramMap.put("amount", totalAmount+"");
+				paramMap.put("amount", totalAmountF);
 				paramMap.put("shortCardNo", userbank.getCardNo().substring(0,6)+userbank.getCardNo().substring(userbank.getCardNo().length()-4));
 				paramMap.put("reqSeq", reqSeq);
 				paramMap.put("dateTime", dateTime);
@@ -1096,7 +1097,7 @@ public class PaymentController extends AbstractBaseController {
 				paramMap.put("cardType", "D");//借记卡
 				paramMap.put("cardNo", userbank.getCardNo());
 				paramMap.put("orderNo", rechargeSn);
-				paramMap.put("amount", totalAmount+"");
+				paramMap.put("amount", totalAmountF);
 				paramMap.put("reqSeq", reqSeq);
 				paramMap.put("randomKey", randomKey);
 				paramMap.put("dateTime", dateTime);
@@ -1143,6 +1144,8 @@ public class PaymentController extends AbstractBaseController {
 			}
 		}
 		double totalAmount = param.getTotalAmount();
+		DecimalFormat df= new DecimalFormat("######0.00");  
+		String totalAmountF = df.format(totalAmount); 
 		// if (totalAmount <= 0) {
 		// logger.info(loggerId + "充值金额有误！totalAmount=" + totalAmount);
 		// return
@@ -1461,7 +1464,7 @@ public class PaymentController extends AbstractBaseController {
 				if(isSign) {
 					paramMap.put("merCustId", userId+"");//用户ID
 					paramMap.put("orderNo", param.getOrderSn());
-					paramMap.put("amount", totalAmount+"");
+					paramMap.put("amount", totalAmountF);
 					paramMap.put("shortCardNo", userbank.getCardNo().substring(0,6)+userbank.getCardNo().substring(userbank.getCardNo().length()-4));
 					paramMap.put("reqSeq", param.getReqSeq());
 					paramMap.put("dateTime", param.getDateTime());
@@ -1485,7 +1488,7 @@ public class PaymentController extends AbstractBaseController {
 					paramMap.put("cardType", "D");//借记卡
 					paramMap.put("cardNo", userbank.getCardNo());
 					paramMap.put("orderNo", param.getOrderSn());
-					paramMap.put("amount", totalAmount+"");
+					paramMap.put("amount", totalAmountF);
 					paramMap.put("reqSeq", param.getReqSeq());
 					paramMap.put("randomKey", param.getRandomKey());
 					paramMap.put("dateTime", param.getDateTime());
