@@ -7,7 +7,7 @@ import lombok.Data;
 public class RechargeParam {
 
 	@ApiModelProperty("充值金额")
-	private int totalAmount;
+	private double totalAmount;
 	@ApiModelProperty("赠送金额:可不传")
 	private int giveAmount;
 	@ApiModelProperty("支付方式编码")
