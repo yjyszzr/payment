@@ -1135,6 +1135,10 @@ public class PaymentController extends AbstractBaseController {
 		logger.info(loggerId + " int /payment/recharge, userId="
 				+ SessionUtil.getUserId() + " ,payCode=" + param.getPayCode()
 				+ " , totalAmount=" + param.getTotalAmount());
+		Integer userId = SessionUtil.getUserId();
+		if(userId==null) {
+			userId = param.getMerCustId();
+		}
 		UserDeviceInfo userDeviceInfo = SessionUtil.getUserDevice();
 		String appCodeName = userDeviceInfo.getAppCodeName();
 		logger.info("当前平台是====appCodeName=" + appCodeName);
@@ -1292,7 +1296,7 @@ public class PaymentController extends AbstractBaseController {
 		String rechargeSn = "";
 		if ("app_smk".equals(payCode)) {
 			rechargeSn = userRechargeService.saveReCharege(
-					BigDecimal.valueOf(totalAmount + givemoney), payCode, payName,param.getOrderSn());
+					BigDecimal.valueOf(totalAmount + givemoney), payCode, payName,param.getOrderSn(),userId);
 		}else {
 			rechargeSn = userRechargeService.saveReCharege(
 					BigDecimal.valueOf(totalAmount + givemoney), payCode, payName);
@@ -1316,7 +1320,6 @@ public class PaymentController extends AbstractBaseController {
 				payCode = "app_weixin" + "_h5";
 			}
 		}
-		Integer userId = SessionUtil.getUserId();
 		PayLog payLog = super.newPayLog(userId, orderSn,
 				BigDecimal.valueOf(totalAmount), 1, payCode, payName, payIp,
 				givemoney + "");

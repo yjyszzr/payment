@@ -110,8 +110,7 @@ public class UserRechargeService extends AbstractService<UserRecharge> {
      * @return
      */
     @Transactional
-    public String saveReCharege(BigDecimal amount,String payCode,String payName,String rechargeSn){
-    	Integer userId = SessionUtil.getUserId();
+    public String saveReCharege(BigDecimal amount,String payCode,String payName,String rechargeSn,Integer userId){
     	UserRecharge userRecharge = new UserRecharge();
     	userRecharge.setRechargeSn(rechargeSn);
     	userRecharge.setAmount(amount);
