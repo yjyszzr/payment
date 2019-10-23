@@ -1113,7 +1113,7 @@ public class PaymentController extends AbstractBaseController {
 			e.printStackTrace();
 		} finally {
 			if(resultMap==null) {
-				return ResultGenerator.genFailResult("充值失败 ");
+				return ResultGenerator.genFailResult("获取验证码失败 ");
 			}
 			if("55".equals(resultMap.get("status"))){
 				return ResultGenerator.genFailResult(resultMap.get("respDesc"));
