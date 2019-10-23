@@ -1040,6 +1040,7 @@ public class PaymentController extends AbstractBaseController {
 		double totalAmount = param.getTotalAmount();
 		DecimalFormat df= new DecimalFormat("######0.00");  
 		String totalAmountF = df.format(totalAmount); 
+		logger.info("forRecharge*****totalAmountF="+totalAmountF);
 		BaseResult<Object> payBaseResult = null;
 		if (totalAmount < 1) {
 			return ResultGenerator.genFailResult("请选择固额充值 ");
