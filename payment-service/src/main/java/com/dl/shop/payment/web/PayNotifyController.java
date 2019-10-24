@@ -608,15 +608,15 @@ public class PayNotifyController {
 	@PostMapping("/SmkPayNotify")
 	@ResponseBody
 	public String SmkPayNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
-		log.info("SMKPayNotify()云闪付支付通知消息begin");
+		log.info("SMKPayNotify()惠民代付通知消息begin");
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		response.setHeader("Content-type", "text/html;charset=UTF-8");
 		Map<?, ?> parameters = request.getParameterMap();// 保存request请求参数的临时变量
-		log.info("SMKPayNotify()*********云闪付支付通知消息LidPayNotify={}", parameters);
+		log.info("SMKPayNotify()*********惠民代付通知消息LidPayNotify={}", parameters);
 		Map<String,String> realMap = new HashMap<String, String>();
 		// 打印惠民代付回调结果
-		log.info("SMKPayNotify()*********云闪付支付服务器端通知-接收到云闪付支付返回报文：");
+		log.info("SMKPayNotify()*********惠民代付服务器端通知-接收到云闪付支付返回报文：");
 		Iterator<?> paiter = parameters.keySet().iterator();
 		while (paiter.hasNext()) {
 			String key = paiter.next().toString();

@@ -1017,6 +1017,7 @@ public class PaymentController extends AbstractBaseController {
 		String cardNoHide=userBank.getCardNo().substring(0,4)+"*********"+userBank.getCardNo().substring(userBank.getCardNo().length()-4);
 		Map<String, String> paramMap = new HashMap<String, String>();
 		paramMap.put("cardNoHide", cardNoHide);
+		paramMap.put("isSign", userBank.getIsSign()+"");
 //		paramMap.put("phone", resultUser.getData().getRealmobile());
 		payBaseResult = ResultGenerator.genSuccessResult("succ", paramMap);
 		return payBaseResult;
