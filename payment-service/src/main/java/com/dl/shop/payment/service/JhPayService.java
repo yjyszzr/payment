@@ -84,11 +84,11 @@ public class JhPayService {
 			key = zfbutil.getSECRET_C();
 			mch_id = zfbutil.getMERCHANT_NO_C();
 		}else if(rnumber%3==0) {
-			key = zfbutil.getSECRET_C();
-			mch_id = zfbutil.getMERCHANT_NO_C();
+			key = zfbutil.getSECRET_D();
+			mch_id = zfbutil.getMERCHANT_NO_D();
 		}else if(rnumber%2==0) {
-			key = zfbutil.getSECRET_C();
-			mch_id = zfbutil.getMERCHANT_NO_C();
+			key = zfbutil.getSECRET_D();
+			mch_id = zfbutil.getMERCHANT_NO_D();
 		}
 		
 		map.put("service", zfbutil.getPAY_URL());
