@@ -77,18 +77,18 @@ public class JhPayService {
 	 */
 	@SuppressWarnings("finally")
 	public String jhAliPay(SortedMap<String, String> map){
-		String key = zfbutil.getSECRET_D();
-		String mch_id = zfbutil.getMERCHANT_NO_D();
+		String key = zfbutil.getSECRET_C();
+		String mch_id = zfbutil.getMERCHANT_NO_C();
 		int rnumber = new Random().nextInt(4)+1;
 		if(rnumber%4==0) {
-			key = zfbutil.getSECRET_D();
-			mch_id = zfbutil.getMERCHANT_NO_D();
+			key = zfbutil.getSECRET_C();
+			mch_id = zfbutil.getMERCHANT_NO_C();
 		}else if(rnumber%3==0) {
-			key = zfbutil.getSECRET_D();
-			mch_id = zfbutil.getMERCHANT_NO_D();
+			key = zfbutil.getSECRET_C();
+			mch_id = zfbutil.getMERCHANT_NO_C();
 		}else if(rnumber%2==0) {
-			key = zfbutil.getSECRET_D();
-			mch_id = zfbutil.getMERCHANT_NO_D();
+			key = zfbutil.getSECRET_C();
+			mch_id = zfbutil.getMERCHANT_NO_C();
 		}
 		
 		map.put("service", zfbutil.getPAY_URL());
