@@ -1092,7 +1092,7 @@ public class PaymentController extends AbstractBaseController {
 					return ResultGenerator.genFailResult("用户实名认证信息获取失败。");
 				}
 				UserRealDTO userDto = resultUserReal.getData();
-				paramMap.put("merCustId", SessionUtil.getUserId()+"");//用户ID
+				paramMap.put("merCustId", userid+"");//用户ID
 				paramMap.put("name", userbank.getRealName());
 				paramMap.put("certType", "0");//身份证
 				paramMap.put("certNo", userDto.getIdCode());
