@@ -1078,6 +1078,7 @@ public class PaymentController extends AbstractBaseController {
 				paramMap.put("shortCardNo", userbank.getCardNo().substring(0,6)+userbank.getCardNo().substring(userbank.getCardNo().length()-4));
 				paramMap.put("reqSeq", reqSeq);
 				paramMap.put("dateTime", dateTime);
+				logger.info("SMK####isSign=true===paramMap"+paramMap);
 				resultMap = smkPayService.bqpPay(paramMap);//银行卡信息已经签约，直接支付
 				resultHFMap.put("reqSeq", reqSeq);
 				resultHFMap.put("dateTime", dateTime);
@@ -1103,6 +1104,7 @@ public class PaymentController extends AbstractBaseController {
 				paramMap.put("reqSeq", reqSeq);
 				paramMap.put("randomKey", randomKey);
 				paramMap.put("dateTime", dateTime);
+				logger.info("SMK####isSign=false===paramMap"+paramMap);
 				resultMap = smkPayService.bqpSignAndPay(paramMap);//银行卡信息未签约并支付
 				resultHFMap.put("reqSeq", reqSeq);
 				resultHFMap.put("randomKey", randomKey);
