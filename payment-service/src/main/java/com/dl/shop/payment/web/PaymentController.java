@@ -270,9 +270,15 @@ public class PaymentController extends AbstractBaseController {
 			deviceUnique = "h5";
 		}
 		List<PaymentDTO> list = paymentService.findAllDto(deviceUnique);
-		if ("1.3.0".compareTo(userDevice.getAppv()) > 0) {// 1.3.0以前版本隐藏聚合支付
+		SysConfigParam cfg = new SysConfigParam();
+		cfg.setBusinessId(74);//支付方式版本控制
+		String valueTxt = userAccountService.queryBusinessLimit(cfg).getData()!=null?userAccountService.queryBusinessLimit(cfg).getData().getValueTxt():"5.0.0";
+		if(valueTxt==null) {
+			valueTxt="5.0.0";
+		}
+		if (valueTxt.compareTo(userDevice.getAppv()) > 0) {// 5.0.0以前版本隐藏聚合支付
 			list = list.stream().filter(dto -> {
-				if ("app_jhpay".equalsIgnoreCase(dto.getPayCode())
+				if ("app_smk".equalsIgnoreCase(dto.getPayCode())
 						|| "app_yunpay".equalsIgnoreCase(dto.getPayCode())) {
 					return false;
 				}
@@ -459,16 +465,22 @@ public class PaymentController extends AbstractBaseController {
 		List<PaymentDTO> paymentDTOList = paymentService
 				.findAllDto(deviceUnique);
 
-		if ("1.3.0".compareTo(userDevice.getAppv()) > 0) {// 1.3.0以前版本隐藏聚合支付
+		SysConfigParam cfg = new SysConfigParam();
+		cfg.setBusinessId(74);//支付方式版本控制
+		String valueTxt = userAccountService.queryBusinessLimit(cfg).getData()!=null?userAccountService.queryBusinessLimit(cfg).getData().getValueTxt():"5.0.0";
+		if(valueTxt==null) {
+			valueTxt="5.0.0";
+		}
+		if (valueTxt.compareTo(userDevice.getAppv()) > 0) {// 1.3.0以前版本隐藏聚合支付
 			paymentDTOList = paymentDTOList.stream().filter(dto -> {
-				if ("app_jhpay".equalsIgnoreCase(dto.getPayCode())
-						|| "app_yunpay".equalsIgnoreCase(dto.getPayCode())) {
+				if ("app_smk".equalsIgnoreCase(dto.getPayCode())
+						|| "app_smk".equalsIgnoreCase(dto.getPayCode())) {
 					return false;
 				}
 				return true;
 			}).collect(Collectors.toList());
 		}
-
+		
 		payWaysDTO.setPaymentDTOList(paymentDTOList);
 
 		StrParam strParam = new StrParam();
