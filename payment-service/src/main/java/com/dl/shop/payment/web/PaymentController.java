@@ -1050,103 +1050,104 @@ public class PaymentController extends AbstractBaseController {
 	@PostMapping("/forRecharge")
 	@ResponseBody
 	public BaseResult<Object> forRecharge(@RequestBody RechargeParam param,HttpServletRequest request) {
-		Integer userid = param.getMerCustId();
-		if(userid==null) {
-			userid = SessionUtil.getUserId();
-			if(userid==null) {
-				return ResultGenerator.genFailResult("获取用户信息失败。");
-			}
-		}
-		String loggerId = "forRecharge" + System.currentTimeMillis();
-		logger.info(loggerId + " int /payment/forRecharge, userId="
-				+ userid + " ,payCode=" + param.getPayCode()
-				+ " , totalAmount=" + param.getTotalAmount());
-		double totalAmount = param.getTotalAmount();
-		DecimalFormat df= new DecimalFormat("######0.00");  
-		String totalAmountF = df.format(totalAmount); 
-		logger.info("forRecharge*****totalAmountF="+totalAmountF);
-		BaseResult<Object> payBaseResult = null;
-		if (totalAmount < 1) {
-			return ResultGenerator.genFailResult("请选择固额充值 ");
-		}
-		
-		//获取当前用户身份证及默认银行卡信息
-		boolean isSign = false;
-		//获取当前用户身份证及默认银行卡信息
-		UserBankQueryParam ubqp = new UserBankQueryParam();
-		ubqp.setUserId(userid);
-		ubqp.setBankCardCode(userid+"");//此处赋值是为了通过model校验，实际参数未用到
-		BaseResult<UserBankDTO>  resultBank = userBankService.queryUserBankByUserId(ubqp);
-		if(resultBank==null || resultBank.getData()==null) {
-			return ResultGenerator.genFailResult("银行卡信息获取失败。");
-		}
-		UserBankDTO userbank = resultBank.getData();
-		if(userbank.getIsSign()==1) {
-			isSign = true;
-		}
-		String rechargeSn = SNGenerator.nextSN(SNBusinessCodeEnum.RECHARGE_SN.getCode());
-		Map<String, String> paramMap = new HashMap<String, String>();
-		Map<String, String> resultHFMap = new HashMap<String, String>();
-		resultHFMap.put("orderNo", rechargeSn);
-		Map<String, String> resultMap = null;
-		String reqSeq = this.setReqSeq();
-		String dateTime = this.setDateTime();
-		String randomKey = this.setRandomKey();
-		try {
-			if(isSign) {
-				logger.info("SMK####isSign=true");
-				paramMap.put("merCustId", userid+"");//用户ID
-				paramMap.put("orderNo", rechargeSn);
-				paramMap.put("amount", totalAmountF);
-				paramMap.put("shortCardNo", userbank.getCardNo().substring(0,6)+userbank.getCardNo().substring(userbank.getCardNo().length()-4));
-				paramMap.put("reqSeq", reqSeq);
-				paramMap.put("dateTime", dateTime);
-				logger.info("SMK####isSign=true===paramMap"+paramMap);
-				resultMap = smkPayService.bqpPay(paramMap);//银行卡信息已经签约，直接支付
-				resultHFMap.put("reqSeq", reqSeq);
-				resultHFMap.put("dateTime", dateTime);
-				resultHFMap.put("phoneToken", resultMap.get("phoneToken"));
-			}else {
-				logger.info("SMK####isSign=false");
-				UserIdRealParam ureal = new UserIdRealParam();
-				ureal.setUserId(userid);
-				BaseResult<UserRealDTO> resultUserReal = userService.queryUserRealByUserId(ureal);
-				if(resultUserReal==null || resultUserReal.getData()==null) {
-					return ResultGenerator.genFailResult("用户实名认证信息获取失败。");
-				}
-				UserRealDTO userDto = resultUserReal.getData();
-				paramMap.put("merCustId", userid+"");//用户ID
-				paramMap.put("name", userbank.getRealName());
-				paramMap.put("certType", "0");//身份证
-				paramMap.put("certNo", userDto.getIdCode());
-				paramMap.put("phone", param.getPhone());
-				paramMap.put("cardType", "D");//借记卡
-				paramMap.put("cardNo", userbank.getCardNo());
-				paramMap.put("orderNo", rechargeSn);
-				paramMap.put("amount", totalAmountF);
-				paramMap.put("reqSeq", reqSeq);
-				paramMap.put("randomKey", randomKey);
-				paramMap.put("dateTime", dateTime);
-				logger.info("SMK####isSign=false===paramMap"+paramMap);
-				resultMap = smkPayService.bqpSignAndPay(paramMap);//银行卡信息未签约并支付
-				resultHFMap.put("reqSeq", reqSeq);
-				resultHFMap.put("randomKey", randomKey);
-				resultHFMap.put("dateTime", dateTime);
-				resultHFMap.put("token", resultMap.get("token"));
-				resultHFMap.put("phoneToken", resultMap.get("phoneToken"));
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			if(resultMap==null) {
-				return ResultGenerator.genFailResult("获取验证码失败 ");
-			}
-			if("55".equals(resultMap.get("status"))){
-				return ResultGenerator.genFailResult(resultMap.get("respDesc"));
-			}
-		}
-		payBaseResult = ResultGenerator.genSuccessResult("succ", resultHFMap);
-		return payBaseResult;
+		return ResultGenerator.genFailResult("获取用户信息失败。");
+//		Integer userid = param.getMerCustId();
+//		if(userid==null) {
+//			userid = SessionUtil.getUserId();
+//			if(userid==null) {
+//				return ResultGenerator.genFailResult("获取用户信息失败。");
+//			}
+//		}
+//		String loggerId = "forRecharge" + System.currentTimeMillis();
+//		logger.info(loggerId + " int /payment/forRecharge, userId="
+//				+ userid + " ,payCode=" + param.getPayCode()
+//				+ " , totalAmount=" + param.getTotalAmount());
+//		double totalAmount = param.getTotalAmount();
+//		DecimalFormat df= new DecimalFormat("######0.00");  
+//		String totalAmountF = df.format(totalAmount); 
+//		logger.info("forRecharge*****totalAmountF="+totalAmountF);
+//		BaseResult<Object> payBaseResult = null;
+//		if (totalAmount < 1) {
+//			return ResultGenerator.genFailResult("请选择固额充值 ");
+//		}
+//		
+//		//获取当前用户身份证及默认银行卡信息
+//		boolean isSign = false;
+//		//获取当前用户身份证及默认银行卡信息
+//		UserBankQueryParam ubqp = new UserBankQueryParam();
+//		ubqp.setUserId(userid);
+//		ubqp.setBankCardCode(userid+"");//此处赋值是为了通过model校验，实际参数未用到
+//		BaseResult<UserBankDTO>  resultBank = userBankService.queryUserBankByUserId(ubqp);
+//		if(resultBank==null || resultBank.getData()==null) {
+//			return ResultGenerator.genFailResult("银行卡信息获取失败。");
+//		}
+//		UserBankDTO userbank = resultBank.getData();
+//		if(userbank.getIsSign()==1) {
+//			isSign = true;
+//		}
+//		String rechargeSn = SNGenerator.nextSN(SNBusinessCodeEnum.RECHARGE_SN.getCode());
+//		Map<String, String> paramMap = new HashMap<String, String>();
+//		Map<String, String> resultHFMap = new HashMap<String, String>();
+//		resultHFMap.put("orderNo", rechargeSn);
+//		Map<String, String> resultMap = null;
+//		String reqSeq = this.setReqSeq();
+//		String dateTime = this.setDateTime();
+//		String randomKey = this.setRandomKey();
+//		try {
+//			if(isSign) {
+//				logger.info("SMK####isSign=true");
+//				paramMap.put("merCustId", userid+"");//用户ID
+//				paramMap.put("orderNo", rechargeSn);
+//				paramMap.put("amount", totalAmountF);
+//				paramMap.put("shortCardNo", userbank.getCardNo().substring(0,6)+userbank.getCardNo().substring(userbank.getCardNo().length()-4));
+//				paramMap.put("reqSeq", reqSeq);
+//				paramMap.put("dateTime", dateTime);
+//				logger.info("SMK####isSign=true===paramMap"+paramMap);
+//				resultMap = smkPayService.bqpPay(paramMap);//银行卡信息已经签约，直接支付
+//				resultHFMap.put("reqSeq", reqSeq);
+//				resultHFMap.put("dateTime", dateTime);
+//				resultHFMap.put("phoneToken", resultMap.get("phoneToken"));
+//			}else {
+//				logger.info("SMK####isSign=false");
+//				UserIdRealParam ureal = new UserIdRealParam();
+//				ureal.setUserId(userid);
+//				BaseResult<UserRealDTO> resultUserReal = userService.queryUserRealByUserId(ureal);
+//				if(resultUserReal==null || resultUserReal.getData()==null) {
+//					return ResultGenerator.genFailResult("用户实名认证信息获取失败。");
+//				}
+//				UserRealDTO userDto = resultUserReal.getData();
+//				paramMap.put("merCustId", userid+"");//用户ID
+//				paramMap.put("name", userbank.getRealName());
+//				paramMap.put("certType", "0");//身份证
+//				paramMap.put("certNo", userDto.getIdCode());
+//				paramMap.put("phone", param.getPhone());
+//				paramMap.put("cardType", "D");//借记卡
+//				paramMap.put("cardNo", userbank.getCardNo());
+//				paramMap.put("orderNo", rechargeSn);
+//				paramMap.put("amount", totalAmountF);
+//				paramMap.put("reqSeq", reqSeq);
+//				paramMap.put("randomKey", randomKey);
+//				paramMap.put("dateTime", dateTime);
+//				logger.info("SMK####isSign=false===paramMap"+paramMap);
+//				resultMap = smkPayService.bqpSignAndPay(paramMap);//银行卡信息未签约并支付
+//				resultHFMap.put("reqSeq", reqSeq);
+//				resultHFMap.put("randomKey", randomKey);
+//				resultHFMap.put("dateTime", dateTime);
+//				resultHFMap.put("token", resultMap.get("token"));
+//				resultHFMap.put("phoneToken", resultMap.get("phoneToken"));
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		} finally {
+//			if(resultMap==null) {
+//				return ResultGenerator.genFailResult("获取验证码失败 ");
+//			}
+//			if("55".equals(resultMap.get("status"))){
+//				return ResultGenerator.genFailResult(resultMap.get("respDesc"));
+//			}
+//		}
+//		payBaseResult = ResultGenerator.genSuccessResult("succ", resultHFMap);
+//		return payBaseResult;
 	}
 	
 	@ApiOperation(value = "app充值调用", notes = "payCode：支付编码，app端微信支付为app_weixin")
