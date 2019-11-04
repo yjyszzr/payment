@@ -988,6 +988,15 @@ public class PaymentController extends AbstractBaseController {
 			return ResultGenerator.genFailResult("请选择固额充值。");
 		}
 		
+		//获取当前用户身份证及默认银行卡信息
+		UserBankQueryParam ubqp = new UserBankQueryParam();
+		ubqp.setUserId(userid);
+		ubqp.setBankCardCode(userid+"");//此处赋值是为了通过model校验，实际参数未用到
+		BaseResult<UserBankDTO>  resultBank = userBankService.queryUserBankByUserId(ubqp);
+		if(resultBank==null || resultBank.getData()==null) {
+			return ResultGenerator.genFailResult("获取银行卡信息失败,请核实是否已绑定银行卡。");
+		}
+		
 		//获取支付链接
 		BaseResult<PaymentDTO> resultPayment = paymentService.queryByCode("app_smk");
 		if(resultPayment==null || resultPayment.getData()==null) {
