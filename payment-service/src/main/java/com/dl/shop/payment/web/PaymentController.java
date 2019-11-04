@@ -276,6 +276,7 @@ public class PaymentController extends AbstractBaseController {
 		if(valueTxt==null) {
 			valueTxt="5.0.0";
 		}
+		logger.info("valueTxt="+valueTxt+",appv="+userDevice.getAppv()+",compare="+valueTxt.compareTo(userDevice.getAppv()));
 		if (valueTxt.compareTo(userDevice.getAppv()) > 0) {// 5.0.0以前版本隐藏聚合支付
 			list = list.stream().filter(dto -> {
 				if ("app_smk".equalsIgnoreCase(dto.getPayCode())
@@ -471,6 +472,7 @@ public class PaymentController extends AbstractBaseController {
 		if(valueTxt==null) {
 			valueTxt="5.0.0";
 		}
+		logger.info("valueTxt="+valueTxt+",appv="+userDevice.getAppv()+",compare="+valueTxt.compareTo(userDevice.getAppv()));
 		if (valueTxt.compareTo(userDevice.getAppv()) > 0) {// 1.3.0以前版本隐藏聚合支付
 			paymentDTOList = paymentDTOList.stream().filter(dto -> {
 				if ("app_smk".equalsIgnoreCase(dto.getPayCode())
