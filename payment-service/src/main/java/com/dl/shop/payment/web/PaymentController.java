@@ -985,7 +985,7 @@ public class PaymentController extends AbstractBaseController {
 		int totalAmount = param.getTotalAmount();
 		BaseResult<Object> payBaseResult = null;
 		if (totalAmount < 1) {
-			return ResultGenerator.genResult(3000001,"请选择固额充值。");
+			return ResultGenerator.genResult(300001,"请选择固额充值。");
 		}
 		
 		//获取当前用户身份证及默认银行卡信息
@@ -994,7 +994,7 @@ public class PaymentController extends AbstractBaseController {
 		ubqp.setBankCardCode(userid+"");//此处赋值是为了通过model校验，实际参数未用到
 		BaseResult<UserBankDTO>  resultBank = userBankService.queryUserBankByUserId(ubqp);
 		if(resultBank==null || resultBank.getData()==null) {
-			return ResultGenerator.genResult(3000001,"获取银行卡信息失败,请核实是否已绑定银行卡。");
+			return ResultGenerator.genResult(300001,"获取银行卡信息失败,请核实是否已绑定银行卡。");
 		}
 		
 		//获取支付链接
@@ -1034,7 +1034,7 @@ public class PaymentController extends AbstractBaseController {
 		ubqp.setBankCardCode(userid+"");//此处赋值是为了通过model校验，实际参数未用到
 		BaseResult<UserBankDTO>  resultBank = userBankService.queryUserBankByUserId(ubqp);
 		if(resultBank==null || resultBank.getData()==null) {
-			return ResultGenerator.genResult(3000001,"获取银行卡信息失败,请核实是否已绑定银行卡。");
+			return ResultGenerator.genResult(300001,"获取银行卡信息失败,请核实是否已绑定银行卡。");
 		}
 		UserBankDTO userBank = resultBank.getData();
 		String cardNoHide=userBank.getCardNo().substring(0,4)+"*********"+userBank.getCardNo().substring(userBank.getCardNo().length()-4);
@@ -1139,10 +1139,10 @@ public class PaymentController extends AbstractBaseController {
 			e.printStackTrace();
 		} finally {
 			if(resultMap==null) {
-				return ResultGenerator.genResult(3000001,"获取验证码失败 ");
+				return ResultGenerator.genResult(300001,"获取验证码失败 ");
 			}
 			if("55".equals(resultMap.get("status"))){
-				return ResultGenerator.genResult(3000001,resultMap.get("respDesc"));
+				return ResultGenerator.genResult(300001,resultMap.get("respDesc"));
 			}
 		}
 		payBaseResult = ResultGenerator.genSuccessResult("succ", resultHFMap);
@@ -1534,7 +1534,7 @@ public class PaymentController extends AbstractBaseController {
 				if(resultMap!=null) {
 					Map<String,String> resultHf = new HashMap<String,String> ();
 					if("55".equals(resultMap.get("status"))){
-						payBaseResult = ResultGenerator.genResult(3000001,resultMap.get("respDesc"));
+						payBaseResult = ResultGenerator.genResult(300001,resultMap.get("respDesc"));
 					}else {
 						//修改银行卡为已签约
 						UserBankQueryParam ubqpParam = new UserBankQueryParam();
