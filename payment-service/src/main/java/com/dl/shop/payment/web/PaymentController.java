@@ -1018,7 +1018,7 @@ public class PaymentController extends AbstractBaseController {
 		if(userid==null) {
 			userid = SessionUtil.getUserId();
 			if(userid==null) {
-				return ResultGenerator.genFailResult("获取用户信息失败。");
+				return ResultGenerator.genFailResult("用户ID为空。");
 			}
 		}
 		com.dl.member.param.UserIdParam params = new com.dl.member.param.UserIdParam();
