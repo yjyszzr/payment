@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property name="LOG_DIR" value="/a/logs/app/payment"/>
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%p] - %msg %n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="rollingFileINFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/payment-info.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/info/payment-info.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%p] - %msg %n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+    </appender>
+
+
+    <appender name="rollingFileERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/payment-error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/error/payment-error.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%p] - %msg %n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+    </appender>
+
+    <!-- 测试环境，配置sentry用来收集日志-->
+    <appender name="sentry-dev" class="com.getsentry.raven.logback.SentryAppender">
+        <dsn>http://e583acfdf099471f8d68294af44dbd6b:68b5ce08ea444da99a3c06e67ccd6f64@49.232.65.109:9000/19</dsn>
+        <tags>tag1:value1,tag2:value2</tags>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+    </appender>
+
+    <!-- 生产环境，配置sentry用来收集日志-->
+    <appender name="sentry-prod" class="com.getsentry.raven.logback.SentryAppender">
+        <dsn>http://58522e1561814e4aa8fc29645fce148d:de794161ca874dacb0ec16596f4568bc@49.232.65.109:9000/20</dsn>
+        <tags>tag1:value1,tag2:value2</tags>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+    </appender>
+
+    <logger name="com.dl.shop.payment" level="INFO"/>
+    <logger name="org.springframework" level="INFO"/>
+    <logger name="com.dl.base.mapper" level="debug"/>
+    <logger name="com.alibaba.druid" level="WARN"/>
+
+    <!-- 开发、测试环境日志配置-->
+    <springProfile name="dev">
+        <root level="info">
+            <appender-ref ref="console"/>
+            <appender-ref ref="rollingFileINFO"/>
+            <appender-ref ref="rollingFileERROR"/>
+            <appender-ref ref="sentry-dev"/>
+        </root>
+    </springProfile>
+
+    <!-- 生产环境日志配置-->
+    <springProfile name="prod">
+        <root level="info">
+            <appender-ref ref="console"/>
+            <appender-ref ref="rollingFileINFO"/>
+            <appender-ref ref="rollingFileERROR"/>
+            <appender-ref ref="sentry-prod"/>
+        </root>
+    </springProfile>
+</configuration>
+
