@@ -28,7 +28,6 @@ import com.dl.shop.payment.pay.tianxia.tianxiaScan.entity.TXScanResponsePay;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.enums.PayChannelEnum;
 import com.dl.shop.payment.pay.tianxia.tianxiaScan.enums.TranCodeEnum;
 import com.dl.shop.payment.pay.xianfeng.cash.entity.RspSingleCashEntity;
-import com.dl.shop.payment.pay.yiniupay.util.HttpApi;
 
 @Component
 public class TXScanPay {
