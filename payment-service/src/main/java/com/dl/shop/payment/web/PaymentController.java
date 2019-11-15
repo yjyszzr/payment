@@ -1247,7 +1247,7 @@ public class PaymentController extends AbstractBaseController {
 				return ResultGenerator.genFailResult("请选择固额充值 ");
 			}
 		} else if ("app_smk".equals(param.getPayCode())) {
-			if (totalAmount < 1) {
+			if (totalAmount < 1) { 
 				return ResultGenerator.genFailResult("请选择固额充值 ");
 			}
 		}
