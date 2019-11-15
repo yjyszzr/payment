@@ -41,7 +41,7 @@
         <dsn>http://e583acfdf099471f8d68294af44dbd6b:68b5ce08ea444da99a3c06e67ccd6f64@49.232.65.109:9000/19</dsn>
         <tags>tag1:value1,tag2:value2</tags>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>WARN</level>
+            <level>ERROR</level>
         </filter>
     </appender>
 
@@ -50,7 +50,7 @@
         <dsn>http://58522e1561814e4aa8fc29645fce148d:de794161ca874dacb0ec16596f4568bc@49.232.65.109:9000/20</dsn>
         <tags>tag1:value1,tag2:value2</tags>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>WARN</level>
+            <level>ERROR</level>
         </filter>
     </appender>
 
@@ -59,7 +59,7 @@
         <dsn>http://9434bfb207094b1da1d8fa0f5126536f:52c12b3a00dc41b6a5c38335193b57b7@49.232.65.109:9000/36</dsn>
         <tags>tag1:value1,tag2:value2</tags>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>WARN</level>
+            <level>ERROR</level>
         </filter>
     </appender>
 
