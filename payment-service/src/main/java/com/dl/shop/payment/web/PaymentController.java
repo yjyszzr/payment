@@ -1251,8 +1251,12 @@ public class PaymentController extends AbstractBaseController {
 				return ResultGenerator.genFailResult("请选择固额充值 ");
 			}
 		}
+		if ("app_smk".equals(payCode)) {
+			if(StringUtils.isEmpty(param.getVerCode())){
+				return ResultGenerator.genResult(300001,"请输入验证码");
+			}
+		}
 		
-
 		BaseResult<PaymentDTO> paymentResult = paymentService
 				.queryByCode(payCode);
 		if (paymentResult.getCode() != 0) {
