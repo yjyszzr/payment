@@ -1493,7 +1493,7 @@ public class PaymentController extends AbstractBaseController {
 				isSign = true;
 			}
 			Map<String, String> paramMap = new HashMap<String, String>();
-			Map<String, String> resultMap = new HashMap<String, String>();
+			Map<String, String> resultMap = null;
 			try {
 				if(isSign) {
 					paramMap.put("merCustId", userId+"");//用户ID
