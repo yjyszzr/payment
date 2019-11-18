@@ -212,7 +212,7 @@ public class PayNotifyController {
 			writer = response.getWriter();
 			writer.write("success");
 			writer.flush();
-			log.error("回调响应成功,返回信息成功,返回信息为'success'");
+			log.info("回调响应成功,返回信息成功,返回信息为'success'");
 		} catch (Exception e) {
 			log.error("支付回调响应异常", e);
 		}
