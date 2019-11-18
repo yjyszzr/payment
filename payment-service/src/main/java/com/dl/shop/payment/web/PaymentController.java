@@ -1550,7 +1550,7 @@ public class PaymentController extends AbstractBaseController {
 						payBaseResult = ResultGenerator.genSuccessResult("succ", resultHf);
 					}
 				}else {
-					payBaseResult = ResultGenerator.genFailResult("惠民支付返回数据有误");
+					payBaseResult = ResultGenerator.genResult(300001,"充值失败，请稍后再试...");
 				}
 			}
 		}
