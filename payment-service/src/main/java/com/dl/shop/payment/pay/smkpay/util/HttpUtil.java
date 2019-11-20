@@ -42,7 +42,7 @@ public class HttpUtil {
 				conn.connect();
 			}
 			catch (Exception e) {
-				log.error("连接超时-第三方：{}",e.getMessage());
+				log.error("连接超时-第三方：{}",e);
 				return null;
 			}
 
