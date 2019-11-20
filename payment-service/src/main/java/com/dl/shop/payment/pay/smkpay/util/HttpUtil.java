@@ -1,4 +1,6 @@
 package com.dl.shop.payment.pay.smkpay.util;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -6,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+@Slf4j
 public class HttpUtil {
 	
 	/**
@@ -39,6 +42,7 @@ public class HttpUtil {
 				conn.connect();
 			}
 			catch (Exception e) {
+				log.error("连接超时",e.getMessage());
 				System.out.println("连接超时");
 				return null;
 			}
@@ -56,7 +60,7 @@ public class HttpUtil {
 				sb.append(buff, 0, cnt);
 			}
 			in.close();
-			System.out.println("第三方返回结果集："+sb.toString());
+			log.info("第三方返回结果集：", sb.toString());
 			return sb.toString();
 		}
 		catch (IOException e) {
