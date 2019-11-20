@@ -80,7 +80,6 @@ public class RSAUtil {
             } else {
                 nPassword = strPassword.toCharArray();
             }
-            log.info("证书内容：{}",fis.read());
             ks.load(fis, nPassword);
             fis.close();
             // Now we loop all the aliases, we need the alias to get keys.
