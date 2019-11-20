@@ -251,7 +251,7 @@ public class SmkPay {
         //加签
         openMap.put("sign", RSAUtil.rsaSignByCert(openMap, requestMap.get("certPath"), requestMap.get("certPwd")));
         String message = gson.toJson(openMap);
-        logger.info("请求开放平台数据:" + message);
+        logger.info("请求开放平台数据:" + requestMap);
         String respStr = HttpUtil.postReq(requestMap.get("requestUrl"), message);
         logger.info("SMK支付返回结果：" + respStr);
         JSONObject json = JSON.parseObject(respStr);
