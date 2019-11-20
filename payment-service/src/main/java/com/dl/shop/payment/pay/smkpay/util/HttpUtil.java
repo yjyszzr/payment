@@ -14,7 +14,7 @@ public class HttpUtil {
 	/**
 	 * 默认的http连接超时时间
 	 */
-	private final static int DEFAULT_CONN_TIMEOUT = 10000; // 10s
+	private final static int DEFAULT_CONN_TIMEOUT = 15000; // 10s
 	/**
 	 * 默认的http read超时时间
 	 */
@@ -42,8 +42,7 @@ public class HttpUtil {
 				conn.connect();
 			}
 			catch (Exception e) {
-				log.error("连接超时",e.getMessage());
-				System.out.println("连接超时");
+				log.error("连接超时-第三方：{}",e.getMessage());
 				return null;
 			}
 
