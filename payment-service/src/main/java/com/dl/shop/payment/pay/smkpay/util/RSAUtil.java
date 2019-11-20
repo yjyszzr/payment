@@ -1,6 +1,7 @@
 package com.dl.shop.payment.pay.smkpay.util;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -20,6 +21,7 @@ import java.util.*;
 /**
  * RSA签名工具类
  */
+@Slf4j
 public class RSAUtil {
     private static final int DEFAULT_BUFFER_SIZE = 8192;
 
@@ -78,6 +80,7 @@ public class RSAUtil {
             } else {
                 nPassword = strPassword.toCharArray();
             }
+            log.info("证书内容：{}",fis.read());
             ks.load(fis, nPassword);
             fis.close();
             // Now we loop all the aliases, we need the alias to get keys.
