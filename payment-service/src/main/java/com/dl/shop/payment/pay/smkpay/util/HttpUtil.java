@@ -59,7 +59,7 @@ public class HttpUtil {
 				sb.append(buff, 0, cnt);
 			}
 			in.close();
-			log.info("第三方返回结果集：", sb.toString());
+			log.info("第三方返回结果集：{}", sb.toString());
 			return sb.toString();
 		}
 		catch (IOException e) {
