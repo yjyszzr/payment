@@ -602,10 +602,10 @@ public class PayMentService extends AbstractService<PayMent> {
 				}
 				
 				//推广活动流程begin
-				com.dl.activity.param.ActivityParam actparam = new com.dl.activity.param.ActivityParam();
-				actparam.setMoney(payLog.getOrderAmount().doubleValue());
-				actparam.setUserId(payLog.getUserId());
-				activiService.invitationNumAndReward(actparam);
+// 				com.dl.activity.param.ActivityParam actparam = new com.dl.activity.param.ActivityParam();
+// 				actparam.setMoney(payLog.getOrderAmount().doubleValue());
+// 				actparam.setUserId(payLog.getUserId());
+// 				activiService.invitationNumAndReward(actparam);
 				//推广活动流程end
 				// 更新paylog
 				RspOrderQueryDTO rspOrderQueryDTO = new RspOrderQueryDTO();
