@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
+import com.dl.activity.param.ActivityParam;
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 
